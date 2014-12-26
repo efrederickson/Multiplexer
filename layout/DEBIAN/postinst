@@ -1,0 +1,10 @@
+#!/bin/bash
+
+declare -a cydia 
+cydia=($CYDIA) 
+
+if [[ ${CYDIA+@} ]]; then 
+eval "echo 'finish:reboot' >&${cydia[0]}" 
+fi
+
+echo "We are not #fakr"
