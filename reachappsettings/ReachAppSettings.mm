@@ -49,7 +49,14 @@
                  @"label": @"Enable Rotation",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
-                 
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @YES,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"homeButtonClosesReachability",
+                 @"label": @"Home button closes Reachability",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
              ];
 }
 

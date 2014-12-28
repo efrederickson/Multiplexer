@@ -14,6 +14,8 @@ ForceReach: https://github.com/PoomSmart/ForceReach/
 Reference: https://github.com/fewjative/Reference
 MessageBox: https://github.com/b3ll/MessageBox
 This pastie (by @Freerunnering?): http://pastie.org/pastes/8684110
+AppHeads disassembly: @sharedRoutine
+
 
 Many concepts and ideas have been used from them.
 
@@ -209,6 +211,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @interface SBReachabilityManager
 + (id)sharedInstance;
 @property(readonly, nonatomic) _Bool reachabilityModeActive; // @synthesize reachabilityModeActive=_reachabilityModeActive;
+- (void)_handleReachabilityDeactivated;
 @end
 
 FBWindowContextHostWrapperView *view = nil;
@@ -235,6 +238,7 @@ BOOL enabled = YES;
 BOOL disableAutoDismiss = YES;
 BOOL enableRotation = YES;
 BOOL showNCInstead = NO;
+BOOL homeButtonClosesReachability = YES;
 
 %group springboardHooks
 
@@ -289,6 +293,13 @@ BOOL wasEnabled = NO;
 		wasEnabled = NO;
 		if (arg1)
 		{
+			// Notify both top and bottom apps Reachability is closing
+			if (lastBundleIdentifier)
+				CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": lastBundleIdentifier}, NO);
+			if (currentBundleIdentifier)
+				CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentBundleIdentifier}, NO);
+
+
 			if (showNCInstead)
 			{
 				showingNC = NO;
@@ -302,26 +313,23 @@ BOOL wasEnabled = NO;
 			}
 			else
 			{
-				//notify_post("com.efrederickson.reachapp.endresizing");
-
-				// Notify both top and bottom apps Reachability is closing
-				CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": lastBundleIdentifier}, NO);
-				CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentBundleIdentifier}, NO);
-
-				SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
-				if (app && [app pid] && [app mainScene])
+				if (lastBundleIdentifier && lastBundleIdentifier.length > 0)
 				{
-					if (view)
+					SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
+					if (app && [app pid] && [app mainScene])
 					{
-						if ([view superview] != nil)
-							[view removeFromSuperview];
-					}
-					if (keepAlive != nil)
-				    	[keepAlive invalidate];
+						if (view)
+						{
+							if ([view superview] != nil)
+								[view removeFromSuperview];
+						}
+						if (keepAlive != nil)
+					    	[keepAlive invalidate];
 
-					FBScene *scene = [app mainScene];
-					FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
-					[contextHostManager disableHostingForRequester:@"reachapp"];
+						FBScene *scene = [app mainScene];
+						FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
+						[contextHostManager disableHostingForRequester:@"reachapp"];
+					}
 				}
 				view = nil;
 			    keepAlive = nil;
@@ -529,7 +537,7 @@ BOOL wasEnabled = NO;
 		CFDictionaryAddValue(dictionary, @"sizeHeight", @(bottomWindow.frame.size.height));
 	}
 	CFDictionaryAddValue(dictionary, @"bundleIdentifier", currentBundleIdentifier);
-		CFDictionaryAddValue(dictionary, @"isTopApp", @NO);
+	CFDictionaryAddValue(dictionary, @"isTopApp", @NO);
 	CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, dictionary, true);
 	CFRelease(dictionary);
 }
@@ -538,7 +546,15 @@ BOOL wasEnabled = NO;
 %hook SpringBoard
 - (UIInterfaceOrientation)activeInterfaceOrientation
 {
-	return overrideOrientation ? UIInterfaceOrientationPortrait : %orig;
+	UIInterfaceOrientation o = %orig;
+	// supported interfaces. TODO: Landscape Left, Upside Down
+	if (overrideOrientation && (o == UIInterfaceOrientationPortrait || o == UIInterfaceOrientationLandscapeRight))
+	{
+		// force for reachability
+		return UIInterfaceOrientationPortrait;
+	}
+	return o;
+	//return overrideOrientation ? UIInterfaceOrientationPortrait : %orig;
 }
 %end
 
@@ -555,15 +571,24 @@ BOOL wasEnabled = NO;
 }
 %end
 
-//%hook SBUIController
-//- (_Bool)clickedMenuButton; < just close reachability if open?
-//%end
+%hook SBUIController
+- (_Bool)clickedMenuButton
+{
+	if (homeButtonClosesReachability && (view || showingNC) && ((SBReachabilityManager*)[%c(SBReachabilityManager) sharedInstance]).reachabilityModeActive)
+	{
+		[[%c(SBReachabilityManager) sharedInstance] _handleReachabilityDeactivated];
+		return YES;
+	}
+	return %orig;
+}
+%end
 
-%end // Group springboardHook
+%end // Group springboardHooks
 
 NSCache *oldFrames = [NSCache new];
 
 %group uikitHooks
+
 %hook UIWindow
 +(void) initialize
 {
@@ -632,8 +657,6 @@ NSCache *oldFrames = [NSCache new];
 %end
 
 %hook UIApplication
-
-
 -(int) applicationState
 {
 	return overrideDisplay ? UIApplicationStateActive : %orig;
@@ -690,7 +713,7 @@ NSCache *oldFrames = [NSCache new];
 	overrideViewControllerDismissal = NO;
 }
 
-// Not sure which combination of these works, but it does. 
+// Not sure which combination of these works to inhibit rotation, but it does. 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(int)arg1 { return overrideDisplay && arg1 != forcedOrientation ? NO : %orig; }
 - (BOOL)shouldAutorotate { return overrideDisplay ? NO : %orig; }
 - (void)_setAllowsAutorotation:(BOOL)arg1 { %orig(overrideDisplay ? NO : arg1); }
@@ -770,7 +793,7 @@ void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef n
 {
 	if ([NSBundle.mainBundle.bundleIdentifier isEqual:[(__bridge NSDictionary*)userInfo objectForKey:@"bundleIdentifier"]])
 	{
-		if (!resumed)
+		if (!resumed && [[(__bridge NSDictionary*)userInfo objectForKey:@"isTopApp"] boolValue])
 		{
 			resumed = YES;
 			UIApplication *sharedApp = [UIApplication sharedApplication];
@@ -822,7 +845,7 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
 	        [window setFrame:frame];
 	    }
 
-	    if (resumed)
+	    if (resumed && [[(__bridge NSDictionary*)userInfo objectForKey:@"isTopApp"] boolValue])
 		{
 			resumed = NO;
 			UIApplication *sharedApp = [UIApplication sharedApplication];
@@ -859,6 +882,7 @@ void reloadSettings(CFNotificationCenterRef center,
 	disableAutoDismiss = [prefs objectForKey:@"disableAutoDismiss"] != nil ? [prefs[@"disableAutoDismiss"] boolValue] : YES;
 	enableRotation = [prefs objectForKey:@"enableRotation"] != nil ? [prefs[@"enableRotation"] boolValue] : YES;
 	showNCInstead = [prefs objectForKey:@"showNCInstead"] != nil ? [prefs[@"showNCInstead"] boolValue] : NO;
+	homeButtonClosesReachability = [prefs objectForKey:@"homeButtonClosesReachability"] != nil ? [prefs[@"homeButtonClosesReachability"] boolValue] : YES;
 }
 
 %ctor

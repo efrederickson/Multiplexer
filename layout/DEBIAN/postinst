@@ -4,7 +4,7 @@ declare -a cydia
 cydia=($CYDIA) 
 
 if [[ ${CYDIA+@} ]]; then 
-eval "echo 'finish:reboot' >&${cydia[0]}" 
+[ -f /tmp/reachapp.exists ] && echo || eval "echo 'finish:reboot' >&${cydia[0]}"  
 fi
 
 echo "ReachApp is not #fakr"
