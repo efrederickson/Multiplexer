@@ -1,6 +1,6 @@
 Package: com.efrederickson.reachapp
 Name: ReachApp
-Depends: mobilesubstrate
+Depends: mobilesubstrate, firmware (>= 8.0)
 Version: 0.0.1
 Architecture: iphoneos-arm
 Description: Split-screen multitasking in reachability view

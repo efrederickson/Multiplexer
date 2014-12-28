@@ -8,3 +8,5 @@ obj
 *.bak
 debs/
 theos
+backboardd
+backboardd_headers/

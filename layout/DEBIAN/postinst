@@ -7,4 +7,4 @@ if [[ ${CYDIA+@} ]]; then
 eval "echo 'finish:reboot' >&${cydia[0]}" 
 fi
 
-echo "We are not #fakr"
+echo "ReachApp is not #fakr"

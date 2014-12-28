@@ -19,6 +19,11 @@ Many concepts and ideas have been used from them.
 
 */
 
+@interface FBApplicationProcess : NSObject
+- (void)launchIfNecessary;
+- (BOOL)bootstrapAndExec;
+@end
+
 extern "C" CFNotificationCenterRef CFNotificationCenterGetDistributedCenter(void);
 
 @interface UITextEffectsWindow : UIWindow
@@ -36,6 +41,13 @@ extern "C" CFNotificationCenterRef CFNotificationCenterGetDistributedCenter(void
 - (id)_mainScene;
 -(SBApplication*) _accessibilityFrontMostApplication;
 - (void)RA_forceRotationToInterfaceOrientation:(UIInterfaceOrientation)orientation isReverting:(BOOL)reverting;
+- (void)applicationDidResume;
+- (void)_sendWillEnterForegroundCallbacks;
+- (void)suspend;
+- (void)applicationWillSuspend;
+- (void)_setSuspended:(BOOL)arg1;
+- (void)applicationSuspend;
+- (void)_deactivateForReason:(int)arg1 notify:(BOOL)arg2;
 @end
 
 extern const char *__progname;
@@ -78,13 +90,82 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 - (void)invalidate;
 @end
 
+@interface FBSSceneSettings : NSObject <NSCopying, NSMutableCopying>
+{
+    CGRect _frame;
+    CGPoint _contentOffset;
+    float _level;
+    int _interfaceOrientation;
+    BOOL _backgrounded;
+    BOOL _occluded;
+    BOOL _occludedHasBeenCalculated;
+    NSSet *_ignoreOcclusionReasons;
+    NSArray *_occlusions;
+    //BSSettings *_otherSettings;
+    //BSSettings *_transientLocalSettings;
+}
+
++ (BOOL)_isMutable;
++ (id)settings;
+@property(readonly, copy, nonatomic) NSArray *occlusions; // @synthesize occlusions=_occlusions;
+@property(readonly, nonatomic, getter=isBackgrounded) BOOL backgrounded; // @synthesize backgrounded=_backgrounded;
+@property(readonly, nonatomic) int interfaceOrientation; // @synthesize interfaceOrientation=_interfaceOrientation;
+@property(readonly, nonatomic) float level; // @synthesize level=_level;
+@property(readonly, nonatomic) CGPoint contentOffset; // @synthesize contentOffset=_contentOffset;
+@property(readonly, nonatomic) CGRect frame; // @synthesize frame=_frame;
+- (id)valueDescriptionForFlag:(int)arg1 object:(id)arg2 ofSetting:(unsigned int)arg3;
+- (id)keyDescriptionForSetting:(unsigned int)arg1;
+- (id)description;
+- (BOOL)isEqual:(id)arg1;
+- (unsigned int)hash;
+- (id)_descriptionOfSettingsWithMultilinePrefix:(id)arg1;
+- (id)transientLocalSettings;
+- (BOOL)isIgnoringOcclusions;
+- (id)ignoreOcclusionReasons;
+- (id)otherSettings;
+- (BOOL)isOccluded;
+- (CGRect)bounds;
+- (void)dealloc;
+- (id)init;
+- (id)initWithSettings:(id)arg1;
+
+@end
+
+@interface FBSMutableSceneSettings : FBSSceneSettings
+{
+}
+
++ (BOOL)_isMutable;
+- (id)mutableCopyWithZone:(struct _NSZone *)arg1;
+- (id)copyWithZone:(struct _NSZone *)arg1;
+@property(copy, nonatomic) NSArray *occlusions;
+- (id)transientLocalSettings;
+- (id)ignoreOcclusionReasons;
+- (id)otherSettings;
+@property(nonatomic, getter=isBackgrounded) BOOL backgrounded;
+@property(nonatomic) int interfaceOrientation;
+@property(nonatomic) float level;
+@property(nonatomic) struct CGPoint contentOffset;
+@property(nonatomic) struct CGRect frame;
+
+@end
+
 @interface FBScene
 -(FBWindowContextHostManager*) contextHostManager;
+@property(readonly, retain, nonatomic) FBSMutableSceneSettings *mutableSettings; // @synthesize mutableSettings=_mutableSettings;
+- (void)updateSettings:(id)arg1 withTransitionContext:(id)arg2;
 @end
 
 @interface SBApplication ()
 -(FBScene*) mainScene;
 - (void)activate;
+
+- (void)processDidLaunch:(id)arg1;
+- (void)processWillLaunch:(id)arg1;
+- (void)resumeForContentAvailable;
+- (void)resumeToQuit;
+- (void)_sendDidLaunchNotification:(_Bool)arg1;
+- (void)notifyResumeActiveForReason:(long long)arg1;
 
 @property(readonly, nonatomic) int pid;
 @end
@@ -156,6 +237,7 @@ BOOL enableRotation = YES;
 BOOL showNCInstead = NO;
 
 %group springboardHooks
+
 %hook SBReachabilityManager
 +(BOOL)reachabilitySupported
 {
@@ -189,7 +271,6 @@ BOOL showNCInstead = NO;
 		return;
 	%orig;
 }
-
 %end
 
 BOOL wasEnabled = NO;
@@ -222,24 +303,28 @@ BOOL wasEnabled = NO;
 			else
 			{
 				//notify_post("com.efrederickson.reachapp.endresizing");
-				CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, NULL, NO);
 
-				if (view)
+				// Notify both top and bottom apps Reachability is closing
+				CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": lastBundleIdentifier}, NO);
+				CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentBundleIdentifier}, NO);
+
+				SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
+				if (app && [app pid] && [app mainScene])
 				{
-					[view removeFromSuperview];
-					view = nil;
-
+					if (view)
+					{
+						if ([view superview] != nil)
+							[view removeFromSuperview];
+					}
 					if (keepAlive != nil)
 				    	[keepAlive invalidate];
-				    keepAlive = nil;
 
+					FBScene *scene = [app mainScene];
+					FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
+					[contextHostManager disableHostingForRequester:@"reachapp"];
 				}
-				SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
-				if (!app || ![app pid] || ![app mainScene])
-					return;
-				FBScene *scene = [app mainScene];
-				FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
-				[contextHostManager disableHostingForRequester:@"reachapp"];
+				view = nil;
+			    keepAlive = nil;
 			}
 		}
 	}
@@ -260,9 +345,7 @@ BOOL wasEnabled = NO;
 	{
 		showingNC = YES;
 
-		UIViewController *viewController = [[%c(SBNotificationCenterController) performSelector:@selector(sharedInstance)] performSelector:@selector(viewController)];
-		UIWindow *ncWindow = [[%c(SBNotificationCenterController) performSelector:@selector(sharedInstance)] performSelector:@selector(window)];
-		ncWindow.rootViewController = nil;
+		static UIViewController *viewController = [[%c(SBNotificationCenterViewController) alloc] init];
 		viewController.view.frame = (CGRect) { { 0, 0 }, w.frame.size };
 		w.rootViewController = viewController;
 		[w addSubview:viewController.view];
@@ -301,6 +384,10 @@ BOOL wasEnabled = NO;
 
 			app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
 			scene = [app mainScene];
+
+			if (!scene)
+				if (lastBundleIdentifiers.count > 0)
+					[lastBundleIdentifiers removeObjectAtIndex:0];
 		}
 
 		if (!app || ![app pid] || [app mainScene] == nil)
@@ -330,8 +417,8 @@ BOOL wasEnabled = NO;
  
 		FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
 
+		[contextHostManager enableHostingForRequester:@"reachapp" orderFront:YES];
 		view = [contextHostManager hostViewForRequester:@"reachapp" enableAndOrderFront:YES];
-		[view updateFrame]; // I don't think this is needed. 
 
 		[w addSubview:view];
 
@@ -425,6 +512,7 @@ BOOL wasEnabled = NO;
 			CFDictionaryAddValue(dictionary, @"sizeHeight", @(topWindow.frame.size.height));
 		}
 		CFDictionaryAddValue(dictionary, @"bundleIdentifier", lastBundleIdentifier);
+		CFDictionaryAddValue(dictionary, @"isTopApp", @YES);
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, dictionary, true);
 		CFRelease(dictionary);
 	}
@@ -441,6 +529,7 @@ BOOL wasEnabled = NO;
 		CFDictionaryAddValue(dictionary, @"sizeHeight", @(bottomWindow.frame.size.height));
 	}
 	CFDictionaryAddValue(dictionary, @"bundleIdentifier", currentBundleIdentifier);
+		CFDictionaryAddValue(dictionary, @"isTopApp", @NO);
 	CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, dictionary, true);
 	CFRelease(dictionary);
 }
@@ -484,10 +573,10 @@ NSCache *oldFrames = [NSCache new];
 	//	return;
 	//[UIWindow setAllWindowsKeepContextInBackground:YES];
 }
-+(void)setAllWindowsKeepContextInBackground:(BOOL)background
-{
-	%orig(background);
-}
+//+(void)setAllWindowsKeepContextInBackground:(BOOL)background
+//{
+//	%orig(background);
+//}
 
 -(void) setFrame:(CGRect) frame
 {
@@ -543,6 +632,12 @@ NSCache *oldFrames = [NSCache new];
 %end
 
 %hook UIApplication
+
+
+-(int) applicationState
+{
+	return overrideDisplay ? UIApplicationStateActive : %orig;
+}
 
 - (void)applicationWillOrderInContext:(id)arg1 forWindow:(id)arg2
 {
@@ -669,41 +764,76 @@ void forceRotation_upsidedown(CFNotificationCenterRef center, void *observer, CF
     [[UIApplication sharedApplication] RA_forceRotationToInterfaceOrientation:newOrientation isReverting:NO];
 }
 
+BOOL resumed = NO;
+
 void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) 
 {
 	if ([NSBundle.mainBundle.bundleIdentifier isEqual:[(__bridge NSDictionary*)userInfo objectForKey:@"bundleIdentifier"]])
 	{
+		if (!resumed)
+		{
+			resumed = YES;
+			UIApplication *sharedApp = [UIApplication sharedApplication];
+			[sharedApp _sendWillEnterForegroundCallbacks];
+			[sharedApp applicationDidResume];
+			if ([sharedApp.delegate respondsToSelector:@selector(applicationWillEnterForeground:)])
+				[sharedApp.delegate applicationWillEnterForeground:sharedApp];
+			if ([sharedApp.delegate respondsToSelector:@selector(applicationDidBecomeActive:)])
+				[sharedApp.delegate applicationDidBecomeActive:sharedApp];
+			[NSNotificationCenter.defaultCenter postNotificationName:UIApplicationWillEnterForegroundNotification object:nil];
+			[NSNotificationCenter.defaultCenter postNotificationName:UIApplicationDidBecomeActiveNotification object:nil];
+		}
+
 		[UIWindow setAllWindowsKeepContextInBackground:YES];
 		overrideHeight = [[(__bridge NSDictionary*)userInfo objectForKey:@"sizeHeight"] floatValue];
 		overrideWidth = [[(__bridge NSDictionary*)userInfo objectForKey:@"sizeWidth"] floatValue];
 		overrideDisplay = YES;
+
+		//if ([[(__bridge NSDictionary*)userInfo objectForKey:@"isTopApp"] boolValue])
+		//	[UIApplication.sharedApplication setStatusBarHidden:NO];
+		//else //if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationPortrait)
+		//	[UIApplication.sharedApplication setStatusBarHidden:YES];
 
 		for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
 			if ([oldFrames objectForKey:@(window.hash)] == nil)
 				[oldFrames setObject:[NSValue valueWithCGRect:window.frame] forKey:@(window.hash)];
 	        [window setFrame:window.frame];
 	    }
-    	UITextEffectsWindow *teWindow = [UITextEffectsWindow sharedTextEffectsWindow];
-    	teWindow.frame = (CGRect) { 
-    		{ 0, 0 }, 
-    		{ overrideWidth, overrideHeight } 
-    	};
 	}
 }
 void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) 
 {
-	//[UIWindow setAllWindowsKeepContextInBackground:NO];
-	overrideDisplay = NO;
-    [[UIApplication sharedApplication] RA_forceRotationToInterfaceOrientation:prevousOrientation isReverting:YES];
-    setPreviousOrientation = NO;
+	if ([NSBundle.mainBundle.bundleIdentifier isEqual:[(__bridge NSDictionary*)userInfo objectForKey:@"bundleIdentifier"]])
+	{
+		overrideDisplay = NO;
 
-	for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
-		CGRect frame = window.frame;
-		if ([oldFrames objectForKey:@(window.hash)] != nil)
-			frame = [[oldFrames objectForKey:@(window.hash)] CGRectValue];
-        [window setFrame:frame];
-    }
+		//[UIWindow setAllWindowsKeepContextInBackground:NO];
+	    [[UIApplication sharedApplication] RA_forceRotationToInterfaceOrientation:prevousOrientation isReverting:YES];
+	    setPreviousOrientation = NO;
 
+		for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
+			CGRect frame = window.frame;
+			if ([oldFrames objectForKey:@(window.hash)] != nil)
+			{
+				frame = [[oldFrames objectForKey:@(window.hash)] CGRectValue];
+				frame.origin.x = 0;
+				frame.origin.y = 0;
+			}
+	        [window setFrame:frame];
+	    }
+
+	    if (resumed)
+		{
+			resumed = NO;
+			UIApplication *sharedApp = [UIApplication sharedApplication];
+			if ([sharedApp.delegate respondsToSelector:@selector(applicationWillResignActive:)])
+				[sharedApp.delegate applicationWillResignActive:sharedApp];
+			if ([sharedApp.delegate respondsToSelector:@selector(applicationDidEnterBackground:)])
+				[sharedApp.delegate applicationDidEnterBackground:sharedApp];
+			[NSNotificationCenter.defaultCenter postNotificationName:UIApplicationWillResignActiveNotification object:nil];
+			[NSNotificationCenter.defaultCenter postNotificationName:UIApplicationDidEnterBackgroundNotification object:nil];
+		}
+	}
 }
 
 void reloadSettings(CFNotificationCenterRef center,
@@ -753,7 +883,7 @@ void reloadSettings(CFNotificationCenterRef center,
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, forceRotation_portrait, CFSTR("com.efrederickson.reachapp.forcerotation-portrait"), NULL, CFNotificationSuspensionBehaviorDrop);
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, forceRotation_upsidedown, CFSTR("com.efrederickson.reachapp.forcerotation-upsidedown"), NULL, CFNotificationSuspensionBehaviorDrop);
         CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceResizing, CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
-        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, endForceResizing, CFSTR("com.efrederickson.reachapp.endresizing"), NULL, CFNotificationSuspensionBehaviorDrop);
+        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, endForceResizing, CFSTR("com.efrederickson.reachapp.endresizing"), NULL, CFNotificationSuspensionBehaviorDrop);
     }
     %init(uikitHooks);
 }
