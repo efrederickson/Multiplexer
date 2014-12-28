@@ -219,6 +219,7 @@ BKSProcessAssertion *keepAlive = nil;
 NSMutableArray *lastBundleIdentifiers = [NSMutableArray array];
 NSString *lastBundleIdentifier = @"";
 NSString *currentBundleIdentifier = @"";
+UIViewController *ncViewController = nil;
 
 BOOL overrideDisplay = NO;
 CGFloat overrideHeight = 0;
@@ -353,15 +354,15 @@ BOOL wasEnabled = NO;
 	{
 		showingNC = YES;
 
-		static UIViewController *viewController = [[%c(SBNotificationCenterViewController) alloc] init];
-		viewController.view.frame = (CGRect) { { 0, 0 }, w.frame.size };
-		w.rootViewController = viewController;
-		[w addSubview:viewController.view];
+		if (ncViewController == nil)
+			ncViewController = [[%c(SBNotificationCenterViewController) alloc] init];
+		ncViewController.view.frame = (CGRect) { { 0, 0 }, w.frame.size };
+		w.rootViewController = ncViewController;
+		[w addSubview:ncViewController.view];
 
 		//[[%c(SBNotificationCenterController) performSelector:@selector(sharedInstance)] performSelector:@selector(_setupForViewPresentation)];
-		[viewController performSelector:@selector(hostWillPresent)];
-		[viewController performSelector:@selector(hostDidPresent)];
-		[[%c(SBNotificationCenterController) performSelector:@selector(sharedInstance)] performSelector:@selector(showGrabberAnimated:) withObject:@YES];
+		[ncViewController performSelector:@selector(hostWillPresent)];
+		[ncViewController performSelector:@selector(hostDidPresent)];
 
 		if (enableRotation)
 		{
@@ -496,8 +497,8 @@ BOOL wasEnabled = NO;
 
 	if (showNCInstead)
 	{
-		UIViewController *viewController = [[%c(SBNotificationCenterController) performSelector:@selector(sharedInstance)] performSelector:@selector(viewController)];
-		viewController.view.frame = (CGRect) { { 0, 0 }, topFrame.size };
+		if (ncViewController)
+			ncViewController.view.frame = (CGRect) { { 0, 0 }, topFrame.size };
 	}
 	else
 	{
