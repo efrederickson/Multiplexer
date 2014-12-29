@@ -220,6 +220,7 @@ NSMutableArray *lastBundleIdentifiers = [NSMutableArray array];
 NSString *lastBundleIdentifier = @"";
 NSString *currentBundleIdentifier = @"";
 UIViewController *ncViewController = nil;
+UIView *draggerView = nil;
 
 BOOL overrideDisplay = NO;
 CGFloat overrideHeight = 0;
@@ -234,12 +235,15 @@ CGFloat grabberCenter_X = 0;
 BOOL forcingRotation = NO;
 BOOL showingNC = NO;
 BOOL setPreviousOrientation = NO;
+BOOL isTopApp = NO;
+BOOL wasStatusBarHidden = NO;
 
 BOOL enabled = YES;
 BOOL disableAutoDismiss = YES;
 BOOL enableRotation = YES;
 BOOL showNCInstead = NO;
 BOOL homeButtonClosesReachability = YES;
+BOOL showBottomGrabber = NO;
 
 %group springboardHooks
 
@@ -300,6 +304,8 @@ BOOL wasEnabled = NO;
 			if (currentBundleIdentifier)
 				CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentBundleIdentifier}, NO);
 
+			if (draggerView)
+				draggerView = nil;
 
 			if (showNCInstead)
 			{
@@ -445,13 +451,20 @@ BOOL wasEnabled = NO;
 		}
 	}
 
-	UIView *draggerView = [[UIView alloc] initWithFrame:CGRectMake(0, [UIScreen mainScreen].bounds.size.height * .3, w.frame.size.width, 15)];
+	CGFloat knobWidth = 60;
+	CGFloat knobHeight = 25;
+	draggerView = [[UIView alloc] initWithFrame:CGRectMake(
+		(UIScreen.mainScreen.bounds.size.width / 2) - (knobWidth / 2), 
+		[UIScreen mainScreen].bounds.size.height * .3, 
+		knobWidth, knobHeight)];
 	draggerView.alpha = 0.8;
+	draggerView.layer.cornerRadius = 10;
 	grabberCenter_X = draggerView.center.x;
+
 	draggerView.backgroundColor = UIColor.lightGrayColor;
 	UIPanGestureRecognizer *recognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
 	if (grabberCenter_Y == -1)
-		grabberCenter_Y = w.frame.size.height - 15;
+		grabberCenter_Y = w.frame.size.height - (knobHeight / 2);
 	if (grabberCenter_Y < 0)
 		grabberCenter_Y = UIScreen.mainScreen.bounds.size.height * 0.3;
 	draggerView.center = CGPointMake(grabberCenter_X, grabberCenter_Y);
@@ -459,13 +472,26 @@ BOOL wasEnabled = NO;
 
 	[w addSubview:draggerView];
 
+	if (showBottomGrabber)
+	{
+		UIView *draggerView2 = [[UIView alloc] initWithFrame:CGRectMake(
+			(UIScreen.mainScreen.bounds.size.width / 2) - (knobWidth / 2), 
+			-(knobHeight / 2), 
+			knobWidth, knobHeight)];
+		draggerView2.alpha = 0.8;
+		draggerView2.layer.cornerRadius = 10;
+		draggerView2.backgroundColor = UIColor.lightGrayColor;
+		[draggerView2 addGestureRecognizer:recognizer];
+		[MSHookIvar<UIWindow*>(self,"_reachabilityWindow") addSubview:draggerView2];
+	}
+
 	// Update sizes of reachability (and their contained apps) and the location of the dragger view
 	[self updateViewSizes:draggerView.center];
 }
 
 %new -(void)handlePan:(UIPanGestureRecognizer*)sender
 {
-	UIView *view = sender.view;
+	UIView *view = draggerView; //sender.view;
 
 	if (sender.state == UIGestureRecognizerStateBegan)
 	{
@@ -686,11 +712,24 @@ NSCache *oldFrames = [NSCache new];
 		{
 			setPreviousOrientation = YES;
 			prevousOrientation = UIApplication.sharedApplication.statusBarOrientation;
+
+
 		}
 		forcedOrientation = orientation;
+		
+		wasStatusBarHidden = UIApplication.sharedApplication.statusBarHidden;
+		if (isTopApp && orientation == UIInterfaceOrientationPortrait)
+			[UIApplication.sharedApplication setStatusBarHidden:NO];
+		else if (orientation == UIInterfaceOrientationPortrait)
+			[UIApplication.sharedApplication setStatusBarHidden:YES];
+	}
+	else
+	{
+		[UIApplication.sharedApplication setStatusBarHidden:wasStatusBarHidden];
 	}
 
     [[UIApplication sharedApplication] setStatusBarOrientation:orientation];
+
     for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
         [window _setRotatableViewOrientation:orientation updateStatusBar:YES duration:0.0 force:YES];
     }
@@ -813,10 +852,11 @@ void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef n
 		overrideWidth = [[(__bridge NSDictionary*)userInfo objectForKey:@"sizeWidth"] floatValue];
 		overrideDisplay = YES;
 
-		//if ([[(__bridge NSDictionary*)userInfo objectForKey:@"isTopApp"] boolValue])
-		//	[UIApplication.sharedApplication setStatusBarHidden:NO];
-		//else //if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationPortrait)
-		//	[UIApplication.sharedApplication setStatusBarHidden:YES];
+		isTopApp = [[(__bridge NSDictionary*)userInfo objectForKey:@"isTopApp"] boolValue];
+		if (isTopApp)
+			[UIApplication.sharedApplication setStatusBarHidden:NO];
+		else //if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationPortrait)
+			[UIApplication.sharedApplication setStatusBarHidden:YES];
 
 		for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
 			if ([oldFrames objectForKey:@(window.hash)] == nil)
@@ -884,6 +924,7 @@ void reloadSettings(CFNotificationCenterRef center,
 	enableRotation = [prefs objectForKey:@"enableRotation"] != nil ? [prefs[@"enableRotation"] boolValue] : YES;
 	showNCInstead = [prefs objectForKey:@"showNCInstead"] != nil ? [prefs[@"showNCInstead"] boolValue] : NO;
 	homeButtonClosesReachability = [prefs objectForKey:@"homeButtonClosesReachability"] != nil ? [prefs[@"homeButtonClosesReachability"] boolValue] : YES;
+	showBottomGrabber = [prefs objectForKey:@"showBottomGrabber"] != nil ? [prefs[@"showBottomGrabber"] boolValue] : NO;
 }
 
 %ctor
