@@ -684,6 +684,23 @@ NSCache *oldFrames = [NSCache new];
 %end
 
 %hook UIApplication
+
+- (void)setStatusBarHidden:(BOOL)hidden
+             withAnimation:(UIStatusBarAnimation)animation
+{
+	if (overrideDisplay && forcedOrientation == UIInterfaceOrientationPortrait && isTopApp == NO)
+	{
+		%orig(YES, animation);
+		return;
+	}
+	else if (overrideDisplay && forcedOrientation == UIInterfaceOrientationPortrait && isTopApp == YES)
+	{
+		%orig(NO, animation);
+		return;
+	}
+	%orig;
+}
+
 -(int) applicationState
 {
 	return overrideDisplay ? UIApplicationStateActive : %orig;
