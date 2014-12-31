@@ -7,6 +7,7 @@
 #include <dlfcn.h>
 #include <sys/sysctl.h>
 #import <notify.h>
+#import "headers.h"
 
 /*
 This code thanks: 
@@ -14,217 +15,25 @@ ForceReach: https://github.com/PoomSmart/ForceReach/
 Reference: https://github.com/fewjative/Reference
 MessageBox: https://github.com/b3ll/MessageBox
 This pastie (by @Freerunnering?): http://pastie.org/pastes/8684110
-AppHeads disassembly: @sharedRoutine
-
+AppHeads disassembly: Original binary from @sharedRoutine
 
 Many concepts and ideas have been used from them.
-
 */
 
-@interface FBApplicationProcess : NSObject
-- (void)launchIfNecessary;
-- (BOOL)bootstrapAndExec;
-@end
-
 extern "C" CFNotificationCenterRef CFNotificationCenterGetDistributedCenter(void);
-
-@interface UITextEffectsWindow : UIWindow
-+ (id)sharedTextEffectsWindow;
-@end
-
-@interface UIWindow () 
-+ (void)setAllWindowsKeepContextInBackground:(BOOL)arg1;
--(void) _setRotatableViewOrientation:(UIInterfaceOrientation)orientation duration:(CGFloat)duration force:(BOOL)force;
-- (void)_setRotatableViewOrientation:(int)arg1 updateStatusBar:(BOOL)arg2 duration:(double)arg3 force:(BOOL)arg4;
-- (void)_rotateWindowToOrientation:(int)arg1 updateStatusBar:(BOOL)arg2 duration:(double)arg3 skipCallbacks:(BOOL)arg4;
-@end
-
-@interface UIApplication ()
-- (id)_mainScene;
--(SBApplication*) _accessibilityFrontMostApplication;
-- (void)RA_forceRotationToInterfaceOrientation:(UIInterfaceOrientation)orientation isReverting:(BOOL)reverting;
-- (void)applicationDidResume;
-- (void)_sendWillEnterForegroundCallbacks;
-- (void)suspend;
-- (void)applicationWillSuspend;
-- (void)_setSuspended:(BOOL)arg1;
-- (void)applicationSuspend;
-- (void)_deactivateForReason:(int)arg1 notify:(BOOL)arg2;
-@end
-
-extern const char *__progname;
+extern const char *__progname; 
 extern "C" int xpc_connection_get_pid(id connection);
 
-typedef NS_ENUM(NSUInteger, BKSProcessAssertionReason)
-{
-    kProcessAssertionReasonAudio = 1,
-    kProcessAssertionReasonLocation,
-    kProcessAssertionReasonExternalAccessory,
-    kProcessAssertionReasonFinishTask,
-    kProcessAssertionReasonBluetooth,
-    kProcessAssertionReasonNetworkAuthentication,
-    kProcessAssertionReasonBackgroundUI,
-    kProcessAssertionReasonInterAppAudioStreaming,
-    kProcessAssertionReasonViewServices
-};
-
-typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
-{
-    ProcessAssertionFlagNone = 0,
-    ProcessAssertionFlagPreventSuspend         = 1 << 0,
-    ProcessAssertionFlagPreventThrottleDownCPU = 1 << 1,
-    ProcessAssertionFlagAllowIdleSleep         = 1 << 2,
-    ProcessAssertionFlagWantsForegroundResourcePriority  = 1 << 3
-};
-
-
-@interface FBWindowContextHostManager
-- (id)hostViewForRequester:(id)arg1 enableAndOrderFront:(BOOL)arg2;
-- (void)resumeContextHosting;
-- (id)_hostViewForRequester:(id)arg1 enableAndOrderFront:(BOOL)arg2;
-- (id)snapshotViewWithFrame:(CGRect)arg1 excludingContexts:(id)arg2 opaque:(BOOL)arg3;
-- (id)visibleContexts;
-- (void)orderRequesterFront:(id)arg1;
-- (void)enableHostingForRequester:(id)arg1 orderFront:(BOOL)arg2;
-- (void)enableHostingForRequester:(id)arg1 priority:(int)arg2;
-- (void)disableHostingForRequester:(id)arg1;
-- (void)_updateHostViewFrameForRequester:(id)arg1;
-- (void)invalidate;
-@end
-
-@interface FBSSceneSettings : NSObject <NSCopying, NSMutableCopying>
-{
-    CGRect _frame;
-    CGPoint _contentOffset;
-    float _level;
-    int _interfaceOrientation;
-    BOOL _backgrounded;
-    BOOL _occluded;
-    BOOL _occludedHasBeenCalculated;
-    NSSet *_ignoreOcclusionReasons;
-    NSArray *_occlusions;
-    //BSSettings *_otherSettings;
-    //BSSettings *_transientLocalSettings;
-}
-
-+ (BOOL)_isMutable;
-+ (id)settings;
-@property(readonly, copy, nonatomic) NSArray *occlusions; // @synthesize occlusions=_occlusions;
-@property(readonly, nonatomic, getter=isBackgrounded) BOOL backgrounded; // @synthesize backgrounded=_backgrounded;
-@property(readonly, nonatomic) int interfaceOrientation; // @synthesize interfaceOrientation=_interfaceOrientation;
-@property(readonly, nonatomic) float level; // @synthesize level=_level;
-@property(readonly, nonatomic) CGPoint contentOffset; // @synthesize contentOffset=_contentOffset;
-@property(readonly, nonatomic) CGRect frame; // @synthesize frame=_frame;
-- (id)valueDescriptionForFlag:(int)arg1 object:(id)arg2 ofSetting:(unsigned int)arg3;
-- (id)keyDescriptionForSetting:(unsigned int)arg1;
-- (id)description;
-- (BOOL)isEqual:(id)arg1;
-- (unsigned int)hash;
-- (id)_descriptionOfSettingsWithMultilinePrefix:(id)arg1;
-- (id)transientLocalSettings;
-- (BOOL)isIgnoringOcclusions;
-- (id)ignoreOcclusionReasons;
-- (id)otherSettings;
-- (BOOL)isOccluded;
-- (CGRect)bounds;
-- (void)dealloc;
-- (id)init;
-- (id)initWithSettings:(id)arg1;
-
-@end
-
-@interface FBSMutableSceneSettings : FBSSceneSettings
-{
-}
-
-+ (BOOL)_isMutable;
-- (id)mutableCopyWithZone:(struct _NSZone *)arg1;
-- (id)copyWithZone:(struct _NSZone *)arg1;
-@property(copy, nonatomic) NSArray *occlusions;
-- (id)transientLocalSettings;
-- (id)ignoreOcclusionReasons;
-- (id)otherSettings;
-@property(nonatomic, getter=isBackgrounded) BOOL backgrounded;
-@property(nonatomic) int interfaceOrientation;
-@property(nonatomic) float level;
-@property(nonatomic) struct CGPoint contentOffset;
-@property(nonatomic) struct CGRect frame;
-
-@end
-
-@interface FBScene
--(FBWindowContextHostManager*) contextHostManager;
-@property(readonly, retain, nonatomic) FBSMutableSceneSettings *mutableSettings; // @synthesize mutableSettings=_mutableSettings;
-- (void)updateSettings:(id)arg1 withTransitionContext:(id)arg2;
-@end
-
-@interface SBApplication ()
--(FBScene*) mainScene;
-- (void)activate;
-
-- (void)processDidLaunch:(id)arg1;
-- (void)processWillLaunch:(id)arg1;
-- (void)resumeForContentAvailable;
-- (void)resumeToQuit;
-- (void)_sendDidLaunchNotification:(_Bool)arg1;
-- (void)notifyResumeActiveForReason:(long long)arg1;
-
-@property(readonly, nonatomic) int pid;
-@end
-
-@interface SBApplicationController
-+(id) sharedInstance;
--(SBApplication*) applicationWithBundleIdentifier:(NSString*)identifier;
-@end
-
-@interface FBWindowContextHostWrapperView : UIView
-@property(readonly, nonatomic) FBWindowContextHostManager *manager; // @synthesize manager=_manager;
-@property(nonatomic) unsigned int appearanceStyle; // @synthesize appearanceStyle=_appearanceStyle;
-- (void)_setAppearanceStyle:(unsigned int)arg1 force:(BOOL)arg2;
-- (id)_stringForAppearanceStyle;
-- (id)window;
-@property(readonly, nonatomic) struct CGRect referenceFrame; // @dynamic referenceFrame;
-@property(readonly, nonatomic, getter=isContextHosted) BOOL contextHosted; // @dynamic contextHosted;
-- (void)clearManager;
-- (void)_hostingStatusChanged;
-- (BOOL)_isReallyHosting;
-- (void)updateFrame;
-@end
-@interface FBWindowContextHostView : UIView
-@end
-
-@interface SBWorkspace
--(void) updateViewSizes:(CGPoint)center;
-@end
-
-@interface UIKeyboard : UIView
-+ (id)activeKeyboard;
-@end
-
-@interface BKSProcessAssertion
-- (id)initWithPID:(int)arg1 flags:(unsigned int)arg2 reason:(unsigned int)arg3 name:(id)arg4 withHandler:(id)arg5;
-- (id)initWithBundleIdentifier:(id)arg1 flags:(unsigned int)arg2 reason:(unsigned int)arg3 name:(id)arg4 withHandler:(id)arg5;
-- (void)invalidate;
-@property(readonly, nonatomic) BOOL valid;
-@end
-
-@interface SBReachabilityManager
-+ (id)sharedInstance;
-@property(readonly, nonatomic) _Bool reachabilityModeActive; // @synthesize reachabilityModeActive=_reachabilityModeActive;
-- (void)_handleReachabilityDeactivated;
-@end
-
-FBWindowContextHostWrapperView *view = nil;
+/*FBWindowContextHostWrapperView*/ UIView *view = nil;
 BKSProcessAssertion *keepAlive = nil;
-NSMutableArray *lastBundleIdentifiers = [NSMutableArray array];
 NSString *lastBundleIdentifier = @"";
 NSString *currentBundleIdentifier = @"";
 UIViewController *ncViewController = nil;
 UIView *draggerView = nil;
 
 BOOL overrideDisplay = NO;
-CGFloat overrideHeight = 0;
-CGFloat overrideWidth = 0;
+CGFloat overrideHeight = -1;
+CGFloat overrideWidth = -1;
 BOOL overrideViewControllerDismissal = NO;
 BOOL overrideOrientation = NO;
 UIInterfaceOrientation forcedOrientation;
@@ -237,6 +46,11 @@ BOOL showingNC = NO;
 BOOL setPreviousOrientation = NO;
 BOOL isTopApp = NO;
 BOOL wasStatusBarHidden = NO;
+BOOL overrideDisableForStatusBar = NO;
+CGRect pre_topAppFrame = CGRectZero;
+CGAffineTransform pre_topAppTransform = CGAffineTransformIdentity;
+UIView *bottomDraggerView = nil;
+CGFloat old_grabberCenterY = -1;
 
 BOOL enabled = YES;
 BOOL disableAutoDismiss = YES;
@@ -244,6 +58,13 @@ BOOL enableRotation = YES;
 BOOL showNCInstead = NO;
 BOOL homeButtonClosesReachability = YES;
 BOOL showBottomGrabber = NO;
+BOOL showAppSelector = YES;
+BOOL scalingRotationMode = NO; 
+/* 
+ NO = Standard (resize windows and force orientation)
+ YES = Scale (scale apps in Portrait mode)
+ But, i'm sure a boolean is simple enough to understand ;P
+*/ 
 
 %group springboardHooks
 
@@ -280,12 +101,39 @@ BOOL showBottomGrabber = NO;
 		return;
 	%orig;
 }
+
+- (void)_handleReachabilityDeactivated
+{
+	if (overrideDisableForStatusBar)
+		return;
+
+	%orig;
+}
 %end
 
 BOOL wasEnabled = NO;
 %hook SBWorkspace
+- (void)_exitReachabilityModeWithCompletion:(id)arg1
+{
+	if (overrideDisableForStatusBar)
+		return;
+
+	%orig;
+}
+
+- (void)handleReachabilityModeDeactivated
+{
+	if (overrideDisableForStatusBar)
+		return;
+
+	%orig;
+}
+
 - (void)_disableReachabilityImmediately:(_Bool)arg1
 {
+	if (overrideDisableForStatusBar)
+		return;
+
 	if (!enabled)
 	{
 		%orig;
@@ -320,11 +168,42 @@ BOOL wasEnabled = NO;
 			}
 			else
 			{
+				for (UIView *v in MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow").subviews)
+				{
+					if ([v isKindOfClass:[UIScrollView class]])
+					{
+						for (UIView *v2 in v.subviews)
+						{
+							if ([v2 isKindOfClass:[%c(SBIconView) class]])
+							{
+								for (UIGestureRecognizer *gesture in [v2 gestureRecognizers])
+					            {
+					               if ([gesture isKindOfClass:[UITapGestureRecognizer class]])
+					               {
+						                if (MSHookIvar<id>(MSHookIvar<NSMutableArray*>(gesture, "_targets")[0], "_target") == self)
+						                	[v2 removeGestureRecognizer:gesture];
+					               }
+					            }
+							}
+						}
+					}
+				}
+
 				if (lastBundleIdentifier && lastBundleIdentifier.length > 0)
 				{
 					SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
 					if (app && [app pid] && [app mainScene])
 					{
+						MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").frame = pre_topAppFrame;
+						MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").transform = pre_topAppTransform;
+
+						SBApplication *currentApp = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:currentBundleIdentifier];
+						if ([currentApp mainScene])
+						{
+							MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").frame = pre_topAppFrame;
+							MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").transform = pre_topAppTransform;
+						}
+
 						if (view)
 						{
 							if ([view superview] != nil)
@@ -384,70 +263,166 @@ BOOL wasEnabled = NO;
 		if (!currentBundleIdentifier)
 			return;
 
-		while ([app mainScene] == nil && lastBundleIdentifiers.count > 0)
+		if (showAppSelector)
 		{
-			if (lastBundleIdentifiers.count > 0)
+			UIScrollView *appSelectorView = [[UIScrollView alloc] initWithFrame:w.frame];
+			CGSize contentSize = CGSizeMake(20, 20);
+			static CGFloat oneRowHeight = -1;
+			for (NSString *str in [[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary])
 			{
-				//while (lastBundleIdentifiers.count > 0 && [lastBundleIdentifiers[0] isEqual:currentBundleIdentifier])
-				//	[lastBundleIdentifiers removeObjectAtIndex:0];
-				[lastBundleIdentifiers removeObject:currentBundleIdentifier];
-				if (lastBundleIdentifiers.count > 0)
-					lastBundleIdentifier = lastBundleIdentifiers[0];
+				if ([currentBundleIdentifier isEqual:str] == NO && str && str.length > 0)
+				{
+					app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:str];
+					scene = [app mainScene];
+					if (scene)
+					{
+				        SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:app.bundleIdentifier];
+				        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] mappedIconViewForIcon:icon];
+				        
+				        if (contentSize.width + iconView.frame.size.width >= UIScreen.mainScreen.bounds.size.width)
+						{
+							contentSize.width = 20;
+				        	contentSize.height += oneRowHeight + 10;
+						}
+
+				        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+				        switch (UIApplication.sharedApplication.statusBarOrientation)
+				        {
+				        	case UIInterfaceOrientationLandscapeRight:
+				        		iconView.frame = CGRectMake(contentSize.width + 5, contentSize.height + 5, iconView.frame.size.width, iconView.frame.size.height);
+				        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
+				        		if (oneRowHeight != -1)
+					        		oneRowHeight += 5;
+				        		break;
+				        	case UIInterfaceOrientationLandscapeLeft:
+				        	case UIInterfaceOrientationPortrait:
+				        	default:
+				        		break;
+				        }
+
+				        iconView.tag = [app pid];
+				        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
+				        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
+				        if (oneRowHeight == -1)
+				        	oneRowHeight = iconView.frame.size.height + 10;
+				        [appSelectorView addSubview:iconView];
+				        contentSize.width += iconView.frame.size.width + 20;
+					}
+				}
 			}
-			if (lastBundleIdentifier == nil || lastBundleIdentifier.length == 0)
+			contentSize.height += oneRowHeight + 10;
+			[appSelectorView setContentSize:contentSize];
+			[w addSubview:appSelectorView];
+			view = appSelectorView;
+
+			if (oneRowHeight != -1)
+			{
+				CGFloat moddedHeight = contentSize.height;
+				if (moddedHeight > oneRowHeight * 3)
+					moddedHeight = (oneRowHeight * 3) + 10;
+				if (old_grabberCenterY == -1)
+					old_grabberCenterY = UIScreen.mainScreen.bounds.size.height * 0.3;
+				old_grabberCenterY = grabberCenter_Y;
+				grabberCenter_Y = moddedHeight;
+			}
+		}
+		else
+		{
+			NSMutableArray *bundleIdentifiers = [[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary];
+			while ([app mainScene] == nil && bundleIdentifiers.count > 0)
+			{
+				if (bundleIdentifiers.count > 0)
+				{
+					//while (lastBundleIdentifiers.count > 0 && [lastBundleIdentifiers[0] isEqual:currentBundleIdentifier])
+					//	[lastBundleIdentifiers removeObjectAtIndex:0];
+					[bundleIdentifiers removeObject:currentBundleIdentifier];
+					if (bundleIdentifiers.count > 0)
+						lastBundleIdentifier = bundleIdentifiers[0];
+				}
+				if (lastBundleIdentifier == nil || lastBundleIdentifier.length == 0)
+					return;
+
+				app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
+				scene = [app mainScene];
+
+				if (!scene)
+					if (bundleIdentifiers.count > 0)
+						[bundleIdentifiers removeObjectAtIndex:0];
+			}
+
+			if (!app || ![app pid] || [app mainScene] == nil)
+			{
+				[bundleIdentifiers removeObject:lastBundleIdentifier];
 				return;
+			}
 
-			app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
-			scene = [app mainScene];
+			if (keepAlive != nil)
+		    	[keepAlive invalidate]; // shouldn't get here - this removes the old last apps backgrounding assertion
+			keepAlive = [[%c(BKSProcessAssertion) alloc] initWithPID:[app pid]
+			                                                   flags:(ProcessAssertionFlagPreventSuspend |
+		                                                                      ProcessAssertionFlagAllowIdleSleep |
+		                                                                      ProcessAssertionFlagPreventThrottleDownCPU |
+		                                                                      ProcessAssertionFlagWantsForegroundResourcePriority)
+		                                                              reason:kProcessAssertionReasonBackgroundUI
+			                                                    name:@"reachapp"
+			                                             withHandler:nil //^void (void)
+		                  //{
+		                  //    NSLog(@"ReachApp: %d kept alive: %@", [app pid], [keepAlive valid] > 0 ? @"TRUE" : @"FALSE");
+		                  //}
+		                  ];
 
-			if (!scene)
-				if (lastBundleIdentifiers.count > 0)
-					[lastBundleIdentifiers removeObjectAtIndex:0];
-		}
+	 
+			FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
 
-		if (!app || ![app pid] || [app mainScene] == nil)
-		{
-			[lastBundleIdentifiers removeObject:lastBundleIdentifier];
-			return;
-		}
+			[contextHostManager enableHostingForRequester:@"reachapp" orderFront:YES];
+			view = [contextHostManager hostViewForRequester:@"reachapp" enableAndOrderFront:YES];
 
-		if (!scene)
-			return; // app is dead
+			[w addSubview:view];
 
-		if (keepAlive != nil)
-	    	[keepAlive invalidate]; // shouldn't get here - this removes the old last apps backgrounding assertion
-		keepAlive = [[%c(BKSProcessAssertion) alloc] initWithPID:[app pid]
-		                                                   flags:(ProcessAssertionFlagPreventSuspend |
-	                                                                      ProcessAssertionFlagAllowIdleSleep |
-	                                                                      ProcessAssertionFlagPreventThrottleDownCPU |
-	                                                                      ProcessAssertionFlagWantsForegroundResourcePriority)
-	                                                              reason:kProcessAssertionReasonBackgroundUI
-		                                                    name:@"reachapp"
-		                                             withHandler:nil //^void (void)
-	                  //{
-	                  //    NSLog(@"ReachApp: %d kept alive: %@", [app pid], [keepAlive valid] > 0 ? @"TRUE" : @"FALSE");
-	                  //}
-	                  ];
+			if (enableRotation && !scalingRotationMode)
+			{
+				// force the last app to orient to the current apps orientation
+				if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
+					notify_post("com.efrederickson.reachapp.forcerotation-right");
+				else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
+					notify_post("com.efrederickson.reachapp.forcerotation-left");
+				else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortrait)
+					notify_post("com.efrederickson.reachapp.forcerotation-portrait");
+				else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortraitUpsideDown)
+					notify_post("com.efrederickson.reachapp.forcerotation-upsidedown");
+			}
+			else if (scalingRotationMode && [UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
+			{
+				overrideDisableForStatusBar = YES;
+				// Force portrait
+				notify_post("com.efrederickson.reachapp.forcerotation-portrait"); 
 
- 
-		FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
+				// Scale app
+				CGFloat scale = view.frame.size.width / UIScreen.mainScreen.bounds.size.height;
+				pre_topAppTransform = MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").transform;
+				MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").transform = CGAffineTransformConcat(CGAffineTransformMakeScale(scale, scale), CGAffineTransformMakeRotation(M_PI_2));
+				pre_topAppFrame = MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").frame;
+				MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").frame = CGRectMake(0, 0, view.frame.size.width, view.frame.size.height);
+				UIWindow *window = MSHookIvar<UIWindow*>(self,"_reachabilityEffectWindow");
+				window.frame = (CGRect) { window.frame.origin, { window.frame.size.width, view.frame.size.width } };
+				window = MSHookIvar<UIWindow*>(self,"_reachabilityWindow");
+				window.frame = (CGRect) { { window.frame.origin.x, view.frame.size.width }, { window.frame.size.width, view.frame.size.width } };
+				
+				SBApplication *currentApp = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:currentBundleIdentifier];
+				if ([currentApp mainScene]) // just checking...
+				{
+					MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").transform = CGAffineTransformConcat(CGAffineTransformMakeScale(scale, scale), CGAffineTransformMakeRotation(M_PI_2));
+					MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").frame = CGRectMake(0, 0, view.frame.size.width, view.frame.size.height);
+				}
 
-		[contextHostManager enableHostingForRequester:@"reachapp" orderFront:YES];
-		view = [contextHostManager hostViewForRequester:@"reachapp" enableAndOrderFront:YES];
-
-		[w addSubview:view];
-
-		if (enableRotation)
-		{
-			// force the last app to orient to the current apps orientation
-			if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
-				notify_post("com.efrederickson.reachapp.forcerotation-right");
-			else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
-				notify_post("com.efrederickson.reachapp.forcerotation-left");
-			else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortrait)
-				notify_post("com.efrederickson.reachapp.forcerotation-portrait");
-			else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortraitUpsideDown)
-				notify_post("com.efrederickson.reachapp.forcerotation-upsidedown");
+				// Gotta for the animations to finish... ;_;
+				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+					overrideDisableForStatusBar = NO;
+					// welp. 
+					[[%c(SBReachabilityManager) sharedInstance] _handleReachabilityActivated];
+				});
+				return;
+			}
 		}
 	}
 
@@ -457,7 +432,7 @@ BOOL wasEnabled = NO;
 		(UIScreen.mainScreen.bounds.size.width / 2) - (knobWidth / 2), 
 		[UIScreen mainScreen].bounds.size.height * .3, 
 		knobWidth, knobHeight)];
-	draggerView.alpha = 0.8;
+	draggerView.alpha = 0.2;
 	draggerView.layer.cornerRadius = 10;
 	grabberCenter_X = draggerView.center.x;
 
@@ -474,15 +449,15 @@ BOOL wasEnabled = NO;
 
 	if (showBottomGrabber)
 	{
-		UIView *draggerView2 = [[UIView alloc] initWithFrame:CGRectMake(
+		bottomDraggerView = [[UIView alloc] initWithFrame:CGRectMake(
 			(UIScreen.mainScreen.bounds.size.width / 2) - (knobWidth / 2), 
 			-(knobHeight / 2), 
 			knobWidth, knobHeight)];
-		draggerView2.alpha = 0.8;
-		draggerView2.layer.cornerRadius = 10;
-		draggerView2.backgroundColor = UIColor.lightGrayColor;
-		[draggerView2 addGestureRecognizer:recognizer];
-		[MSHookIvar<UIWindow*>(self,"_reachabilityWindow") addSubview:draggerView2];
+		bottomDraggerView.alpha = 0.2;
+		bottomDraggerView.layer.cornerRadius = 10;
+		bottomDraggerView.backgroundColor = UIColor.lightGrayColor;
+		[bottomDraggerView addGestureRecognizer:recognizer];
+		[MSHookIvar<UIWindow*>(self,"_reachabilityWindow") addSubview:bottomDraggerView];
 	}
 
 	// Update sizes of reachability (and their contained apps) and the location of the dragger view
@@ -498,15 +473,34 @@ BOOL wasEnabled = NO;
 		grabberCenter_X = view.center.x;
 		firstLocation = view.center;
 		grabberCenter_Y = [sender locationInView:view.superview].y;
+		draggerView.alpha = 0.8;
+		bottomDraggerView.alpha = 0.8;
 	}
 	else if (sender.state == UIGestureRecognizerStateChanged)
 	{
 		CGPoint translation = [sender translationInView:view];
 
-		view.center = CGPointMake(grabberCenter_X, firstLocation.y + translation.y);
-		grabberCenter_Y = [sender locationInView:view.superview].y;
-
+		if (firstLocation.y + translation.y < 50)
+		{
+			view.center = CGPointMake(grabberCenter_X, 50);
+			grabberCenter_Y = 50;
+		}
+		else if (firstLocation.y + translation.y > UIScreen.mainScreen.bounds.size.height - 30)
+		{
+			view.center = CGPointMake(grabberCenter_X, UIScreen.mainScreen.bounds.size.height - 30);
+			grabberCenter_Y = UIScreen.mainScreen.bounds.size.height - 30;
+		}
+		else
+		{
+			view.center = CGPointMake(grabberCenter_X, firstLocation.y + translation.y);
+			grabberCenter_Y = [sender locationInView:view.superview].y;
+		}
 		[self updateViewSizes:view.center];
+	}
+	else if (sender.state == UIGestureRecognizerStateEnded)
+	{
+		draggerView.alpha = 0.2;
+		bottomDraggerView.alpha = 0.2;
 	}
 }
 
@@ -516,6 +510,9 @@ BOOL wasEnabled = NO;
 	UIWindow *topWindow = MSHookIvar<UIWindow*>(self,"_reachabilityEffectWindow");
 	CGRect topFrame = CGRectMake(topWindow.frame.origin.x, topWindow.frame.origin.y, topWindow.frame.size.width, center.y);
 	topWindow.frame = topFrame;
+
+	if (view && [view isKindOfClass:[UIScrollView class]])
+		view.frame = topFrame;
 
 	UIWindow *bottomWindow = MSHookIvar<UIWindow*>(self,"_reachabilityWindow");
 	CGRect bottomFrame = CGRectMake(bottomWindow.frame.origin.x, center.y, bottomWindow.frame.size.width, UIScreen.mainScreen.bounds.size.height - center.y);
@@ -548,6 +545,7 @@ BOOL wasEnabled = NO;
 		}
 		CFDictionaryAddValue(dictionary, @"bundleIdentifier", lastBundleIdentifier);
 		CFDictionaryAddValue(dictionary, @"isTopApp", @YES);
+		CFDictionaryAddValue(dictionary, @"rotationMode", @(scalingRotationMode));
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, dictionary, true);
 		CFRelease(dictionary);
 	}
@@ -565,8 +563,105 @@ BOOL wasEnabled = NO;
 	}
 	CFDictionaryAddValue(dictionary, @"bundleIdentifier", currentBundleIdentifier);
 	CFDictionaryAddValue(dictionary, @"isTopApp", @NO);
+	CFDictionaryAddValue(dictionary, @"rotationMode", @(scalingRotationMode));
 	CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, dictionary, true);
 	CFRelease(dictionary);
+}
+
+%new -(void) appViewItemTap:(UITapGestureRecognizer*)sender
+{
+	int pid = [sender.view tag];
+	if (!pid)
+		return;
+	SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithPid:pid];
+	if (app)
+	{
+		FBScene *scene = [app mainScene];
+		if (!app || ![app pid] || scene == nil)
+		{
+			return;
+		}
+
+		lastBundleIdentifier = app.bundleIdentifier;
+
+		if (keepAlive != nil)
+	    	[keepAlive invalidate]; // shouldn't get here - this removes the old last apps backgrounding assertion
+		keepAlive = [[%c(BKSProcessAssertion) alloc] initWithPID:pid
+		                                                   flags:(ProcessAssertionFlagPreventSuspend |
+	                                                                      ProcessAssertionFlagAllowIdleSleep |
+	                                                                      ProcessAssertionFlagPreventThrottleDownCPU |
+	                                                                      ProcessAssertionFlagWantsForegroundResourcePriority)
+	                                                              reason:kProcessAssertionReasonBackgroundUI
+		                                                    name:@"reachapp"
+		                                             withHandler:nil //^void (void)
+	                  //{
+	                  //    NSLog(@"ReachApp: %d kept alive: %@", [app pid], [keepAlive valid] > 0 ? @"TRUE" : @"FALSE");
+	                  //}
+	                  ];
+
+ 
+		FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
+
+		UIWindow *w = MSHookIvar<UIWindow*>(self,"_reachabilityEffectWindow");
+
+		// Wow... 
+		for (UIView *v in w.subviews)
+		{
+			if ([v isKindOfClass:[UIScrollView class]])
+			{
+				for (UIView *v2 in v.subviews)
+				{
+					if ([v2 isKindOfClass:[%c(SBIconView) class]])
+					{
+						for (UIGestureRecognizer *gesture in [v2 gestureRecognizers])
+			            {
+			               if ([gesture isKindOfClass:[UITapGestureRecognizer class]])
+			               {
+				               if (MSHookIvar<id>(MSHookIvar<NSMutableArray*>(gesture, "_targets")[0], "_target") == self)
+				                    [v2 removeGestureRecognizer:gesture];
+			               }
+			            }
+					}
+				}
+			}
+		}
+
+		// before we re-assign view...
+		[UIView animateWithDuration:0.8
+	             animations:^{
+					view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 0, 0);
+					view.alpha = 0;
+	             }
+	             completion:^(BOOL a){
+					[view removeFromSuperview];
+					view = nil;
+
+					[contextHostManager enableHostingForRequester:@"reachapp" orderFront:YES];
+					view = [contextHostManager hostViewForRequester:@"reachapp" enableAndOrderFront:YES];
+					[w insertSubview:view belowSubview:draggerView];
+
+					
+					if (enableRotation && !scalingRotationMode)
+					{
+						// force the last app to orient to the current apps orientation
+						if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
+							notify_post("com.efrederickson.reachapp.forcerotation-right");
+						else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
+							notify_post("com.efrederickson.reachapp.forcerotation-left");
+						else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortrait)
+							notify_post("com.efrederickson.reachapp.forcerotation-portrait");
+						else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortraitUpsideDown)
+							notify_post("com.efrederickson.reachapp.forcerotation-upsidedown");
+					}
+					else if (enableRotation && scalingRotationMode && [UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
+					{
+						// TODO: put code from above here
+					}
+
+					grabberCenter_Y = old_grabberCenterY;
+					[self updateViewSizes:draggerView.center];
+	             }];
+	}
 }
 %end
 
@@ -582,19 +677,6 @@ BOOL wasEnabled = NO;
 	}
 	return o;
 	//return overrideOrientation ? UIInterfaceOrientationPortrait : %orig;
-}
-%end
-
-%hook SBApplication
-- (void)setApplicationState:(unsigned int)arg1
-{
-	%orig;
-	if (arg1 != UIApplicationStateActive)
-	{
-		if ([lastBundleIdentifiers containsObject:self.bundleIdentifier])
-			[lastBundleIdentifiers removeObject:self.bundleIdentifier];
-		[lastBundleIdentifiers insertObject:self.bundleIdentifier atIndex:0];
-	}
 }
 %end
 
@@ -617,22 +699,9 @@ NSCache *oldFrames = [NSCache new];
 %group uikitHooks
 
 %hook UIWindow
-+(void) initialize
-{
-	%orig;
-
-	//if ([UIWindow.keyWindow _scene] == nil)
-	//	return;
-	//[UIWindow setAllWindowsKeepContextInBackground:YES];
-}
-//+(void)setAllWindowsKeepContextInBackground:(BOOL)background
-//{
-//	%orig(background);
-//}
-
 -(void) setFrame:(CGRect) frame
 {
-	if (overrideDisplay)
+	if (overrideDisplay && overrideWidth != -1 && overrideHeight != -1)
 	{
 		if ([oldFrames objectForKey:@(self.hash)] == nil)
 			[oldFrames setObject:[NSValue valueWithCGRect:frame] forKey:@(self.hash)];
@@ -641,7 +710,6 @@ NSCache *oldFrames = [NSCache new];
 		frame.origin.y = 0;
 		frame.size.width = overrideWidth;
 		frame.size.height = overrideHeight;
-		//self.clipsToBounds = YES;
 	}
 
 	%orig(frame);
@@ -650,19 +718,14 @@ NSCache *oldFrames = [NSCache new];
 - (void)_rotateWindowToOrientation:(int)arg1 updateStatusBar:(BOOL)arg2 duration:(double)arg3 skipCallbacks:(BOOL)arg4
 {
 	if (overrideDisplay && forcingRotation == NO)
-	{
 		return;
-		//%orig(forcedOrientation, arg2, arg3, arg4);
-	}
 	%orig;
 }
 
 - (BOOL)_shouldAutorotateToInterfaceOrientation:(int)arg1 checkForDismissal:(BOOL)arg2 isRotationDisabled:(BOOL*)arg3
 {
 	if (overrideDisplay && forcingRotation == NO)
-	{
 		return NO;
-	}
 	return %orig;
 }
 
@@ -684,7 +747,7 @@ NSCache *oldFrames = [NSCache new];
 %end
 
 %hook UIApplication
-
+/*
 - (void)setStatusBarHidden:(BOOL)hidden
              withAnimation:(UIStatusBarAnimation)animation
 {
@@ -699,7 +762,7 @@ NSCache *oldFrames = [NSCache new];
 		return;
 	}
 	%orig;
-}
+}*/
 
 -(int) applicationState
 {
@@ -723,6 +786,7 @@ NSCache *oldFrames = [NSCache new];
 %new - (void)RA_forceRotationToInterfaceOrientation:(UIInterfaceOrientation)orientation isReverting:(BOOL) reverting
 {
 	forcingRotation = YES;
+
 	if (!reverting)
 	{
 		if (setPreviousOrientation == NO)
@@ -734,23 +798,31 @@ NSCache *oldFrames = [NSCache new];
 		}
 		forcedOrientation = orientation;
 		
-		wasStatusBarHidden = UIApplication.sharedApplication.statusBarHidden;
-		if (isTopApp && orientation == UIInterfaceOrientationPortrait)
-			[UIApplication.sharedApplication setStatusBarHidden:NO];
-		else if (orientation == UIInterfaceOrientationPortrait)
-			[UIApplication.sharedApplication setStatusBarHidden:YES];
+		//wasStatusBarHidden = UIApplication.sharedApplication.statusBarHidden;
+		//if (overrideDisplay && isTopApp && orientation == UIInterfaceOrientationPortrait)
+		//	[UIApplication.sharedApplication setStatusBarHidden:NO];
+		//else if (overrideDisplay && orientation == UIInterfaceOrientationPortrait)
+		//	[UIApplication.sharedApplication setStatusBarHidden:YES];
 	}
 	else
 	{
-		[UIApplication.sharedApplication setStatusBarHidden:wasStatusBarHidden];
+		//[UIApplication.sharedApplication setStatusBarHidden:wasStatusBarHidden];
 	}
 
-    [[UIApplication sharedApplication] setStatusBarOrientation:orientation];
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) 
+	{
+		// TODO
+	}
+	else
+	{
+		if ([[UIApplication sharedApplication] statusBarOrientation] != orientation)
+		    [[UIApplication sharedApplication] setStatusBarOrientation:orientation];
 
-    for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
-        [window _setRotatableViewOrientation:orientation updateStatusBar:YES duration:0.0 force:YES];
-    }
-    
+	    for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
+	        [window _setRotatableViewOrientation:orientation updateStatusBar:YES duration:0.0 force:YES];
+	    }
+	}
+
     forcingRotation = NO;
 }
 %end
@@ -817,6 +889,7 @@ NSCache *oldFrames = [NSCache new];
 static int (*orig_BSAuditTokenTaskHasEntitlement)(id connection, NSString *entitlement);
 static int hax_BSAuditTokenTaskHasEntitlement(id connection, NSString *entitlement) 
 {
+	// TODO: should probably verify it's SpringBoard asking
     if ([entitlement isEqualToString:@"com.apple.multitasking.unlimitedassertions"])
         return true;
 
@@ -854,7 +927,7 @@ void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef n
 		{
 			resumed = YES;
 			UIApplication *sharedApp = [UIApplication sharedApplication];
-			[sharedApp _sendWillEnterForegroundCallbacks];
+			[sharedApp _sendWillEnterForegroundCallbacks]; // <- TODO: crashes Adobe Reader app
 			[sharedApp applicationDidResume];
 			if ([sharedApp.delegate respondsToSelector:@selector(applicationWillEnterForeground:)])
 				[sharedApp.delegate applicationWillEnterForeground:sharedApp];
@@ -865,21 +938,29 @@ void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef n
 		}
 
 		[UIWindow setAllWindowsKeepContextInBackground:YES];
-		overrideHeight = [[(__bridge NSDictionary*)userInfo objectForKey:@"sizeHeight"] floatValue];
-		overrideWidth = [[(__bridge NSDictionary*)userInfo objectForKey:@"sizeWidth"] floatValue];
+
+		scalingRotationMode = [[(__bridge NSDictionary*)userInfo objectForKey:@"rotationMode"] boolValue];
+		if (!scalingRotationMode)
+		{
+			overrideHeight = [[(__bridge NSDictionary*)userInfo objectForKey:@"sizeHeight"] floatValue];
+			overrideWidth = [[(__bridge NSDictionary*)userInfo objectForKey:@"sizeWidth"] floatValue];
+		}
 		overrideDisplay = YES;
 
 		isTopApp = [[(__bridge NSDictionary*)userInfo objectForKey:@"isTopApp"] boolValue];
-		if (isTopApp)
-			[UIApplication.sharedApplication setStatusBarHidden:NO];
-		else //if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationPortrait)
-			[UIApplication.sharedApplication setStatusBarHidden:YES];
+		//if (isTopApp)
+		//	[UIApplication.sharedApplication setStatusBarHidden:NO];
+		//else //if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationPortrait)
+		//	[UIApplication.sharedApplication setStatusBarHidden:YES];
 
-		for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
-			if ([oldFrames objectForKey:@(window.hash)] == nil)
-				[oldFrames setObject:[NSValue valueWithCGRect:window.frame] forKey:@(window.hash)];
-	        [window setFrame:window.frame];
-	    }
+		if (!scalingRotationMode)
+		{
+			for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
+				if ([oldFrames objectForKey:@(window.hash)] == nil)
+					[oldFrames setObject:[NSValue valueWithCGRect:window.frame] forKey:@(window.hash)];
+		        [window setFrame:window.frame];
+		    }
+		}
 	}
 }
 void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) 
@@ -889,19 +970,23 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
 		overrideDisplay = NO;
 
 		//[UIWindow setAllWindowsKeepContextInBackground:NO];
-	    [[UIApplication sharedApplication] RA_forceRotationToInterfaceOrientation:prevousOrientation isReverting:YES];
+		if (setPreviousOrientation)
+		    [[UIApplication sharedApplication] RA_forceRotationToInterfaceOrientation:prevousOrientation isReverting:YES];
 	    setPreviousOrientation = NO;
 
-		for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
-			CGRect frame = window.frame;
-			if ([oldFrames objectForKey:@(window.hash)] != nil)
-			{
-				frame = [[oldFrames objectForKey:@(window.hash)] CGRectValue];
-				frame.origin.x = 0;
-				frame.origin.y = 0;
-			}
-	        [window setFrame:frame];
-	    }
+	    if (!scalingRotationMode)
+	    {
+			for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
+				CGRect frame = window.frame;
+				if ([oldFrames objectForKey:@(window.hash)] != nil)
+				{
+					frame = [[oldFrames objectForKey:@(window.hash)] CGRectValue];
+					//frame.origin.x = 0;
+					//frame.origin.y = 0;
+				}
+		        [window setFrame:frame];
+		    }
+		}
 
 	    if (resumed && [[(__bridge NSDictionary*)userInfo objectForKey:@"isTopApp"] boolValue])
 		{
@@ -942,16 +1027,19 @@ void reloadSettings(CFNotificationCenterRef center,
 	showNCInstead = [prefs objectForKey:@"showNCInstead"] != nil ? [prefs[@"showNCInstead"] boolValue] : NO;
 	homeButtonClosesReachability = [prefs objectForKey:@"homeButtonClosesReachability"] != nil ? [prefs[@"homeButtonClosesReachability"] boolValue] : YES;
 	showBottomGrabber = [prefs objectForKey:@"showBottomGrabber"] != nil ? [prefs[@"showBottomGrabber"] boolValue] : NO;
+	showAppSelector = [prefs objectForKey:@"showAppSelector"] != nil ? [prefs[@"showAppSelector"] boolValue] : YES;
+	scalingRotationMode = [prefs objectForKey:@"rotationMode"] != nil ? [prefs[@"rotationMode"] intValue] : NO;
 }
 
 %ctor
 {
-	NSString *bundleIdentifier = NSBundle.mainBundle.bundleIdentifier;
-	if ([bundleIdentifier isEqual:@"com.apple.springboard"])
+	if (strcmp(__progname, "filecoordinationd") == 0)
 	{
-		%init(springboardHooks);
-		CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &reloadSettings, CFSTR("com.efrederickson.reachapp.settings/reloadSettings"), NULL, 0);
-		reloadSettings(NULL, NULL, NULL, NULL, NULL);
+		// Somehow, filecoordinationd seems to be crashing (due to XPC?)
+		// I haven't noticed it crashing though.
+		// Simply not initializing any of the hooks/CFNotificationCenter callbacks should do the trick.
+		// But I won't know until people either stop sending emails or continue sending emails...
+		return;
 	}
 	else if (strcmp(__progname, "assertiond") == 0) 
 	{
@@ -961,12 +1049,19 @@ void reloadSettings(CFNotificationCenterRef center,
     }
     else
     {
+		NSString *bundleIdentifier = NSBundle.mainBundle.bundleIdentifier;
+	    if ([bundleIdentifier isEqual:@"com.apple.springboard"])
+		{
+			%init(springboardHooks);
+			CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &reloadSettings, CFSTR("com.efrederickson.reachapp.settings/reloadSettings"), NULL, 0);
+			reloadSettings(NULL, NULL, NULL, NULL, NULL);
+		}
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, forceRotation_right, CFSTR("com.efrederickson.reachapp.forcerotation-right"), NULL, CFNotificationSuspensionBehaviorDrop);
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, forceRotation_left, CFSTR("com.efrederickson.reachapp.forcerotation-left"), NULL, CFNotificationSuspensionBehaviorDrop);
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, forceRotation_portrait, CFSTR("com.efrederickson.reachapp.forcerotation-portrait"), NULL, CFNotificationSuspensionBehaviorDrop);
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, forceRotation_upsidedown, CFSTR("com.efrederickson.reachapp.forcerotation-upsidedown"), NULL, CFNotificationSuspensionBehaviorDrop);
         CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceResizing, CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
         CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, endForceResizing, CFSTR("com.efrederickson.reachapp.endresizing"), NULL, CFNotificationSuspensionBehaviorDrop);
+    	%init(uikitHooks);
     }
-    %init(uikitHooks);
 }

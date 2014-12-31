@@ -3,15 +3,13 @@ Puts the last used app (or NC) in the Reachability view
 Depiction (and some more info): http://elijahandandrew.com/repo/depictions/ReachApp/
 
 Known issues / TODO: 
-• NC view doesn't show after opening the NC normally
+√ NC view doesn't show after opening the NC normally
 • UIWindows (apps) may be placed incorrectly
 • UIWindows (apps) may not rotation or resize correctly
 • Keyboard doesn't resize
 • Root apps don't show
-• Practically everything else
 • Landscape right support
 • Upside down support (maybe)
 √ Properly (or a better fake way) un-background apps 
-• Flipswitch 
-• this will expand later
-
+√ Flipswitch 
+√ Update recents to use -[SBAppSwitcherModel snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary];
