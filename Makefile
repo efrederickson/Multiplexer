@@ -8,8 +8,8 @@ ReachApp_FRAMEWORKS = UIKit QuartzCore CoreGraphics
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 after-install::
-#	install.exec "killall -9 assertiond backboardd"
-	install.exec "killall -9 Preferences"
+	install.exec "killall -9 assertiond backboardd"
+#	install.exec "killall -9 Preferences"
 SUBPROJECTS += reachappsettings
 SUBPROJECTS += reachappflipswitch
 include $(THEOS_MAKE_PATH)/aggregate.mk
