@@ -270,6 +270,7 @@ BOOL wasEnabled = NO;
 		if (showAppSelector)
 		{
 			UIScrollView *appSelectorView = [[UIScrollView alloc] initWithFrame:w.frame];
+			appSelectorView.backgroundColor = [UIColor clearColor];
 			CGSize contentSize = CGSizeMake(20, 20);
 			CGFloat oneRowHeight = -1;
 			for (NSString *str in [[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary])
@@ -281,7 +282,7 @@ BOOL wasEnabled = NO;
 					if (scene)
 					{
 				        SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:app.bundleIdentifier];
-				        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] mappedIconViewForIcon:icon];
+				        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
 				        if (!iconView)
 				        	continue;
 				        
@@ -536,7 +537,7 @@ BOOL wasEnabled = NO;
 	[contextHostManager enableHostingForRequester:@"reachapp" orderFront:YES];
 	view = [contextHostManager hostViewForRequester:@"reachapp" enableAndOrderFront:YES];
 
-	[w addSubview:view];
+	[w insertSubview:view belowSubview:draggerView];
 
 	if (enableRotation && !scalingRotationMode)
 	{
@@ -593,7 +594,6 @@ BOOL wasEnabled = NO;
 			// welp. 
 			[[%c(SBReachabilityManager) sharedInstance] _handleReachabilityActivated];
 		});
-		return;
 	}
 }
 
@@ -630,20 +630,24 @@ BOOL wasEnabled = NO;
 		}
 
 		// before we re-assign view...
-		[UIView animateWithDuration:0.8
+		/*[UIView animateWithDuration:0.8
 	             animations:^{
 					view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 0, 0);
 					view.alpha = 0;
 	             }
-	             completion:^(BOOL a){
+	             completion:^(BOOL a){*/
 					[view removeFromSuperview];
 					view = nil;
 
+					lastBundleIdentifier = app.bundleIdentifier;
 					[self RA_launchTopAppWithIdentifier:app.bundleIdentifier];
 
+					if (old_grabberCenterY == -1)
+						old_grabberCenterY = UIScreen.mainScreen.bounds.size.height * 0.3;
 					grabberCenter_Y = old_grabberCenterY;
+					draggerView.center = CGPointMake(grabberCenter_X, grabberCenter_Y);
 					[self updateViewSizes:draggerView.center];
-	             }];
+	             //}];
 	}
 }
 %end
