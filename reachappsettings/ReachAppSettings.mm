@@ -88,6 +88,16 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
+             @{ @"footerText": @"Auto-size the app chooser to the size of the available apps... Or not." },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @YES,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"autoSizeAppChooser",
+                 @"label": @"Auto-size app chooser",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+
              @{ @"footerText": @"PLEASE NOTE THIS IS A BETA OPTION, IT'S STILL UNDER WORK. DO NOT SEND EMAILS RELATING TO THIS FEATURE. THEY WILL BE IGNORED. \n\nThat said, it will force applications into portrait and scale them to the screen size in landscape mode." },
              @{
                  @"cell": @"PSSwitchCell",

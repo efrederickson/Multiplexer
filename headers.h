@@ -116,6 +116,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 -(FBWindowContextHostManager*) contextHostManager;
 @property(readonly, retain, nonatomic) FBSMutableSceneSettings *mutableSettings; // @synthesize mutableSettings=_mutableSettings;
 - (void)updateSettings:(id)arg1 withTransitionContext:(id)arg2;
+- (void)_applyMutableSettings:(id)arg1 withTransitionContext:(id)arg2 completion:(id)arg3;
 @end
 
 @interface SBApplication ()

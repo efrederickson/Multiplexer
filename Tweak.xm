@@ -64,11 +64,7 @@ BOOL homeButtonClosesReachability = YES;
 BOOL showBottomGrabber = NO;
 BOOL showAppSelector = YES;
 BOOL scalingRotationMode = NO; 
-/* 
- NO = Standard (resize windows and force orientation)
- YES = Scale (scale apps in Portrait mode)
- But, i'm sure a boolean is simple enough to understand ;P
-*/ 
+BOOL autoSizeAppChooser = YES;
 
 %group springboardHooks
 
@@ -193,36 +189,43 @@ BOOL wasEnabled = NO;
 					}
 				}
 
-				if (lastBundleIdentifier && lastBundleIdentifier.length > 0)
-				{
-					SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
-					if (app && [app pid] && [app mainScene])
+				// Give them a little time to receive the notifications...
+				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+					if (lastBundleIdentifier && lastBundleIdentifier.length > 0)
 					{
-						MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").frame = pre_topAppFrame;
-						MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").transform = pre_topAppTransform;
-
-						SBApplication *currentApp = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:currentBundleIdentifier];
-						if ([currentApp mainScene])
+						SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
+						if (app && [app pid] && [app mainScene])
 						{
-							MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").frame = pre_topAppFrame;
-							MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").transform = pre_topAppTransform;
-						}
+							FBScene *scene = [app mainScene];
+							FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
+							object_setInstanceVariable(settings, "_backgrounded", (void*)YES);
+							[scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];
+							MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").frame = pre_topAppFrame;
+							MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").transform = pre_topAppTransform;
 
-						if (view)
-						{
-							if ([view superview] != nil)
-								[view removeFromSuperview];
-						}
-						if (keepAlive != nil)
-					    	[keepAlive invalidate];
+							SBApplication *currentApp = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:currentBundleIdentifier];
+							if ([currentApp mainScene])
+							{
+								MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").frame = pre_topAppFrame;
+								MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").transform = pre_topAppTransform;
+							}
 
-						FBScene *scene = [app mainScene];
-						FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
-						[contextHostManager disableHostingForRequester:@"reachapp"];
+							if (view)
+							{
+								if ([view superview] != nil)
+									[view removeFromSuperview];
+							}
+							if (keepAlive != nil)
+						    	[keepAlive invalidate];
+
+							FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
+							[contextHostManager disableHostingForRequester:@"reachapp"];
+						}
 					}
-				}
-				view = nil;
-			    keepAlive = nil;
+					view = nil;
+				    keepAlive = nil;
+				    lastBundleIdentifier = nil;
+				});
 			}
 		}
 	}
@@ -235,7 +238,6 @@ BOOL wasEnabled = NO;
 	%orig;
 	if (!enabled)
 		return;
-
 	wasEnabled = YES;
 
 	UIWindow *w = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
@@ -323,7 +325,7 @@ BOOL wasEnabled = NO;
 			[w addSubview:appSelectorView];
 			view = appSelectorView;
 
-			if (appSelectorView.subviews.count > 2) // These two are the "default" UIImageView's that are the scroll indicators. What a pain.
+			if (autoSizeAppChooser && appSelectorView.subviews.count > 2) // These two are the "default" UIImageView's that are the scroll indicators. What a pain.
 			{
 				CGFloat moddedHeight = contentSize.height;
 				if (moddedHeight > oneRowHeight * 3)
@@ -339,26 +341,24 @@ BOOL wasEnabled = NO;
 			SBApplication *app = nil;
 			FBScene *scene = nil;
 			NSMutableArray *bundleIdentifiers = [[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary];
-			while ([app mainScene] == nil && bundleIdentifiers.count > 0)
+			while (scene == nil && bundleIdentifiers.count > 0)
 			{
-				if (bundleIdentifiers.count > 0)
+				lastBundleIdentifier = bundleIdentifiers[0];
+
+				if ([lastBundleIdentifier isEqual:currentBundleIdentifier])
 				{
-					//while (lastBundleIdentifiers.count > 0 && [lastBundleIdentifiers[0] isEqual:currentBundleIdentifier])
-					//	[lastBundleIdentifiers removeObjectAtIndex:0];
-					[bundleIdentifiers removeObject:currentBundleIdentifier];
-					if (bundleIdentifiers.count > 0)
-						lastBundleIdentifier = bundleIdentifiers[0];
+					[bundleIdentifiers removeObjectAtIndex:0];
+					continue;
 				}
-				if (lastBundleIdentifier == nil || lastBundleIdentifier.length == 0)
-					return;
 
 				app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
 				scene = [app mainScene];
-
 				if (!scene)
 					if (bundleIdentifiers.count > 0)
 						[bundleIdentifiers removeObjectAtIndex:0];
 			}
+			if (lastBundleIdentifier == nil || lastBundleIdentifier.length == 0)
+				return;
 
 			[self RA_launchTopAppWithIdentifier:lastBundleIdentifier];
 		}
@@ -404,6 +404,7 @@ BOOL wasEnabled = NO;
 
 %new -(void)handlePan:(UIPanGestureRecognizer*)sender
 {
+	//static CGFloat initialGrabberY = 0;
 	UIView *view = draggerView; //sender.view;
 
 	if (sender.state == UIGestureRecognizerStateBegan)
@@ -411,12 +412,19 @@ BOOL wasEnabled = NO;
 		grabberCenter_X = view.center.x;
 		firstLocation = view.center;
 		grabberCenter_Y = [sender locationInView:view.superview].y;
+		//initialGrabberY = grabberCenter_Y;
 		draggerView.alpha = 0.8;
 		bottomDraggerView.alpha = 0.8;
 	}
 	else if (sender.state == UIGestureRecognizerStateChanged)
 	{
 		CGPoint translation = [sender translationInView:view];
+
+		//BOOL needsToResizeNow = NO;
+		//if (initialGrabberY < firstLocation.y + translation.y)
+		//	needsToResizeNow = YES;
+		//else
+		//	initialGrabberY = firstLocation.y + translation.y;
 
 		if (firstLocation.y + translation.y < 50)
 		{
@@ -433,12 +441,14 @@ BOOL wasEnabled = NO;
 			view.center = CGPointMake(grabberCenter_X, firstLocation.y + translation.y);
 			grabberCenter_Y = [sender locationInView:view.superview].y;
 		}
-		[self updateViewSizes:view.center];
+		//if (needsToResizeNow)
+			[self updateViewSizes:view.center];
 	}
 	else if (sender.state == UIGestureRecognizerStateEnded)
 	{
 		draggerView.alpha = 0.3;
 		bottomDraggerView.alpha = 0.3;
+		[self updateViewSizes:view.center];
 	}
 }
 
@@ -446,15 +456,17 @@ BOOL wasEnabled = NO;
 {
 	// Resizing
 	UIWindow *topWindow = MSHookIvar<UIWindow*>(self,"_reachabilityEffectWindow");
-	CGRect topFrame = CGRectMake(topWindow.frame.origin.x, topWindow.frame.origin.y, topWindow.frame.size.width, center.y);
-	topWindow.frame = topFrame;
-
-	if (view && [view isKindOfClass:[UIScrollView class]])
-		view.frame = topFrame;
-
 	UIWindow *bottomWindow = MSHookIvar<UIWindow*>(self,"_reachabilityWindow");
+
+	CGRect topFrame = CGRectMake(topWindow.frame.origin.x, topWindow.frame.origin.y, topWindow.frame.size.width, center.y);
 	CGRect bottomFrame = CGRectMake(bottomWindow.frame.origin.x, center.y, bottomWindow.frame.size.width, UIScreen.mainScreen.bounds.size.height - center.y);
-	bottomWindow.frame = bottomFrame;
+
+	[UIView animateWithDuration:0.3 animations:^{
+		bottomWindow.frame = bottomFrame;
+		topWindow.frame = topFrame;
+		if (view && [view isKindOfClass:[UIScrollView class]])
+			view.frame = topFrame;
+    }];
 
 	if (showNCInstead)
 	{
@@ -463,47 +475,50 @@ BOOL wasEnabled = NO;
 	}
 	else
 	{
-		// Notifying clients
-		CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+		// Notify clients
+		NSMutableDictionary *dict = [NSMutableDictionary dictionary];
 		if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
 		{
-			CFDictionaryAddValue(dictionary, @"sizeWidth", @(topWindow.frame.size.height));
-			CFDictionaryAddValue(dictionary, @"sizeHeight", @(topWindow.frame.size.width));
+			dict[@"sizeWidth"] = @(topWindow.frame.size.height);
+			dict[@"sizeHeight"] = @(topWindow.frame.size.width);
 		}
 		else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
 		{
-			/* welp, this needs fixed */
-			CFDictionaryAddValue(dictionary, @"sizeWidth", @(topWindow.frame.size.height));
-			CFDictionaryAddValue(dictionary, @"sizeHeight", @(topWindow.frame.size.width));
+			dict[@"sizeWidth"] = @(topWindow.frame.size.height);
+			dict[@"sizeHeight"] = @(topWindow.frame.size.width);
 		}
 		else
 		{
-			CFDictionaryAddValue(dictionary, @"sizeWidth", @(topWindow.frame.size.width));
-			CFDictionaryAddValue(dictionary, @"sizeHeight", @(topWindow.frame.size.height));
+			dict[@"sizeWidth"] = @(topWindow.frame.size.width);
+			dict[@"sizeHeight"] = @(topWindow.frame.size.height);
 		}
-		CFDictionaryAddValue(dictionary, @"bundleIdentifier", lastBundleIdentifier);
-		CFDictionaryAddValue(dictionary, @"isTopApp", @YES);
-		CFDictionaryAddValue(dictionary, @"rotationMode", @(scalingRotationMode));
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, dictionary, true);
-		CFRelease(dictionary);
+		if (lastBundleIdentifier)
+			dict[@"bundleIdentifier"] = lastBundleIdentifier;
+		dict[@"isTopApp"] = @YES;
+		dict[@"rotationMode"] = @(scalingRotationMode);
+		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, (__bridge CFDictionaryRef)dict, true);
 	}
 
-	CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft || [UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
+	NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
 	{
-		CFDictionaryAddValue(dictionary, @"sizeWidth", @(bottomWindow.frame.size.height));
-		CFDictionaryAddValue(dictionary, @"sizeHeight", @(bottomWindow.frame.size.width));
+		dict[@"sizeWidth"] = @(bottomWindow.frame.size.height);
+		dict[@"sizeHeight"] = @(bottomWindow.frame.size.width);
+	}
+	else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
+	{
+		dict[@"sizeWidth"] = @(bottomWindow.frame.size.height);
+		dict[@"sizeHeight"] = @(bottomWindow.frame.size.width);
 	}
 	else
 	{
-		CFDictionaryAddValue(dictionary, @"sizeWidth", @(bottomWindow.frame.size.width));
-		CFDictionaryAddValue(dictionary, @"sizeHeight", @(bottomWindow.frame.size.height));
+		dict[@"sizeWidth"] = @(bottomWindow.frame.size.width);
+		dict[@"sizeHeight"] = @(bottomWindow.frame.size.height);
 	}
-	CFDictionaryAddValue(dictionary, @"bundleIdentifier", currentBundleIdentifier);
-	CFDictionaryAddValue(dictionary, @"isTopApp", @NO);
-	CFDictionaryAddValue(dictionary, @"rotationMode", @(scalingRotationMode));
-	CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, dictionary, true);
-	CFRelease(dictionary);
+	dict[@"bundleIdentifier"] = currentBundleIdentifier;
+	dict[@"isTopApp"] = @NO;
+	dict[@"rotationMode"] = @(scalingRotationMode);
+	CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, (__bridge CFDictionaryRef)dict, true);
 }
 
 %new -(void) RA_launchTopAppWithIdentifier:(NSString*) bundleIdentifier
@@ -534,10 +549,17 @@ BOOL wasEnabled = NO;
 
 	FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
 
+	FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
+	object_setInstanceVariable(settings, "_backgrounded", (void*)NO);
+	[scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];
+
 	[contextHostManager enableHostingForRequester:@"reachapp" orderFront:YES];
 	view = [contextHostManager hostViewForRequester:@"reachapp" enableAndOrderFront:YES];
 
-	[w insertSubview:view belowSubview:draggerView];
+	if (draggerView && draggerView.superview == w)
+		[w insertSubview:view belowSubview:draggerView];
+	else
+		[w addSubview:view];
 
 	if (enableRotation && !scalingRotationMode)
 	{
@@ -642,10 +664,13 @@ BOOL wasEnabled = NO;
 					lastBundleIdentifier = app.bundleIdentifier;
 					[self RA_launchTopAppWithIdentifier:app.bundleIdentifier];
 
-					if (old_grabberCenterY == -1)
-						old_grabberCenterY = UIScreen.mainScreen.bounds.size.height * 0.3;
-					grabberCenter_Y = old_grabberCenterY;
-					draggerView.center = CGPointMake(grabberCenter_X, grabberCenter_Y);
+					if (autoSizeAppChooser)
+					{
+						if (old_grabberCenterY == -1)
+							old_grabberCenterY = UIScreen.mainScreen.bounds.size.height * 0.3;
+						grabberCenter_Y = old_grabberCenterY;
+						draggerView.center = CGPointMake(grabberCenter_X, grabberCenter_Y);
+					}
 					[self updateViewSizes:draggerView.center];
 	             //}];
 	}
@@ -655,15 +680,7 @@ BOOL wasEnabled = NO;
 %hook SpringBoard
 - (UIInterfaceOrientation)activeInterfaceOrientation
 {
-	UIInterfaceOrientation o = %orig;
-	// supported interfaces. TODO: Landscape Left, Upside Down
-	if (overrideOrientation && (o == UIInterfaceOrientationPortrait || o == UIInterfaceOrientationLandscapeRight))
-	{
-		// force for reachability
-		return UIInterfaceOrientationPortrait;
-	}
-	return o;
-	//return overrideOrientation ? UIInterfaceOrientationPortrait : %orig;
+	return overrideOrientation ? UIInterfaceOrientationPortrait : %orig;
 }
 %end
 
@@ -722,62 +739,44 @@ NSCache *oldFrames = [NSCache new];
 		return;
 	%orig(overrideDisplay ? forcedOrientation : arg1);
 }
-
-- (void)setAutorotates:(BOOL)arg1 forceUpdateInterfaceOrientation:(BOOL)arg2 { %orig(overrideDisplay ? NO : arg1, arg2); }
-- (void)setAutorotates:(BOOL)arg1 { %orig(overrideDisplay ? NO : arg1); }
-- (void)_rotateToBounds:(struct CGRect)arg1 withAnimator:(id)arg2 transitionContext:(id)arg3
-{
-	if (overrideDisplay && forcingRotation == NO)
-		return;
-	%orig;
-}
 %end
 
 %hook UIApplication
+
+//- (void)_notifySpringBoardOfStatusBarOrientationChangeAndFenceWithAnimationDuration:(double)arg1
+//{
+//    if (scalingRotationMode && (overrideDisplay || overrideRotation))
+//        return;
+//    %orig;
+//}
+
 /*
-- (void)setStatusBarHidden:(BOOL)hidden
-             withAnimation:(UIStatusBarAnimation)animation
+- (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(id)arg2 changeApplicationFlag:(BOOL)arg3
 {
 	if (overrideDisplay && forcedOrientation == UIInterfaceOrientationPortrait && isTopApp == NO)
 	{
-		%orig(YES, animation);
+		%orig(YES, arg2, arg3);
 		return;
 	}
 	else if (overrideDisplay && forcedOrientation == UIInterfaceOrientationPortrait && isTopApp == YES)
 	{
-		%orig(NO, animation);
+		%orig(NO, arg2, arg3);
 		return;
 	}
 	%orig;
-}*/
-- (void)_notifySpringBoardOfStatusBarOrientationChangeAndFenceWithAnimationDuration:(CGFloat)arg1
-{
-	if (overrideDisplay || forcingRotation)
-		return;
-	//%orig;
 }
-
--(int) applicationState
-{
-	return overrideDisplay ? UIApplicationStateActive : %orig;
-}
-
-- (void)applicationWillOrderInContext:(id)arg1 forWindow:(id)arg2
-{
-	if (![self _mainScene])
-		[UIWindow setAllWindowsKeepContextInBackground:NO];
-	%orig;
-}
+*/
 
 - (void)_deactivateReachability
 {
 	if (overrideViewControllerDismissal)
 		return;
-	//%orig;
+	%orig;
 }
 
 %new - (void)RA_forceRotationToInterfaceOrientation:(UIInterfaceOrientation)orientation isReverting:(BOOL) reverting
 {
+	NSLog(@"ReachApp: RA_forceRotationToInterfaceOrientation %@", @(orientation));
 	forcingRotation = YES;
 
 	if (!reverting)
@@ -833,15 +832,6 @@ NSCache *oldFrames = [NSCache new];
 	%orig;
 	overrideViewControllerDismissal = NO;
 }
-
-// Not sure which combination of these works to inhibit rotation, but it does. 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(int)arg1 { return overrideDisplay && arg1 != forcedOrientation ? NO : %orig; }
-- (BOOL)shouldAutorotate { return overrideDisplay ? NO : %orig; }
-- (void)_setAllowsAutorotation:(BOOL)arg1 { %orig(overrideDisplay ? NO : arg1); }
-- (BOOL)_allowsAutorotation { return overrideDisplay ? NO : %orig; }
-- (BOOL)window:(id)arg1 shouldAutorotateToInterfaceOrientation:(int)arg { return overrideDisplay ? NO : %orig; }
-- (BOOL)_isInterfaceAutorotationDisabled { return overrideDisplay ? YES : %orig; }
-- (int)_rotatingToInterfaceOrientation { return overrideDisplay ? forcedOrientation : %orig; }
 %end
 
 %hook UINavigationController
@@ -917,27 +907,13 @@ void forceRotation_upsidedown(CFNotificationCenterRef center, void *observer, CF
     [[UIApplication sharedApplication] RA_forceRotationToInterfaceOrientation:newOrientation isReverting:NO];
 }
 
-BOOL resumed = NO;
-
 void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) 
 {
 	if ([NSBundle.mainBundle.bundleIdentifier isEqual:[(__bridge NSDictionary*)userInfo objectForKey:@"bundleIdentifier"]])
 	{
-		if (!resumed && [[(__bridge NSDictionary*)userInfo objectForKey:@"isTopApp"] boolValue])
-		{
-			resumed = YES;
-			UIApplication *sharedApp = [UIApplication sharedApplication];
-			[sharedApp _sendWillEnterForegroundCallbacks]; // <- TODO: crashes Adobe Reader app
-			[sharedApp applicationDidResume];
-			if ([sharedApp.delegate respondsToSelector:@selector(applicationWillEnterForeground:)])
-				[sharedApp.delegate applicationWillEnterForeground:sharedApp];
-			if ([sharedApp.delegate respondsToSelector:@selector(applicationDidBecomeActive:)])
-				[sharedApp.delegate applicationDidBecomeActive:sharedApp];
-			[NSNotificationCenter.defaultCenter postNotificationName:UIApplicationWillEnterForegroundNotification object:nil];
-			[NSNotificationCenter.defaultCenter postNotificationName:UIApplicationDidBecomeActiveNotification object:nil];
-		}
+		isTopApp = [[(__bridge NSDictionary*)userInfo objectForKey:@"isTopApp"] boolValue];
 
-		[UIWindow setAllWindowsKeepContextInBackground:YES];
+		//[UIWindow setAllWindowsKeepContextInBackground:YES];
 
 		scalingRotationMode = [[(__bridge NSDictionary*)userInfo objectForKey:@"rotationMode"] boolValue];
 		if (!scalingRotationMode)
@@ -947,19 +923,17 @@ void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef n
 		}
 		overrideDisplay = YES;
 
-		isTopApp = [[(__bridge NSDictionary*)userInfo objectForKey:@"isTopApp"] boolValue];
-		//if (isTopApp)
-		//	[UIApplication.sharedApplication setStatusBarHidden:NO];
-		//else //if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationPortrait)
-		//	[UIApplication.sharedApplication setStatusBarHidden:YES];
 
 		if (!scalingRotationMode)
 		{
 			for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
 				if ([oldFrames objectForKey:@(window.hash)] == nil)
 					[oldFrames setObject:[NSValue valueWithCGRect:window.frame] forKey:@(window.hash)];
-		        [window setFrame:window.frame];
+				[UIView animateWithDuration:0.3 animations:^{
+			        [window setFrame:window.frame];
+			    }];
 		    }
+		    ((UIView*)[UIKeyboard activeKeyboard]).frame = ((UIView*)[UIKeyboard activeKeyboard]).frame;
 		}
 	}
 }
@@ -973,6 +947,7 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
 		if (setPreviousOrientation)
 		    [[UIApplication sharedApplication] RA_forceRotationToInterfaceOrientation:prevousOrientation isReverting:YES];
 	    setPreviousOrientation = NO;
+	    //[UIApplication.sharedApplication setStatusBarHidden:wasStatusBarHidden];
 
 	    if (!scalingRotationMode)
 	    {
@@ -981,23 +956,14 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
 				if ([oldFrames objectForKey:@(window.hash)] != nil)
 				{
 					frame = [[oldFrames objectForKey:@(window.hash)] CGRectValue];
+					[oldFrames removeObjectForKey:@(window.hash)];
 					//frame.origin.x = 0;
 					//frame.origin.y = 0;
 				}
-		        [window setFrame:frame];
+		        [UIView animateWithDuration:0.3 animations:^{
+			        [window setFrame:frame];
+			    }];
 		    }
-		}
-
-	    if (resumed && [[(__bridge NSDictionary*)userInfo objectForKey:@"isTopApp"] boolValue])
-		{
-			resumed = NO;
-			UIApplication *sharedApp = [UIApplication sharedApplication];
-			if ([sharedApp.delegate respondsToSelector:@selector(applicationWillResignActive:)])
-				[sharedApp.delegate applicationWillResignActive:sharedApp];
-			if ([sharedApp.delegate respondsToSelector:@selector(applicationDidEnterBackground:)])
-				[sharedApp.delegate applicationDidEnterBackground:sharedApp];
-			[NSNotificationCenter.defaultCenter postNotificationName:UIApplicationWillResignActiveNotification object:nil];
-			[NSNotificationCenter.defaultCenter postNotificationName:UIApplicationDidEnterBackgroundNotification object:nil];
 		}
 	}
 }
@@ -1029,6 +995,7 @@ void reloadSettings(CFNotificationCenterRef center,
 	showBottomGrabber = [prefs objectForKey:@"showBottomGrabber"] != nil ? [prefs[@"showBottomGrabber"] boolValue] : NO;
 	showAppSelector = [prefs objectForKey:@"showAppSelector"] != nil ? [prefs[@"showAppSelector"] boolValue] : YES;
 	scalingRotationMode = [prefs objectForKey:@"rotationMode"] != nil ? [prefs[@"rotationMode"] intValue] : NO;
+	autoSizeAppChooser = [prefs objectForKey:@"autoSizeAppChooser"] != nil ? [prefs[@"autoSizeAppChooser"] intValue] : YES;
 }
 
 %ctor
@@ -1057,12 +1024,15 @@ void reloadSettings(CFNotificationCenterRef center,
 			CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &reloadSettings, CFSTR("com.efrederickson.reachapp.settings/reloadSettings"), NULL, 0);
 			reloadSettings(NULL, NULL, NULL, NULL, NULL);
 		}
-        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_right, CFSTR("com.efrederickson.reachapp.forcerotation-right"), NULL, CFNotificationSuspensionBehaviorDrop);
-        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_left, CFSTR("com.efrederickson.reachapp.forcerotation-left"), NULL, CFNotificationSuspensionBehaviorDrop);
-        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_portrait, CFSTR("com.efrederickson.reachapp.forcerotation-portrait"), NULL, CFNotificationSuspensionBehaviorDrop);
-        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_upsidedown, CFSTR("com.efrederickson.reachapp.forcerotation-upsidedown"), NULL, CFNotificationSuspensionBehaviorDrop);
-        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceResizing, CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
-        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, endForceResizing, CFSTR("com.efrederickson.reachapp.endresizing"), NULL, CFNotificationSuspensionBehaviorDrop);
+		else
+		{
+	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_right, CFSTR("com.efrederickson.reachapp.forcerotation-right"), NULL, CFNotificationSuspensionBehaviorDrop);
+	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_left, CFSTR("com.efrederickson.reachapp.forcerotation-left"), NULL, CFNotificationSuspensionBehaviorDrop);
+	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_portrait, CFSTR("com.efrederickson.reachapp.forcerotation-portrait"), NULL, CFNotificationSuspensionBehaviorDrop);
+	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_upsidedown, CFSTR("com.efrederickson.reachapp.forcerotation-upsidedown"), NULL, CFNotificationSuspensionBehaviorDrop);
+	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceResizing, CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
+	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, endForceResizing, CFSTR("com.efrederickson.reachapp.endresizing"), NULL, CFNotificationSuspensionBehaviorDrop);
+	    }
     	%init(uikitHooks);
     }
 }

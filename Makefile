@@ -1,4 +1,6 @@
 ARCHS = armv7 armv7s arm64
+THEOS_PACKAGE_DIR_NAME = debs
+
 include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = ReachApp
