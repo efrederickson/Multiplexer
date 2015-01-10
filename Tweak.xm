@@ -66,6 +66,7 @@ BOOL scalingRotationMode = NO;
 BOOL autoSizeAppChooser = YES;
 NSMutableArray *favorites = nil;
 BOOL showAllAppsInAppChooser = YES;
+BOOL instantlyResize = NO;
 
 %group springboardHooks
 
@@ -283,6 +284,7 @@ BOOL wasEnabled = NO;
 			NSArray *recents = [[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary];
 			NSInteger width = 0;
 			BOOL isTop = YES;
+			BOOL hasSecondRow = NO;
 			CGFloat interval = 0, intervalCount = 1, numIconsPerLine = 0;
 			for (NSString *str in recents)
 			{
@@ -307,6 +309,7 @@ BOOL wasEnabled = NO;
 							contentSize.height -= (oneRowHeight + 10);
 							width += interval;
 						}
+						hasSecondRow = YES;
 						isTop = !isTop;
 					}
 
@@ -346,7 +349,7 @@ BOOL wasEnabled = NO;
 				}
 			}
 			contentSize.width = width;
-			contentSize.height = 10 + ((oneRowHeight + 10) * 2);
+			contentSize.height = 10 + ((oneRowHeight + 10) * (hasSecondRow ? 2 : 1));
 			y += contentSize.height + 10;
 			CGRect frame = recentsView.frame;
 			frame.size.height = contentSize.height;
@@ -419,6 +422,7 @@ BOOL wasEnabled = NO;
 				isTop = YES;
 				contentSize = CGSizeMake(10, 10);
 				intervalCount = 1;
+				hasSecondRow = NO;
 				for (NSString *str in allApps)
 				{
 					if ([currentBundleIdentifier isEqual:str] == NO && str && str.length > 0)
@@ -443,6 +447,7 @@ BOOL wasEnabled = NO;
 								width += interval;
 							}
 							isTop = !isTop;
+							hasSecondRow = YES;
 						}
 
 				        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
@@ -456,7 +461,7 @@ BOOL wasEnabled = NO;
 					}
 				}
 				contentSize.width = width; //(oneRowHeight + 20) * (recents.count / 2) + 10;
-				contentSize.height = 10 + ((oneRowHeight + 10) * 2);
+				contentSize.height = 10 + ((oneRowHeight + 10) * (hasSecondRow ? 2 : 1));
 				y += contentSize.height + 10;
 				frame = allAppsView.frame;
 				frame.size.height = contentSize.height;
@@ -565,7 +570,7 @@ BOOL wasEnabled = NO;
 	{
 		CGPoint translation = [sender translationInView:view];
 
-		BOOL needsToResizeNow = NO;
+		BOOL needsToResizeNow = instantlyResize;
 		if (realInitialGrabberY < firstLocation.y + translation.y)
 			needsToResizeNow = YES;
 		else
@@ -1118,9 +1123,10 @@ void reloadSettings(CFNotificationCenterRef center,
 	homeButtonClosesReachability = [prefs objectForKey:@"homeButtonClosesReachability"] != nil ? [prefs[@"homeButtonClosesReachability"] boolValue] : YES;
 	showBottomGrabber = [prefs objectForKey:@"showBottomGrabber"] != nil ? [prefs[@"showBottomGrabber"] boolValue] : NO;
 	showAppSelector = [prefs objectForKey:@"showAppSelector"] != nil ? [prefs[@"showAppSelector"] boolValue] : YES;
-	scalingRotationMode = [prefs objectForKey:@"rotationMode"] != nil ? [prefs[@"rotationMode"] intValue] : NO;
+	scalingRotationMode = [prefs objectForKey:@"rotationMode"] != nil ? [prefs[@"rotationMode"] boolValue] : NO;
 	autoSizeAppChooser = [prefs objectForKey:@"autoSizeAppChooser"] != nil ? [prefs[@"autoSizeAppChooser"] boolValue] : YES;
 	showAllAppsInAppChooser = [prefs objectForKey:@"showAllAppsInAppChooser"] != nil ? [prefs[@"showAllAppsInAppChooser"] boolValue] : YES;
+	instantlyResize = [prefs objectForKey:@"instantlyResize"] != nil ? [prefs[@"instantlyResize"] boolValue] : NO;
 
 	if (favorites)
 	{

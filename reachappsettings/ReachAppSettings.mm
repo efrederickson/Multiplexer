@@ -99,6 +99,16 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
+             @{ @"footerText": @"Instantly resize the apps when using the dragger, or wait until done dragging." },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @NO,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"instantlyResize",
+                 @"label": @"Instantly Resize",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+
              @{ @"footerText": @"Shows an app chooser similar to the iOS 6 App Switcher in the Reachability view. Only running apps will show. If disabled, the last used app will be shown in Reachability." },
              @{
                  @"cell": @"PSSwitchCell",
