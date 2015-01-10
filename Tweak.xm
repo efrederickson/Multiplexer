@@ -29,7 +29,6 @@ extern const char *__progname;
 extern "C" int xpc_connection_get_pid(id connection);
 
 /*FBWindowContextHostWrapperView*/ UIView *view = nil;
-BKSProcessAssertion *keepAlive = nil;
 NSString *lastBundleIdentifier = @"";
 NSString *currentBundleIdentifier = @"";
 UIViewController *ncViewController = nil;
@@ -65,6 +64,8 @@ BOOL showBottomGrabber = NO;
 BOOL showAppSelector = YES;
 BOOL scalingRotationMode = NO; 
 BOOL autoSizeAppChooser = YES;
+NSMutableArray *favorites = nil;
+BOOL showAllAppsInAppChooser = YES;
 
 %group springboardHooks
 
@@ -102,11 +103,24 @@ BOOL autoSizeAppChooser = YES;
 	%orig;
 }
 
+- (void)deactivateReachabilityModeForObserver:(id)arg1
+{
+	if (overrideDisableForStatusBar)
+		return;
+	%orig;
+}
+
 - (void)_handleReachabilityDeactivated
 {
 	if (overrideDisableForStatusBar)
 		return;
+	%orig;
+}
 
+- (void)_updateReachabilityModeActive:(_Bool)arg1 withRequestingObserver:(id)arg2
+{
+	if (overrideDisableForStatusBar)
+		return;
 	%orig;
 }
 %end
@@ -168,27 +182,6 @@ BOOL wasEnabled = NO;
 			}
 			else
 			{
-				for (UIView *v in MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow").subviews)
-				{
-					if ([v isKindOfClass:[UIScrollView class]])
-					{
-						for (UIView *v2 in v.subviews)
-						{
-							if ([v2 isKindOfClass:[%c(SBIconView) class]])
-							{
-								for (UIGestureRecognizer *gesture in [v2 gestureRecognizers])
-					            {
-					               if ([gesture isKindOfClass:[UITapGestureRecognizer class]])
-					               {
-						                if (MSHookIvar<id>(MSHookIvar<NSMutableArray*>(gesture, "_targets")[0], "_target") == self)
-						                	[v2 removeGestureRecognizer:gesture];
-					               }
-					            }
-							}
-						}
-					}
-				}
-
 				// Give them a little time to receive the notifications...
 				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
 					if (lastBundleIdentifier && lastBundleIdentifier.length > 0)
@@ -203,6 +196,12 @@ BOOL wasEnabled = NO;
 							MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").frame = pre_topAppFrame;
 							MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").transform = pre_topAppTransform;
 
+							if (view)
+							{
+								if ([view superview] != nil)
+									[view removeFromSuperview];
+							}
+
 							SBApplication *currentApp = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:currentBundleIdentifier];
 							if ([currentApp mainScene])
 							{
@@ -210,20 +209,11 @@ BOOL wasEnabled = NO;
 								MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").transform = pre_topAppTransform;
 							}
 
-							if (view)
-							{
-								if ([view superview] != nil)
-									[view removeFromSuperview];
-							}
-							if (keepAlive != nil)
-						    	[keepAlive invalidate];
-
 							FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
 							[contextHostManager disableHostingForRequester:@"reachapp"];
 						}
 					}
 					view = nil;
-				    keepAlive = nil;
 				    lastBundleIdentifier = nil;
 				});
 			}
@@ -263,7 +253,7 @@ BOOL wasEnabled = NO;
 	else
 	{
 		SBApplication *app = nil;
-		FBScene *scene = nil;
+		//FBScene *scene = nil;
 
 		currentBundleIdentifier = [[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier;
 		if (!currentBundleIdentifier)
@@ -271,65 +261,219 @@ BOOL wasEnabled = NO;
 
 		if (showAppSelector)
 		{
-			UIScrollView *appSelectorView = [[UIScrollView alloc] initWithFrame:w.frame];
+			UIView *appSelectorView = [[UIView alloc] initWithFrame:w.frame];
 			appSelectorView.backgroundColor = [UIColor clearColor];
-			CGSize contentSize = CGSizeMake(20, 20);
+			[appSelectorView setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
+
+			CGFloat y = 0;
+
+			// Recents
+			UILabel *recentsLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 10, 300, 20)];
+			y += 30;
+			recentsLabel.textColor = [UIColor whiteColor];
+			recentsLabel.text = @"Recents";
+			recentsLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:20]; // was HelveticaNeue-UltraLight
+			[appSelectorView addSubview:recentsLabel];
+
+			UIScrollView *recentsView = [[UIScrollView alloc] initWithFrame:CGRectMake(10, 40, appSelectorView.frame.size.width - 20, 20)];
+			recentsView.backgroundColor = [UIColor clearColor];
+			CGSize contentSize = CGSizeMake(10, 10);
 			CGFloat oneRowHeight = -1;
-			for (NSString *str in [[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary])
+			CGFloat oneRowWidth = -1;
+			NSArray *recents = [[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary];
+			NSInteger width = 0;
+			BOOL isTop = YES;
+			CGFloat interval = 0, intervalCount = 1, numIconsPerLine = 0;
+			for (NSString *str in recents)
 			{
 				if ([currentBundleIdentifier isEqual:str] == NO && str && str.length > 0)
 				{
 					app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:str];
-					scene = [app mainScene];
-					if (scene)
+			        SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:app.bundleIdentifier];
+			        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
+			        if (!iconView)
+			        	continue;
+			        
+			        if (interval != 0 && contentSize.width + iconView.frame.size.width > interval * intervalCount)
 					{
+						if (isTop)
+						{
+							contentSize.height += oneRowHeight + 10;
+							contentSize.width -= interval;
+						}
+						else
+						{
+							intervalCount++;
+							contentSize.height -= (oneRowHeight + 10);
+							width += interval;
+						}
+						isTop = !isTop;
+					}
+
+			        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+			        switch (UIApplication.sharedApplication.statusBarOrientation)
+			        {
+			        	case UIInterfaceOrientationLandscapeRight:
+			        		iconView.frame = CGRectMake(contentSize.width + 5, contentSize.height + 5, iconView.frame.size.width, iconView.frame.size.height);
+			        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
+			        		if (oneRowHeight != -1)
+				        		oneRowHeight += 5;
+			        		break;
+			        	case UIInterfaceOrientationLandscapeLeft:
+			        	case UIInterfaceOrientationPortrait:
+			        	default:
+			        		break;
+			        }
+
+			        iconView.tag = [app pid];
+			        iconView.restorationIdentifier = app.bundleIdentifier;
+			        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
+			        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
+			        if (oneRowHeight == -1)
+			        {
+			        	oneRowHeight = iconView.frame.size.height + 10;
+			        	oneRowWidth = iconView.frame.size.width + 20;
+			        	while (interval + oneRowWidth <= UIScreen.mainScreen.bounds.size.width)
+			        	{
+			        		numIconsPerLine++;
+				        	interval += oneRowWidth;
+			        	}
+				        width = interval;
+			        }
+			        [recentsView addSubview:iconView];
+
+			        contentSize.width += iconView.frame.size.width + 20;
+				}
+			}
+			contentSize.width = width;
+			contentSize.height = 10 + ((oneRowHeight + 10) * 2);
+			y += contentSize.height + 10;
+			CGRect frame = recentsView.frame;
+			frame.size.height = contentSize.height;
+			recentsView.frame = frame;
+			[recentsView setContentSize:contentSize];
+			[appSelectorView addSubview:recentsView];
+
+			// Favorites
+			if (favorites.count > 0)
+			{
+				UILabel *favoritesLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, y, 300, 20)];
+				y += 30;
+				favoritesLabel.textColor = [UIColor whiteColor];
+				favoritesLabel.text = @"Favorites";
+				favoritesLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:20]; // was HelveticaNeue-UltraLight
+				[appSelectorView addSubview:favoritesLabel];
+
+				UIScrollView *favoritesView = [[UIScrollView alloc] initWithFrame:CGRectMake(10, y, appSelectorView.frame.size.width - 20, 20)];
+				favoritesView.backgroundColor = [UIColor clearColor];
+				contentSize = CGSizeMake(10, 10);
+				for (NSString *str in favorites)
+				{
+					if ([currentBundleIdentifier isEqual:str] == NO && str && str.length > 0)
+					{
+						app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:str];
 				        SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:app.bundleIdentifier];
 				        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
 				        if (!iconView)
 				        	continue;
-				        
-				        if (contentSize.width + iconView.frame.size.width >= UIScreen.mainScreen.bounds.size.width)
-						{
-							contentSize.width = 20;
-				        	contentSize.height += oneRowHeight + 10;
-						}
 
 				        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
-				        switch (UIApplication.sharedApplication.statusBarOrientation)
-				        {
-				        	case UIInterfaceOrientationLandscapeRight:
-				        		iconView.frame = CGRectMake(contentSize.width + 5, contentSize.height + 5, iconView.frame.size.width, iconView.frame.size.height);
-				        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
-				        		if (oneRowHeight != -1)
-					        		oneRowHeight += 5;
-				        		break;
-				        	case UIInterfaceOrientationLandscapeLeft:
-				        	case UIInterfaceOrientationPortrait:
-				        	default:
-				        		break;
-				        }
 
 				        iconView.tag = [app pid];
+				        iconView.restorationIdentifier = app.bundleIdentifier;
 				        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
 				        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
-				        if (oneRowHeight == -1)
-				        	oneRowHeight = iconView.frame.size.height + 10;
-				        [appSelectorView addSubview:iconView];
+				        [favoritesView addSubview:iconView];
+
 				        contentSize.width += iconView.frame.size.width + 20;
 					}
 				}
+				contentSize.height = oneRowHeight + 10;
+				CGRect frame = favoritesView.frame;
+				frame.size.height = contentSize.height;
+				favoritesView.frame = frame;
+				[favoritesView setContentSize:contentSize];
+				[appSelectorView addSubview:favoritesView];
+				y += contentSize.height;
 			}
-			if (oneRowHeight != -1)
-				contentSize.height += oneRowHeight + 10;
-			[appSelectorView setContentSize:contentSize];
+
+			// All Apps
+			if (showAllAppsInAppChooser)
+			{
+				UILabel *allAppsLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, y, appSelectorView.frame.size.width, 20)];
+				y += 20;
+				allAppsLabel.textColor = [UIColor whiteColor];
+				allAppsLabel.text = @"All Apps";
+				allAppsLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:20];
+				[appSelectorView addSubview:allAppsLabel];
+
+				UIScrollView *allAppsView = [[UIScrollView alloc] initWithFrame:CGRectMake(10, y, appSelectorView.frame.size.width - 20, 20)];
+				allAppsView.backgroundColor = [UIColor clearColor];
+				NSMutableArray *allApps = [[[[%c(SBIconViewMap) homescreenMap] iconModel] visibleIconIdentifiers] mutableCopy];
+			    [allApps sortUsingComparator: ^(NSString* a, NSString* b) {
+			    	NSString *a_ = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:a].displayName;
+			    	NSString *b_ = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:b].displayName;
+			        return [a_ caseInsensitiveCompare:b_];
+		   		}];
+				width = interval;
+				isTop = YES;
+				contentSize = CGSizeMake(10, 10);
+				intervalCount = 1;
+				for (NSString *str in allApps)
+				{
+					if ([currentBundleIdentifier isEqual:str] == NO && str && str.length > 0)
+					{
+						app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:str];
+				        SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:app.bundleIdentifier];
+				        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
+				        if (!iconView || ![icon isKindOfClass:[%c(SBApplicationIcon) class]])
+				        	continue;
+
+				        if (interval != 0 && contentSize.width + iconView.frame.size.width > interval * intervalCount)
+						{
+							if (isTop)
+							{
+								contentSize.height += oneRowHeight + 10;
+								contentSize.width -= interval;
+							}
+							else
+							{
+								intervalCount++;
+								contentSize.height -= (oneRowHeight + 10);
+								width += interval;
+							}
+							isTop = !isTop;
+						}
+
+				        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+
+				        iconView.tag = [app pid];
+				        iconView.restorationIdentifier = app.bundleIdentifier;
+				        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
+				        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
+				        [allAppsView addSubview:iconView];
+				        contentSize.width += iconView.frame.size.width + 20;
+					}
+				}
+				contentSize.width = width; //(oneRowHeight + 20) * (recents.count / 2) + 10;
+				contentSize.height = 10 + ((oneRowHeight + 10) * 2);
+				y += contentSize.height + 10;
+				frame = allAppsView.frame;
+				frame.size.height = contentSize.height;
+				allAppsView.frame = frame;
+				[allAppsView setContentSize:contentSize];
+				[appSelectorView addSubview:allAppsView];
+			}
+			
 			[w addSubview:appSelectorView];
+			//appSelectorView.clipsToBounds = YES;
 			view = appSelectorView;
 
-			if (autoSizeAppChooser && appSelectorView.subviews.count > 2) // These two are the "default" UIImageView's that are the scroll indicators. What a pain.
+			if (autoSizeAppChooser)
 			{
-				CGFloat moddedHeight = contentSize.height;
-				if (moddedHeight > oneRowHeight * 3)
-					moddedHeight = (oneRowHeight * 3) + 10;
+				CGFloat moddedHeight = y;
+				//if (moddedHeight > oneRowHeight * 3)
+				//	moddedHeight = (oneRowHeight * 3) + 10;
 				if (old_grabberCenterY == -1)
 					old_grabberCenterY = UIScreen.mainScreen.bounds.size.height * 0.3;
 				old_grabberCenterY = grabberCenter_Y;
@@ -399,12 +543,12 @@ BOOL wasEnabled = NO;
 	}
 
 	// Update sizes of reachability (and their contained apps) and the location of the dragger view
-	[self updateViewSizes:draggerView.center];
+	[self updateViewSizes:draggerView.center animate:NO];
 }
 
 %new -(void)handlePan:(UIPanGestureRecognizer*)sender
 {
-	//static CGFloat initialGrabberY = 0;
+	static CGFloat initialGrabberY = 0, realInitialGrabberY = 0;
 	UIView *view = draggerView; //sender.view;
 
 	if (sender.state == UIGestureRecognizerStateBegan)
@@ -412,19 +556,20 @@ BOOL wasEnabled = NO;
 		grabberCenter_X = view.center.x;
 		firstLocation = view.center;
 		grabberCenter_Y = [sender locationInView:view.superview].y;
-		//initialGrabberY = grabberCenter_Y;
+		initialGrabberY = grabberCenter_Y;
+		realInitialGrabberY = grabberCenter_Y;
 		draggerView.alpha = 0.8;
-		bottomDraggerView.alpha = 0.8;
+		bottomDraggerView.alpha = 0;
 	}
 	else if (sender.state == UIGestureRecognizerStateChanged)
 	{
 		CGPoint translation = [sender translationInView:view];
 
-		//BOOL needsToResizeNow = NO;
-		//if (initialGrabberY < firstLocation.y + translation.y)
-		//	needsToResizeNow = YES;
-		//else
-		//	initialGrabberY = firstLocation.y + translation.y;
+		BOOL needsToResizeNow = NO;
+		if (realInitialGrabberY < firstLocation.y + translation.y)
+			needsToResizeNow = YES;
+		else
+			realInitialGrabberY = MAX(realInitialGrabberY, firstLocation.y + translation.y);
 
 		if (firstLocation.y + translation.y < 50)
 		{
@@ -441,18 +586,19 @@ BOOL wasEnabled = NO;
 			view.center = CGPointMake(grabberCenter_X, firstLocation.y + translation.y);
 			grabberCenter_Y = [sender locationInView:view.superview].y;
 		}
-		//if (needsToResizeNow)
-			[self updateViewSizes:view.center];
+
+		if (needsToResizeNow)
+			[self updateViewSizes:view.center animate:YES];
 	}
 	else if (sender.state == UIGestureRecognizerStateEnded)
 	{
 		draggerView.alpha = 0.3;
 		bottomDraggerView.alpha = 0.3;
-		[self updateViewSizes:view.center];
+		[self updateViewSizes:view.center animate:YES];
 	}
 }
 
-%new -(void) updateViewSizes:(CGPoint) center
+%new -(void) updateViewSizes:(CGPoint) center animate:(BOOL)animate
 {
 	// Resizing
 	UIWindow *topWindow = MSHookIvar<UIWindow*>(self,"_reachabilityEffectWindow");
@@ -461,12 +607,22 @@ BOOL wasEnabled = NO;
 	CGRect topFrame = CGRectMake(topWindow.frame.origin.x, topWindow.frame.origin.y, topWindow.frame.size.width, center.y);
 	CGRect bottomFrame = CGRectMake(bottomWindow.frame.origin.x, center.y, bottomWindow.frame.size.width, UIScreen.mainScreen.bounds.size.height - center.y);
 
-	[UIView animateWithDuration:0.3 animations:^{
+	if (animate)
+	{
+		[UIView animateWithDuration:0.3 animations:^{
+			bottomWindow.frame = bottomFrame;
+			topWindow.frame = topFrame;
+			if (view && [view isKindOfClass:[UIScrollView class]])
+				view.frame = topFrame;
+	    }];
+	}
+	else
+	{
 		bottomWindow.frame = bottomFrame;
 		topWindow.frame = topFrame;
 		if (view && [view isKindOfClass:[UIScrollView class]])
 			view.frame = topFrame;
-    }];
+	}
 
 	if (showNCInstead)
 	{
@@ -526,26 +682,23 @@ BOOL wasEnabled = NO;
 	UIWindow *w = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
 	SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
 	FBScene *scene = [app mainScene];
-	if (!app || ![app pid] || [app mainScene] == nil)
+	if (app == nil)
+		return;
+	if (![app pid] || [app mainScene] == nil)
 	{
+		overrideDisableForStatusBar = YES;
+		[UIApplication.sharedApplication launchApplicationWithIdentifier:bundleIdentifier suspended:YES];
+		[[%c(FBProcessManager) sharedInstance] createApplicationProcessForBundleID:bundleIdentifier];
+
+		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+			[self RA_launchTopAppWithIdentifier:bundleIdentifier];
+			[self updateViewSizes:draggerView.center animate:YES];
+		});
 		return;
 	}
+	overrideDisableForStatusBar = NO;
 
-	if (keepAlive != nil)
-    	[keepAlive invalidate]; // shouldn't get here - this removes the old last apps backgrounding assertion
-	keepAlive = [[%c(BKSProcessAssertion) alloc] initWithPID:[app pid]
-	                                                   flags:(ProcessAssertionFlagPreventSuspend |
-                                                                      ProcessAssertionFlagAllowIdleSleep |
-                                                                      ProcessAssertionFlagPreventThrottleDownCPU |
-                                                                      ProcessAssertionFlagWantsForegroundResourcePriority)
-                                                              reason:kProcessAssertionReasonBackgroundUI
-	                                                    name:@"reachapp"
-	                                             withHandler:nil //^void (void)
-                  //{
-                  //    NSLog(@"ReachApp: %d kept alive: %@", [app pid], [keepAlive valid] > 0 ? @"TRUE" : @"FALSE");
-                  //}
-                  ];
-
+	[[%c(SBAppSwitcherModel) sharedInstance] addToFront:[%c(SBDisplayLayout) fullScreenDisplayLayoutForApplication:[[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:bundleIdentifier]]];
 
 	FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
 
@@ -614,7 +767,7 @@ BOOL wasEnabled = NO;
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
 			overrideDisableForStatusBar = NO;
 			// welp. 
-			[[%c(SBReachabilityManager) sharedInstance] _handleReachabilityActivated];
+			//[[%c(SBReachabilityManager) sharedInstance] _handleReachabilityActivated];
 		});
 	}
 }
@@ -625,39 +778,18 @@ BOOL wasEnabled = NO;
 	if (!pid)
 		return;
 	SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithPid:pid];
+	if (!app)
+		app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:sender.view.restorationIdentifier];
+
 	if (app)
 	{
-		UIWindow *w = MSHookIvar<UIWindow*>(self,"_reachabilityEffectWindow");
-
-		// Wow... 
-		for (UIView *v in w.subviews)
-		{
-			if ([v isKindOfClass:[UIScrollView class]])
-			{
-				for (UIView *v2 in v.subviews)
-				{
-					if ([v2 isKindOfClass:[%c(SBIconView) class]])
-					{
-						for (UIGestureRecognizer *gesture in [v2 gestureRecognizers])
-			            {
-			               if ([gesture isKindOfClass:[UITapGestureRecognizer class]])
-			               {
-				               if (MSHookIvar<id>(MSHookIvar<NSMutableArray*>(gesture, "_targets")[0], "_target") == self)
-				                    [v2 removeGestureRecognizer:gesture];
-			               }
-			            }
-					}
-				}
-			}
-		}
-
 		// before we re-assign view...
-		/*[UIView animateWithDuration:0.8
+		[UIView animateWithDuration:0.3
 	             animations:^{
-					view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 0, 0);
+					view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 0.01, 0.01);
 					view.alpha = 0;
 	             }
-	             completion:^(BOOL a){*/
+	             completion:^(BOOL a){
 					[view removeFromSuperview];
 					view = nil;
 
@@ -671,8 +803,8 @@ BOOL wasEnabled = NO;
 						grabberCenter_Y = old_grabberCenterY;
 						draggerView.center = CGPointMake(grabberCenter_X, grabberCenter_Y);
 					}
-					[self updateViewSizes:draggerView.center];
-	             //}];
+					[self updateViewSizes:draggerView.center animate:YES];
+	             }];
 	}
 }
 %end
@@ -743,12 +875,14 @@ NSCache *oldFrames = [NSCache new];
 
 %hook UIApplication
 
-//- (void)_notifySpringBoardOfStatusBarOrientationChangeAndFenceWithAnimationDuration:(double)arg1
-//{
-//    if (scalingRotationMode && (overrideDisplay || overrideRotation))
-//        return;
-//    %orig;
-//}
+/*
+- (void)_notifySpringBoardOfStatusBarOrientationChangeAndFenceWithAnimationDuration:(double)arg1
+{
+    if (scalingRotationMode && (overrideDisplay || forcingRotation))
+        return;
+    %orig;
+}
+*/
 
 /*
 - (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(id)arg2 changeApplicationFlag:(BOOL)arg3
@@ -868,16 +1002,6 @@ NSCache *oldFrames = [NSCache new];
 %end
 %end // group uikitHooks
 
-static int (*orig_BSAuditTokenTaskHasEntitlement)(id connection, NSString *entitlement);
-static int hax_BSAuditTokenTaskHasEntitlement(id connection, NSString *entitlement) 
-{
-	// TODO: should probably verify it's SpringBoard asking
-    if ([entitlement isEqualToString:@"com.apple.multitasking.unlimitedassertions"])
-        return true;
-
-    return orig_BSAuditTokenTaskHasEntitlement(connection, entitlement);
-}
-
 void forceRotation_right(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) 
 {
 	if ([NSBundle.mainBundle.bundleIdentifier isEqual:[(__bridge NSDictionary*)userInfo objectForKey:@"bundleIdentifier"]] == NO)
@@ -933,7 +1057,7 @@ void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef n
 			        [window setFrame:window.frame];
 			    }];
 		    }
-		    ((UIView*)[UIKeyboard activeKeyboard]).frame = ((UIView*)[UIKeyboard activeKeyboard]).frame;
+		    //((UIView*)[UIKeyboard activeKeyboard]).frame = ((UIView*)[UIKeyboard activeKeyboard]).frame;
 		}
 	}
 }
@@ -960,7 +1084,7 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
 					//frame.origin.x = 0;
 					//frame.origin.y = 0;
 				}
-		        [UIView animateWithDuration:0.3 animations:^{
+		        [UIView animateWithDuration:0.4 animations:^{
 			        [window setFrame:frame];
 			    }];
 		    }
@@ -995,7 +1119,24 @@ void reloadSettings(CFNotificationCenterRef center,
 	showBottomGrabber = [prefs objectForKey:@"showBottomGrabber"] != nil ? [prefs[@"showBottomGrabber"] boolValue] : NO;
 	showAppSelector = [prefs objectForKey:@"showAppSelector"] != nil ? [prefs[@"showAppSelector"] boolValue] : YES;
 	scalingRotationMode = [prefs objectForKey:@"rotationMode"] != nil ? [prefs[@"rotationMode"] intValue] : NO;
-	autoSizeAppChooser = [prefs objectForKey:@"autoSizeAppChooser"] != nil ? [prefs[@"autoSizeAppChooser"] intValue] : YES;
+	autoSizeAppChooser = [prefs objectForKey:@"autoSizeAppChooser"] != nil ? [prefs[@"autoSizeAppChooser"] boolValue] : YES;
+	showAllAppsInAppChooser = [prefs objectForKey:@"showAllAppsInAppChooser"] != nil ? [prefs[@"showAllAppsInAppChooser"] boolValue] : YES;
+
+	if (favorites)
+	{
+		[favorites release];
+		favorites = nil;
+	}
+	favorites = [[[NSMutableArray alloc] init] retain];
+	for (NSString *key in prefs.allKeys)
+	{
+		if ([key hasPrefix:@"Favorites-"])
+		{
+			NSString *ident = [key substringFromIndex:10];
+			if ([prefs[key] boolValue])
+				[favorites addObject:ident];
+		}
+	}
 }
 
 %ctor
@@ -1009,12 +1150,6 @@ void reloadSettings(CFNotificationCenterRef center,
 		// But I won't know until people either stop sending emails or continue sending emails...
 		return;
 	}
-	else if (strcmp(__progname, "assertiond") == 0) 
-	{
-        dlopen("/System/Library/PrivateFrameworks/XPCObjects.framework/XPCObjects", RTLD_LAZY);
-        void *xpcFunction = MSFindSymbol(NULL, "_BSAuditTokenTaskHasEntitlement");
-        MSHookFunction(xpcFunction, (void *)hax_BSAuditTokenTaskHasEntitlement, (void **)&orig_BSAuditTokenTaskHasEntitlement);
-    }
     else
     {
 		NSString *bundleIdentifier = NSBundle.mainBundle.bundleIdentifier;

@@ -10,6 +10,53 @@
 #import <SpringBoard/SBApplication.h>
 #import <QuartzCore/QuartzCore.h>
 
+@interface SBDisplayLayout : NSObject {
+	int _layoutSize;
+	NSMutableArray* _displayItems;
+	NSString* _uniqueStringRepresentation;
+}
+@property(readonly, assign, nonatomic) NSArray* displayItems;
+@property(readonly, assign, nonatomic) int layoutSize;
++(id)fullScreenDisplayLayoutForApplication:(id)application;
++(id)homeScreenDisplayLayout;
++(id)displayLayoutWithPlistRepresentation:(id)plistRepresentation;
++(id)displayLayoutWithLayoutSize:(int)layoutSize displayItems:(id)items;
+-(id)displayLayoutBySettingSize:(int)size;
+-(id)displayLayoutByReplacingDisplayItemOnSide:(int)side withDisplayItem:(id)displayItem;
+-(id)displayLayoutByRemovingDisplayItems:(id)items;
+-(id)displayLayoutByRemovingDisplayItem:(id)item;
+-(id)displayLayoutByAddingDisplayItem:(id)item side:(int)side withLayout:(int)layout;
+-(BOOL)isEqual:(id)equal;
+-(unsigned)hash;
+-(id)uniqueStringRepresentation;
+-(id)_calculateUniqueStringRepresentation;
+-(id)description;
+-(id)copyWithZone:(NSZone*)zone;
+-(void)dealloc;
+-(id)plistRepresentation;
+-(id)initWithLayoutSize:(int)layoutSize displayItems:(id)items;
+@end
+
+@interface FBProcessManager : NSObject
++ (id)sharedInstance;
+- (void)_updateWorkspaceLockedState;
+- (void)applicationProcessWillLaunch:(id)arg1;
+- (void)noteProcess:(id)arg1 didUpdateState:(id)arg2;
+- (void)noteProcessDidExit:(id)arg1;
+- (id)_serviceClientAddedWithPID:(int)arg1 isUIApp:(BOOL)arg2 isExtension:(BOOL)arg3 bundleID:(id)arg4;
+- (id)_serviceClientAddedWithConnection:(id)arg1;
+- (id)_systemServiceClientAdded:(id)arg1;
+- (BOOL)_isWorkspaceLocked;
+- (id)createApplicationProcessForBundleID:(id)arg1 withExecutionContext:(id)arg2;
+- (id)createApplicationProcessForBundleID:(id)arg1;
+- (id)applicationProcessForPID:(int)arg1;
+- (id)processForPID:(int)arg1;
+- (id)applicationProcessesForBundleIdentifier:(id)arg1;
+- (id)processesForBundleIdentifier:(id)arg1;
+- (id)allApplicationProcesses;
+- (id)allProcesses;
+@end
+
 @interface UIGestureRecognizerTarget : NSObject {
 	id _target;
 }
@@ -156,7 +203,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @end
 
 @interface SBWorkspace
--(void) updateViewSizes:(CGPoint)center;
+-(void) updateViewSizes:(CGPoint)center animate:(BOOL)animate;
 @end
 
 @interface UIKeyboard : UIView
@@ -211,7 +258,11 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 
 @interface UIApplication ()
 - (id)_mainScene;
+
+// SpringBoard methods
+-(BOOL)launchApplicationWithIdentifier:(id)identifier suspended:(BOOL)suspended;
 -(SBApplication*) _accessibilityFrontMostApplication;
+
 - (void)RA_forceRotationToInterfaceOrientation:(UIInterfaceOrientation)orientation isReverting:(BOOL)reverting;
 - (void)applicationDidResume;
 - (void)_sendWillEnterForegroundCallbacks;
@@ -230,6 +281,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @end
 
 @interface SBIconModel (iOS81)
+- (id)visibleIconIdentifiers;
 - (id)applicationIconForBundleIdentifier:(id)arg1;
 @end
 

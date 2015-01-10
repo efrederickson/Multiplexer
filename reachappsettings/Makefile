@@ -9,6 +9,7 @@ BUNDLE_NAME = ReachAppSettings
 ReachAppSettings_FILES = ReachAppSettings.mm $(shell find $(THEOS)/include/SettingsKit -name '*.m')
 ReachAppSettings_INSTALL_PATH = /Library/PreferenceBundles
 ReachAppSettings_FRAMEWORKS = UIKit MessageUI Social QuartzCore CoreGraphics
+ReachAppSettings_LIBRARIES = applist substrate
 ReachAppSettings_PRIVATE_FRAMEWORKS = Preferences
 
 include $(THEOS_MAKE_PATH)/bundle.mk
