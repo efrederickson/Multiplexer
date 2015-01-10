@@ -1,3 +1,0 @@
-#!/bin/sh
-
-[ -f /Library/MobileSubstrate/DynamicLibraries/ReachApp.dylib ] && touch /tmp/reachapp.exists || echo
