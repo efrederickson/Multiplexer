@@ -16,6 +16,7 @@ Reference: https://github.com/fewjative/Reference
 MessageBox: https://github.com/b3ll/MessageBox
 This pastie (by @Freerunnering?): http://pastie.org/pastes/8684110
 AppHeads disassembly: Original binary from @sharedRoutine
+Various tips and help: @sharedRoutine
 
 Many concepts and ideas have been used from them.
 */
@@ -48,7 +49,7 @@ BOOL forcingRotation = NO;
 BOOL showingNC = NO;
 BOOL setPreviousOrientation = NO;
 BOOL isTopApp = NO;
-BOOL wasStatusBarHidden = NO;
+NSInteger wasStatusBarHidden = -1;
 BOOL overrideDisableForStatusBar = NO;
 CGRect pre_topAppFrame = CGRectZero;
 CGAffineTransform pre_topAppTransform = CGAffineTransformIdentity;
@@ -66,7 +67,7 @@ BOOL scalingRotationMode = NO;
 BOOL autoSizeAppChooser = YES;
 NSMutableArray *favorites = nil;
 BOOL showAllAppsInAppChooser = YES;
-BOOL instantlyResize = NO;
+BOOL showRecents = YES;
 
 %group springboardHooks
 
@@ -266,96 +267,102 @@ BOOL wasEnabled = NO;
 			appSelectorView.backgroundColor = [UIColor clearColor];
 			[appSelectorView setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
 
-			CGFloat y = 0;
-
-			// Recents
-			UILabel *recentsLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 10, 300, 20)];
-			y += 30;
-			recentsLabel.textColor = [UIColor whiteColor];
-			recentsLabel.text = @"Recents";
-			recentsLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:20]; // was HelveticaNeue-UltraLight
-			[appSelectorView addSubview:recentsLabel];
-
-			UIScrollView *recentsView = [[UIScrollView alloc] initWithFrame:CGRectMake(10, 40, appSelectorView.frame.size.width - 20, 20)];
-			recentsView.backgroundColor = [UIColor clearColor];
-			CGSize contentSize = CGSizeMake(10, 10);
+			CGFloat y = 10;
+			CGSize contentSize = CGSizeZero;
+			CGRect frame = CGRectZero;
 			CGFloat oneRowHeight = -1;
 			CGFloat oneRowWidth = -1;
-			NSArray *recents = [[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary];
 			NSInteger width = 0;
 			BOOL isTop = YES;
 			BOOL hasSecondRow = NO;
 			CGFloat interval = 0, intervalCount = 1, numIconsPerLine = 0;
-			for (NSString *str in recents)
+
+			// Recents
+			if (showRecents)
 			{
-				if ([currentBundleIdentifier isEqual:str] == NO && str && str.length > 0)
+				NSArray *recents = [[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary];
+				if (recents.count > 1) // item 1 = current app
 				{
-					app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:str];
-			        SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:app.bundleIdentifier];
-			        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
-			        if (!iconView)
-			        	continue;
-			        
-			        if (interval != 0 && contentSize.width + iconView.frame.size.width > interval * intervalCount)
+					UILabel *recentsLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, y, 300, 20)];
+					y += 30;
+					recentsLabel.textColor = [UIColor whiteColor];
+					recentsLabel.text = @"Recents";
+					recentsLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:20]; // was HelveticaNeue-UltraLight
+					[appSelectorView addSubview:recentsLabel];
+
+					UIScrollView *recentsView = [[UIScrollView alloc] initWithFrame:CGRectMake(10, y, appSelectorView.frame.size.width - 20, 20)];
+					recentsView.backgroundColor = [UIColor clearColor];
+					contentSize = CGSizeMake(10, 10);
+					for (NSString *str in recents)
 					{
-						if (isTop)
+						if ([currentBundleIdentifier isEqual:str] == NO && str && str.length > 0)
 						{
-							contentSize.height += oneRowHeight + 10;
-							contentSize.width -= interval;
+							app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:str];
+					        SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:app.bundleIdentifier];
+					        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
+					        if (!iconView)
+					        	continue;
+					        
+					        if (interval != 0 && contentSize.width + iconView.frame.size.width > interval * intervalCount)
+							{
+								if (isTop)
+								{
+									contentSize.height += oneRowHeight + 10;
+									contentSize.width -= interval;
+								}
+								else
+								{
+									intervalCount++;
+									contentSize.height -= (oneRowHeight + 10);
+									width += interval;
+								}
+								hasSecondRow = YES;
+								isTop = !isTop;
+							}
+
+					        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+					        switch (UIApplication.sharedApplication.statusBarOrientation)
+					        {
+					        	case UIInterfaceOrientationLandscapeRight:
+					        		iconView.frame = CGRectMake(contentSize.width + 15, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+					        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
+					        		break;
+					        	case UIInterfaceOrientationLandscapeLeft:
+					        	case UIInterfaceOrientationPortrait:
+					        	default:
+					        		break;
+					        }
+
+					        iconView.tag = [app pid];
+					        iconView.restorationIdentifier = app.bundleIdentifier;
+					        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
+					        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
+					        if (oneRowHeight == -1)
+					        {
+					        	oneRowHeight = iconView.frame.size.height + 10;
+					        	oneRowWidth = iconView.frame.size.width + 20;
+					        	while (interval + oneRowWidth <= UIScreen.mainScreen.bounds.size.width)
+					        	{
+					        		numIconsPerLine++;
+						        	interval += oneRowWidth;
+					        	}
+						        width = interval;
+					        }
+					        [recentsView addSubview:iconView];
+
+					        contentSize.width += iconView.frame.size.width + 20;
 						}
-						else
-						{
-							intervalCount++;
-							contentSize.height -= (oneRowHeight + 10);
-							width += interval;
-						}
-						hasSecondRow = YES;
-						isTop = !isTop;
 					}
-
-			        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
-			        switch (UIApplication.sharedApplication.statusBarOrientation)
-			        {
-			        	case UIInterfaceOrientationLandscapeRight:
-			        		iconView.frame = CGRectMake(contentSize.width + 5, contentSize.height + 5, iconView.frame.size.width, iconView.frame.size.height);
-			        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
-			        		if (oneRowHeight != -1)
-				        		oneRowHeight += 5;
-			        		break;
-			        	case UIInterfaceOrientationLandscapeLeft:
-			        	case UIInterfaceOrientationPortrait:
-			        	default:
-			        		break;
-			        }
-
-			        iconView.tag = [app pid];
-			        iconView.restorationIdentifier = app.bundleIdentifier;
-			        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
-			        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
-			        if (oneRowHeight == -1)
-			        {
-			        	oneRowHeight = iconView.frame.size.height + 10;
-			        	oneRowWidth = iconView.frame.size.width + 20;
-			        	while (interval + oneRowWidth <= UIScreen.mainScreen.bounds.size.width)
-			        	{
-			        		numIconsPerLine++;
-				        	interval += oneRowWidth;
-			        	}
-				        width = interval;
-			        }
-			        [recentsView addSubview:iconView];
-
-			        contentSize.width += iconView.frame.size.width + 20;
+					contentSize.width = width;
+					contentSize.height = 10 + ((oneRowHeight + 10) * (hasSecondRow ? 2 : 1));
+					y += contentSize.height + 10;
+					frame = recentsView.frame;
+					frame.size.height = contentSize.height;
+					recentsView.frame = frame;
+					[recentsView setContentSize:contentSize];
+					[appSelectorView addSubview:recentsView];
 				}
 			}
-			contentSize.width = width;
-			contentSize.height = 10 + ((oneRowHeight + 10) * (hasSecondRow ? 2 : 1));
-			y += contentSize.height + 10;
-			CGRect frame = recentsView.frame;
-			frame.size.height = contentSize.height;
-			recentsView.frame = frame;
-			[recentsView setContentSize:contentSize];
-			[appSelectorView addSubview:recentsView];
 
 			// Favorites
 			if (favorites.count > 0)
@@ -381,19 +388,41 @@ BOOL wasEnabled = NO;
 				        	continue;
 
 				        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+				        switch (UIApplication.sharedApplication.statusBarOrientation)
+				        {
+				        	case UIInterfaceOrientationLandscapeRight:
+				        		iconView.frame = CGRectMake(contentSize.width + 15, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+				        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
+				        		break;
+				        	case UIInterfaceOrientationLandscapeLeft:
+				        	case UIInterfaceOrientationPortrait:
+				        	default:
+				        		break;
+				        }
+
 
 				        iconView.tag = [app pid];
 				        iconView.restorationIdentifier = app.bundleIdentifier;
 				        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
 				        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
 				        [favoritesView addSubview:iconView];
-
+				        if (oneRowHeight == -1)
+				        {
+				        	oneRowHeight = iconView.frame.size.height + 10;
+				        	oneRowWidth = iconView.frame.size.width + 20;
+				        	while (interval + oneRowWidth <= UIScreen.mainScreen.bounds.size.width)
+				        	{
+				        		numIconsPerLine++;
+					        	interval += oneRowWidth;
+				        	}
+					        width = interval;
+				        }
 				        contentSize.width += iconView.frame.size.width + 20;
 					}
 				}
 				contentSize.height = oneRowHeight + 10;
 				CGRect frame = favoritesView.frame;
-				frame.size.height = contentSize.height;
+				frame.size.height = contentSize.height + 10;
 				favoritesView.frame = frame;
 				[favoritesView setContentSize:contentSize];
 				[appSelectorView addSubview:favoritesView];
@@ -404,7 +433,7 @@ BOOL wasEnabled = NO;
 			if (showAllAppsInAppChooser)
 			{
 				UILabel *allAppsLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, y, appSelectorView.frame.size.width, 20)];
-				y += 20;
+				y += 30;
 				allAppsLabel.textColor = [UIColor whiteColor];
 				allAppsLabel.text = @"All Apps";
 				allAppsLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:20];
@@ -451,12 +480,35 @@ BOOL wasEnabled = NO;
 						}
 
 				        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+				        switch (UIApplication.sharedApplication.statusBarOrientation)
+				        {
+				        	case UIInterfaceOrientationLandscapeRight:
+				        		iconView.frame = CGRectMake(contentSize.width + 15, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+				        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
+				        		break;
+				        	case UIInterfaceOrientationLandscapeLeft:
+				        	case UIInterfaceOrientationPortrait:
+				        	default:
+				        		break;
+				        }
+
 
 				        iconView.tag = [app pid];
 				        iconView.restorationIdentifier = app.bundleIdentifier;
 				        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
 				        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
 				        [allAppsView addSubview:iconView];
+				        if (oneRowHeight == -1)
+				        {
+				        	oneRowHeight = iconView.frame.size.height + 10;
+				        	oneRowWidth = iconView.frame.size.width + 20;
+				        	while (interval + oneRowWidth <= UIScreen.mainScreen.bounds.size.width)
+				        	{
+				        		numIconsPerLine++;
+					        	interval += oneRowWidth;
+				        	}
+					        width = interval;
+				        }
 				        contentSize.width += iconView.frame.size.width + 20;
 					}
 				}
@@ -471,6 +523,7 @@ BOOL wasEnabled = NO;
 			}
 			
 			[w addSubview:appSelectorView];
+			NSLog(@"[ReachApp] app chooser just created: %@ %@", @(y), appSelectorView.superview);
 			//appSelectorView.clipsToBounds = YES;
 			view = appSelectorView;
 
@@ -553,7 +606,6 @@ BOOL wasEnabled = NO;
 
 %new -(void)handlePan:(UIPanGestureRecognizer*)sender
 {
-	static CGFloat initialGrabberY = 0, realInitialGrabberY = 0;
 	UIView *view = draggerView; //sender.view;
 
 	if (sender.state == UIGestureRecognizerStateBegan)
@@ -561,20 +613,12 @@ BOOL wasEnabled = NO;
 		grabberCenter_X = view.center.x;
 		firstLocation = view.center;
 		grabberCenter_Y = [sender locationInView:view.superview].y;
-		initialGrabberY = grabberCenter_Y;
-		realInitialGrabberY = grabberCenter_Y;
 		draggerView.alpha = 0.8;
 		bottomDraggerView.alpha = 0;
 	}
 	else if (sender.state == UIGestureRecognizerStateChanged)
 	{
 		CGPoint translation = [sender translationInView:view];
-
-		BOOL needsToResizeNow = instantlyResize;
-		if (realInitialGrabberY < firstLocation.y + translation.y)
-			needsToResizeNow = YES;
-		else
-			realInitialGrabberY = MAX(realInitialGrabberY, firstLocation.y + translation.y);
 
 		if (firstLocation.y + translation.y < 50)
 		{
@@ -592,14 +636,13 @@ BOOL wasEnabled = NO;
 			grabberCenter_Y = [sender locationInView:view.superview].y;
 		}
 
-		if (needsToResizeNow)
-			[self updateViewSizes:view.center animate:YES];
+		[self updateViewSizes:view.center animate:YES];
 	}
 	else if (sender.state == UIGestureRecognizerStateEnded)
 	{
 		draggerView.alpha = 0.3;
 		bottomDraggerView.alpha = 0.3;
-		[self updateViewSizes:view.center animate:YES];
+		//[self updateViewSizes:view.center animate:YES];
 	}
 }
 
@@ -659,6 +702,9 @@ BOOL wasEnabled = NO;
 		dict[@"rotationMode"] = @(scalingRotationMode);
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, (__bridge CFDictionaryRef)dict, true);
 	}
+
+	if ([view isKindOfClass:[%c(FBWindowContextHostWrapperView) class]] == NO)
+		return; // only resize when the app is being shown. Otherwise it's more like native Reachability
 
 	NSMutableDictionary *dict = [NSMutableDictionary dictionary];
 	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
@@ -736,6 +782,8 @@ BOOL wasEnabled = NO;
 		CFDictionaryAddValue(dictionary, @"bundleIdentifier", lastBundleIdentifier); // Top app
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), (__bridge CFStringRef)event, NULL, dictionary, true);
 		CFRelease(dictionary);
+
+
 	}
 	else if (scalingRotationMode && [UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
 	{
@@ -743,12 +791,8 @@ BOOL wasEnabled = NO;
 
 		// Force portrait
 		NSString *event = @"com.efrederickson.reachapp.forcerotation-portrait";
-		CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-		CFDictionaryAddValue(dictionary, @"bundleIdentifier", lastBundleIdentifier); // Top app
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), (__bridge CFStringRef)event, NULL, dictionary, true);
-		CFDictionaryAddValue(dictionary, @"bundleIdentifier", currentBundleIdentifier); // Bottom app
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), (__bridge CFStringRef)event, NULL, dictionary, true);
-		CFRelease(dictionary);
+		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), (__bridge CFStringRef)event, NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": lastBundleIdentifier }, true);
+		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), (__bridge CFStringRef)event, NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentBundleIdentifier }, true);
 
 		// Scale app
 		CGFloat scale = view.frame.size.width / UIScreen.mainScreen.bounds.size.height;
@@ -758,6 +802,7 @@ BOOL wasEnabled = NO;
 		MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").frame = CGRectMake(0, 0, view.frame.size.width, view.frame.size.height);
 		UIWindow *window = MSHookIvar<UIWindow*>(self,"_reachabilityEffectWindow");
 		window.frame = (CGRect) { window.frame.origin, { window.frame.size.width, view.frame.size.width } };
+
 		window = MSHookIvar<UIWindow*>(self,"_reachabilityWindow");
 		window.frame = (CGRect) { { window.frame.origin.x, view.frame.size.width }, { window.frame.size.width, view.frame.size.width } };
 		
@@ -765,14 +810,12 @@ BOOL wasEnabled = NO;
 		if ([currentApp mainScene]) // just checking...
 		{
 			MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").transform = CGAffineTransformConcat(CGAffineTransformMakeScale(scale, scale), CGAffineTransformMakeRotation(M_PI_2));
-			MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").frame = CGRectMake(0, 0, view.frame.size.width, view.frame.size.height);
+			MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").frame = CGRectMake(0, 0, window.frame.size.width, window.frame.size.height);
 		}
 
 		// Gotta for the animations to finish... ;_;
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
 			overrideDisableForStatusBar = NO;
-			// welp. 
-			//[[%c(SBReachabilityManager) sharedInstance] _handleReachabilityActivated];
 		});
 	}
 }
@@ -880,29 +923,18 @@ NSCache *oldFrames = [NSCache new];
 
 %hook UIApplication
 
+- (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(id)arg2 changeApplicationFlag:(BOOL)arg3
+{
+	arg1 = (forcingRotation || overrideDisplay) ? (isTopApp ? NO : YES) : arg1;
+	%orig(arg1, arg2, YES);
+}
+
 /*
 - (void)_notifySpringBoardOfStatusBarOrientationChangeAndFenceWithAnimationDuration:(double)arg1
 {
     if (scalingRotationMode && (overrideDisplay || forcingRotation))
         return;
     %orig;
-}
-*/
-
-/*
-- (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(id)arg2 changeApplicationFlag:(BOOL)arg3
-{
-	if (overrideDisplay && forcedOrientation == UIInterfaceOrientationPortrait && isTopApp == NO)
-	{
-		%orig(YES, arg2, arg3);
-		return;
-	}
-	else if (overrideDisplay && forcedOrientation == UIInterfaceOrientationPortrait && isTopApp == YES)
-	{
-		%orig(NO, arg2, arg3);
-		return;
-	}
-	%orig;
 }
 */
 
@@ -915,7 +947,7 @@ NSCache *oldFrames = [NSCache new];
 
 %new - (void)RA_forceRotationToInterfaceOrientation:(UIInterfaceOrientation)orientation isReverting:(BOOL) reverting
 {
-	NSLog(@"ReachApp: RA_forceRotationToInterfaceOrientation %@", @(orientation));
+	//NSLog(@"ReachApp: RA_forceRotationToInterfaceOrientation %@", @(orientation));
 	forcingRotation = YES;
 
 	if (!reverting)
@@ -929,29 +961,22 @@ NSCache *oldFrames = [NSCache new];
 		}
 		forcedOrientation = orientation;
 		
-		//wasStatusBarHidden = UIApplication.sharedApplication.statusBarHidden;
-		//if (overrideDisplay && isTopApp && orientation == UIInterfaceOrientationPortrait)
-		//	[UIApplication.sharedApplication setStatusBarHidden:NO];
-		//else if (overrideDisplay && orientation == UIInterfaceOrientationPortrait)
-		//	[UIApplication.sharedApplication setStatusBarHidden:YES];
+		//if (wasStatusBarHidden == -1)
+		//{
+		//	wasStatusBarHidden = UIApplication.sharedApplication.statusBarHidden;
+		//	[UIApplication.sharedApplication setStatusBarHidden:NO /* it doesn't matter, hooks will take care of it 8) */];
+		//}
 	}
 	else
 	{
 		//[UIApplication.sharedApplication setStatusBarHidden:wasStatusBarHidden];
 	}
 
-	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) 
-	{
-		// TODO
-	}
-	else
-	{
 		//[[UIApplication sharedApplication] setStatusBarOrientation:orientation];
 
-	    for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
-	    	[window _setRotatableViewOrientation:orientation updateStatusBar:YES duration:0.0 force:YES];
-	    }
-	}
+    for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
+    	[window _setRotatableViewOrientation:orientation updateStatusBar:YES duration:0.0 force:YES];
+    }
 
     forcingRotation = NO;
 }
@@ -1038,17 +1063,22 @@ void forceRotation_upsidedown(CFNotificationCenterRef center, void *observer, CF
 
 void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) 
 {
-	if ([NSBundle.mainBundle.bundleIdentifier isEqual:[(__bridge NSDictionary*)userInfo objectForKey:@"bundleIdentifier"]])
+	NSDictionary *info = (__bridge NSDictionary*)userInfo;
+	if ([NSBundle.mainBundle.bundleIdentifier isEqual:[info objectForKey:@"bundleIdentifier"]])
 	{
-		isTopApp = [[(__bridge NSDictionary*)userInfo objectForKey:@"isTopApp"] boolValue];
+		isTopApp = [[info objectForKey:@"isTopApp"] boolValue];
 
-		//[UIWindow setAllWindowsKeepContextInBackground:YES];
+		if (wasStatusBarHidden == -1 && forcedOrientation == UIInterfaceOrientationPortrait)
+		{
+			wasStatusBarHidden = UIApplication.sharedApplication.statusBarHidden;
+			[UIApplication.sharedApplication _setStatusBarHidden:NO /* it doesn't matter, hooks will take care of it 8) */ animationParameters:nil changeApplicationFlag:YES];
+		}
 
-		scalingRotationMode = [[(__bridge NSDictionary*)userInfo objectForKey:@"rotationMode"] boolValue];
+		scalingRotationMode = [[info objectForKey:@"rotationMode"] boolValue];
 		if (!scalingRotationMode)
 		{
-			overrideHeight = [[(__bridge NSDictionary*)userInfo objectForKey:@"sizeHeight"] floatValue];
-			overrideWidth = [[(__bridge NSDictionary*)userInfo objectForKey:@"sizeWidth"] floatValue];
+			overrideHeight = [[info objectForKey:@"sizeHeight"] floatValue];
+			overrideWidth = [[info objectForKey:@"sizeWidth"] floatValue];
 		}
 		overrideDisplay = YES;
 
@@ -1076,7 +1106,8 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
 		if (setPreviousOrientation)
 		    [[UIApplication sharedApplication] RA_forceRotationToInterfaceOrientation:prevousOrientation isReverting:YES];
 	    setPreviousOrientation = NO;
-	    //[UIApplication.sharedApplication setStatusBarHidden:wasStatusBarHidden];
+	    if (wasStatusBarHidden != -1)
+		    [UIApplication.sharedApplication _setStatusBarHidden:wasStatusBarHidden animationParameters:nil changeApplicationFlag:YES];
 
 	    if (!scalingRotationMode)
 	    {
@@ -1126,7 +1157,7 @@ void reloadSettings(CFNotificationCenterRef center,
 	scalingRotationMode = [prefs objectForKey:@"rotationMode"] != nil ? [prefs[@"rotationMode"] boolValue] : NO;
 	autoSizeAppChooser = [prefs objectForKey:@"autoSizeAppChooser"] != nil ? [prefs[@"autoSizeAppChooser"] boolValue] : YES;
 	showAllAppsInAppChooser = [prefs objectForKey:@"showAllAppsInAppChooser"] != nil ? [prefs[@"showAllAppsInAppChooser"] boolValue] : YES;
-	instantlyResize = [prefs objectForKey:@"instantlyResize"] != nil ? [prefs[@"instantlyResize"] boolValue] : NO;
+	showRecents = [prefs objectForKey:@"showRecents"] != nil ? [prefs[@"showRecents"] boolValue] : YES;
 
 	if (favorites)
 	{
@@ -1171,7 +1202,7 @@ void reloadSettings(CFNotificationCenterRef center,
 	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_left, CFSTR("com.efrederickson.reachapp.forcerotation-left"), NULL, CFNotificationSuspensionBehaviorDrop);
 	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_portrait, CFSTR("com.efrederickson.reachapp.forcerotation-portrait"), NULL, CFNotificationSuspensionBehaviorDrop);
 	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_upsidedown, CFSTR("com.efrederickson.reachapp.forcerotation-upsidedown"), NULL, CFNotificationSuspensionBehaviorDrop);
-	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceResizing, CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
+	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceResizing, CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, CFNotificationSuspensionBehaviorCoalesce);
 	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, endForceResizing, CFSTR("com.efrederickson.reachapp.endresizing"), NULL, CFNotificationSuspensionBehaviorDrop);
 	    }
     	%init(uikitHooks);

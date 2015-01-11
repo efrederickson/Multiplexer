@@ -1,6 +1,6 @@
 Package: com.efrederickson.reachapp
 Name: ReachApp
-Depends: mobilesubstrate, firmware (>= 8.0)
+Depends: mobilesubstrate, firmware (>= 8.0), applist
 Conflicts: cc.tweak.statushud
 Version: 0.0.1
 Architecture: iphoneos-arm

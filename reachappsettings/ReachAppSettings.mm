@@ -34,7 +34,8 @@
 
 -(NSString*) customTitle { return @"ReachApp"; }
 
--(BOOL) showHeartImage { return NO; }
+-(BOOL) showHeartImage { return YES; }
+-(NSString*) shareMessage { return @"I'm using #ReachApp by @daementor for split screen multitasking on iOS!"; }
 
 -(NSArray*) customSpecifiers
 {
@@ -99,17 +100,7 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
-             @{ @"footerText": @"Instantly resize the apps when using the dragger, or wait until done dragging." },
-             @{
-                 @"cell": @"PSSwitchCell",
-                 @"default": @NO,
-                 @"defaults": @"com.efrederickson.reachapp.settings",
-                 @"key": @"instantlyResize",
-                 @"label": @"Instantly Resize",
-                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-                 },
-
-             @{ @"footerText": @"Shows an app chooser similar to the iOS 6 App Switcher in the Reachability view. Only running apps will show. If disabled, the last used app will be shown in Reachability." },
+             @{ @"footerText": @"Shows an app chooser that allows you to choose which app to show. If disabled, the last used app will be shown in Reachability." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
@@ -118,7 +109,34 @@
                  @"label": @"Show App Selector",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
+             @{
+                @"cell": @"PSLinkListCell",
+                @"detail": @"RAAppChooserOptionsListController",
+                @"label": @"App Chooser Options",
+            },
 
+             @{ @"footerText": @"PLEASE NOTE THIS IS A BETA OPTION, IT'S STILL UNDER WORK. DO NOT SEND EMAILS RELATING TO THIS FEATURE. THEY WILL BE IGNORED. \n\nThat said, it will force applications into portrait and scale them to the screen size in landscape mode." },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @0,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"rotationMode",
+                 @"label": @"Use scaling rotation mode",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 @"cellClass": @"RASwitchCell",
+                 },
+             ];
+}
+@end
+
+@interface RAAppChooserOptionsListController : SKTintedListController<SKListControllerProtocol, UIAlertViewDelegate>
+@end
+
+@implementation RAAppChooserOptionsListController
+-(BOOL) showHeartImage { return NO; }
+-(NSArray*) customSpecifiers 
+{
+    return @[
              @{ @"footerText": @"Auto-size the app chooser to the size of the available apps... Or not." },
              @{
                  @"cell": @"PSSwitchCell",
@@ -126,6 +144,16 @@
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"autoSizeAppChooser",
                  @"label": @"Auto-size app chooser",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+             
+             @{ @"footerText": @"Choose whether to show the recents section in the chooser or not." },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @YES,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"showRecents",
+                 @"label": @"Show Recent Apps",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
@@ -145,19 +173,9 @@
                  @"label": @"Show All Apps",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
-
-             @{ @"footerText": @"PLEASE NOTE THIS IS A BETA OPTION, IT'S STILL UNDER WORK. DO NOT SEND EMAILS RELATING TO THIS FEATURE. THEY WILL BE IGNORED. \n\nThat said, it will force applications into portrait and scale them to the screen size in landscape mode." },
-             @{
-                 @"cell": @"PSSwitchCell",
-                 @"default": @0,
-                 @"defaults": @"com.efrederickson.reachapp.settings",
-                 @"key": @"rotationMode",
-                 @"label": @"Use scaling rotation mode",
-                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-                 @"cellClass": @"RASwitchCell",
-                 },
-             ];
+                 ];
 }
+
 @end
 
 @interface RASwitchCell : PSSwitchTableCell //our class
