@@ -56,7 +56,7 @@
                  @"default": @NO,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"showNCInstead",
-                 @"label": @"Show NC instead of app",
+                 @"label": @"Show NC Instead of App",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
@@ -66,7 +66,7 @@
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"disableAutoDismiss",
-                 @"label": @"Disable auto-dismiss",
+                 @"label": @"Disable Auto-dismiss",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
@@ -86,7 +86,7 @@
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"homeButtonClosesReachability",
-                 @"label": @"Home button closes Reachability",
+                 @"label": @"Home Button Closes Reachability",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
@@ -96,7 +96,7 @@
                  @"default": @NO,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"showBottomGrabber",
-                 @"label": @"Show bottom grabber",
+                 @"label": @"Show Bottom Grabber",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
@@ -121,7 +121,7 @@
                  @"default": @0,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"rotationMode",
-                 @"label": @"Use scaling rotation mode",
+                 @"label": @"Use Scaling Rotation Mode",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  @"cellClass": @"RASwitchCell",
                  },
@@ -143,7 +143,7 @@
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"autoSizeAppChooser",
-                 @"label": @"Auto-size app chooser",
+                 @"label": @"Auto-size App Chooser",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
              
@@ -180,7 +180,7 @@
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"pagingEnabled",
-                 @"label": @"Paging enabled",
+                 @"label": @"Paging Enabled",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
