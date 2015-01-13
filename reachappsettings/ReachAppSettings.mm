@@ -173,6 +173,17 @@
                  @"label": @"Show All Apps",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
+
+             @{ @"footerText": @"Choose whether to page the app chooser, allowing for a different experience." },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @YES,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"pagingEnabled",
+                 @"label": @"Paging enabled",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+
                  ];
 }
 

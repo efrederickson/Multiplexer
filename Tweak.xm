@@ -68,9 +68,37 @@ BOOL autoSizeAppChooser = YES;
 NSMutableArray *favorites = nil;
 BOOL showAllAppsInAppChooser = YES;
 BOOL showRecents = YES;
+BOOL pagingEnabled = YES;
+
+/*
+@interface RAScrollViewDelegate : NSObject <UIScrollViewDelegate>
+@end
+@implementation RAScrollViewDelegate
+- (void)scrollViewDidScroll:(UIScrollView *)sender { sender.decelerationRate = UIScrollViewDecelerationRateFast; }
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)sender
+{
+	static BOOL isPaging = NO;
+	if (isPaging == NO)
+	{
+		isPaging = YES;
+		CGFloat pageWidth = sender.frame.size.width;
+		int page = floor((sender.contentOffset.x - pageWidth / 2) / pageWidth) + 1;
+		
+		CGRect frame;
+		frame.origin.x = sender.frame.size.width * page;
+		frame.origin.y = 0;
+		frame.size = sender.frame.size;
+		[UIView animateWithDuration:0.3 animations:^{
+		    [sender scrollRectToVisible:frame animated:NO];
+		} completion:^(BOOL finished) {
+			isPaging = NO;
+		}];
+	}
+}
+@end
+*/
 
 %group springboardHooks
-
 %hook SBReachabilityManager
 +(BOOL)reachabilitySupported
 {
@@ -185,7 +213,7 @@ BOOL wasEnabled = NO;
 			else
 			{
 				// Give them a little time to receive the notifications...
-				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
 					if (lastBundleIdentifier && lastBundleIdentifier.length > 0)
 					{
 						SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
@@ -275,7 +303,7 @@ BOOL wasEnabled = NO;
 			NSInteger width = 0;
 			BOOL isTop = YES;
 			BOOL hasSecondRow = NO;
-			CGFloat interval = 0, intervalCount = 1, numIconsPerLine = 0;
+			CGFloat interval = 0, intervalCount = 1, numIconsPerLine = 0, padding = 0;
 
 			// Recents
 			if (showRecents)
@@ -292,6 +320,7 @@ BOOL wasEnabled = NO;
 
 					UIScrollView *recentsView = [[UIScrollView alloc] initWithFrame:CGRectMake(10, y, appSelectorView.frame.size.width - 20, 20)];
 					recentsView.backgroundColor = [UIColor clearColor];
+					recentsView.pagingEnabled = pagingEnabled;
 					contentSize = CGSizeMake(10, 10);
 					for (NSString *str in recents)
 					{
@@ -340,17 +369,19 @@ BOOL wasEnabled = NO;
 					        if (oneRowHeight == -1)
 					        {
 					        	oneRowHeight = iconView.frame.size.height + 10;
-					        	oneRowWidth = iconView.frame.size.width + 20;
-					        	while (interval + oneRowWidth <= UIScreen.mainScreen.bounds.size.width)
+					        	oneRowWidth = iconView.frame.size.width;
+					        	while (interval + oneRowWidth <= recentsView.frame.size.width)
 					        	{
 					        		numIconsPerLine++;
-						        	interval += oneRowWidth;
+						        	interval += oneRowWidth + 20;
 					        	}
+					        	padding = (recentsView.frame.size.width - (numIconsPerLine * oneRowWidth)) / numIconsPerLine;
+					        	interval = (oneRowWidth + padding) * numIconsPerLine;
 						        width = interval;
 					        }
 					        [recentsView addSubview:iconView];
 
-					        contentSize.width += iconView.frame.size.width + 20;
+					        contentSize.width += iconView.frame.size.width + padding;
 						}
 					}
 					contentSize.width = width;
@@ -376,6 +407,7 @@ BOOL wasEnabled = NO;
 
 				UIScrollView *favoritesView = [[UIScrollView alloc] initWithFrame:CGRectMake(10, y, appSelectorView.frame.size.width - 20, 20)];
 				favoritesView.backgroundColor = [UIColor clearColor];
+				favoritesView.pagingEnabled = pagingEnabled;
 				contentSize = CGSizeMake(10, 10);
 				for (NSString *str in favorites)
 				{
@@ -409,15 +441,17 @@ BOOL wasEnabled = NO;
 				        if (oneRowHeight == -1)
 				        {
 				        	oneRowHeight = iconView.frame.size.height + 10;
-				        	oneRowWidth = iconView.frame.size.width + 20;
-				        	while (interval + oneRowWidth <= UIScreen.mainScreen.bounds.size.width)
+				        	oneRowWidth = iconView.frame.size.width;
+				        	while (interval + oneRowWidth <= favoritesView.frame.size.width)
 				        	{
 				        		numIconsPerLine++;
-					        	interval += oneRowWidth;
+					        	interval += oneRowWidth + 20;
 				        	}
+				        	padding = (favoritesView.frame.size.width - (numIconsPerLine * oneRowWidth)) / numIconsPerLine;
+				        	interval = (oneRowWidth + padding) * numIconsPerLine;
 					        width = interval;
 				        }
-				        contentSize.width += iconView.frame.size.width + 20;
+				        contentSize.width += iconView.frame.size.width + padding;
 					}
 				}
 				contentSize.height = oneRowHeight + 10;
@@ -440,6 +474,7 @@ BOOL wasEnabled = NO;
 				[appSelectorView addSubview:allAppsLabel];
 
 				UIScrollView *allAppsView = [[UIScrollView alloc] initWithFrame:CGRectMake(10, y, appSelectorView.frame.size.width - 20, 20)];
+				allAppsView.pagingEnabled = pagingEnabled;
 				allAppsView.backgroundColor = [UIColor clearColor];
 				NSMutableArray *allApps = [[[[%c(SBIconViewMap) homescreenMap] iconModel] visibleIconIdentifiers] mutableCopy];
 			    [allApps sortUsingComparator: ^(NSString* a, NSString* b) {
@@ -501,15 +536,17 @@ BOOL wasEnabled = NO;
 				        if (oneRowHeight == -1)
 				        {
 				        	oneRowHeight = iconView.frame.size.height + 10;
-				        	oneRowWidth = iconView.frame.size.width + 20;
-				        	while (interval + oneRowWidth <= UIScreen.mainScreen.bounds.size.width)
+				        	oneRowWidth = iconView.frame.size.width;
+				        	while (interval + oneRowWidth <= allAppsView.frame.size.width)
 				        	{
 				        		numIconsPerLine++;
-					        	interval += oneRowWidth;
+					        	interval += oneRowWidth + 20;
 				        	}
+				        	padding = (allAppsView.frame.size.width - (numIconsPerLine * oneRowWidth)) / numIconsPerLine;
+				        	interval = (oneRowWidth + padding) * numIconsPerLine;
 					        width = interval;
 				        }
-				        contentSize.width += iconView.frame.size.width + 20;
+				        contentSize.width += iconView.frame.size.width + padding;
 					}
 				}
 				contentSize.width = width; //(oneRowHeight + 20) * (recents.count / 2) + 10;
@@ -523,7 +560,7 @@ BOOL wasEnabled = NO;
 			}
 			
 			[w addSubview:appSelectorView];
-			NSLog(@"[ReachApp] app chooser just created: %@ %@", @(y), appSelectorView.superview);
+			//NSLog(@"[ReachApp] app chooser just created: %@ %@", @(y), appSelectorView.superview);
 			//appSelectorView.clipsToBounds = YES;
 			view = appSelectorView;
 
@@ -1087,7 +1124,10 @@ void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef n
 		{
 			for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
 				if ([oldFrames objectForKey:@(window.hash)] == nil)
+				{
+					//NSLog(@"ReachApp: storing frame %@ for rotation %@", NSStringFromCGRect(window.frame), @(UIApplication.sharedApplication.statusBarOrientation));
 					[oldFrames setObject:[NSValue valueWithCGRect:window.frame] forKey:@(window.hash)];
+				}
 				[UIView animateWithDuration:0.3 animations:^{
 			        [window setFrame:window.frame];
 			    }];
@@ -1102,13 +1142,6 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
 	{
 		overrideDisplay = NO;
 
-		//[UIWindow setAllWindowsKeepContextInBackground:NO];
-		if (setPreviousOrientation)
-		    [[UIApplication sharedApplication] RA_forceRotationToInterfaceOrientation:prevousOrientation isReverting:YES];
-	    setPreviousOrientation = NO;
-	    if (wasStatusBarHidden != -1)
-		    [UIApplication.sharedApplication _setStatusBarHidden:wasStatusBarHidden animationParameters:nil changeApplicationFlag:YES];
-
 	    if (!scalingRotationMode)
 	    {
 			for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
@@ -1120,11 +1153,19 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
 					//frame.origin.x = 0;
 					//frame.origin.y = 0;
 				}
+				//NSLog(@"ReachApp: restoring frame %@ for rotation %@", NSStringFromCGRect(frame), @(UIApplication.sharedApplication.statusBarOrientation));
 		        [UIView animateWithDuration:0.4 animations:^{
 			        [window setFrame:frame];
 			    }];
 		    }
 		}
+
+		//[UIWindow setAllWindowsKeepContextInBackground:NO];
+		if (setPreviousOrientation)
+		    [[UIApplication sharedApplication] RA_forceRotationToInterfaceOrientation:prevousOrientation isReverting:YES];
+	    setPreviousOrientation = NO;
+	    if (wasStatusBarHidden != -1)
+		    [UIApplication.sharedApplication _setStatusBarHidden:wasStatusBarHidden animationParameters:nil changeApplicationFlag:YES];
 	}
 }
 
@@ -1158,6 +1199,7 @@ void reloadSettings(CFNotificationCenterRef center,
 	autoSizeAppChooser = [prefs objectForKey:@"autoSizeAppChooser"] != nil ? [prefs[@"autoSizeAppChooser"] boolValue] : YES;
 	showAllAppsInAppChooser = [prefs objectForKey:@"showAllAppsInAppChooser"] != nil ? [prefs[@"showAllAppsInAppChooser"] boolValue] : YES;
 	showRecents = [prefs objectForKey:@"showRecents"] != nil ? [prefs[@"showRecents"] boolValue] : YES;
+	pagingEnabled = [prefs objectForKey:@"pagingEnabled"] != nil ? [prefs[@"pagingEnabled"] boolValue] : YES;
 
 	if (favorites)
 	{
