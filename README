@@ -4,11 +4,11 @@ Depiction (and some more info): http://elijahandandrew.com/repo/depictions/Reach
 
 Known issues / TODO: 
 √ NC view doesn't show after opening the NC normally
-• UIWindows (apps) may be placed incorrectly
-• UIWindows (apps) may not rotate or resize correctly
+√ UIWindows (apps) may be placed incorrectly
+√ UIWindows (apps) may not rotate or resize correctly
 • Keyboard doesn't resize
 √ Root apps don't show
-• Landscape right support
+• Landscape left support
 • Upside down support (maybe)
 √ Properly (or a better fake way) un-background apps 
 √ Flipswitch 

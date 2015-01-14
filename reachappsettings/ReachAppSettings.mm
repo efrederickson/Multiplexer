@@ -106,7 +106,7 @@
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"showAppSelector",
-                 @"label": @"Show App Selector",
+                 @"label": @"Show App Chooser",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
              @{

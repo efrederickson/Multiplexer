@@ -308,7 +308,8 @@ BOOL wasEnabled = NO;
 			// Recents
 			if (showRecents)
 			{
-				NSArray *recents = [[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary];
+				NSMutableArray *recents = [[[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary] mutableCopy];
+		   		[recents removeObject:currentBundleIdentifier];
 				if (recents.count > 1) // item 1 = current app
 				{
 					UILabel *recentsLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, y, 300, 20)];
@@ -324,65 +325,67 @@ BOOL wasEnabled = NO;
 					contentSize = CGSizeMake(10, 10);
 					for (NSString *str in recents)
 					{
-						if ([currentBundleIdentifier isEqual:str] == NO && str && str.length > 0)
+						app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:str];
+				        SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:app.bundleIdentifier];
+				        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
+				        if (!iconView)
+				        	continue;
+				        
+				        if (interval != 0 && contentSize.width + iconView.frame.size.width > interval * intervalCount)
 						{
-							app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:str];
-					        SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:app.bundleIdentifier];
-					        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
-					        if (!iconView)
-					        	continue;
-					        
-					        if (interval != 0 && contentSize.width + iconView.frame.size.width > interval * intervalCount)
+							if (isTop)
 							{
-								if (isTop)
-								{
-									contentSize.height += oneRowHeight + 10;
-									contentSize.width -= interval;
-								}
-								else
-								{
-									intervalCount++;
-									contentSize.height -= (oneRowHeight + 10);
-									width += interval;
-								}
-								hasSecondRow = YES;
-								isTop = !isTop;
+								contentSize.height += oneRowHeight + 10;
+								contentSize.width -= interval;
 							}
-
-					        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
-					        switch (UIApplication.sharedApplication.statusBarOrientation)
-					        {
-					        	case UIInterfaceOrientationLandscapeRight:
-					        		iconView.frame = CGRectMake(contentSize.width + 15, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
-					        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
-					        		break;
-					        	case UIInterfaceOrientationLandscapeLeft:
-					        	case UIInterfaceOrientationPortrait:
-					        	default:
-					        		break;
-					        }
-
-					        iconView.tag = [app pid];
-					        iconView.restorationIdentifier = app.bundleIdentifier;
-					        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
-					        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
-					        if (oneRowHeight == -1)
-					        {
-					        	oneRowHeight = iconView.frame.size.height + 10;
-					        	oneRowWidth = iconView.frame.size.width;
-					        	while (interval + oneRowWidth <= recentsView.frame.size.width)
-					        	{
-					        		numIconsPerLine++;
-						        	interval += oneRowWidth + 20;
-					        	}
-					        	padding = (recentsView.frame.size.width - (numIconsPerLine * oneRowWidth)) / numIconsPerLine;
-					        	interval = (oneRowWidth + padding) * numIconsPerLine;
-						        width = interval;
-					        }
-					        [recentsView addSubview:iconView];
-
-					        contentSize.width += iconView.frame.size.width + padding;
+							else
+							{
+								intervalCount++;
+								contentSize.height -= (oneRowHeight + 10);
+								width += interval;
+							}
+							hasSecondRow = YES;
+							isTop = !isTop;
 						}
+
+				        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+				        switch (UIApplication.sharedApplication.statusBarOrientation)
+				        {
+				        	case UIInterfaceOrientationLandscapeRight:
+				        		iconView.frame = CGRectMake(contentSize.width + 15, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+				        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
+				        		break;
+				        	case UIInterfaceOrientationLandscapeLeft:
+				        		iconView.transform = CGAffineTransformMakeRotation(-M_PI_2);
+				        		break;
+				        	case UIInterfaceOrientationPortraitUpsideDown:
+				        		appSelectorView.transform = CGAffineTransformMakeRotation(M_PI);
+				        		break;
+				        	case UIInterfaceOrientationPortrait:
+				        	default:
+				        		break;
+				        }
+
+				        iconView.tag = [app pid];
+				        iconView.restorationIdentifier = app.bundleIdentifier;
+				        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
+				        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
+				        if (oneRowHeight == -1)
+				        {
+				        	oneRowHeight = iconView.frame.size.height + 10;
+				        	oneRowWidth = iconView.frame.size.width;
+				        	while (interval + oneRowWidth <= recentsView.frame.size.width)
+				        	{
+				        		numIconsPerLine++;
+					        	interval += oneRowWidth + 20;
+				        	}
+				        	padding = (recentsView.frame.size.width - (numIconsPerLine * oneRowWidth)) / numIconsPerLine;
+				        	interval = (oneRowWidth + padding) * numIconsPerLine;
+					        width = interval;
+				        }
+				        [recentsView addSubview:iconView];
+
+				        contentSize.width += iconView.frame.size.width + padding;
 					}
 					contentSize.width = width;
 					contentSize.height = 10 + ((oneRowHeight + 10) * (hasSecondRow ? 2 : 1));
@@ -427,11 +430,15 @@ BOOL wasEnabled = NO;
 				        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
 				        		break;
 				        	case UIInterfaceOrientationLandscapeLeft:
+				        		iconView.transform = CGAffineTransformMakeRotation(-M_PI_2);
+				        		break;
+				        	case UIInterfaceOrientationPortraitUpsideDown:
+				        		appSelectorView.transform = CGAffineTransformMakeRotation(M_PI);
+				        		break;
 				        	case UIInterfaceOrientationPortrait:
 				        	default:
 				        		break;
 				        }
-
 
 				        iconView.tag = [app pid];
 				        iconView.restorationIdentifier = app.bundleIdentifier;
@@ -482,6 +489,7 @@ BOOL wasEnabled = NO;
 			    	NSString *b_ = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:b].displayName;
 			        return [a_ caseInsensitiveCompare:b_];
 		   		}];
+		   		[allApps removeObject:currentBundleIdentifier];
 				width = interval;
 				isTop = YES;
 				contentSize = CGSizeMake(10, 10);
@@ -489,65 +497,66 @@ BOOL wasEnabled = NO;
 				hasSecondRow = NO;
 				for (NSString *str in allApps)
 				{
-					if ([currentBundleIdentifier isEqual:str] == NO && str && str.length > 0)
+					app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:str];
+			        SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:app.bundleIdentifier];
+			        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
+			        if (!iconView || ![icon isKindOfClass:[%c(SBApplicationIcon) class]])
+			        	continue;
+
+			        if (interval != 0 && contentSize.width + iconView.frame.size.width > interval * intervalCount)
 					{
-						app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:str];
-				        SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:app.bundleIdentifier];
-				        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
-				        if (!iconView || ![icon isKindOfClass:[%c(SBApplicationIcon) class]])
-				        	continue;
-
-				        if (interval != 0 && contentSize.width + iconView.frame.size.width > interval * intervalCount)
+						if (isTop)
 						{
-							if (isTop)
-							{
-								contentSize.height += oneRowHeight + 10;
-								contentSize.width -= interval;
-							}
-							else
-							{
-								intervalCount++;
-								contentSize.height -= (oneRowHeight + 10);
-								width += interval;
-							}
-							isTop = !isTop;
-							hasSecondRow = YES;
+							contentSize.height += oneRowHeight + 10;
+							contentSize.width -= interval;
 						}
-
-				        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
-				        switch (UIApplication.sharedApplication.statusBarOrientation)
-				        {
-				        	case UIInterfaceOrientationLandscapeRight:
-				        		iconView.frame = CGRectMake(contentSize.width + 15, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
-				        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
-				        		break;
-				        	case UIInterfaceOrientationLandscapeLeft:
-				        	case UIInterfaceOrientationPortrait:
-				        	default:
-				        		break;
-				        }
-
-
-				        iconView.tag = [app pid];
-				        iconView.restorationIdentifier = app.bundleIdentifier;
-				        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
-				        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
-				        [allAppsView addSubview:iconView];
-				        if (oneRowHeight == -1)
-				        {
-				        	oneRowHeight = iconView.frame.size.height + 10;
-				        	oneRowWidth = iconView.frame.size.width;
-				        	while (interval + oneRowWidth <= allAppsView.frame.size.width)
-				        	{
-				        		numIconsPerLine++;
-					        	interval += oneRowWidth + 20;
-				        	}
-				        	padding = (allAppsView.frame.size.width - (numIconsPerLine * oneRowWidth)) / numIconsPerLine;
-				        	interval = (oneRowWidth + padding) * numIconsPerLine;
-					        width = interval;
-				        }
-				        contentSize.width += iconView.frame.size.width + padding;
+						else
+						{
+							intervalCount++;
+							contentSize.height -= (oneRowHeight + 10);
+							width += interval;
+						}
+						isTop = !isTop;
+						hasSecondRow = YES;
 					}
+
+			        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+			        switch (UIApplication.sharedApplication.statusBarOrientation)
+			        {
+			        	case UIInterfaceOrientationLandscapeRight:
+			        		iconView.frame = CGRectMake(contentSize.width + 15, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+			        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
+			        		break;
+			        	case UIInterfaceOrientationLandscapeLeft:
+			        		iconView.transform = CGAffineTransformMakeRotation(-M_PI_2);
+			        		break;
+				        case UIInterfaceOrientationPortraitUpsideDown:
+				        		appSelectorView.transform = CGAffineTransformMakeRotation(M_PI);
+			        		break;
+			        	case UIInterfaceOrientationPortrait:
+			        	default:
+			        		break;
+			        }
+
+			        iconView.tag = [app pid];
+			        iconView.restorationIdentifier = app.bundleIdentifier;
+			        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
+			        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
+			        [allAppsView addSubview:iconView];
+			        if (oneRowHeight == -1)
+			        {
+			        	oneRowHeight = iconView.frame.size.height + 10;
+			        	oneRowWidth = iconView.frame.size.width;
+			        	while (interval + oneRowWidth <= allAppsView.frame.size.width)
+			        	{
+			        		numIconsPerLine++;
+				        	interval += oneRowWidth + 20;
+			        	}
+			        	padding = (allAppsView.frame.size.width - (numIconsPerLine * oneRowWidth)) / numIconsPerLine;
+			        	interval = (oneRowWidth + padding) * numIconsPerLine;
+				        width = interval;
+			        }
+			        contentSize.width += iconView.frame.size.width + padding;
 				}
 				contentSize.width = width; //(oneRowHeight + 20) * (recents.count / 2) + 10;
 				contentSize.height = 10 + ((oneRowHeight + 10) * (hasSecondRow ? 2 : 1));
