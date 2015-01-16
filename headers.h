@@ -9,6 +9,17 @@
 #import <SpringBoard/SBIconLabel.h>
 #import <SpringBoard/SBApplication.h>
 #import <QuartzCore/QuartzCore.h>
+#import <UIKit/UIKit.h>
+
+@interface SBWorkspace 
++(id) sharedInstance;
+-(void) RA_animateWidgetSelectorOut:(id)completion;
+-(void) RA_setView:(UIView*)view;
+-(void) RA_launchTopAppWithIdentifier:(NSString*) bundleIdentifier;
+-(void) RA_showWidgetSelector;
+-(void) updateViewSizes:(CGPoint)center animate:(BOOL)animate;
+-(void) RA_closeCurrentView;
+@end
 
 @interface SBDisplayLayout : NSObject {
 	int _layoutSize;
@@ -202,10 +213,6 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @interface FBWindowContextHostView : UIView
 @end
 
-@interface SBWorkspace
--(void) updateViewSizes:(CGPoint)center animate:(BOOL)animate;
-@end
-
 @interface UIKeyboard : UIView
 + (id)activeKeyboard;
 @end
@@ -356,6 +363,8 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 + (BOOL)allowsRecycling;
 + (id)_jitterPositionAnimation;
 + (id)_jitterTransformAnimation;
++ (struct CGSize)defaultIconImageSize;
++ (struct CGSize)defaultIconSize;
 
 - (id)initWithDefaultSize;
 - (void)dealloc;

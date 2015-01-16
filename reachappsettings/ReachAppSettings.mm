@@ -106,13 +106,13 @@
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"showAppSelector",
-                 @"label": @"Show App Chooser",
+                 @"label": @"Show Widget Chooser",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
              @{
                 @"cell": @"PSLinkListCell",
                 @"detail": @"RAAppChooserOptionsListController",
-                @"label": @"App Chooser Options",
+                @"label": @"Widget Chooser Options",
             },
 
              @{ @"footerText": @"PLEASE NOTE THIS IS A BETA OPTION, IT'S STILL UNDER WORK. DO NOT SEND EMAILS RELATING TO THIS FEATURE. THEY WILL BE IGNORED. \n\nThat said, it will force applications into portrait and scale them to the screen size in landscape mode." },

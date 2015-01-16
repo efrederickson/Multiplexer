@@ -2,7 +2,7 @@ Package: com.efrederickson.reachapp
 Name: ReachApp
 Depends: mobilesubstrate, firmware (>= 8.0), applist
 Conflicts: cc.tweak.statushud
-Version: 0.0.1
+Version: 0.0.2
 Architecture: iphoneos-arm
 Description: Split-screen multitasking in reachability view
 Depiction: http://elijahandandrew.com/repo/depictions/ReachApp/index.html

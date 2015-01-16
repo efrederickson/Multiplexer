@@ -1,3 +1,7 @@
+
+This is simply kept here for archaic purposes. 
+
+
 #import <UIKit/UIKit.h>
 #import <substrate.h>
 #import <SpringBoard/SBApplication.h>
@@ -7,10 +11,7 @@
 #include <dlfcn.h>
 #include <sys/sysctl.h>
 #import <notify.h>
-
 #import "headers.h"
-#import "RAWidgetSectionManager.h"
-#import "RASettings.h"
 
 /*
 This code thanks: 
@@ -18,14 +19,19 @@ ForceReach: https://github.com/PoomSmart/ForceReach/
 Reference: https://github.com/fewjative/Reference
 MessageBox: https://github.com/b3ll/MessageBox
 This pastie (by @Freerunnering?): http://pastie.org/pastes/8684110
+AppHeads disassembly: Original binary from @sharedRoutine
 Various tips and help: @sharedRoutine
 
 Many concepts and ideas have been used from them.
 */
 
+@interface SBWorkspace (ReachApp)
+-(void)RA_launchTopAppWithIdentifier:(NSString*)bundleIdentifier;
+@end
 
 extern "C" CFNotificationCenterRef CFNotificationCenterGetDistributedCenter(void);
 extern const char *__progname; 
+extern "C" int xpc_connection_get_pid(id connection);
 
 /*FBWindowContextHostWrapperView*/ UIView *view = nil;
 NSString *lastBundleIdentifier = @"";
@@ -54,6 +60,48 @@ CGAffineTransform pre_topAppTransform = CGAffineTransformIdentity;
 UIView *bottomDraggerView = nil;
 CGFloat old_grabberCenterY = -1;
 
+BOOL enabled = YES;
+BOOL disableAutoDismiss = YES;
+BOOL enableRotation = YES;
+BOOL showNCInstead = NO;
+BOOL homeButtonClosesReachability = YES;
+BOOL showBottomGrabber = NO;
+BOOL showAppSelector = YES;
+BOOL scalingRotationMode = NO; 
+BOOL autoSizeAppChooser = YES;
+NSMutableArray *favorites = nil;
+BOOL showAllAppsInAppChooser = YES;
+BOOL showRecents = YES;
+BOOL pagingEnabled = YES;
+
+/*
+@interface RAScrollViewDelegate : NSObject <UIScrollViewDelegate>
+@end
+@implementation RAScrollViewDelegate
+- (void)scrollViewDidScroll:(UIScrollView *)sender { sender.decelerationRate = UIScrollViewDecelerationRateFast; }
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)sender
+{
+	static BOOL isPaging = NO;
+	if (isPaging == NO)
+	{
+		isPaging = YES;
+		CGFloat pageWidth = sender.frame.size.width;
+		int page = floor((sender.contentOffset.x - pageWidth / 2) / pageWidth) + 1;
+		
+		CGRect frame;
+		frame.origin.x = sender.frame.size.width * page;
+		frame.origin.y = 0;
+		frame.size = sender.frame.size;
+		[UIView animateWithDuration:0.3 animations:^{
+		    [sender scrollRectToVisible:frame animated:NO];
+		} completion:^(BOOL finished) {
+			isPaging = NO;
+		}];
+	}
+}
+@end
+*/
+
 %group springboardHooks
 %hook SBReachabilityManager
 +(BOOL)reachabilitySupported
@@ -70,21 +118,21 @@ CGFloat old_grabberCenterY = -1;
 
 - (void)enableExpirationTimerForEndedInteraction
 {
-	if ((view || showingNC) && [RASettings.sharedInstance disableAutoDismiss])
+	if ((view || showingNC) && disableAutoDismiss)
 		return;
 	%orig;
 }
 
 - (void)_handleSignificantTimeChanged
 {
-	if ((view || showingNC) && [RASettings.sharedInstance disableAutoDismiss])
+	if ((view || showingNC) && disableAutoDismiss)
 		return;
 	%orig;
 }
 
 - (void)_keepAliveTimerFired:(id)arg1
 {
-	if ((view || showingNC) && [RASettings.sharedInstance disableAutoDismiss])
+	if ((view || showingNC) && disableAutoDismiss)
 		return;
 	%orig;
 }
@@ -112,20 +160,7 @@ CGFloat old_grabberCenterY = -1;
 %end
 
 BOOL wasEnabled = NO;
-id SBWorkspace$sharedInstance;
 %hook SBWorkspace
-
-%new + (id) sharedInstance
-{
-	return SBWorkspace$sharedInstance;
-}
-
-- (id) init
-{
-	SBWorkspace$sharedInstance = %orig;
-	return SBWorkspace$sharedInstance;
-}
-
 - (void)_exitReachabilityModeWithCompletion:(id)arg1
 {
 	if (overrideDisableForStatusBar)
@@ -142,82 +177,81 @@ id SBWorkspace$sharedInstance;
 	%orig;
 }
 
-%new -(void) RA_closeCurrentView
-{
-	// Notify both top and bottom apps Reachability is closing
-	if (lastBundleIdentifier)
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": lastBundleIdentifier}, NO);
-	if (currentBundleIdentifier)
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentBundleIdentifier}, NO);
-
-	if (draggerView)
-		draggerView = nil;
-
-	if ([RASettings.sharedInstance showNCInstead])
-	{
-		showingNC = NO;
-		UIWindow *window = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
-		[window _setRotatableViewOrientation:UIInterfaceOrientationPortrait updateStatusBar:YES duration:0.0 force:YES];
-		window.rootViewController = nil;
-		UIViewController *viewController = [[%c(SBNotificationCenterController) performSelector:@selector(sharedInstance)] performSelector:@selector(viewController)];
-		[viewController performSelector:@selector(hostWillDismiss)];
-		[viewController performSelector:@selector(hostDidDismiss)];
-		//[viewController.view removeFromSuperview];
-	}
-	else
-	{
-		// Give them a little time to receive the notifications...
-		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-			if (lastBundleIdentifier && lastBundleIdentifier.length > 0)
-			{
-				SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
-				if (app && [app pid] && [app mainScene])
-				{
-					FBScene *scene = [app mainScene];
-					FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
-					object_setInstanceVariable(settings, "_backgrounded", (void*)YES);
-					[scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];
-					MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").frame = pre_topAppFrame;
-					MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").transform = pre_topAppTransform;
-
-					if (view)
-					{
-						if ([view superview] != nil)
-							[view removeFromSuperview];
-					}
-
-					SBApplication *currentApp = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:currentBundleIdentifier];
-					if ([currentApp mainScene])
-					{
-						MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").frame = pre_topAppFrame;
-						MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").transform = pre_topAppTransform;
-					}
-
-					FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
-					[contextHostManager disableHostingForRequester:@"reachapp"];
-				}
-			}
-			view = nil;
-		    lastBundleIdentifier = nil;
-		});
-	}
-}
-
 - (void)_disableReachabilityImmediately:(_Bool)arg1
 {
 	if (overrideDisableForStatusBar)
 		return;
 
-	if (![RASettings.sharedInstance enabled])
+	if (!enabled)
 	{
 		%orig;
 		return;
 	}
 
-	if (arg1 && wasEnabled)
+	//if ([[%c(SBReachabilityManager) sharedInstance] reachabilityModeActive])
+	if (wasEnabled)
 	{
 		wasEnabled = NO;
-		[self RA_closeCurrentView];
+		if (arg1)
+		{
+			// Notify both top and bottom apps Reachability is closing
+			if (lastBundleIdentifier)
+				CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": lastBundleIdentifier}, NO);
+			if (currentBundleIdentifier)
+				CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentBundleIdentifier}, NO);
+
+			if (draggerView)
+				draggerView = nil;
+
+			if (showNCInstead)
+			{
+				showingNC = NO;
+				UIWindow *window = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
+        		[window _setRotatableViewOrientation:UIInterfaceOrientationPortrait updateStatusBar:YES duration:0.0 force:YES];
+        		window.rootViewController = nil;
+				UIViewController *viewController = [[%c(SBNotificationCenterController) performSelector:@selector(sharedInstance)] performSelector:@selector(viewController)];
+				[viewController performSelector:@selector(hostWillDismiss)];
+				[viewController performSelector:@selector(hostDidDismiss)];
+				//[viewController.view removeFromSuperview];
+			}
+			else
+			{
+				// Give them a little time to receive the notifications...
+				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+					if (lastBundleIdentifier && lastBundleIdentifier.length > 0)
+					{
+						SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
+						if (app && [app pid] && [app mainScene])
+						{
+							FBScene *scene = [app mainScene];
+							FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
+							object_setInstanceVariable(settings, "_backgrounded", (void*)YES);
+							[scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];
+							MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").frame = pre_topAppFrame;
+							MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").transform = pre_topAppTransform;
+
+							if (view)
+							{
+								if ([view superview] != nil)
+									[view removeFromSuperview];
+							}
+
+							SBApplication *currentApp = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:currentBundleIdentifier];
+							if ([currentApp mainScene])
+							{
+								MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").frame = pre_topAppFrame;
+								MSHookIvar<FBWindowContextHostView*>([currentApp mainScene].contextHostManager, "_hostView").transform = pre_topAppTransform;
+							}
+
+							FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
+							[contextHostManager disableHostingForRequester:@"reachapp"];
+						}
+					}
+					view = nil;
+				    lastBundleIdentifier = nil;
+				});
+			}
+		}
 	}
 
 	%orig;
@@ -226,12 +260,12 @@ id SBWorkspace$sharedInstance;
 - (void) handleReachabilityModeActivated
 {
 	%orig;
-	if (![RASettings.sharedInstance enabled])
+	if (!enabled)
 		return;
 	wasEnabled = YES;
 
 	UIWindow *w = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
-	if ([RASettings.sharedInstance showNCInstead])
+	if (showNCInstead)
 	{
 		showingNC = YES;
 
@@ -245,20 +279,314 @@ id SBWorkspace$sharedInstance;
 		[ncViewController performSelector:@selector(hostWillPresent)];
 		[ncViewController performSelector:@selector(hostDidPresent)];
 
-		if ([RASettings.sharedInstance enableRotation])
+		if (enableRotation)
 		{
         	[w _setRotatableViewOrientation:[UIApplication sharedApplication].statusBarOrientation updateStatusBar:YES duration:0.0 force:YES];
 		}
 	}
 	else
 	{
+		SBApplication *app = nil;
+		//FBScene *scene = nil;
+
 		currentBundleIdentifier = [[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier;
 		if (!currentBundleIdentifier)
 			return;
 
-		if ([RASettings.sharedInstance showWidgetSelector])
+		if (showAppSelector)
 		{
-			[self RA_showWidgetSelector];
+			UIView *appSelectorView = [[UIView alloc] initWithFrame:w.frame];
+			appSelectorView.backgroundColor = [UIColor clearColor];
+			[appSelectorView setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
+
+			CGFloat y = 10;
+			CGSize contentSize = CGSizeZero;
+			CGRect frame = CGRectZero;
+			CGFloat oneRowHeight = -1;
+			CGFloat oneRowWidth = -1;
+			NSInteger width = 0;
+			BOOL isTop = YES;
+			BOOL hasSecondRow = NO;
+			CGFloat interval = 0, intervalCount = 1, numIconsPerLine = 0, padding = 0;
+
+			// Recents
+			if (showRecents)
+			{
+				NSMutableArray *recents = [[[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary] mutableCopy];
+		   		[recents removeObject:currentBundleIdentifier];
+				if (recents.count > 1) // item 1 = current app
+				{
+					UILabel *recentsLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, y, 300, 20)];
+					y += 30;
+					recentsLabel.textColor = [UIColor whiteColor];
+					recentsLabel.text = @"Recents";
+					recentsLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:20]; // was HelveticaNeue-UltraLight
+					[appSelectorView addSubview:recentsLabel];
+
+					UIScrollView *recentsView = [[UIScrollView alloc] initWithFrame:CGRectMake(10, y, appSelectorView.frame.size.width - 20, 20)];
+					recentsView.backgroundColor = [UIColor clearColor];
+					recentsView.pagingEnabled = pagingEnabled;
+					contentSize = CGSizeMake(10, 10);
+					for (NSString *str in recents)
+					{
+						app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:str];
+				        SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:app.bundleIdentifier];
+				        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
+				        if (!iconView)
+				        	continue;
+				        
+				        if (interval != 0 && contentSize.width + iconView.frame.size.width > interval * intervalCount)
+						{
+							if (isTop)
+							{
+								contentSize.height += oneRowHeight + 10;
+								contentSize.width -= interval;
+							}
+							else
+							{
+								intervalCount++;
+								contentSize.height -= (oneRowHeight + 10);
+								width += interval;
+							}
+							hasSecondRow = YES;
+							isTop = !isTop;
+						}
+
+				        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+				        switch (UIApplication.sharedApplication.statusBarOrientation)
+				        {
+				        	case UIInterfaceOrientationLandscapeRight:
+				        		iconView.frame = CGRectMake(contentSize.width + 15, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+				        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
+				        		break;
+				        	case UIInterfaceOrientationLandscapeLeft:
+				        		iconView.transform = CGAffineTransformMakeRotation(-M_PI_2);
+				        		break;
+				        	case UIInterfaceOrientationPortraitUpsideDown:
+				        		appSelectorView.transform = CGAffineTransformMakeRotation(M_PI);
+				        		break;
+				        	case UIInterfaceOrientationPortrait:
+				        	default:
+				        		break;
+				        }
+
+				        iconView.tag = [app pid];
+				        iconView.restorationIdentifier = app.bundleIdentifier;
+				        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
+				        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
+				        if (oneRowHeight == -1)
+				        {
+				        	oneRowHeight = iconView.frame.size.height + 10;
+				        	oneRowWidth = iconView.frame.size.width;
+				        	while (interval + oneRowWidth <= recentsView.frame.size.width)
+				        	{
+				        		numIconsPerLine++;
+					        	interval += oneRowWidth + 20;
+				        	}
+				        	padding = (recentsView.frame.size.width - (numIconsPerLine * oneRowWidth)) / numIconsPerLine;
+				        	interval = (oneRowWidth + padding) * numIconsPerLine;
+					        width = interval;
+				        }
+				        [recentsView addSubview:iconView];
+
+				        contentSize.width += iconView.frame.size.width + padding;
+					}
+					contentSize.width = width;
+					contentSize.height = 10 + ((oneRowHeight + 10) * (hasSecondRow ? 2 : 1));
+					y += contentSize.height + 10;
+					frame = recentsView.frame;
+					frame.size.height = contentSize.height;
+					recentsView.frame = frame;
+					[recentsView setContentSize:contentSize];
+					[appSelectorView addSubview:recentsView];
+				}
+			}
+
+			// Favorites
+			if (favorites.count > 0)
+			{
+				UILabel *favoritesLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, y, 300, 20)];
+				y += 30;
+				favoritesLabel.textColor = [UIColor whiteColor];
+				favoritesLabel.text = @"Favorites";
+				favoritesLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:20]; // was HelveticaNeue-UltraLight
+				[appSelectorView addSubview:favoritesLabel];
+
+				UIScrollView *favoritesView = [[UIScrollView alloc] initWithFrame:CGRectMake(10, y, appSelectorView.frame.size.width - 20, 20)];
+				favoritesView.backgroundColor = [UIColor clearColor];
+				favoritesView.pagingEnabled = pagingEnabled;
+				contentSize = CGSizeMake(10, 10);
+				for (NSString *str in favorites)
+				{
+					if ([currentBundleIdentifier isEqual:str] == NO && str && str.length > 0)
+					{
+						app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:str];
+				        SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:app.bundleIdentifier];
+				        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
+				        if (!iconView)
+				        	continue;
+
+				        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+				        switch (UIApplication.sharedApplication.statusBarOrientation)
+				        {
+				        	case UIInterfaceOrientationLandscapeRight:
+				        		iconView.frame = CGRectMake(contentSize.width + 15, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+				        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
+				        		break;
+				        	case UIInterfaceOrientationLandscapeLeft:
+				        		iconView.transform = CGAffineTransformMakeRotation(-M_PI_2);
+				        		break;
+				        	case UIInterfaceOrientationPortraitUpsideDown:
+				        		appSelectorView.transform = CGAffineTransformMakeRotation(M_PI);
+				        		break;
+				        	case UIInterfaceOrientationPortrait:
+				        	default:
+				        		break;
+				        }
+
+				        iconView.tag = [app pid];
+				        iconView.restorationIdentifier = app.bundleIdentifier;
+				        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
+				        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
+				        [favoritesView addSubview:iconView];
+				        if (oneRowHeight == -1)
+				        {
+				        	oneRowHeight = iconView.frame.size.height + 10;
+				        	oneRowWidth = iconView.frame.size.width;
+				        	while (interval + oneRowWidth <= favoritesView.frame.size.width)
+				        	{
+				        		numIconsPerLine++;
+					        	interval += oneRowWidth + 20;
+				        	}
+				        	padding = (favoritesView.frame.size.width - (numIconsPerLine * oneRowWidth)) / numIconsPerLine;
+				        	interval = (oneRowWidth + padding) * numIconsPerLine;
+					        width = interval;
+				        }
+				        contentSize.width += iconView.frame.size.width + padding;
+					}
+				}
+				contentSize.height = oneRowHeight + 10;
+				CGRect frame = favoritesView.frame;
+				frame.size.height = contentSize.height + 10;
+				favoritesView.frame = frame;
+				[favoritesView setContentSize:contentSize];
+				[appSelectorView addSubview:favoritesView];
+				y += contentSize.height;
+			}
+
+			// All Apps
+			if (showAllAppsInAppChooser)
+			{
+				UILabel *allAppsLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, y, appSelectorView.frame.size.width, 20)];
+				y += 30;
+				allAppsLabel.textColor = [UIColor whiteColor];
+				allAppsLabel.text = @"All Apps";
+				allAppsLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:20];
+				[appSelectorView addSubview:allAppsLabel];
+
+				UIScrollView *allAppsView = [[UIScrollView alloc] initWithFrame:CGRectMake(10, y, appSelectorView.frame.size.width - 20, 20)];
+				allAppsView.pagingEnabled = pagingEnabled;
+				allAppsView.backgroundColor = [UIColor clearColor];
+				NSMutableArray *allApps = [[[[%c(SBIconViewMap) homescreenMap] iconModel] visibleIconIdentifiers] mutableCopy];
+			    [allApps sortUsingComparator: ^(NSString* a, NSString* b) {
+			    	NSString *a_ = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:a].displayName;
+			    	NSString *b_ = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:b].displayName;
+			        return [a_ caseInsensitiveCompare:b_];
+		   		}];
+		   		[allApps removeObject:currentBundleIdentifier];
+				width = interval;
+				isTop = YES;
+				contentSize = CGSizeMake(10, 10);
+				intervalCount = 1;
+				hasSecondRow = NO;
+				for (NSString *str in allApps)
+				{
+					app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:str];
+			        SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:app.bundleIdentifier];
+			        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
+			        if (!iconView || ![icon isKindOfClass:[%c(SBApplicationIcon) class]])
+			        	continue;
+
+			        if (interval != 0 && contentSize.width + iconView.frame.size.width > interval * intervalCount)
+					{
+						if (isTop)
+						{
+							contentSize.height += oneRowHeight + 10;
+							contentSize.width -= interval;
+						}
+						else
+						{
+							intervalCount++;
+							contentSize.height -= (oneRowHeight + 10);
+							width += interval;
+						}
+						isTop = !isTop;
+						hasSecondRow = YES;
+					}
+
+			        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+			        switch (UIApplication.sharedApplication.statusBarOrientation)
+			        {
+			        	case UIInterfaceOrientationLandscapeRight:
+			        		iconView.frame = CGRectMake(contentSize.width + 15, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
+			        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
+			        		break;
+			        	case UIInterfaceOrientationLandscapeLeft:
+			        		iconView.transform = CGAffineTransformMakeRotation(-M_PI_2);
+			        		break;
+				        case UIInterfaceOrientationPortraitUpsideDown:
+				        		appSelectorView.transform = CGAffineTransformMakeRotation(M_PI);
+			        		break;
+			        	case UIInterfaceOrientationPortrait:
+			        	default:
+			        		break;
+			        }
+
+			        iconView.tag = [app pid];
+			        iconView.restorationIdentifier = app.bundleIdentifier;
+			        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
+			        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
+			        [allAppsView addSubview:iconView];
+			        if (oneRowHeight == -1)
+			        {
+			        	oneRowHeight = iconView.frame.size.height + 10;
+			        	oneRowWidth = iconView.frame.size.width;
+			        	while (interval + oneRowWidth <= allAppsView.frame.size.width)
+			        	{
+			        		numIconsPerLine++;
+				        	interval += oneRowWidth + 20;
+			        	}
+			        	padding = (allAppsView.frame.size.width - (numIconsPerLine * oneRowWidth)) / numIconsPerLine;
+			        	interval = (oneRowWidth + padding) * numIconsPerLine;
+				        width = interval;
+			        }
+			        contentSize.width += iconView.frame.size.width + padding;
+				}
+				contentSize.width = width; //(oneRowHeight + 20) * (recents.count / 2) + 10;
+				contentSize.height = 10 + ((oneRowHeight + 10) * (hasSecondRow ? 2 : 1));
+				y += contentSize.height + 10;
+				frame = allAppsView.frame;
+				frame.size.height = contentSize.height;
+				allAppsView.frame = frame;
+				[allAppsView setContentSize:contentSize];
+				[appSelectorView addSubview:allAppsView];
+			}
+			
+			[w addSubview:appSelectorView];
+			//NSLog(@"[ReachApp] app chooser just created: %@ %@", @(y), appSelectorView.superview);
+			//appSelectorView.clipsToBounds = YES;
+			view = appSelectorView;
+
+			if (autoSizeAppChooser)
+			{
+				CGFloat moddedHeight = y;
+				//if (moddedHeight > oneRowHeight * 3)
+				//	moddedHeight = (oneRowHeight * 3) + 10;
+				if (old_grabberCenterY == -1)
+					old_grabberCenterY = UIScreen.mainScreen.bounds.size.height * 0.3;
+				old_grabberCenterY = grabberCenter_Y;
+				grabberCenter_Y = moddedHeight;
+			}
 		}
 		else
 		{
@@ -309,7 +637,7 @@ id SBWorkspace$sharedInstance;
 
 	[w addSubview:draggerView];
 
-	if ([RASettings.sharedInstance showBottomGrabber])
+	if (showBottomGrabber)
 	{
 		bottomDraggerView = [[UIView alloc] initWithFrame:CGRectMake(
 			(UIScreen.mainScreen.bounds.size.width / 2) - (knobWidth / 2), 
@@ -324,40 +652,6 @@ id SBWorkspace$sharedInstance;
 
 	// Update sizes of reachability (and their contained apps) and the location of the dragger view
 	[self updateViewSizes:draggerView.center animate:NO];
-}
-
-%new -(void)RA_showWidgetSelector
-{
-	if (view)
-		[self RA_closeCurrentView];
-	UIWindow *w = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
-	//CGSize iconSize = [%c(SBIconView) defaultIconImageSize];
-	CGSize fullSize = [%c(SBIconView) defaultIconSize];
-	CGFloat padding = 20;
-
-	NSInteger numIconsPerLine = 0;
-	CGFloat tmpWidth = 10;
-	while (tmpWidth + fullSize.width <= w.frame.size.width)
-	{
-		numIconsPerLine++;
-		tmpWidth += fullSize.width + 20;
-	}
-	padding = (w.frame.size.width - (numIconsPerLine * fullSize.width)) / numIconsPerLine;
-
-	UIView *widgetSelectorView = [[RAWidgetSectionManager sharedInstance] createViewForEnabledSectionsWithBaseFrame:w.frame preferredIconSize:fullSize iconsThatFitPerLine:numIconsPerLine spacing:padding];
-	//widgetSelectorView.frame = w.frame;
-	
-	[w addSubview:widgetSelectorView];
-	view = widgetSelectorView;
-
-	if ([RASettings.sharedInstance autoSizeWidgetSelector])
-	{
-		CGFloat moddedHeight = widgetSelectorView.frame.size.height;
-		if (old_grabberCenterY == -1)
-			old_grabberCenterY = UIScreen.mainScreen.bounds.size.height * 0.3;
-		old_grabberCenterY = grabberCenter_Y;
-		grabberCenter_Y = moddedHeight;
-	}
 }
 
 %new -(void)handlePan:(UIPanGestureRecognizer*)sender
@@ -433,12 +727,12 @@ id SBWorkspace$sharedInstance;
 			view.frame = topFrame;
 	}
 
-	if ([RASettings.sharedInstance showNCInstead])
+	if (showNCInstead)
 	{
 		if (ncViewController)
 			ncViewController.view.frame = (CGRect) { { 0, 0 }, topFrame.size };
 	}
-	else if (lastBundleIdentifier != nil)
+	else
 	{
 		// Notify clients
 		NSMutableDictionary *dict = [NSMutableDictionary dictionary];
@@ -460,12 +754,12 @@ id SBWorkspace$sharedInstance;
 		if (lastBundleIdentifier)
 			dict[@"bundleIdentifier"] = lastBundleIdentifier;
 		dict[@"isTopApp"] = @YES;
-		dict[@"rotationMode"] = @([RASettings.sharedInstance scalingRotationMode]);
+		dict[@"rotationMode"] = @(scalingRotationMode);
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, (__bridge CFDictionaryRef)dict, true);
 	}
 
 	if ([view isKindOfClass:[%c(FBWindowContextHostWrapperView) class]] == NO)
-		return; // only resize when the app is being shown. That way it's more like native Reachability
+		return; // only resize when the app is being shown. Otherwise it's more like native Reachability
 
 	NSMutableDictionary *dict = [NSMutableDictionary dictionary];
 	if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
@@ -485,7 +779,7 @@ id SBWorkspace$sharedInstance;
 	}
 	dict[@"bundleIdentifier"] = currentBundleIdentifier;
 	dict[@"isTopApp"] = @NO;
-	dict[@"rotationMode"] = @([RASettings.sharedInstance scalingRotationMode]);
+	dict[@"rotationMode"] = @(scalingRotationMode);
 	CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, (__bridge CFDictionaryRef)dict, true);
 }
 
@@ -526,7 +820,7 @@ id SBWorkspace$sharedInstance;
 	else
 		[w addSubview:view];
 
-	if ([RASettings.sharedInstance enableRotation] && ![RASettings.sharedInstance scalingRotationMode])
+	if (enableRotation && !scalingRotationMode)
 	{
 		NSString *event = @"";
 		// force the last app to orient to the current apps orientation
@@ -546,7 +840,7 @@ id SBWorkspace$sharedInstance;
 
 
 	}
-	else if ([RASettings.sharedInstance scalingRotationMode] && [UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
+	else if (scalingRotationMode && [UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
 	{
 		overrideDisableForStatusBar = YES;
 
@@ -581,29 +875,6 @@ id SBWorkspace$sharedInstance;
 	}
 }
 
-%new -(void) RA_setView:(UIView*)view_
-{
-	UIWindow *w = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
-	if (view)
-		[view removeFromSuperview];
-	view = view_;
-	if (draggerView && draggerView.superview == w)
-		[w insertSubview:view belowSubview:draggerView];
-	else
-		[w addSubview:view];
-	[self updateViewSizes:draggerView.center animate:NO];
-}
-
-%new -(void) RA_animateWidgetSelectorOut:(id)completion
-{
-	[UIView animateWithDuration:0.3
-        animations:^{
-			view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 0.01, 0.01);
-			view.alpha = 0;
-        }
-        completion:completion];
-}
-
 %new -(void) appViewItemTap:(UITapGestureRecognizer*)sender
 {
 	int pid = [sender.view tag];
@@ -616,22 +887,27 @@ id SBWorkspace$sharedInstance;
 	if (app)
 	{
 		// before we re-assign view...
-		[self RA_animateWidgetSelectorOut:^(BOOL a){
-			[view removeFromSuperview];
-			view = nil;
+		[UIView animateWithDuration:0.3
+	             animations:^{
+					view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 0.01, 0.01);
+					view.alpha = 0;
+	             }
+	             completion:^(BOOL a){
+					[view removeFromSuperview];
+					view = nil;
 
-			lastBundleIdentifier = app.bundleIdentifier;
-			[self RA_launchTopAppWithIdentifier:app.bundleIdentifier];
+					lastBundleIdentifier = app.bundleIdentifier;
+					[self RA_launchTopAppWithIdentifier:app.bundleIdentifier];
 
-			if ([RASettings.sharedInstance autoSizeWidgetSelector])
-			{
-				if (old_grabberCenterY == -1)
-					old_grabberCenterY = UIScreen.mainScreen.bounds.size.height * 0.3;
-				grabberCenter_Y = old_grabberCenterY;
-				draggerView.center = CGPointMake(grabberCenter_X, grabberCenter_Y);
-			}
-			[self updateViewSizes:draggerView.center animate:YES];
-         }];
+					if (autoSizeAppChooser)
+					{
+						if (old_grabberCenterY == -1)
+							old_grabberCenterY = UIScreen.mainScreen.bounds.size.height * 0.3;
+						grabberCenter_Y = old_grabberCenterY;
+						draggerView.center = CGPointMake(grabberCenter_X, grabberCenter_Y);
+					}
+					[self updateViewSizes:draggerView.center animate:YES];
+	             }];
 	}
 }
 %end
@@ -646,7 +922,7 @@ id SBWorkspace$sharedInstance;
 %hook SBUIController
 - (_Bool)clickedMenuButton
 {
-	if ([RASettings.sharedInstance homeButtonClosesReachability] && (view || showingNC) && ((SBReachabilityManager*)[%c(SBReachabilityManager) sharedInstance]).reachabilityModeActive)
+	if (homeButtonClosesReachability && (view || showingNC) && ((SBReachabilityManager*)[%c(SBReachabilityManager) sharedInstance]).reachabilityModeActive)
 	{
 		[[%c(SBReachabilityManager) sharedInstance] _handleReachabilityDeactivated];
 		return YES;
@@ -840,8 +1116,6 @@ void forceRotation_upsidedown(CFNotificationCenterRef center, void *observer, CF
     [[UIApplication sharedApplication] RA_forceRotationToInterfaceOrientation:newOrientation isReverting:NO];
 }
 
-BOOL inapp_ScalingRotationMode = NO;
-
 void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) 
 {
 	NSDictionary *info = (__bridge NSDictionary*)userInfo;
@@ -855,8 +1129,8 @@ void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef n
 			[UIApplication.sharedApplication _setStatusBarHidden:NO /* it doesn't matter, hooks will take care of it 8) */ animationParameters:nil changeApplicationFlag:YES];
 		}
 
-		inapp_ScalingRotationMode = [[info objectForKey:@"rotationMode"] boolValue];
-		if (!inapp_ScalingRotationMode)
+		scalingRotationMode = [[info objectForKey:@"rotationMode"] boolValue];
+		if (!scalingRotationMode)
 		{
 			overrideHeight = [[info objectForKey:@"sizeHeight"] floatValue];
 			overrideWidth = [[info objectForKey:@"sizeWidth"] floatValue];
@@ -864,7 +1138,7 @@ void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef n
 		overrideDisplay = YES;
 
 
-		if (!inapp_ScalingRotationMode)
+		if (!scalingRotationMode)
 		{
 			for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
 				if ([oldFrames objectForKey:@(window.hash)] == nil)
@@ -886,7 +1160,7 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
 	{
 		overrideDisplay = NO;
 
-	    if (!inapp_ScalingRotationMode)
+	    if (!scalingRotationMode)
 	    {
 			for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
 				CGRect frame = window.frame;
@@ -919,7 +1193,47 @@ void reloadSettings(CFNotificationCenterRef center,
                     const void *object,
                     CFDictionaryRef userInfo)
 {
-	[RASettings.sharedInstance reloadSettings];
+	NSDictionary *prefs = nil;
+
+	CFStringRef appID = CFSTR("com.efrederickson.reachapp.settings");
+	CFArrayRef keyList = CFPreferencesCopyKeyList(appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+	if (!keyList) {
+		return;
+	}
+	prefs = (NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+	if (!prefs) {
+		return;
+	}
+	CFRelease(keyList);
+
+    enabled = [prefs objectForKey:@"enabled"] != nil ? [prefs[@"enabled"] boolValue] : YES;
+	disableAutoDismiss = [prefs objectForKey:@"disableAutoDismiss"] != nil ? [prefs[@"disableAutoDismiss"] boolValue] : YES;
+	enableRotation = [prefs objectForKey:@"enableRotation"] != nil ? [prefs[@"enableRotation"] boolValue] : YES;
+	showNCInstead = [prefs objectForKey:@"showNCInstead"] != nil ? [prefs[@"showNCInstead"] boolValue] : NO;
+	homeButtonClosesReachability = [prefs objectForKey:@"homeButtonClosesReachability"] != nil ? [prefs[@"homeButtonClosesReachability"] boolValue] : YES;
+	showBottomGrabber = [prefs objectForKey:@"showBottomGrabber"] != nil ? [prefs[@"showBottomGrabber"] boolValue] : NO;
+	showAppSelector = [prefs objectForKey:@"showAppSelector"] != nil ? [prefs[@"showAppSelector"] boolValue] : YES;
+	scalingRotationMode = [prefs objectForKey:@"rotationMode"] != nil ? [prefs[@"rotationMode"] boolValue] : NO;
+	autoSizeAppChooser = [prefs objectForKey:@"autoSizeAppChooser"] != nil ? [prefs[@"autoSizeAppChooser"] boolValue] : YES;
+	showAllAppsInAppChooser = [prefs objectForKey:@"showAllAppsInAppChooser"] != nil ? [prefs[@"showAllAppsInAppChooser"] boolValue] : YES;
+	showRecents = [prefs objectForKey:@"showRecents"] != nil ? [prefs[@"showRecents"] boolValue] : YES;
+	pagingEnabled = [prefs objectForKey:@"pagingEnabled"] != nil ? [prefs[@"pagingEnabled"] boolValue] : YES;
+
+	if (favorites)
+	{
+		[favorites release];
+		favorites = nil;
+	}
+	favorites = [[[NSMutableArray alloc] init] retain];
+	for (NSString *key in prefs.allKeys)
+	{
+		if ([key hasPrefix:@"Favorites-"])
+		{
+			NSString *ident = [key substringFromIndex:10];
+			if ([prefs[key] boolValue])
+				[favorites addObject:ident];
+		}
+	}
 }
 
 %ctor
