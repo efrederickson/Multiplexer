@@ -5,7 +5,7 @@ THEOS_PACKAGE_DIR_NAME = debs
 include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = ReachApp
-ReachApp_FILES = Tweak.xm RASettings.mm \
+ReachApp_FILES = Tweak.xm RASettings.mm RATouchGestureRecognizer.m \
 	RAWidgetSection.mm RAWidgetSectionManager.mm RAWidget.mm RAReachabilityManager.mm \
 	widgets/RADefaultWidgetSection.mm widgets/RAAllAppsWidget.xm widgets/RARecentAppsWidget.xm widgets/RAFavoriteAppsWidget.xm
 ReachApp_FRAMEWORKS = UIKit QuartzCore CoreGraphics

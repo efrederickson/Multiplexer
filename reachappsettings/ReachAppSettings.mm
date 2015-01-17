@@ -143,7 +143,7 @@
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"autoSizeAppChooser",
-                 @"label": @"Auto-size App Chooser",
+                 @"label": @"Auto-size Widget Chooser",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
              

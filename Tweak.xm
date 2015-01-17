@@ -11,6 +11,7 @@
 #import "headers.h"
 #import "RAWidgetSectionManager.h"
 #import "RASettings.h"
+#import "RATouchGestureRecognizer.h"
 
 /*
 This code thanks: 
@@ -150,9 +151,6 @@ id SBWorkspace$sharedInstance;
 	if (currentBundleIdentifier)
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentBundleIdentifier}, NO);
 
-	if (draggerView)
-		draggerView = nil;
-
 	if ([RASettings.sharedInstance showNCInstead])
 	{
 		showingNC = NO;
@@ -167,6 +165,11 @@ id SBWorkspace$sharedInstance;
 	else
 	{
 		// Give them a little time to receive the notifications...
+		if (view)
+		{
+			if ([view superview] != nil)
+				[view removeFromSuperview];
+		}
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
 			if (lastBundleIdentifier && lastBundleIdentifier.length > 0)
 			{
@@ -179,12 +182,6 @@ id SBWorkspace$sharedInstance;
 					[scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];
 					MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").frame = pre_topAppFrame;
 					MSHookIvar<FBWindowContextHostView*>([app mainScene].contextHostManager, "_hostView").transform = pre_topAppTransform;
-
-					if (view)
-					{
-						if ([view superview] != nil)
-							[view removeFromSuperview];
-					}
 
 					SBApplication *currentApp = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:currentBundleIdentifier];
 					if ([currentApp mainScene])
@@ -218,6 +215,9 @@ id SBWorkspace$sharedInstance;
 	{
 		wasEnabled = NO;
 		[self RA_closeCurrentView];
+		if (draggerView)
+			draggerView = nil;
+
 	}
 
 	%orig;
@@ -299,7 +299,7 @@ id SBWorkspace$sharedInstance;
 	grabberCenter_X = draggerView.center.x;
 
 	draggerView.backgroundColor = UIColor.lightGrayColor;
-	UIPanGestureRecognizer *recognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+	RATouchGestureRecognizer *recognizer = [[RATouchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
 	if (grabberCenter_Y == -1)
 		grabberCenter_Y = w.frame.size.height - (knobHeight / 2);
 	if (grabberCenter_Y < 0)
@@ -347,7 +347,10 @@ id SBWorkspace$sharedInstance;
 	UIView *widgetSelectorView = [[RAWidgetSectionManager sharedInstance] createViewForEnabledSectionsWithBaseFrame:w.frame preferredIconSize:fullSize iconsThatFitPerLine:numIconsPerLine spacing:padding];
 	//widgetSelectorView.frame = w.frame;
 	
-	[w addSubview:widgetSelectorView];
+	if (draggerView)
+		[w insertSubview:widgetSelectorView belowSubview:draggerView];
+	else
+		[w addSubview:widgetSelectorView];
 	view = widgetSelectorView;
 
 	if ([RASettings.sharedInstance autoSizeWidgetSelector])
@@ -358,14 +361,19 @@ id SBWorkspace$sharedInstance;
 		old_grabberCenterY = grabberCenter_Y;
 		grabberCenter_Y = moddedHeight;
 	}
+	CGPoint newCenter = CGPointMake(draggerView.center.x, grabberCenter_Y);
+	draggerView.center = newCenter;
+	[self updateViewSizes:newCenter animate:YES];
 }
 
+CGFloat startingY = -1;
 %new -(void)handlePan:(UIPanGestureRecognizer*)sender
 {
 	UIView *view = draggerView; //sender.view;
 
 	if (sender.state == UIGestureRecognizerStateBegan)
 	{
+		startingY = grabberCenter_Y;
 		grabberCenter_X = view.center.x;
 		firstLocation = view.center;
 		grabberCenter_Y = [sender locationInView:view.superview].y;
@@ -398,6 +406,9 @@ id SBWorkspace$sharedInstance;
 	{
 		draggerView.alpha = 0.3;
 		bottomDraggerView.alpha = 0.3;
+		if (startingY != -1 && abs(grabberCenter_Y - startingY) < 3)
+			[self RA_showWidgetSelector];
+		startingY = -1;
 		//[self updateViewSizes:view.center animate:YES];
 	}
 }
