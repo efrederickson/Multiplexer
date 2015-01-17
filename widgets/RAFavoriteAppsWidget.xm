@@ -5,7 +5,7 @@
 #import "RASettings.h"
 
 @implementation RAFavoriteAppsWidget
--(BOOL) enabled { return [RASettings.sharedInstance showRecentAppsInWidgetSelector]; }
+-(BOOL) enabled { return YES; }
 
 -(NSInteger) sortOrder { return 2; }
 -(NSString*) displayName { return @"Favorites"; }
