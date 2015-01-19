@@ -13,6 +13,7 @@
 }
 
 -(BOOL) enabled { return YES; }
+-(BOOL) showTitle { return YES; }
 
 -(NSInteger) sortOrder { return 10; }
 

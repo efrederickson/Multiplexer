@@ -113,4 +113,9 @@ NSDictionary *_settings = nil;
 	}
 	return favorites;
 }
+
+-(BOOL) unifyStatusBar
+{
+	return BOOL(@"unifyStatusBar", YES);
+}
 @end

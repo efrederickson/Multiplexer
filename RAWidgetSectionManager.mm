@@ -68,13 +68,16 @@
 		UIView *sectionView = [section viewForFrame:CGRectMake(0, currentY, view.frame.size.width, iconSize.height + VERTICAL_PADDING) preferredIconSize:iconSize iconsThatFitPerLine:iconsPerLine spacing:spacing];
 		if (sectionView)
 		{
-			UILabel *titleView = [[UILabel alloc] initWithFrame:CGRectMake(10, currentY, 300, 20)];
-			titleView.text = section.displayName;
-			titleView.textColor = [UIColor whiteColor];
-			titleView.font = [UIFont fontWithName:@"HelveticaNeue" size:20];
-			[view addSubview:titleView];
-			currentY += titleView.frame.size.height;
-
+			if (section.showTitle)
+			{
+				UILabel *titleView = [[UILabel alloc] initWithFrame:CGRectMake(10, currentY, 300, 20)];
+				titleView.text = section.displayName;
+				titleView.textColor = [UIColor whiteColor];
+				titleView.font = [UIFont fontWithName:@"HelveticaNeue" size:20];
+				[view addSubview:titleView];
+				currentY += titleView.frame.size.height;
+			}
+			
 			//sectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 			sectionView.backgroundColor = [UIColor clearColor];
 			sectionView.clipsToBounds = YES;

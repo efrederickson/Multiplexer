@@ -18,5 +18,6 @@
 -(BOOL) showRecentAppsInWidgetSelector;
 -(BOOL) pagingEnabled;
 -(NSMutableArray*) favoriteApps;
+-(BOOL) unifyStatusBar;
 
 @end

@@ -14,11 +14,19 @@
 
 -(UIView*) viewForFrame:(CGRect)frame preferredIconSize:(CGSize)size_ iconsThatFitPerLine:(NSInteger)iconsPerLine spacing:(CGFloat)spacing
 {
+
+	/*static UIScrollView *allAppsView = nil; 
+	if (allAppsView == nil)
+		allAppsView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 200)];
+	else
+		return allAppsView;*/
+	UIScrollView *allAppsView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 200)];
+
 	CGSize size = [%c(SBIconView) defaultIconSize];
 	spacing = (frame.size.width - (iconsPerLine * size.width)) / iconsPerLine;
-	NSString *currentBundleIdentifier = [[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier;
-	if (!currentBundleIdentifier)
-		return nil;
+	//NSString *currentBundleIdentifier = [[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier;
+	//if (!currentBundleIdentifier)
+	//	return nil;
 	CGSize contentSize = CGSizeMake(10, 10);
 	CGFloat interval = (size.width + spacing) * iconsPerLine;
 	NSInteger intervalCount = 1;
@@ -27,11 +35,6 @@
 	SBApplication *app = nil;
 	CGFloat width = interval;
 
-	static UIScrollView *allAppsView = nil; 
-	if (allAppsView == nil)
-		allAppsView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 200)];
-	else
-		return allAppsView;
 	allAppsView.backgroundColor = [UIColor clearColor];
 	allAppsView.pagingEnabled = [RASettings.sharedInstance pagingEnabled];
 
@@ -41,7 +44,7 @@
     	NSString *b_ = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:b].displayName;
         return [a_ caseInsensitiveCompare:b_];
 	}];
-	[allApps removeObject:currentBundleIdentifier];
+	//[allApps removeObject:currentBundleIdentifier];
 
 	width = interval;
 	isTop = YES;
@@ -77,7 +80,6 @@
         switch (UIApplication.sharedApplication.statusBarOrientation)
         {
         	case UIInterfaceOrientationLandscapeRight:
-        		iconView.frame = CGRectMake(contentSize.width + 15, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
         		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
         		break;
         	case UIInterfaceOrientationLandscapeLeft:

@@ -8,6 +8,7 @@
 -(BOOL) enabled;
 
 -(NSInteger) sortOrder;
+-(BOOL) showTitle;
 -(NSString*) displayName;
 -(NSString*) identifier;
 

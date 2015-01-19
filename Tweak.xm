@@ -618,8 +618,6 @@ CGFloat startingY = -1;
 %new -(void) appViewItemTap:(UITapGestureRecognizer*)sender
 {
 	int pid = [sender.view tag];
-	if (!pid)
-		return;
 	SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithPid:pid];
 	if (!app)
 		app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:sender.view.restorationIdentifier];
@@ -750,19 +748,7 @@ NSCache *oldFrames = [NSCache new];
 
 		}
 		forcedOrientation = orientation;
-		
-		//if (wasStatusBarHidden == -1)
-		//{
-		//	wasStatusBarHidden = UIApplication.sharedApplication.statusBarHidden;
-		//	[UIApplication.sharedApplication setStatusBarHidden:NO /* it doesn't matter, hooks will take care of it 8) */];
-		//}
 	}
-	else
-	{
-		//[UIApplication.sharedApplication setStatusBarHidden:wasStatusBarHidden];
-	}
-
-		//[[UIApplication sharedApplication] setStatusBarOrientation:orientation];
 
     for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
     	[window _setRotatableViewOrientation:orientation updateStatusBar:YES duration:0.0 force:YES];
@@ -860,10 +846,10 @@ void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef n
 	{
 		isTopApp = [[info objectForKey:@"isTopApp"] boolValue];
 
-		if (wasStatusBarHidden == -1 && forcedOrientation == UIInterfaceOrientationPortrait)
+		if (wasStatusBarHidden == -1 && [RASettings.sharedInstance unifyStatusBar])
 		{
 			wasStatusBarHidden = UIApplication.sharedApplication.statusBarHidden;
-			[UIApplication.sharedApplication _setStatusBarHidden:NO /* it doesn't matter, hooks will take care of it 8) */ animationParameters:nil changeApplicationFlag:YES];
+			[UIApplication.sharedApplication _setStatusBarHidden:!isTopApp animationParameters:nil changeApplicationFlag:YES];
 		}
 
 		inapp_ScalingRotationMode = [[info objectForKey:@"rotationMode"] boolValue];
@@ -891,6 +877,7 @@ void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef n
 		}
 	}
 }
+
 void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) 
 {
 	if ([NSBundle.mainBundle.bundleIdentifier isEqual:[(__bridge NSDictionary*)userInfo objectForKey:@"bundleIdentifier"]])
@@ -915,12 +902,12 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
 		    }
 		}
 
-		//[UIWindow setAllWindowsKeepContextInBackground:NO];
 		if (setPreviousOrientation)
 		    [[UIApplication sharedApplication] RA_forceRotationToInterfaceOrientation:prevousOrientation isReverting:YES];
 	    setPreviousOrientation = NO;
-	    if (wasStatusBarHidden != -1)
+	    if (wasStatusBarHidden != -1 && [RASettings.sharedInstance unifyStatusBar])
 		    [UIApplication.sharedApplication _setStatusBarHidden:wasStatusBarHidden animationParameters:nil changeApplicationFlag:YES];
+		   wasStatusBarHidden = -1;
 	}
 }
 

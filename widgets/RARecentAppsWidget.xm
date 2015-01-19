@@ -63,7 +63,6 @@
         switch (UIApplication.sharedApplication.statusBarOrientation)
         {
         	case UIInterfaceOrientationLandscapeRight:
-        		iconView.frame = CGRectMake(contentSize.width + 15, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
         		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
         		break;
         	case UIInterfaceOrientationLandscapeLeft:
