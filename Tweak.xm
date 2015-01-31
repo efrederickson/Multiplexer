@@ -24,7 +24,6 @@ Various tips and help: @sharedRoutine
 Many concepts and ideas have been used from them.
 */
 
-
 extern "C" CFNotificationCenterRef CFNotificationCenterGetDistributedCenter(void);
 extern const char *__progname; 
 
@@ -54,6 +53,58 @@ CGRect pre_topAppFrame = CGRectZero;
 CGAffineTransform pre_topAppTransform = CGAffineTransformIdentity;
 UIView *bottomDraggerView = nil;
 CGFloat old_grabberCenterY = -1;
+BOOL topAppWantsKeyboardEvents = NO;
+UITextField *currentTextField = nil;
+
+inline void sendKeyEventToTopApp(UIPhysicalKeyboardEvent *event)
+{
+	CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.simulatekeypress"), NULL, (__bridge CFDictionaryRef) @{
+		@"key": event._modifiedInput,
+	}, true);
+}
+inline void sendKeyEventStringToTopApp(NSString *key)
+{
+	CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.simulatekeypress"), NULL, (__bridge CFDictionaryRef) @{
+		@"key": key,
+	}, true);
+}
+inline void sendKeyEventBackspaceToApp()
+{
+	CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.simulatekeypress"), NULL, (__bridge CFDictionaryRef) @{
+		@"key": @"",
+		@"isBackspace": @YES,
+	}, true);
+}
+
+void handleKeyEvent(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
+{
+	if (isTopApp)
+	{
+		NSDictionary *dict = (__bridge NSDictionary*)userInfo;
+		if ([dict objectForKey:@"isBackspace"] != nil)
+		{
+			BOOL isBackspace = [dict[@"isBackspace"] boolValue]; // probably true...
+			if (isBackspace)
+			{
+				[currentTextField deleteBackward];
+				return;
+			}
+		}
+
+		if ([dict objectForKey:@"key"] != nil)
+		{
+			NSString *key = [dict objectForKey:@"key"];
+
+			UIPhysicalKeyboardEvent *k = [%c(UIPhysicalKeyboardEvent) _eventWithInput:nil inputFlags:0];
+			k._privateInput = key;
+			k._modifiedInput = key;
+			k._unmodifiedInput = key;
+
+			// Interesting - UIKeyboardImpl is not a "private" class and doesn't need objc_getClass
+			[([UIKeyboardImpl activeInstance] ?: [UIKeyboardImpl sharedInstance]) handleKeyEvent:k];
+		}
+	}
+}
 
 %group springboardHooks
 %hook SBReachabilityManager
@@ -806,6 +857,68 @@ NSCache *oldFrames = [NSCache new];
 	overrideViewControllerDismissal = NO;
 }
 %end
+
+%hook UITextField
+- (void)_becomeFirstResponder
+{
+	if (isTopApp && overrideDisplay)
+	{
+		currentTextField = self;
+		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.topAppWantsKeyboardEvents"), NULL, NULL, true);
+	}
+	%orig;
+}
+
+- (void)_resignFirstResponder
+{
+	if (isTopApp && overrideDisplay)
+	{
+		currentTextField = nil;
+		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachpp.topAppDoesntWantKeyboardEvents"), NULL, NULL, true);
+	}
+	%orig;
+}
+%end
+
+%hook UIKeyboard
+- (void)maximize
+{
+	%orig;
+
+	if (isTopApp && overrideDisplay)
+	{
+		[self performSelector:@selector(minimize)];
+	}
+}
+- (void)activate
+{
+	%orig;
+}
+%end
+
+%hook UITextInputController
+- (void)_insertText:(id)arg1 fromKeyboard:(BOOL)arg2
+{
+	if (!isTopApp && overrideDisplay && topAppWantsKeyboardEvents)
+	{
+		sendKeyEventStringToTopApp(arg1);
+	}
+	else
+		%orig;
+}
+
+- (void)deleteBackward
+{
+	if (!isTopApp && overrideDisplay && topAppWantsKeyboardEvents)
+	{
+		NSLog(@"[ReachApp] backspace");
+		sendKeyEventBackspaceToApp();
+	}
+	else
+		%orig;
+}
+%end
+
 %end // group uikitHooks
 
 void forceRotation_right(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) 
@@ -884,6 +997,8 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
 	{
 		overrideDisplay = NO;
 
+		CGRect defaultGuess = CGRectZero;
+
 	    if (!inapp_ScalingRotationMode)
 	    {
 			for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
@@ -894,6 +1009,8 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
 					[oldFrames removeObjectForKey:@(window.hash)];
 					//frame.origin.x = 0;
 					//frame.origin.y = 0;
+
+					defaultGuess = defaultGuess.size.width == 0 ? frame : defaultGuess;
 				}
 				//NSLog(@"ReachApp: restoring frame %@ for rotation %@", NSStringFromCGRect(frame), @(UIApplication.sharedApplication.statusBarOrientation));
 		        [UIView animateWithDuration:0.4 animations:^{
@@ -918,6 +1035,23 @@ void reloadSettings(CFNotificationCenterRef center,
                     CFDictionaryRef userInfo)
 {
 	[RASettings.sharedInstance reloadSettings];
+}
+
+void setTopAppWantsKeyboardEvents(CFNotificationCenterRef center,
+                    void *observer,
+                    CFStringRef name,
+                    const void *object,
+                    CFDictionaryRef userInfo)
+{
+	NSString *name2 = (__bridge NSString*)name;
+	if ([name2 isEqual:@"com.efrederickson.reachapp.topAppWantsKeyboardEvents"])
+	{
+		topAppWantsKeyboardEvents = YES;
+	}
+	else
+	{
+		topAppWantsKeyboardEvents = NO;
+	}
 }
 
 %ctor
@@ -946,8 +1080,14 @@ void reloadSettings(CFNotificationCenterRef center,
 	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_left, CFSTR("com.efrederickson.reachapp.forcerotation-left"), NULL, CFNotificationSuspensionBehaviorDrop);
 	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_portrait, CFSTR("com.efrederickson.reachapp.forcerotation-portrait"), NULL, CFNotificationSuspensionBehaviorDrop);
 	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_upsidedown, CFSTR("com.efrederickson.reachapp.forcerotation-upsidedown"), NULL, CFNotificationSuspensionBehaviorDrop);
+	        
 	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceResizing, CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, CFNotificationSuspensionBehaviorCoalesce);
 	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, endForceResizing, CFSTR("com.efrederickson.reachapp.endresizing"), NULL, CFNotificationSuspensionBehaviorDrop);
+	       
+	        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, handleKeyEvent, CFSTR("com.efrederickson.reachapp.simulatekeypress"), NULL, CFNotificationSuspensionBehaviorCoalesce);
+	    	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &setTopAppWantsKeyboardEvents, CFSTR("com.efrederickson.reachapp.topAppWantsKeyboardEvents"), NULL, 0);
+			CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &setTopAppWantsKeyboardEvents, CFSTR("com.efrederickson.reachapp.topAppDoesntWantKeyboardEvents"), NULL, 0);
+			
 	    }
     	%init(uikitHooks);
     }

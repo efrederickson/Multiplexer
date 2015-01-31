@@ -9,6 +9,7 @@ ReachApp_FILES = Tweak.xm RASettings.mm RATouchGestureRecognizer.m \
 	RAWidgetSection.mm RAWidgetSectionManager.mm RAWidget.mm RAReachabilityManager.mm \
 	widgets/RADefaultWidgetSection.mm widgets/RAAllAppsWidget.xm widgets/RARecentAppsWidget.xm widgets/RAFavoriteAppsWidget.xm
 ReachApp_FRAMEWORKS = UIKit QuartzCore CoreGraphics
+ReachApp_PRIVATE_FRAMEWORKS = GraphicsServices
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 

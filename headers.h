@@ -10,6 +10,57 @@
 #import <SpringBoard/SBApplication.h>
 #import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
+#import <substrate.h>
+#import <SpringBoard/SBApplication.h>
+#include <mach/mach.h>
+#include <libkern/OSCacheControl.h>
+#include <stdbool.h>
+#include <dlfcn.h>
+#include <sys/sysctl.h>
+#import <notify.h>
+#import <IOKit/hid/IOHIDEvent.h>
+
+@interface UIInternalEvent : UIEvent {
+    __GSEvent *_gsEvent;
+    __IOHIDEvent *_hidEvent;
+}
+
+- (__GSEvent*)_gsEvent;
+- (__IOHIDEvent*)_hidEvent;
+- (id)_screen;
+- (void)_setGSEvent:(__GSEvent*)arg1;
+- (void)_setHIDEvent:(__IOHIDEvent*)arg1;
+@end
+
+@interface UIKeyboardImpl
++ (id)activeInstance;
++ (id)sharedInstance;
+- (void)handleKeyEvent:(id)arg1;
+- (void)handleKeyWithString:(id)arg1 forKeyEvent:(id)arg2 executionContext:(id)arg3;
+- (void)deleteBackward;
+@end
+
+@interface UIPhysicalKeyboardEvent
++ (id)_eventWithInput:(id)arg1 inputFlags:(int)arg2;
+@property(retain, nonatomic) NSString *_privateInput; // @synthesize _privateInput;
+@property(nonatomic) int _inputFlags; // @synthesize _inputFlags;
+@property(nonatomic) int _modifierFlags; // @synthesize _modifierFlags;
+@property(retain, nonatomic) NSString *_markedInput; // @synthesize _markedInput;
+@property(retain, nonatomic) NSString *_commandModifiedInput; // @synthesize _commandModifiedInput;
+@property(retain, nonatomic) NSString *_shiftModifiedInput; // @synthesize _shiftModifiedInput;
+@property(retain, nonatomic) NSString *_unmodifiedInput; // @synthesize _unmodifiedInput;
+@property(retain, nonatomic) NSString *_modifiedInput; // @synthesize _modifiedInput;
+@property(readonly, nonatomic) int _gsModifierFlags;
+- (void)_privatizeInput;
+- (void)dealloc;
+- (id)_cloneEvent;
+- (BOOL)isEqual:(id)arg1;
+- (BOOL)_matchesKeyCommand:(id)arg1;
+- (void)_setHIDEvent:(struct __IOHIDEvent *)arg1 keyboard:(struct __GSKeyboard *)arg2;
+@property(readonly, nonatomic) long _keyCode;
+@property(readonly, nonatomic) BOOL _isKeyDown;
+- (int)type;
+@end
 
 @interface SBWorkspace 
 +(id) sharedInstance;
