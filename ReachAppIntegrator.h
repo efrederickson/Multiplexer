@@ -6,4 +6,4 @@
 if ([NSFileManager.defaultManager fileExistsAtPath:@"/Library/MobileSubstrate/DynamicLibraries/ReachApp.dylib"]) \
 	dlopen("/Library/MobileSubstrate/DynamicLibraries/ReachApp.dylib", RTLD_NOW | RTLD_GLOBAL); \
 
-#define IF_REACHAPP if (objc_getClass("RAWidget"))
+#define IF_REACHAPP if (objc_getClass("RAWidget") != nil)

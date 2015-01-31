@@ -58,9 +58,7 @@ UITextField *currentTextField = nil;
 
 inline void sendKeyEventToTopApp(UIPhysicalKeyboardEvent *event)
 {
-	CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.simulatekeypress"), NULL, (__bridge CFDictionaryRef) @{
-		@"key": event._modifiedInput,
-	}, true);
+	sendKeyEventStringToTopApp(event._modifiedInput);
 }
 inline void sendKeyEventStringToTopApp(NSString *key)
 {
@@ -83,7 +81,7 @@ void handleKeyEvent(CFNotificationCenterRef center, void *observer, CFStringRef 
 		NSDictionary *dict = (__bridge NSDictionary*)userInfo;
 		if ([dict objectForKey:@"isBackspace"] != nil)
 		{
-			BOOL isBackspace = [dict[@"isBackspace"] boolValue]; // probably true...
+			BOOL isBackspace = [dict[@"isBackspace"] boolValue]; // probably true if it exists...
 			if (isBackspace)
 			{
 				[currentTextField deleteBackward];
@@ -874,7 +872,7 @@ NSCache *oldFrames = [NSCache new];
 	if (isTopApp && overrideDisplay)
 	{
 		currentTextField = nil;
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachpp.topAppDoesntWantKeyboardEvents"), NULL, NULL, true);
+		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.topAppDoesntWantKeyboardEvents"), NULL, NULL, true);
 	}
 	%orig;
 }
@@ -886,13 +884,7 @@ NSCache *oldFrames = [NSCache new];
 	%orig;
 
 	if (isTopApp && overrideDisplay)
-	{
 		[self performSelector:@selector(minimize)];
-	}
-}
-- (void)activate
-{
-	%orig;
 }
 %end
 
@@ -900,9 +892,7 @@ NSCache *oldFrames = [NSCache new];
 - (void)_insertText:(id)arg1 fromKeyboard:(BOOL)arg2
 {
 	if (!isTopApp && overrideDisplay && topAppWantsKeyboardEvents)
-	{
 		sendKeyEventStringToTopApp(arg1);
-	}
 	else
 		%orig;
 }
@@ -910,10 +900,7 @@ NSCache *oldFrames = [NSCache new];
 - (void)deleteBackward
 {
 	if (!isTopApp && overrideDisplay && topAppWantsKeyboardEvents)
-	{
-		NSLog(@"[ReachApp] backspace");
 		sendKeyEventBackspaceToApp();
-	}
 	else
 		%orig;
 }
