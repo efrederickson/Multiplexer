@@ -308,6 +308,8 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @end
 
 @interface UIWindow () 
++(id) keyWindow;
+-(id) firstResponder;
 + (void)setAllWindowsKeepContextInBackground:(BOOL)arg1;
 -(void) _setRotatableViewOrientation:(UIInterfaceOrientation)orientation duration:(CGFloat)duration force:(BOOL)force;
 - (void)_setRotatableViewOrientation:(int)arg1 updateStatusBar:(BOOL)arg2 duration:(double)arg3 force:(BOOL)arg4;
