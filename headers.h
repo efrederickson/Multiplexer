@@ -266,6 +266,9 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 
 @interface UIKeyboard : UIView
 + (id)activeKeyboard;
+
+- (BOOL)isMinimized;
+- (void)minimize;
 @end
 
 @interface BKSProcessAssertion

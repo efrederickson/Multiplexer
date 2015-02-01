@@ -220,6 +220,8 @@ id SBWorkspace$sharedInstance;
     if (currentBundleIdentifier)
         CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentBundleIdentifier}, NO);
 
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.topAppDoesntWantKeyboardEvents"), NULL, NULL, true);
+        
     if ([RASettings.sharedInstance showNCInstead])
     {
         showingNC = NO;
@@ -782,7 +784,8 @@ NSCache *oldFrames = [NSCache new];
 
 - (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(id)arg2 changeApplicationFlag:(BOOL)arg3
 {
-    arg1 = (forcingRotation || overrideDisplay) ? (isTopApp ? NO : YES) : arg1;
+	if ([RASettings.sharedInstance unifyStatusBar])
+	    arg1 = (forcingRotation || overrideDisplay) ? (isTopApp ? NO : YES) : arg1;
     %orig(arg1, arg2, YES);
 }
 
@@ -887,6 +890,17 @@ NSCache *oldFrames = [NSCache new];
     %orig;
 }
 
+- (BOOL)resignFirstResponder
+{
+    if (isTopApp && overrideDisplay)
+    {
+        currentTextField = nil;
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.topAppDoesntWantKeyboardEvents"), NULL, NULL, true);
+    }
+    return %orig;
+}
+
+/*
 - (void)_resignFirstResponder
 {
     if (isTopApp && overrideDisplay)
@@ -896,6 +910,7 @@ NSCache *oldFrames = [NSCache new];
     }
     %orig;
 }
+*/
 
 -(void) insertText:(NSString*)text
 {
@@ -907,12 +922,31 @@ NSCache *oldFrames = [NSCache new];
 %end
 
 %hook UIKeyboard
-- (void)maximize
+- (void)activate
 {
     %orig;
 
+    NSLog(@"[ReachApp] keybaord maximize");
+
     if (isTopApp && overrideDisplay)
-        [self performSelector:@selector(minimize) withObject:nil afterDelay:1];
+    {
+		static void (^dismisser)();
+		dismisser = ^{
+			NSLog(@"[ReachApp] in dismisser");
+	    	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+				if ([self isMinimized] == NO)
+				{
+					NSLog(@"[ReachApp] dismissing");
+					[self minimize];
+				}
+				else // it is minimized
+				{
+					dismisser();
+				}
+			});
+    	};
+    	dismisser();
+    }
 }
 %end
 
@@ -1012,26 +1046,20 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
     {
         overrideDisplay = NO;
 
-        CGRect defaultGuess = CGRectZero;
-
         if (!inapp_ScalingRotationMode)
         {
             for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
                 CGRect frame = window.frame;
-                BOOL hadFrame = NO;
                 if ([oldFrames objectForKey:@(window.hash)] != nil)
                 {
                     frame = [[oldFrames objectForKey:@(window.hash)] CGRectValue];
                     [oldFrames removeObjectForKey:@(window.hash)];
                     //frame.origin.x = 0;
                     //frame.origin.y = 0;
-
-                    defaultGuess = defaultGuess.size.width == 0 ? frame : defaultGuess;
-                    hadFrame = YES;
                 }
                 //NSLog(@"ReachApp: restoring frame %@ for rotation %@", NSStringFromCGRect(frame), @(UIApplication.sharedApplication.statusBarOrientation));
                 [UIView animateWithDuration:0.4 animations:^{
-                    [window setFrame:hadFrame ? frame : defaultGuess];
+                    [window setFrame:frame];
                 }];
             }
         }
@@ -1060,7 +1088,7 @@ void setTopAppWantsKeyboardEvents(CFNotificationCenterRef center,
                     const void *object,
                     CFDictionaryRef userInfo)
 {
-    if (!isTopApp && overrideDisplay) // bottom app
+    if (!isTopApp) // bottom app
     {
         NSString *name2 = (__bridge NSString*)name;
         if ([name2 isEqual:@"com.efrederickson.reachapp.topAppWantsKeyboardEvents"])
