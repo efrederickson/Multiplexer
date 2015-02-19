@@ -65,7 +65,7 @@
 @interface SBWorkspace 
 +(id) sharedInstance;
 -(void) RA_animateWidgetSelectorOut:(id)completion;
--(void) RA_setView:(UIView*)view;
+-(void) RA_setView:(UIView*)view preferredHeight:(CGFloat)preferredHeight;
 -(void) RA_launchTopAppWithIdentifier:(NSString*) bundleIdentifier;
 -(void) RA_showWidgetSelector;
 -(void) updateViewSizes:(CGPoint)center animate:(BOOL)animate;

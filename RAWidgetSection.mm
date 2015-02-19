@@ -12,7 +12,7 @@
 	return self;
 }
 
--(BOOL) enabled { return YES; }
+-(BOOL) enabled { return _widgets.count > 0; }
 -(BOOL) showTitle { return YES; }
 
 -(NSInteger) sortOrder { return 10; }

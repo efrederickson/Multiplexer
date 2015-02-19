@@ -18,7 +18,7 @@
 
 -(void) launchWidget:(RAWidget*)widget
 {
-	[[objc_getClass("SBWorkspace") sharedInstance] RA_setView:[widget view]];
+	[[objc_getClass("SBWorkspace") sharedInstance] RA_setView:[widget view] preferredHeight:[widget preferredHeight]];
 }
 
 -(void) showWidgetSelector

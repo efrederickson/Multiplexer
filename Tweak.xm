@@ -403,7 +403,7 @@ id SBWorkspace$sharedInstance;
         [self RA_closeCurrentView];
     UIWindow *w = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
     //CGSize iconSize = [%c(SBIconView) defaultIconImageSize];
-    CGSize fullSize = [%c(SBIconView) defaultIconSize];
+    static CGSize fullSize = [%c(SBIconView) defaultIconSize];
     CGFloat padding = 20;
 
     NSInteger numIconsPerLine = 0;
@@ -416,6 +416,7 @@ id SBWorkspace$sharedInstance;
     padding = (w.frame.size.width - (numIconsPerLine * fullSize.width)) / numIconsPerLine;
 
     UIView *widgetSelectorView = [[RAWidgetSectionManager sharedInstance] createViewForEnabledSectionsWithBaseFrame:w.frame preferredIconSize:fullSize iconsThatFitPerLine:numIconsPerLine spacing:padding];
+    widgetSelectorView.frame = (CGRect){ { 0, 0 }, widgetSelectorView.frame.size };
     //widgetSelectorView.frame = w.frame;
     
     if (draggerView)
@@ -480,7 +481,7 @@ CGFloat startingY = -1;
         if (startingY != -1 && abs(grabberCenter_Y - startingY) < 3)
             [self RA_showWidgetSelector];
         startingY = -1;
-        //[self updateViewSizes:view.center animate:YES];
+        [self updateViewSizes:view.center animate:YES];
     }
 }
 
@@ -492,10 +493,18 @@ CGFloat startingY = -1;
 
     CGRect topFrame = CGRectMake(topWindow.frame.origin.x, topWindow.frame.origin.y, topWindow.frame.size.width, center.y);
     CGRect bottomFrame = CGRectMake(bottomWindow.frame.origin.x, center.y, bottomWindow.frame.size.width, UIScreen.mainScreen.bounds.size.height - center.y);
+
     if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
     {
         topFrame = CGRectMake(topWindow.frame.origin.x, center.y, topWindow.frame.size.width, UIScreen.mainScreen.bounds.size.height - center.y);
         bottomFrame = CGRectMake(bottomWindow.frame.origin.x, bottomWindow.frame.origin.y, bottomWindow.frame.size.width, center.y);
+    }
+
+    if ([RASettings.sharedInstance flipTopAndBottom])
+    {
+        CGRect tmp = topFrame;
+        topFrame = bottomFrame;
+        bottomFrame = tmp;
     }
 
     if (animate)
@@ -663,7 +672,7 @@ CGFloat startingY = -1;
     }
 }
 
-%new -(void) RA_setView:(UIView*)view_
+%new -(void) RA_setView:(UIView*)view_ preferredHeight:(CGFloat)pHeight
 {
     UIWindow *w = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
     if (view)
@@ -673,7 +682,9 @@ CGFloat startingY = -1;
         [w insertSubview:view belowSubview:draggerView];
     else
         [w addSubview:view];
-    [self updateViewSizes:draggerView.center animate:NO];
+
+    CGPoint center = (CGPoint){ draggerView.center.x, pHeight <= 0 ? draggerView.center.y : pHeight };
+    [self updateViewSizes:center animate:YES];
 }
 
 %new -(void) RA_animateWidgetSelectorOut:(id)completion

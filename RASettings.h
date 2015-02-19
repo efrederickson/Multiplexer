@@ -19,5 +19,6 @@
 -(BOOL) pagingEnabled;
 -(NSMutableArray*) favoriteApps;
 -(BOOL) unifyStatusBar;
+-(BOOL) flipTopAndBottom;
 
 @end

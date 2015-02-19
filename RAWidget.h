@@ -9,4 +9,6 @@
 
 // Similar to an app icon with the image/title
 -(UIView*) iconForSize:(CGSize)size; 
+
+-(CGFloat) preferredHeight;
 @end

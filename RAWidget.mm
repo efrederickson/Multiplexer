@@ -9,11 +9,16 @@
 
 -(UIView*) view
 {
-	return nil;
+	@throw @"This is an abstract method and must be overriden";
 }
 
 -(UIView*) iconForSize:(CGSize)size
 {
-	return nil; 
+	@throw @"This is an abstract method and must be overriden";
+}
+
+-(CGFloat) preferredHeight
+{
+	return self.view.frame.size.height;
 }
 @end

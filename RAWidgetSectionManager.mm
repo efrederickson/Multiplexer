@@ -24,8 +24,12 @@
 
 -(void) registerSection:(RAWidgetSection*)section
 {
+	if (!section || !section.identifier)
+		return;
 	if ([_sections.allKeys containsObject:section.identifier])
 		return;
+
+	NSLog(@"[ReachApp] registering section %@", section.identifier);
 	_sections[section.identifier] = section;
 }
 
@@ -42,12 +46,20 @@
 		if ([section enabled])
 			[arr addObject:section];
 	}
-	//[arr sortUsingComparator: ^(RAWidgetSection* a, RAWidgetSection* b) {
-    //    return [a.identifier caseInsensitiveCompare:b.identifier];
+
+	//[arr sortUsingComparator:^(RAWidgetSection *a, RAWidgetSection *b) {
+	//	return [@(a.sortOrder) compare:@(b.sortOrder)];
 	//}];
-	[arr sortUsingComparator:^(RAWidgetSection *a, RAWidgetSection *b) {
-		return [@(a.sortOrder) compare:@(b.sortOrder)];
+	
+	[arr sortUsingComparator:^NSComparisonResult(RAWidgetSection *a, RAWidgetSection *b) {
+		if (a.sortOrder < b.sortOrder)
+			return NSOrderedAscending;
+		else if (a.sortOrder > b.sortOrder)
+			return NSOrderedDescending;
+		else 
+			return NSOrderedSame;
 	}];
+
 	return arr;
 }
 
@@ -65,30 +77,36 @@
 	{
 		if (section.enabled == NO)
 			continue;
-		UIView *sectionView = [section viewForFrame:CGRectMake(0, currentY, view.frame.size.width, iconSize.height + VERTICAL_PADDING) preferredIconSize:iconSize iconsThatFitPerLine:iconsPerLine spacing:spacing];
-		if (sectionView)
+		@try
 		{
-			if (section.showTitle)
+			UIView *sectionView = [section viewForFrame:CGRectMake(0, currentY, view.frame.size.width, iconSize.height + VERTICAL_PADDING) preferredIconSize:iconSize iconsThatFitPerLine:iconsPerLine spacing:spacing];
+			if (sectionView)
 			{
-				UILabel *titleView = [[UILabel alloc] initWithFrame:CGRectMake(10, currentY, 300, 20)];
-				titleView.text = section.displayName;
-				titleView.textColor = [UIColor whiteColor];
-				titleView.font = [UIFont fontWithName:@"HelveticaNeue" size:20];
-				[view addSubview:titleView];
-				currentY += titleView.frame.size.height;
+				if (section.showTitle)
+				{
+					UILabel *titleView = [[UILabel alloc] initWithFrame:CGRectMake(10, currentY, 300, 20)];
+					titleView.text = section.displayName;
+					titleView.textColor = [UIColor whiteColor];
+					titleView.font = [UIFont fontWithName:@"HelveticaNeue" size:20];
+					[view addSubview:titleView];
+					currentY += titleView.frame.size.height;
+				}
+				
+				//sectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+				sectionView.backgroundColor = [UIColor clearColor];
+				sectionView.clipsToBounds = YES;
+
+				CGRect frame = sectionView.frame;
+				//frame.origin.x = 0;
+				frame.origin.y = currentY;
+				sectionView.frame = frame;
+				currentY += frame.size.height + VERTICAL_PADDING;
+
+				[view addSubview:sectionView];
 			}
-			
-			//sectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-			sectionView.backgroundColor = [UIColor clearColor];
-			sectionView.clipsToBounds = YES;
-
-			CGRect frame = sectionView.frame;
-			//frame.origin.x = 0;
-			frame.origin.y = currentY;
-			sectionView.frame = frame;
-			currentY += frame.size.height + VERTICAL_PADDING;
-
-			[view addSubview:sectionView];
+		} @catch (NSException *ex)
+		{
+			NSLog(@"[ReachApp] an error occurred creating the view for section '%@': %@", section.identifier, ex);
 		}
 	}
 

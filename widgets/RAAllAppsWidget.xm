@@ -14,12 +14,6 @@
 
 -(UIView*) viewForFrame:(CGRect)frame preferredIconSize:(CGSize)size_ iconsThatFitPerLine:(NSInteger)iconsPerLine spacing:(CGFloat)spacing
 {
-
-	/*static UIScrollView *allAppsView = nil; 
-	if (allAppsView == nil)
-		allAppsView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 200)];
-	else
-		return allAppsView;*/
 	UIScrollView *allAppsView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 200)];
 
 	CGSize size = [%c(SBIconView) defaultIconSize];
@@ -38,13 +32,17 @@
 	allAppsView.backgroundColor = [UIColor clearColor];
 	allAppsView.pagingEnabled = [RASettings.sharedInstance pagingEnabled];
 
-	NSMutableArray *allApps = [[[[%c(SBIconViewMap) homescreenMap] iconModel] visibleIconIdentifiers] mutableCopy];
-    [allApps sortUsingComparator: ^(NSString* a, NSString* b) {
-    	NSString *a_ = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:a].displayName;
-    	NSString *b_ = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:b].displayName;
-        return [a_ caseInsensitiveCompare:b_];
-	}];
-	//[allApps removeObject:currentBundleIdentifier];
+	static NSMutableArray *allApps = nil;
+	if (!allApps)
+	{
+		allApps = [[[[%c(SBIconViewMap) homescreenMap] iconModel] visibleIconIdentifiers] mutableCopy];
+	    [allApps sortUsingComparator: ^(NSString* a, NSString* b) {
+	    	NSString *a_ = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:a].displayName;
+	    	NSString *b_ = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:b].displayName;
+	        return [a_ caseInsensitiveCompare:b_];
+		}];
+		//[allApps removeObject:currentBundleIdentifier];
+	}
 
 	width = interval;
 	isTop = YES;

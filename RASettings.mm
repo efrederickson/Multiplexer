@@ -118,4 +118,9 @@ NSDictionary *_settings = nil;
 {
 	return BOOL(@"unifyStatusBar", YES);
 }
+
+-(BOOL) flipTopAndBottom
+{
+	return BOOL(@"flipTopAndBottom", NO);
+}
 @end

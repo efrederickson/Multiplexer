@@ -110,6 +110,16 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
+             @{ @"footerText": @"Flip the panes." },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @NO,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"flipTopAndBottom",
+                 @"label": @"Appear at Bottom",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+
              @{ @"footerText": @"Shows an app chooser that allows you to choose which app to show. If disabled, the last used app will be shown in Reachability." },
              @{
                  @"cell": @"PSSwitchCell",
