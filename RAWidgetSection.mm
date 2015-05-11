@@ -35,7 +35,8 @@
 -(UIView*) viewForFrame:(CGRect)frame preferredIconSize:(CGSize)size iconsThatFitPerLine:(NSInteger)iconsPerLine spacing:(CGFloat)spacing
 { 
 	UIView *view = [[UIView alloc] initWithFrame:frame];
-	CGPoint origin = CGPointMake(10, 0);
+	view.userInteractionEnabled = YES;
+	CGPoint origin = CGPointMake(10, 10);
 
 	for (NSInteger index = 0; index < _widgets.count; index++)
 	{
@@ -48,6 +49,7 @@
 		UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(widgetIconTap:)];
 		[subView addGestureRecognizer:tap];
 		subView.tag = index;
+		subView.userInteractionEnabled = YES;
 
 		CGRect frame = subView.frame;
 		frame.origin = origin;

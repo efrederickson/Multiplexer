@@ -20,6 +20,7 @@ Reference: https://github.com/fewjative/Reference
 MessageBox: https://github.com/b3ll/MessageBox
 This pastie (by @Freerunnering?): http://pastie.org/pastes/8684110
 Various tips and help: @sharedRoutine
+Various concepts and help: Ethan Arbuckle (@its_not_herpes)
 
 Many concepts and ideas have been used from them.
 */
@@ -404,6 +405,7 @@ id SBWorkspace$sharedInstance;
     UIWindow *w = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
     //CGSize iconSize = [%c(SBIconView) defaultIconImageSize];
     static CGSize fullSize = [%c(SBIconView) defaultIconSize];
+    fullSize.height = fullSize.width; // otherwise it often looks like {60,74}
     CGFloat padding = 20;
 
     NSInteger numIconsPerLine = 0;
@@ -634,8 +636,6 @@ CGFloat startingY = -1;
         CFDictionaryAddValue(dictionary, @"bundleIdentifier", lastBundleIdentifier); // Top app
         CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), (__bridge CFStringRef)event, NULL, dictionary, true);
         CFRelease(dictionary);
-
-
     }
     else if ([RASettings.sharedInstance scalingRotationMode] && [UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
     {
@@ -674,17 +674,18 @@ CGFloat startingY = -1;
 
 %new -(void) RA_setView:(UIView*)view_ preferredHeight:(CGFloat)pHeight
 {
+    view_.hidden = NO;
     UIWindow *w = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
     if (view)
         [view removeFromSuperview];
     view = view_;
-    if (draggerView && draggerView.superview == w)
-        [w insertSubview:view belowSubview:draggerView];
-    else
         [w addSubview:view];
+    if (draggerView && draggerView.superview)
+        [draggerView.superview bringSubviewToFront:draggerView];
 
     CGPoint center = (CGPoint){ draggerView.center.x, pHeight <= 0 ? draggerView.center.y : pHeight };
     [self updateViewSizes:center animate:YES];
+    draggerView.center = center;
 }
 
 %new -(void) RA_animateWidgetSelectorOut:(id)completion
@@ -901,6 +902,18 @@ NSCache *oldFrames = [NSCache new];
     %orig;
 }
 
+
+- (void)_endedEditing
+{
+    if (isTopApp && overrideDisplay)
+    {
+        currentTextField = nil;
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.topAppDoesntWantKeyboardEvents"), NULL, NULL, true);
+    }
+
+    %orig;
+}
+
 - (BOOL)resignFirstResponder
 {
     if (isTopApp && overrideDisplay)
@@ -949,6 +962,7 @@ NSCache *oldFrames = [NSCache new];
 				{
 					NSLog(@"[ReachApp] dismissing");
 					[self minimize];
+                    // end the loop
 				}
 				else // it is minimized
 				{
@@ -964,7 +978,7 @@ NSCache *oldFrames = [NSCache new];
 %hook UITextInputController
 - (void)_insertText:(NSString*)arg1 fromKeyboard:(BOOL)arg2
 {
-    if (topAppWantsKeyboardEvents)
+    if (overrideDisplay && topAppWantsKeyboardEvents)
         sendKeyEventStringToTopApp(arg1);
     else
         %orig;
@@ -972,7 +986,7 @@ NSCache *oldFrames = [NSCache new];
 
 - (void)deleteBackward
 {
-    if (topAppWantsKeyboardEvents)
+    if (overrideDisplay && topAppWantsKeyboardEvents)
         sendKeyEventBackspaceToApp();
     else
         %orig;
@@ -1099,7 +1113,7 @@ void setTopAppWantsKeyboardEvents(CFNotificationCenterRef center,
                     const void *object,
                     CFDictionaryRef userInfo)
 {
-    if (!isTopApp) // bottom app
+    if (!isTopApp && overrideDisplay) // bottom app
     {
         NSString *name2 = (__bridge NSString*)name;
         if ([name2 isEqual:@"com.efrederickson.reachapp.topAppWantsKeyboardEvents"])

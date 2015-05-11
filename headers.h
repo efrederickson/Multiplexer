@@ -20,6 +20,18 @@
 #import <notify.h>
 #import <IOKit/hid/IOHIDEvent.h>
 
+#define SHARED_INSTANCE2(cls, extracode) \
+static cls *sharedInstance = nil; \
+static dispatch_once_t onceToken = 0; \
+dispatch_once(&onceToken, ^{ \
+    sharedInstance = [[cls alloc] init]; \
+    extracode; \
+}); \
+return sharedInstance;
+
+#define SHARED_INSTANCE(cls) SHARED_INSTANCE2(cls, );
+
+
 @interface UIInternalEvent : UIEvent {
     __GSEvent *_gsEvent;
     __IOHIDEvent *_hidEvent;
