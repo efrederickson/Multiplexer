@@ -11,7 +11,6 @@
 #import "headers.h"
 #import "RAWidgetSectionManager.h"
 #import "RASettings.h"
-#import "RATouchGestureRecognizer.h"
 
 #define SPRINGBOARD ([NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"])
 
