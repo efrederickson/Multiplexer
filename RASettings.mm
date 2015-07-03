@@ -31,7 +31,7 @@ NSDictionary *_settings = nil;
 	if (!keyList) {
 		return;
 	}
-	_settings = (NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+	_settings = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
 	if (!_settings) {
 		return;
 	}
@@ -85,7 +85,7 @@ NSDictionary *_settings = nil;
 
 -(BOOL) showAllAppsInWidgetSelector
 {
-	NSLog(@"ReachApp: %@ %@", _settings, @(BOOL(@"showAllAppsInAppChooser", YES)));
+	//NSLog(@"ReachApp: %@ %@", _settings, @(BOOL(@"showAllAppsInAppChooser", YES)));
 	return BOOL(@"showAllAppsInAppChooser", YES);
 }
 

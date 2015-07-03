@@ -10,3 +10,5 @@ debs/
 theos
 backboardd
 backboardd_headers/
+disabled*
+DISABLED*

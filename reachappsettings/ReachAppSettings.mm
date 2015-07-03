@@ -110,15 +110,6 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
-             @{ @"footerText": @"Flip the panes." },
-             @{
-                 @"cell": @"PSSwitchCell",
-                 @"default": @NO,
-                 @"defaults": @"com.efrederickson.reachapp.settings",
-                 @"key": @"flipTopAndBottom",
-                 @"label": @"Appear at Bottom",
-                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-                 },
 
              @{ @"footerText": @"Shows an app chooser that allows you to choose which app to show. If disabled, the last used app will be shown in Reachability." },
              @{
@@ -135,7 +126,7 @@
                 @"label": @"Widget Chooser Options",
             },
 
-             @{ @"footerText": @"PLEASE NOTE THIS IS A BETA OPTION, IT'S STILL UNDER WORK. DO NOT SEND EMAILS RELATING TO THIS FEATURE. THEY WILL BE IGNORED. \n\nThat said, it will force applications into portrait and scale them to the screen size in landscape mode." },
+             @{ @"footerText": @"PLEASE NOTE THESE ARE BETA OPTIONS, STILL UNDER WORK OR TEMPORARILY BEING IGNORED. DO NOT SEND EMAILS RELATING TO THIS FEATURE. THEY WILL BE IGNORED. \n\nThat said, one will force applications into portrait and scale them to the screen size in landscape mode\nand the other will flip the top and bottom panes" },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @0,
@@ -144,6 +135,14 @@
                  @"label": @"Use Scaling Rotation Mode",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  @"cellClass": @"RASwitchCell",
+                 },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @NO,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"flipTopAndBottom",
+                 @"label": @"Appear at Bottom",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
              ];
 }

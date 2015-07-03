@@ -29,7 +29,7 @@
 	if ([_sections.allKeys containsObject:section.identifier])
 		return;
 
-	NSLog(@"[ReachApp] registering section %@", section.identifier);
+	//NSLog(@"[ReachApp] registering section %@", section.identifier);
 	_sections[section.identifier] = section;
 }
 

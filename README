@@ -1,15 +1,9 @@
-Puts the last used app (or NC) in the Reachability view
+Puts the last used app (or NC) in the Reachability view. 
+Now with more features!
+- SwipeOver apps with vertical screen splitting and scaled previews
 
 Depiction (and some more info): http://elijahandandrew.com/repo/depictions/ReachApp/
 
-Known issues / TODO: 
-√ NC view doesn't show after opening the NC normally
-√ UIWindows (apps) may be placed incorrectly
-√ UIWindows (apps) may not rotate or resize correctly
-• Keyboard doesn't resize
-√ Root apps don't show
-• Landscape left support
-• Upside down support (maybe)
-√ Properly (or a better fake way) un-background apps 
-√ Flipswitch 
-√ Update recents to use -[SBAppSwitcherModel snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary];
+Known issues / TODO:
+- Landscape (l/r/upside down) support for SwipeOver
+???? Some sort of windowed multitasking with a "Mission Control", "LaunchPad", "Dock (incl. running apps)", and separate desktops

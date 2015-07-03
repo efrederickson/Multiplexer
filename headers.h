@@ -20,6 +20,10 @@
 #import <notify.h>
 #import <IOKit/hid/IOHIDEvent.h>
 
+extern "C" CFNotificationCenterRef CFNotificationCenterGetDistributedCenter(void);
+
+void SET_BACKGROUNDED(id settings, BOOL val);
+
 #define SHARED_INSTANCE2(cls, extracode) \
 static cls *sharedInstance = nil; \
 static dispatch_once_t onceToken = 0; \
@@ -31,6 +35,78 @@ return sharedInstance;
 
 #define SHARED_INSTANCE(cls) SHARED_INSTANCE2(cls, );
 
+extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
+
+@interface BKSWorkspace : NSObject
+- (NSString *)topActivatingApplication;
+@end
+
+@interface SpringBoard (OrientationSupport)
+- (UIInterfaceOrientation)activeInterfaceOrientation;
+- (void)noteInterfaceOrientationChanged:(UIInterfaceOrientation)orientation;
+@end
+
+typedef struct {
+    int type;
+    int modifier;
+    NSUInteger pathIndex;
+    NSUInteger pathIdentity;
+    CGPoint location;
+    CGPoint previousLocation;
+    CGPoint unrotatedLocation;
+    CGPoint previousUnrotatedLocation;
+    double totalDistanceTraveled;
+    UIInterfaceOrientation interfaceOrientation;
+    UIInterfaceOrientation previousInterfaceOrientation;
+    double timestamp;
+    BOOL isValid;
+} SBActiveTouch;
+
+typedef NS_ENUM(NSInteger, UIScreenEdgePanRecognizerType) {
+    UIScreenEdgePanRecognizerTypeMultitasking,
+    UIScreenEdgePanRecognizerTypeNavigation,
+    UIScreenEdgePanRecognizerTypeOther
+};
+
+@protocol _UIScreenEdgePanRecognizerDelegate;
+
+@interface _UIScreenEdgePanRecognizer : NSObject
+- (id)initWithType:(UIScreenEdgePanRecognizerType)type;
+- (void)incorporateTouchSampleAtLocation:(CGPoint)location timestamp:(double)timestamp modifier:(NSInteger)modifier interfaceOrientation:(UIInterfaceOrientation)orientation;
+- (void)reset;
+@property (nonatomic, assign) id <_UIScreenEdgePanRecognizerDelegate> delegate;
+@property (nonatomic, readonly) NSInteger state;
+@property (nonatomic) UIRectEdge targetEdges;
+@property (nonatomic) CGRect screenBounds;
+@end
+
+@protocol _UIScreenEdgePanRecognizerDelegate <NSObject>
+@optional
+- (void)screenEdgePanRecognizerStateDidChange:(_UIScreenEdgePanRecognizer *)screenEdgePanRecognizer;
+@end
+
+@interface UIDevice (UIDevicePrivate)
+- (void)setOrientation:(UIInterfaceOrientation)orientation animated:(BOOL)animated;
+@end
+
+@interface _UIBackdropViewSettings : NSObject
+@property (nonatomic) CGFloat grayscaleTintAlpha;
+@property (nonatomic) CGFloat grayscaleTintLevel;
+@end
+
+@interface _UIBackdropView : UIView
+@property (retain, nonatomic) _UIBackdropViewSettings *outputSettings;
+@property (retain, nonatomic) _UIBackdropViewSettings *inputSettings;
+@end
+
+@interface SBOffscreenSwipeGestureRecognizer : NSObject // SBPanGestureRecognizer <_UIScreenEdgePanRecognizerDelegate>
+-(id) initForOffscreenEdge:(int)edge;
+-(void) setTypes:(NSInteger)types;
+-(void) setMinTouches:(NSInteger)amount;
+-(void) setHandler:(id)arg;
+-(void) setCanBeginCondition:(id)arg;
+-(void) setShouldUseUIKitHeuristics:(BOOL)val;
+@end
 
 @interface UIInternalEvent : UIEvent {
     __GSEvent *_gsEvent;
@@ -76,12 +152,14 @@ return sharedInstance;
 
 @interface SBWorkspace 
 +(id) sharedInstance;
+-(BOOL) isUsingReachApp;
 -(void) RA_animateWidgetSelectorOut:(id)completion;
 -(void) RA_setView:(UIView*)view preferredHeight:(CGFloat)preferredHeight;
 -(void) RA_launchTopAppWithIdentifier:(NSString*) bundleIdentifier;
 -(void) RA_showWidgetSelector;
 -(void) updateViewSizes:(CGPoint)center animate:(BOOL)animate;
 -(void) RA_closeCurrentView;
+-(void) RA_handleLongPress:(UILongPressGestureRecognizer*)gesture;
 @end
 
 @interface SBDisplayLayout : NSObject {
@@ -277,6 +355,9 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @end
 
 @interface UIKeyboard : UIView
++ (BOOL)isOnScreen;
++ (CGSize)keyboardSizeForInterfaceOrientation:(UIInterfaceOrientation)orientation;
++ (CGRect)defaultFrameForInterfaceOrientation:(UIInterfaceOrientation)orientation;
 + (id)activeKeyboard;
 
 - (BOOL)isMinimized;
@@ -332,6 +413,8 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @end
 
 @interface UIApplication ()
+- (void)_handleKeyUIEvent:(id)arg1;
+-(UIView*) statusBar;
 - (id)_mainScene;
 
 // SpringBoard methods
