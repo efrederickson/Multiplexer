@@ -82,7 +82,7 @@ UIRectEdge currentEdge;
 {
     class_addProtocol(objc_getClass("SBHandMotionExtractor"), @protocol(_UIScreenEdgePanRecognizerDelegate));
     
-    UIRectEdge edgesToWatch[] = { UIRectEdgeBottom, UIRectEdgeLeft, UIRectEdgeRight };
+    UIRectEdge edgesToWatch[] = { UIRectEdgeBottom, UIRectEdgeLeft, UIRectEdgeRight, UIRectEdgeTop };
     int edgeCount = sizeof(edgesToWatch) / sizeof(UIRectEdge);
     gestureRecognizers = [[NSMutableSet alloc] initWithCapacity:edgeCount];
     for (int i = 0; i < edgeCount; i++) 
