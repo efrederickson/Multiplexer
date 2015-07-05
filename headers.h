@@ -126,6 +126,7 @@ typedef NS_ENUM(NSInteger, UIScreenEdgePanRecognizerType) {
 - (void)handleKeyEvent:(id)arg1;
 - (void)handleKeyWithString:(id)arg1 forKeyEvent:(id)arg2 executionContext:(id)arg3;
 - (void)deleteBackward;
+-(void) setInHardwareKeyboardMode:(BOOL)arg1;
 @end
 
 @interface UIPhysicalKeyboardEvent
@@ -160,6 +161,7 @@ typedef NS_ENUM(NSInteger, UIScreenEdgePanRecognizerType) {
 -(void) updateViewSizes:(CGPoint)center animate:(BOOL)animate;
 -(void) RA_closeCurrentView;
 -(void) RA_handleLongPress:(UILongPressGestureRecognizer*)gesture;
+-(void) RA_updateViewSizes;
 @end
 
 @interface SBDisplayLayout : NSObject {

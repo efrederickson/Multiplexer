@@ -30,9 +30,10 @@
 
 -(void) stopUsingSwipeOver
 {
+	BOOL wasHiding = overlayWindow.isHidingUnderlyingApp;
 	[overlayWindow removeOverlayFromUnderlyingAppImmediately];
 
-	if (currentAppIdentifier)
+	if (currentAppIdentifier && wasHiding == NO)
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentAppIdentifier }, NO);
 
 	isUsingSwipeOver = NO;

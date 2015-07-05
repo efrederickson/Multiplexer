@@ -11,6 +11,7 @@
 #import "headers.h"
 #import "RAWidgetSectionManager.h"
 #import "RASettings.h"
+#import "RAAppSliderProviderView.h"
 
 #define SPRINGBOARD ([NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"])
 
@@ -126,12 +127,17 @@ id SBWorkspace$sharedInstance;
 %new -(void) RA_closeCurrentView
 {
     // Notify both top and bottom apps Reachability is closing
-    if (lastBundleIdentifier)
+    if (lastBundleIdentifier && lastBundleIdentifier.length > 0)
         CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": lastBundleIdentifier}, NO);
     if (currentBundleIdentifier)
         CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentBundleIdentifier}, NO);
+    if ([view isKindOfClass:[RAAppSliderProviderView class]])
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": [((RAAppSliderProviderView*)view) currentBundleIdentifier]}, NO);
 
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.updateKeyboardWindow"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": @"", @"wantsKeyboard": @NO}, NO);
+    if (lastBundleIdentifier)
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.updateKeyboardWindow"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": lastBundleIdentifier, @"wantsKeyboard": @NO}, NO);
+    else if ([view isKindOfClass:[RAAppSliderProviderView class]])
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.updateKeyboardWindow"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": [((RAAppSliderProviderView*)view) currentBundleIdentifier], @"wantsKeyboard": @NO}, NO);
         
     if ([RASettings.sharedInstance showNCInstead])
     {
@@ -147,6 +153,11 @@ id SBWorkspace$sharedInstance;
     else
     {
         SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:lastBundleIdentifier];
+
+        if ([view isKindOfClass:[RAAppSliderProviderView class]])
+        {
+            [((RAAppSliderProviderView*)view) unload];
+        }
 
         // Give them a little time to receive the notifications...
         if (view)
@@ -414,6 +425,11 @@ CGFloat startingY = -1;
     return YES;
 }
 
+%new -(void) RA_updateViewSizes
+{
+    [self updateViewSizes:draggerView.center animate:YES];
+}
+
 %new -(void) updateViewSizes:(CGPoint) center animate:(BOOL)animate
 {
     // Resizing
@@ -427,6 +443,12 @@ CGFloat startingY = -1;
     {
         topFrame = CGRectMake(topWindow.frame.origin.x, center.y, topWindow.frame.size.width, UIScreen.mainScreen.bounds.size.height - center.y);
         bottomFrame = CGRectMake(bottomWindow.frame.origin.x, bottomWindow.frame.origin.y, bottomWindow.frame.size.width, center.y);
+    }
+
+    if ([view isKindOfClass:[RAAppSliderProviderView class]])
+    {
+        RAAppSliderProviderView *sliderView = (RAAppSliderProviderView*)view;
+        sliderView.frame = topFrame;
     }
 
     if ([RASettings.sharedInstance flipTopAndBottom])
@@ -458,33 +480,44 @@ CGFloat startingY = -1;
         if (ncViewController)
             ncViewController.view.frame = (CGRect) { { 0, 0 }, topFrame.size };
     }
-    else if (lastBundleIdentifier != nil)
+    else if (lastBundleIdentifier != nil || [view isKindOfClass:[RAAppSliderProviderView class]])
     {
         // Notify clients
         NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-        if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
+        if ([view isKindOfClass:[RAAppSliderProviderView class]])
         {
-            dict[@"sizeWidth"] = @(topWindow.frame.size.height);
-            dict[@"sizeHeight"] = @(topWindow.frame.size.width);
-        }
-        else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
-        {
-            dict[@"sizeWidth"] = @(topWindow.frame.size.height);
-            dict[@"sizeHeight"] = @(topWindow.frame.size.width);
+            RAAppSliderProviderView *sliderView = (RAAppSliderProviderView*)view;
+            dict[@"sizeWidth"] = @(sliderView.clientFrame.size.width);
+            dict[@"sizeHeight"] = @(sliderView.clientFrame.size.height);
         }
         else
         {
-            dict[@"sizeWidth"] = @(topWindow.frame.size.width);
-            dict[@"sizeHeight"] = @(topWindow.frame.size.height);
+            if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
+            {
+                dict[@"sizeWidth"] = @(topWindow.frame.size.height);
+                dict[@"sizeHeight"] = @(topWindow.frame.size.width);
+            }
+            else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
+            {
+                dict[@"sizeWidth"] = @(topWindow.frame.size.height);
+                dict[@"sizeHeight"] = @(topWindow.frame.size.width);
+            }
+            else
+            {
+                dict[@"sizeWidth"] = @(topWindow.frame.size.width);
+                dict[@"sizeHeight"] = @(topWindow.frame.size.height);
+            }
         }
         if (lastBundleIdentifier)
             dict[@"bundleIdentifier"] = lastBundleIdentifier;
+        if ([view isKindOfClass:[RAAppSliderProviderView class]])
+            dict[@"bundleIdentifier"] = [((RAAppSliderProviderView*)view) currentBundleIdentifier];
         dict[@"isTopApp"] = @YES;
         dict[@"rotationMode"] = @([RASettings.sharedInstance scalingRotationMode]);
         CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, (__bridge CFDictionaryRef)dict, true);
     }
 
-    if ([view isKindOfClass:[%c(FBWindowContextHostWrapperView) class]] == NO)
+    if ([view isKindOfClass:[%c(FBWindowContextHostWrapperView) class]] == NO && [view isKindOfClass:[RAAppSliderProviderView class]] == NO)
         return; // only resize when the app is being shown. That way it's more like native Reachability
 
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
@@ -606,7 +639,7 @@ CGFloat startingY = -1;
     if (view)
         [view removeFromSuperview];
     view = view_;
-        [w addSubview:view];
+    [w addSubview:view];
     if (draggerView && draggerView.superview)
         [draggerView.superview bringSubviewToFront:draggerView];
 
@@ -618,11 +651,11 @@ CGFloat startingY = -1;
 %new -(void) RA_animateWidgetSelectorOut:(id)completion
 {
     [UIView animateWithDuration:0.3
-        animations:^{
-            view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 0.01, 0.01);
-            view.alpha = 0;
-        }
-        completion:completion];
+    animations:^{
+        view.transform = CGAffineTransformScale(CGAffineTransformIdentity, 0.01, 0.01);
+        view.alpha = 0;
+    }
+    completion:completion];
 }
 
 %new -(void) appViewItemTap:(UITapGestureRecognizer*)sender

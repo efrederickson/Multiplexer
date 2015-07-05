@@ -54,9 +54,11 @@ UIRectEdge currentEdge;
             shouldBeOverridingForRecognizer = [RAGestureManager.sharedInstance canHandleMovementWithPoint:location forEdge:screenEdgePanRecognizer.targetEdges];
         if (shouldBeOverridingForRecognizer) 
         {
-            [RAGestureManager.sharedInstance handleMovementOrStateUpdate:UIGestureRecognizerStateBegan withPoint:location forEdge:screenEdgePanRecognizer.targetEdges];
-            currentEdge = screenEdgePanRecognizer.targetEdges;
-            BKSHIDServicesCancelTouchesOnMainDisplay(); // Don't send to the app, or anywhere else
+            if ([RAGestureManager.sharedInstance handleMovementOrStateUpdate:UIGestureRecognizerStateBegan withPoint:location forEdge:screenEdgePanRecognizer.targetEdges])
+            {
+                currentEdge = screenEdgePanRecognizer.targetEdges;
+                BKSHIDServicesCancelTouchesOnMainDisplay(); // Don't send to the app, or anywhere else
+            }
         }
     }
 }

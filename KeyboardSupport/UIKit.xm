@@ -77,6 +77,12 @@ BOOL shouldSendKeyEvents;
 }
 %end
 %hook UIKeyboardImpl
+-(void) hardwareKeyboardAvailabilityChanged
+{
+    %orig;
+    [self setInHardwareKeyboardMode:YES];
+}
+
 - (void)setInHardwareKeyboardMode:(BOOL)arg1
 {
     if (isTopApp)

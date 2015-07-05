@@ -3,6 +3,14 @@
 #import "RAReachabilityManager.h"
 #import "RAWidgetSectionManager.h"
 #import "RASettings.h"
+#import "RAAppSliderProvider.h"
+#import "RAAppSliderProviderView.h"
+#import "RAHostedAppView.h"
+
+@interface RARecentAppsWidget () {
+	CGRect viewFrame;
+}
+@end
 
 @implementation RARecentAppsWidget
 -(BOOL) enabled { return [RASettings.sharedInstance showRecentAppsInWidgetSelector]; }
@@ -13,6 +21,7 @@
 
 -(UIView*) viewForFrame:(CGRect)frame preferredIconSize:(CGSize)size_ iconsThatFitPerLine:(NSInteger)iconsPerLine spacing:(CGFloat)spacing
 {
+	viewFrame = frame;
 	CGSize size = [%c(SBIconView) defaultIconSize];
 	spacing = (frame.size.width - (iconsPerLine * size.width)) / iconsPerLine;
 	NSString *currentBundleIdentifier = [[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier;
@@ -25,6 +34,7 @@
 	BOOL hasSecondRow = NO;
 	SBApplication *app = nil;
 	CGFloat width = interval;
+	NSInteger index = 0;
 
 	NSMutableArray *recents = [[[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary] mutableCopy];
 	[recents removeObject:currentBundleIdentifier];
@@ -74,7 +84,7 @@
         		break;
         }
 
-        iconView.tag = app.pid;
+        iconView.tag = index++;
         iconView.restorationIdentifier = app.bundleIdentifier;
         UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
         [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
@@ -94,8 +104,18 @@
 
 -(void) appViewItemTap:(UIGestureRecognizer*)gesture
 {
-	[[%c(SBWorkspace) sharedInstance] appViewItemTap:gesture];
-	//[[RAReachabilityManager sharedInstance] launchTopAppWithIdentifier:gesture.view.restorationIdentifier];
+	//[[%c(SBWorkspace) sharedInstance] appViewItemTap:gesture];
+	
+	RAAppSliderProvider *provider = [[RAAppSliderProvider alloc] init];
+	provider.availableIdentifiers = [[[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary] mutableCopy];
+	[((NSMutableArray*)provider.availableIdentifiers) removeObject:[[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier];
+	provider.currentIndex = gesture.view.tag;
+
+	RAAppSliderProviderView *view = [[RAAppSliderProviderView alloc] initWithFrame:CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height / 2)]; // TODO: fix frame
+	view.swipeProvider = provider;
+	view.isSwipeable = YES;
+
+	[[RAReachabilityManager sharedInstance] showAppWithSliderProvider:view];
 }
 @end
 

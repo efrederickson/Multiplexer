@@ -1,6 +1,7 @@
 #import <objc/runtime.h>
 #import "RAReachabilityManager.h"
 #import "headers.h"
+#import "RAAppSliderProviderView.h"
 
 @implementation RAReachabilityManager
 +(id) sharedInstance
@@ -24,5 +25,12 @@
 -(void) showWidgetSelector
 {
 	[[objc_getClass("SBWorkspace") sharedInstance] RA_showWidgetSelector];
+}
+
+-(void) showAppWithSliderProvider:(RAAppSliderProviderView*)view
+{
+	[view updateCurrentView];
+	[view load];
+	[[objc_getClass("SBWorkspace") sharedInstance] RA_setView:view preferredHeight:view.frame.size.height];
 }
 @end
