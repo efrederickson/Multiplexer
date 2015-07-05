@@ -7,4 +7,4 @@ Depiction (and some more info): http://elijahandandrew.com/repo/depictions/Reach
 Known issues / TODO:
 - Better keyboard support (force app to some sort of temporary fullscreen like the iOS 9 swipeover keyboard?)
 - Landscape (l/r/upside down) support for SwipeOver
-???? Some sort of windowed multitasking with a "Mission Control", "LaunchPad", "Dock (incl. running apps)", and separate desktops
+???? Some sort of windowed multitasking with/or a "Mission Control", "LaunchPad", "Dock (incl. running apps)", and separate desktops
