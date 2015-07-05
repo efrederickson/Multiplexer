@@ -32,6 +32,9 @@
 {
 	if (!currentView || !currentView.bundleIdentifier)
 		return;
+
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentView.bundleIdentifier }, NO);
+
 	[RAGestureManager.sharedInstance stopIgnoringSwipesForIdentifier:currentView.bundleIdentifier];
 	[currentView unloadApp];
 }
@@ -91,10 +94,12 @@
 	//NSLog(@"[ReachApp] swipe: %@", gesture);
 	if (gesture.direction == UISwipeGestureRecognizerDirectionLeft && swipeProvider.canGoRight)
 	{
+		[self unload];
 		[self goToTheRight];
 	}
 	if (gesture.direction == UISwipeGestureRecognizerDirectionRight && swipeProvider.canGoLeft)
 	{
+		[self unload];
 		[self goToTheLeft];
 	}
 }
