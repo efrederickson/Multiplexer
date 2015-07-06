@@ -3,11 +3,6 @@
 #import "RAGestureManager.h"
 #import "RAAppSliderProvider.h"
 
-@interface RAAppSliderProviderView () {
-	RAHostedAppView *currentView;
-}
-@end
-
 @implementation RAAppSliderProviderView
 @synthesize swipeProvider;
 
@@ -35,7 +30,7 @@
 
     CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentView.bundleIdentifier }, NO);
 
-	[RAGestureManager.sharedInstance stopIgnoringSwipesForIdentifier:currentView.bundleIdentifier];
+	[RAGestureManager.sharedInstance removeGestureWithIdentifier:currentView.bundleIdentifier];
 	[currentView unloadApp];
 }
 
@@ -51,23 +46,10 @@
     	self.backgroundColor = [UIColor clearColor]; // redColor];
     	self.userInteractionEnabled = YES;
 
-    	if (!leftSwipeGestureRecognizer)
-    	{
-	    	leftSwipeGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
-			leftSwipeGestureRecognizer.direction = UISwipeGestureRecognizerDirectionLeft;
-			[self addGestureRecognizer:leftSwipeGestureRecognizer];	
-    	}
-		
-		if (!rightSwipeGestureRecognizer)
-		{
-			rightSwipeGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
-			rightSwipeGestureRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
-			[self addGestureRecognizer:rightSwipeGestureRecognizer];
-		}
+		[RAGestureManager.sharedInstance addGestureRecognizerWithTarget:self forEdge:UIRectEdgeLeft identifier:currentView.bundleIdentifier priority:RAGesturePriorityHigh];
+		[RAGestureManager.sharedInstance addGestureRecognizerWithTarget:self forEdge:UIRectEdgeRight identifier:currentView.bundleIdentifier priority:RAGesturePriorityHigh];
 
-		[RAGestureManager.sharedInstance ignoreSwipesBeginningInRect:CGRectMake(self.frame.origin.x, [self convertPoint:CGPointMake(0, 0) toView:nil].y, self.frame.size.width, self.frame.size.height) forIdentifier:currentView.bundleIdentifier];
-
-    	currentView.frame = CGRectMake(6, 0, self.frame.size.width - 12, self.frame.size.height);
+    	currentView.frame = CGRectMake(0, 0, self.frame.size.width - 0, self.frame.size.height);
     }
     else
     	currentView.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height);
@@ -89,18 +71,41 @@
 	return currentView ? currentView.bundleIdentifier : nil;
 }
 
--(void) handleSwipe:(UISwipeGestureRecognizer*)gesture
+-(BOOL) RAGestureCallback_canHandle:(CGPoint)point
 {
-	//NSLog(@"[ReachApp] swipe: %@", gesture);
-	if (gesture.direction == UISwipeGestureRecognizerDirectionLeft && swipeProvider.canGoRight)
+	return point.y <= [self convertPoint:self.frame.origin toView:nil].y + self.frame.size.height;
+}
+
+-(RAGestureCallbackResult) RAGestureCallback_handle:(UIGestureRecognizerState)state withPoint:(CGPoint)location forEdge:(UIRectEdge)edge
+{
+	static BOOL didHandle = NO;
+	if (state == UIGestureRecognizerStateEnded)
 	{
-		[self unload];
-		[self goToTheRight];
+		didHandle = NO;
+		return RAGestureCallbackResultSuccessAndStop;
 	}
-	if (gesture.direction == UISwipeGestureRecognizerDirectionRight && swipeProvider.canGoLeft)
+	if (didHandle) return RAGestureCallbackResultSuccessAndStop;
+
+	if (edge == UIRectEdgeLeft)
 	{
-		[self unload];
-		[self goToTheLeft];
+		didHandle = YES;
+		if (self.swipeProvider.canGoLeft)
+		{
+			[self unload];
+			[self goToTheLeft];
+		}
+		return RAGestureCallbackResultSuccessAndStop;
 	}
+	else if (edge == UIRectEdgeRight)
+	{
+		didHandle = YES;
+		if (self.swipeProvider.canGoRight)
+		{
+			[self unload];
+			[self goToTheRight];
+		}
+		return RAGestureCallbackResultSuccessAndStop;
+	}
+	return RAGestureCallbackResultFailure;
 }
 @end

@@ -42,6 +42,8 @@
 -(void) loadApp
 {
 	[self preloadApp];
+    if (!app)
+        return;
 
 	FBScene *scene = [app mainScene];
     FBWindowContextHostManager *contextHostManager = [scene contextHostManager];

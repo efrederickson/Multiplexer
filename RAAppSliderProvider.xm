@@ -25,7 +25,7 @@
 
 -(BOOL) canGoRight
 {
-	return availableIdentifiers.count >= currentIndex + 1;
+	return availableIdentifiers.count > currentIndex + 1;
 }
 
 -(RAHostedAppView*) viewToTheLeft

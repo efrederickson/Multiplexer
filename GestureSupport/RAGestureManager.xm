@@ -1,6 +1,7 @@
 #import "headers.h"
 #import "RAGestureManager.h"
 #import "RASwipeOverManager.h"
+#import "RAGestureCallback.h"
 
 @implementation RAGestureManager
 +(id) sharedInstance
@@ -11,24 +12,73 @@
 	);
 }
 
--(void) addGestureRecognizer:(RAGestureCallbackBlock)callbackBlock withCondition:(RAGestureConditionBlock)conditionBlock forEdge:(UIRectEdge)screenEdge
+-(void) sortGestureRecognizers
 {
-	[self addGesture:(RAGestureCallback) {
-		callbackBlock, 
-		conditionBlock, 
-		screenEdge
+	[gestures sortUsingComparator:^NSComparisonResult(RAGestureCallback *a, RAGestureCallback *b) {
+		if (a.priority > b.priority)
+			return NSOrderedAscending;
+		else if (a.priority < b.priority)
+			return NSOrderedDescending;
+		return NSOrderedSame;
 	}];
 }
 
--(void) addGesture:(RAGestureCallback)callback
+-(void) addGestureRecognizer:(RAGestureCallbackBlock)callbackBlock withCondition:(RAGestureConditionBlock)conditionBlock forEdge:(UIRectEdge)screenEdge identifier:(NSString*)identifier
 {
-	[gestures addObject:[NSValue valueWithBytes:&callback objCType:@encode(RAGestureCallback)]];
+	[self addGestureRecognizer:callbackBlock withCondition:conditionBlock forEdge:screenEdge identifier:identifier priority:RAGesturePriorityDefault];
 }
 
--(RAGestureCallback) callbackAtIndex:(NSUInteger)index
+-(void) addGesture:(RAGestureCallback*)callback
 {
-	RAGestureCallback ret;
-	[gestures[index] getValue:&ret];
+	[gestures addObject:callback];
+	[self sortGestureRecognizers];
+}
+
+-(void) addGestureRecognizer:(RAGestureCallbackBlock)callbackBlock withCondition:(RAGestureConditionBlock)conditionBlock forEdge:(UIRectEdge)screenEdge identifier:(NSString*)identifier priority:(NSUInteger)priority
+{
+	RAGestureCallback *callback = [[RAGestureCallback alloc] init];
+	callback.callbackBlock = [callbackBlock copy];
+	callback.conditionBlock = [conditionBlock copy];
+	callback.screenEdge = screenEdge;
+	callback.identifier = identifier;
+	callback.priority = priority;
+
+	[self addGesture:callback];
+}
+
+-(void) addGestureRecognizerWithTarget:(NSObject<RAGestureCallbackProtocol>*)target forEdge:(UIRectEdge)screenEdge identifier:(NSString*)identifier
+{
+	[self addGestureRecognizerWithTarget:target forEdge:screenEdge identifier:identifier priority:RAGesturePriorityDefault];
+}
+
+-(void) addGestureRecognizerWithTarget:(NSObject<RAGestureCallbackProtocol>*)target forEdge:(UIRectEdge)screenEdge identifier:(NSString*)identifier priority:(NSUInteger)priority
+{
+	RAGestureCallback *callback = [[RAGestureCallback alloc] init];
+	callback.target = target;
+	callback.screenEdge = screenEdge;
+	callback.identifier = identifier;
+	callback.priority = priority;
+
+	[self addGesture:callback];
+}
+
+-(void) removeGestureWithIdentifier:(NSString*)identifier
+{
+	for (int i = 0; i < gestures.count; i++)
+	{
+		RAGestureCallback *callback = [self callbackAtIndex:i];
+		if ([callback.identifier isEqual:identifier])
+		{
+			[gestures removeObjectAtIndex:i];
+			i--; // offset for the change
+		}
+	}
+}
+
+-(RAGestureCallback*) callbackAtIndex:(NSUInteger)index
+{
+	RAGestureCallback *ret = gestures[index];
+	//[gestures[index] getValue:&ret];
 	return ret;
 }
 
@@ -36,10 +86,18 @@
 {
 	for (int i = 0; i < gestures.count; i++)
 	{
-		RAGestureCallback callback = [self callbackAtIndex:i];
+		RAGestureCallback *callback = [self callbackAtIndex:i];
 		if (callback.screenEdge == edge)
-			if (callback.conditionBlock(point))
-				return YES;
+		{
+			if (callback.conditionBlock)
+			{
+				if (callback.conditionBlock(point))
+					return YES;
+			}
+			else if (callback.target && [callback.target respondsToSelector:@selector(RAGestureCallback_canHandle:)])
+				if ([callback.target RAGestureCallback_canHandle:point])
+					return YES;
+		}
 	}
 	return NO;
 }
@@ -58,16 +116,27 @@
 	BOOL ret = NO;
 	for (int i = 0; i < gestures.count; i++)
 	{
-		RAGestureCallback callback = [self callbackAtIndex:i];
+		RAGestureCallback *callback = [self callbackAtIndex:i];
 		if (callback.screenEdge == edge)
 		{
-			callback.callback(state, point);
-			ret = YES;
+			if (callback.callbackBlock)
+			{
+				RAGestureCallbackResult result = callback.callbackBlock(state, point);
+				ret = YES;
+				if (result == RAGestureCallbackResultSuccessAndStop)
+					break;
+			}
+			else if (callback.target && [callback.target respondsToSelector:@selector(RAGestureCallback_handle:withPoint:forEdge:)])
+			{
+				RAGestureCallbackResult result = [callback.target RAGestureCallback_handle:state withPoint:point forEdge:edge];
+				ret = YES;
+				if (result == RAGestureCallbackResultSuccessAndStop)
+					break;
+			}
 		}
 	}
 	return ret;
 }
-
 
 -(void) ignoreSwipesBeginningInRect:(CGRect)area forIdentifier:(NSString*)identifier
 {

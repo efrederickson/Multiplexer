@@ -37,6 +37,11 @@ return sharedInstance;
 
 extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 
+@interface SBLockScreenManager
++(id) sharedInstance;
+-(BOOL) isUILocked;
+@end
+
 @interface BKSWorkspace : NSObject
 - (NSString *)topActivatingApplication;
 @end
