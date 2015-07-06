@@ -25,7 +25,7 @@
 
         return RAGestureCallbackResultSuccess;
     } withCondition:^BOOL(CGPoint location) {
-        return [[%c(SBLockScreenManager) sharedInstance] isUILocked]; 
+        return ![[%c(SBLockScreenManager) sharedInstance] isUILocked]; 
         //return [[UIApplication sharedApplication] _accessibilityFrontMostApplication] != nil;
     } forEdge:UIRectEdgeRight identifier:@"com.efrederickson.reachapp.swipeover.systemgesture" priority:RAGesturePriorityDefault];
 }

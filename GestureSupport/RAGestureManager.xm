@@ -64,7 +64,8 @@
 
 -(void) removeGestureWithIdentifier:(NSString*)identifier
 {
-	for (int i = 0; i < gestures.count; i++)
+	int i = 0;
+	while (i < gestures.count)
 	{
 		RAGestureCallback *callback = [self callbackAtIndex:i];
 		if ([callback.identifier isEqual:identifier])
@@ -72,6 +73,8 @@
 			[gestures removeObjectAtIndex:i];
 			i--; // offset for the change
 		}
+
+		i++;
 	}
 }
 
@@ -87,7 +90,7 @@
 	for (int i = 0; i < gestures.count; i++)
 	{
 		RAGestureCallback *callback = [self callbackAtIndex:i];
-		if (callback.screenEdge == edge)
+		if (callback.screenEdge & edge)
 		{
 			if (callback.conditionBlock)
 			{
@@ -117,7 +120,7 @@
 	for (int i = 0; i < gestures.count; i++)
 	{
 		RAGestureCallback *callback = [self callbackAtIndex:i];
-		if (callback.screenEdge == edge)
+		if (callback.screenEdge & edge)
 		{
 			if (callback.callbackBlock)
 			{
