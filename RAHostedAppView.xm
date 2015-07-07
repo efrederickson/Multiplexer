@@ -6,6 +6,9 @@
 	if (self = [super init])
 	{
 		self.bundleIdentifier = bundleIdentifier;
+        self.autosizesApp = NO;
+        self.isTopApp = NO;
+        self.allowHidingStatusBar = YES;
 	}
 	return self;
 }
@@ -56,9 +59,27 @@
     view = [contextHostManager hostViewForRequester:@"reachapp" enableAndOrderFront:YES];
 
     view.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height);
-    view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    //view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
     [self addSubview:view];
+}
+
+-(void) setFrame:(CGRect)frame
+{
+    [super setFrame:frame];
+    [view setFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
+
+    if (self.autosizesApp)
+    {
+        NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+        dict[@"sizeWidth"] = @(frame.size.width);
+        dict[@"sizeHeight"] = @(frame.size.height);
+        dict[@"bundleIdentifier"] = self.bundleIdentifier;
+        dict[@"isTopApp"] = @(self.isTopApp);
+        dict[@"rotationMode"] = @NO;
+        dict[@"hideStatusBarIfWanted"] = @(self.allowHidingStatusBar);
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, (__bridge CFDictionaryRef)dict, true);
+    }
 }
 
 -(void) unloadApp
@@ -66,6 +87,7 @@
 	FBScene *scene = [app mainScene];
 
     if (!scene) return;
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": self.bundleIdentifier }, NO);   
 
     FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
     SET_BACKGROUNDED(settings, YES);

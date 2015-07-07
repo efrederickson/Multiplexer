@@ -1,13 +1,13 @@
 #import "headers.h"
 #import "RASwipeOverManager.h"
 #import "RASwipeOverOverlay.h"
+#import "RAHostedAppView.h"
 
 #define SCREEN_WIDTH (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation) ? UIScreen.mainScreen.bounds.size.height : UIScreen.mainScreen.bounds.size.width)
 #define VIEW_WIDTH(x) (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation) ? x.frame.size.height : x.frame.size.width)
 
 @interface RASwipeOverManager () {
 	RASwipeOverOverlay *overlayWindow;
-	BOOL isLaunchingApp;
 
 	CGFloat start;
 }
@@ -18,6 +18,10 @@
 {
 	SHARED_INSTANCE(RASwipeOverManager);
 }
+
+-(BOOL) isUsingSwipeOver { return isUsingSwipeOver; }
+-(void) showAppSelector { [overlayWindow showAppSelector]; }
+-(BOOL) isEdgeViewShowing { return overlayWindow.frame.origin.x < SCREEN_WIDTH; }
 
 -(void) startUsingSwipeOver
 {
@@ -30,11 +34,9 @@
 
 -(void) stopUsingSwipeOver
 {
-	BOOL wasHiding = overlayWindow.isHidingUnderlyingApp;
+	if (currentAppIdentifier)
+	    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentAppIdentifier }, NO);   
 	[overlayWindow removeOverlayFromUnderlyingAppImmediately];
-
-	if (currentAppIdentifier && wasHiding == NO)
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentAppIdentifier }, NO);
 
 	isUsingSwipeOver = NO;
 	currentAppIdentifier = nil;
@@ -48,8 +50,6 @@
 		overlayWindow = nil;
 	}];
 }
-
--(BOOL) isUsingSwipeOver { return isUsingSwipeOver; }
 
 -(void) createEdgeView
 {
@@ -68,9 +68,7 @@
     FBScene *scene = nil;
 
     if (identifier)
-    {
         app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:identifier];
-    }
     else
     {
 	    NSMutableArray *bundleIdentifiers = [[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary];
@@ -92,38 +90,12 @@
     if (identifier == nil || identifier.length == 0)
         return;
 
-    scene = [app mainScene];
-
-    if (![app pid] || [app mainScene] == nil)
-    {
-    	if (!isLaunchingApp)
-    	{
-	    	[UIApplication.sharedApplication launchApplicationWithIdentifier:identifier suspended:YES];
-	    	[[%c(FBProcessManager) sharedInstance] createApplicationProcessForBundleID:identifier];	
-
-	    	UIView *tempView = [[UIView alloc] initWithFrame:UIScreen.mainScreen.bounds];
-	    	tempView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.6];
-	    	tempView.tag = RASWIPEOVER_VIEW_TAG;
-	    	[overlayWindow addSubview:tempView];
-    	}
-        
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        	isLaunchingApp = YES;
-            [self showApp:identifier];
-        });
-        return;
-    }
-    if (isLaunchingApp)
-    	[[overlayWindow viewWithTag:RASWIPEOVER_VIEW_TAG] removeFromSuperview];
-    isLaunchingApp = NO;
-
-    FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
-    SET_BACKGROUNDED(settings, NO);
-    [scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];
-
-    FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
-    [contextHostManager enableHostingForRequester:@"reachapp" orderFront:YES];
-    UIView *view = [contextHostManager hostViewForRequester:@"reachapp" enableAndOrderFront:YES];
+    RAHostedAppView *view = [[RAHostedAppView alloc] initWithBundleIdentifier:identifier];
+    view.autosizesApp = YES;
+    view.isTopApp = YES;
+    view.allowHidingStatusBar = NO;
+    view.frame = UIScreen.mainScreen.bounds;
+    [view loadApp];
 
     if (overlayWindow.isHidingUnderlyingApp == NO)
 	    view.frame = CGRectMake(10, 0, view.frame.size.width, view.frame.size.height);
@@ -132,42 +104,17 @@
 
     view.tag = RASWIPEOVER_VIEW_TAG;
     [overlayWindow addSubview:view];
-	currentHostingIdentifier = identifier;
 
 	[self updateClientSizes:YES];
 }
 
 -(void) closeCurrentView
 {
-	[[overlayWindow currentView] removeFromSuperview];
-
-	if (currentHostingIdentifier)
+	if ([[overlayWindow currentView] isKindOfClass:[RAHostedAppView class]])
 	{
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentHostingIdentifier}, NO);
-		SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:currentHostingIdentifier];
-
-		if (app && app.pid && app.mainScene)
-		{
-	        FBScene *scene = [app mainScene];
-	        FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
-	        SET_BACKGROUNDED(settings, YES);
-	        [scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];
-	        [[scene contextHostManager] disableHostingForRequester:@"reachapp"];
-		}
-
-		currentHostingIdentifier = nil;
+		[((RAHostedAppView*)overlayWindow.currentView) unloadApp];
 	}
-}
-
--(void) showAppSelector
-{
-	//[self closeCurrentView];
-	[overlayWindow showAppSelector];
-}
-
--(BOOL) isEdgeViewShowing
-{
-	return overlayWindow.frame.origin.x < SCREEN_WIDTH;
+	[[overlayWindow currentView] removeFromSuperview];
 }
 
 -(void) convertSwipeOverViewToSideBySide
@@ -193,23 +140,10 @@
 		SEND_RESIZE_TO_UNDERLYING_APP(CGSizeMake(underWidth, -1));
 	}
 	
-	if (currentHostingIdentifier == nil && overlayWindow.isShowingAppSelector)
-	{
-		if (reloadAppSelectorSizeNow)
-			[self showAppSelector];
-	}
-	else if (currentHostingIdentifier)
-	{
-		if ([overlayWindow isHidingUnderlyingApp])
-		{
-
-		}
-		else
-		{
-			CGFloat overWidth = [overlayWindow isHidingUnderlyingApp] ? overlayWindow.frame.size.width : SCREEN_WIDTH - overlayWindow.frame.origin.x;
-			SEND_RESIZE_TO_OVERLYING_APP(CGSizeMake(overWidth, -1));	
-		}
-	}
+	if (overlayWindow.isShowingAppSelector && reloadAppSelectorSizeNow)
+		[self showAppSelector];
+	else if (overlayWindow.isHidingUnderlyingApp == NO) // Update swiped-over app. RAHostedAppView takes care of the app sizing if we resize the RAHostedAppView. 
+		overlayWindow.currentView.frame = CGRectMake(10, 0, SCREEN_WIDTH - overlayWindow.frame.origin.x - 10, overlayWindow.currentView.frame.size.height);
 }
 
 -(void) sizeViewForTranslation:(CGPoint)translation state:(UIGestureRecognizerState)state
@@ -234,27 +168,21 @@
 	{
 		//if (start + translation.x + (targetView.frame.size.width / 2) < UIScreen.mainScreen.bounds.size.width && [overlayWindow isHidingUnderlyingApp])
 		//	return;
-		if (start + translation.x + targetView.frame.size.width - (targetView.frame.size.width / 2) < 0)
-			return;
+		//if (start + translation.x + targetView.frame.size.width - (targetView.frame.size.width / 2) < 0 && [overlayWindow isHidingUnderlyingApp] == NO)
+		//	return;
 
 		if (overlayWindow.isHidingUnderlyingApp && [[overlayWindow currentView] isKindOfClass:[UIScrollView class]] == NO)
 		{
-			targetView.center = (CGPoint) { start + translation.x, targetView.center.y };
-			CGFloat scale = (SCREEN_WIDTH - targetView.frame.origin.x) / [overlayWindow currentView].bounds.size.width;
+			CGFloat scale = (SCREEN_WIDTH - (start + translation.x)) / [overlayWindow currentView].bounds.size.width;
 			scale = MIN(MAX(scale, 0.1), 0.98);
 			targetView.transform = CGAffineTransformMakeScale(scale, scale);
 			targetView.center = (CGPoint) { SCREEN_WIDTH - (targetView.frame.size.width / 2), targetView.center.y };
 		} 
 		else
+		{
+			//targetView.frame = CGRectMake(SCREEN_WIDTH - (start + translation.x), 0, SCREEN_WIDTH - (SCREEN_WIDTH - start + translation.x), targetView.frame.size.height);
 			targetView.center = (CGPoint) { start + translation.x, targetView.center.y };
-	}
-
-	if (state == UIGestureRecognizerStateEnded)
-	{
-		overlayWindow.frame = (CGRect) { overlayWindow.frame.origin, { SCREEN_WIDTH - overlayWindow.frame.origin.x, overlayWindow.frame.size.height } };
-
-		if (targetView.frame.origin.x > SCREEN_WIDTH)
-			[self stopUsingSwipeOver];
+		}
 	}
 	[self updateClientSizes:state == UIGestureRecognizerStateEnded];
 }

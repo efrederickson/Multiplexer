@@ -2,7 +2,6 @@
 
 @interface RASwipeOverManager : NSObject {
 	NSString *currentAppIdentifier;
-	NSString *currentHostingIdentifier;
 	BOOL isUsingSwipeOver;
 }
 +(id) sharedInstance;
