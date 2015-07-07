@@ -1,5 +1,6 @@
 #import "RAGestureManager.h"
 #import "RASwipeOverManager.h"
+#import "RAKeyboardStateListener.h"
 
 %ctor
 {
@@ -25,7 +26,15 @@
 
         return RAGestureCallbackResultSuccess;
     } withCondition:^BOOL(CGPoint location) {
-        return ![[%c(SBLockScreenManager) sharedInstance] isUILocked]; 
-        //return [[UIApplication sharedApplication] _accessibilityFrontMostApplication] != nil;
+        if (RAKeyboardStateListener.sharedInstance.visible)
+        {
+            CGRect realKBFrame = CGRectMake(0, UIScreen.mainScreen.bounds.size.height, RAKeyboardStateListener.sharedInstance.size.width, RAKeyboardStateListener.sharedInstance.size.height);
+            realKBFrame = CGRectOffset(realKBFrame, 0, -realKBFrame.size.height);
+
+            if (CGRectContainsPoint(realKBFrame, location))
+                return NO;
+        }
+        
+        return ![[%c(SBLockScreenManager) sharedInstance] isUILocked];
     } forEdge:UIRectEdgeRight identifier:@"com.efrederickson.reachapp.swipeover.systemgesture" priority:RAGesturePriorityDefault];
 }
