@@ -97,10 +97,17 @@
     view.frame = UIScreen.mainScreen.bounds;
     [view loadApp];
 
-    if (overlayWindow.isHidingUnderlyingApp == NO)
+    if (overlayWindow.isHidingUnderlyingApp == NO) // side-by-side
 	    view.frame = CGRectMake(10, 0, view.frame.size.width, view.frame.size.height);
-	else
-		view.frame = CGRectMake(SCREEN_WIDTH, 0, view.frame.size.width, view.frame.size.height);
+	else // overlay
+	{
+		view.frame = CGRectMake(SCREEN_WIDTH - 50, 0, view.frame.size.width, view.frame.size.height);
+
+		CGFloat scale = (SCREEN_WIDTH - (50)) / [overlayWindow currentView].bounds.size.width;
+		scale = 0.1; // MIN(MAX(scale, 0.1), 0.98);
+		view.transform = CGAffineTransformMakeScale(scale, scale);
+		view.center = (CGPoint) { SCREEN_WIDTH - (view.frame.size.width / 2), view.center.y };
+	}
 
     view.tag = RASWIPEOVER_VIEW_TAG;
     [overlayWindow addSubview:view];
@@ -142,7 +149,7 @@
 	
 	if (overlayWindow.isShowingAppSelector && reloadAppSelectorSizeNow)
 		[self showAppSelector];
-	else if (overlayWindow.isHidingUnderlyingApp == NO) // Update swiped-over app. RAHostedAppView takes care of the app sizing if we resize the RAHostedAppView. 
+	else if (overlayWindow.isHidingUnderlyingApp == NO) // Update swiped-over app in side-by-side mode. RAHostedAppView takes care of the app sizing if we resize the RAHostedAppView. 
 		overlayWindow.currentView.frame = CGRectMake(10, 0, SCREEN_WIDTH - overlayWindow.frame.origin.x - 10, overlayWindow.currentView.frame.size.height);
 }
 
@@ -153,7 +160,7 @@
 	if (start == 0)
 		start = targetView.center.x;
 	
-	if (state == UIGestureRecognizerStateEnded)
+	if (state == UIGestureRecognizerStateEnded || state == UIGestureRecognizerStateCancelled || state == UIGestureRecognizerStateFailed)
 	{
 		start = 0;
 

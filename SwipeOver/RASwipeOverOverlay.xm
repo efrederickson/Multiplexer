@@ -120,13 +120,13 @@
     padding = (self.frame.size.width - (numIconsPerLine * fullSize.width)) / numIconsPerLine;
 
     UIScrollView *allAppsView = [[UIScrollView alloc] initWithFrame:CGRectMake(10, 0, self.frame.size.width - 10, self.frame.size.height)];
-    allAppsView.backgroundColor = [UIColor blackColor];
+    allAppsView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.7];
 
 	CGSize contentSize = CGSizeMake(10, 10);
 	SBApplication *app = nil;
 	int horizontal = 0;
 
-	allAppsView.backgroundColor = [UIColor clearColor];
+	//allAppsView.backgroundColor = [UIColor clearColor];
 	// TODO: doesn't work as well to having vertical paging...
 	//allAppsView.pagingEnabled = [RASettings.sharedInstance pagingEnabled];
 

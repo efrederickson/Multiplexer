@@ -12,6 +12,7 @@
 #import "RAWidgetSectionManager.h"
 #import "RASettings.h"
 #import "RASwipeOverManager.h"
+#import "RAMissionControlManager.h"
 
 #define SPRINGBOARD ([NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"])
 
@@ -23,11 +24,34 @@
 		[RASwipeOverManager.sharedInstance stopUsingSwipeOver];
 		return YES;
 	}
+
     if ([RASettings.sharedInstance homeButtonClosesReachability] && [[%c(SBWorkspace) sharedInstance] isUsingReachApp] && ((SBReachabilityManager*)[%c(SBReachabilityManager) sharedInstance]).reachabilityModeActive)
     {
         [[%c(SBReachabilityManager) sharedInstance] _handleReachabilityDeactivated];
         return YES;
     }
+
+    if (RAMissionControlManager.sharedInstance.isShowingMissionControl)
+    {
+        [RAMissionControlManager.sharedInstance hideMissionControl:YES];
+        return YES;
+    }
+
+    return %orig;
+}
+
+- (_Bool)handleMenuDoubleTap
+{
+    if ([RASwipeOverManager.sharedInstance isUsingSwipeOver])
+    {
+        [RASwipeOverManager.sharedInstance stopUsingSwipeOver];
+    }
+
+    if (RAMissionControlManager.sharedInstance.isShowingMissionControl)
+    {
+        [RAMissionControlManager.sharedInstance hideMissionControl:YES];
+    }
+
     return %orig;
 }
 %end

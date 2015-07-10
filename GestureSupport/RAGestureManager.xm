@@ -122,19 +122,32 @@
 		RAGestureCallback *callback = [self callbackAtIndex:i];
 		if (callback.screenEdge & edge)
 		{
-			if (callback.callbackBlock)
+			BOOL isThisCallbackCapable = NO;
+			if (callback.conditionBlock)
 			{
-				RAGestureCallbackResult result = callback.callbackBlock(state, point);
-				ret = YES;
-				if (result == RAGestureCallbackResultSuccessAndStop)
-					break;
+				if (callback.conditionBlock(point))
+					isThisCallbackCapable = YES;
 			}
-			else if (callback.target && [callback.target respondsToSelector:@selector(RAGestureCallback_handle:withPoint:forEdge:)])
-			{
-				RAGestureCallbackResult result = [callback.target RAGestureCallback_handle:state withPoint:point forEdge:edge];
-				ret = YES;
-				if (result == RAGestureCallbackResultSuccessAndStop)
-					break;
+			else if (callback.target && [callback.target respondsToSelector:@selector(RAGestureCallback_canHandle:)])
+				if ([callback.target RAGestureCallback_canHandle:point])
+					isThisCallbackCapable = YES;
+
+			if (isThisCallbackCapable)
+			{	
+				if (callback.callbackBlock)
+				{
+					RAGestureCallbackResult result = callback.callbackBlock(state, point);
+					ret = YES;
+					if (result == RAGestureCallbackResultSuccessAndStop)
+						break;
+				}
+				else if (callback.target && [callback.target respondsToSelector:@selector(RAGestureCallback_handle:withPoint:forEdge:)])
+				{
+					RAGestureCallbackResult result = [callback.target RAGestureCallback_handle:state withPoint:point forEdge:edge];
+					ret = YES;
+					if (result == RAGestureCallbackResultSuccessAndStop)
+						break;
+				}
 			}
 		}
 	}

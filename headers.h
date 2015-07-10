@@ -22,6 +22,9 @@
 
 extern "C" CFNotificationCenterRef CFNotificationCenterGetDistributedCenter(void);
 
+#define RADIANS_TO_DEGREES(radians) ((radians) * (180.0 / M_PI))
+#define DEGREES_TO_RADIANS(radians) ((radians) * (M_PI / 180))
+
 void SET_BACKGROUNDED(id settings, BOOL val);
 
 #define SHARED_INSTANCE2(cls, extracode) \
@@ -36,6 +39,42 @@ return sharedInstance;
 #define SHARED_INSTANCE(cls) SHARED_INSTANCE2(cls, );
 
 extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
+
+@interface SBAppSwitcherWindow : UIWindow
+@end
+
+@interface SBChevronView : UIView
+-(void) setState:(int)state animated:(BOOL)animated;
+@end
+
+@interface SBControlCenterGrabberView : UIView
+-(SBChevronView*) chevronView;
+- (void)_setStatusState:(int)arg1;
+@end
+
+@interface SBAppSwitcherController
+- (void)forceDismissAnimated:(_Bool)arg1;
+@end
+
+@interface SBUIController : NSObject
++(id) sharedInstance;
++ (id)_zoomViewWithSplashboardLaunchImageForApplication:(id)arg1 sceneID:(id)arg2 screen:(id)arg3 interfaceOrientation:(long long)arg4 includeStatusBar:(_Bool)arg5 snapshotFrame:(struct CGRect *)arg6;
+-(id) switcherController;
+- (id)_appSwitcherController;
+-(void) activateApplicationAnimated:(SBApplication*)app;
+- (id)switcherWindow;
+- (void)_animateStatusBarForSuspendGesture;
+- (void)_showControlCenterGestureCancelled;
+- (void)_showControlCenterGestureFailed;
+- (void)_hideControlCenterGrabber;
+- (void)_showControlCenterGestureEndedWithLocation:(CGPoint)arg1 velocity:(CGPoint)arg2;
+- (void)_showControlCenterGestureChangedWithLocation:(CGPoint)arg1 velocity:(CGPoint)arg2 duration:(CGFloat)arg3;
+- (void)_showControlCenterGestureBeganWithLocation:(CGPoint)arg1;
+@end
+
+@interface SBDisplayItem : NSObject <NSCopying>
++ (id)displayItemWithType:(NSString *)arg1 displayIdentifier:(id)arg2;
+@end
 
 @interface SBLockScreenManager
 +(id) sharedInstance;
@@ -156,6 +195,30 @@ typedef NS_ENUM(NSInteger, UIScreenEdgePanRecognizerType) {
 - (int)type;
 @end
 
+@interface FBWorkspaceEvent : NSObject
++ (instancetype)eventWithName:(NSString *)label handler:(id)handler;
+@end
+
+@interface FBSceneManager : NSObject
+@end
+
+@interface SBAppToAppWorkspaceTransaction
+- (void)begin;
+- (id)initWithAlertManager:(id)alertManager exitedApp:(id)app;
+- (id)initWithAlertManager:(id)arg1 from:(id)arg2 to:(id)arg3 withResult:(id)arg4;
+- (id)initWithTransitionRequest:(id)arg1;
+@end
+
+@interface FBWorkspaceEventQueue : NSObject
++ (instancetype)sharedInstance;
+- (void)executeOrAppendEvent:(FBWorkspaceEvent *)event;
+@end
+
+@interface SBDeactivationSettings
+-(id)init;
+-(void)setFlag:(int)flag forDeactivationSetting:(unsigned)deactivationSetting;
+@end
+
 @interface SBWorkspace 
 +(id) sharedInstance;
 -(BOOL) isUsingReachApp;
@@ -249,6 +312,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 - (void)resumeContextHosting;
 - (id)_hostViewForRequester:(id)arg1 enableAndOrderFront:(BOOL)arg2;
 - (id)snapshotViewWithFrame:(CGRect)arg1 excludingContexts:(id)arg2 opaque:(BOOL)arg3;
+- (id)snapshotUIImageForFrame:(struct CGRect)arg1 excludingContexts:(id)arg2 opaque:(BOOL)arg3 outTransform:(struct CGAffineTransform *)arg4;
 - (id)visibleContexts;
 - (void)orderRequesterFront:(id)arg1;
 - (void)enableHostingForRequester:(id)arg1 orderFront:(BOOL)arg2;
@@ -326,7 +390,9 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @end
 
 @interface SBApplication ()
+-(void) _setDeactivationSettings:(SBDeactivationSettings*)arg1;
 -(FBScene*) mainScene;
+-(id) mainSceneID;
 - (void)activate;
 
 - (void)processDidLaunch:(id)arg1;

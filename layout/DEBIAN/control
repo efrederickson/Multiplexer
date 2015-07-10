@@ -1,11 +1,11 @@
-Package: com.efrederickson.reachapp
-Name: ReachApp
-Depends: mobilesubstrate, firmware (>= 8.0), applist
+Package: com.efrederickson.empoleon
+Name: Multiplexer
+Depends: mobilesubstrate, firmware (>= 8.0), applist, preferenceloader
 Conflicts: cc.tweak.statushud
-Version: 0.0.3
+Version: 0.1
 Architecture: iphoneos-arm
-Description: Split-screen multitasking in reachability view
+Description: All sorts of multitasking. ReachApp + Empoleon + Perfection.
 Depiction: http://elijahandandrew.com/repo/depictions/ReachApp/index.html
 Maintainer: Elijah Frederickson <elijah.frederickson@gmail.com>
-Author: Elijah Frederickson <elijah.frederickson@gmail.com>
+Author: Elijah and Andrew <elijahandandrew@gmail.com>
 Section: Tweaks

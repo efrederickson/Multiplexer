@@ -80,7 +80,7 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
 - (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(id)arg2 changeApplicationFlag:(BOOL)arg3
 {
 	if ([RASettings.sharedInstance unifyStatusBar])
-	    arg1 = (forcingRotation || overrideDisplay) ? (isTopApp ? NO : YES) : arg1;
+	    arg1 = ((forcingRotation&&NO) || overrideDisplay) ? (isTopApp ? NO : YES) : arg1;
     %orig(arg1, arg2, YES);
 }
 
@@ -100,7 +100,7 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
     %orig;
 }
 
-%new - (void)RA_forceRotationToInterfaceOrientation:(UIInterfaceOrientation)orientation isReverting:(BOOL) reverting
+%new - (void)RA_forceRotationToInterfaceOrientation:(UIInterfaceOrientation)orientation isReverting:(BOOL)reverting
 {
     //NSLog(@"ReachApp: RA_forceRotationToInterfaceOrientation %@", @(orientation));
     forcingRotation = YES;
@@ -111,12 +111,13 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
         {
             setPreviousOrientation = YES;
             prevousOrientation = UIApplication.sharedApplication.statusBarOrientation;
+            wasStatusBarHidden = UIApplication.sharedApplication.statusBarHidden;
         }
         forcedOrientation = orientation;
     }
 
     for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
-        [window _setRotatableViewOrientation:orientation updateStatusBar:YES duration:0.0 force:YES];
+        [window _setRotatableViewOrientation:orientation updateStatusBar:YES duration:0.25 force:YES];
     }
 
     forcingRotation = NO;

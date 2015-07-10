@@ -1,6 +1,7 @@
 #import "RAGestureManager.h"
 #import "RASwipeOverManager.h"
 #import "RAKeyboardStateListener.h"
+#import "RAMissionControlManager.h"
 
 %ctor
 {
@@ -35,6 +36,6 @@
                 return NO;
         }
         
-        return ![[%c(SBLockScreenManager) sharedInstance] isUILocked];
+        return ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && !RAMissionControlManager.sharedInstance.isShowingMissionControl;
     } forEdge:UIRectEdgeRight identifier:@"com.efrederickson.reachapp.swipeover.systemgesture" priority:RAGesturePriorityDefault];
 }

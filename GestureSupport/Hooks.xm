@@ -47,7 +47,7 @@ UIRectEdge currentEdge;
 
 %new -(void) screenEdgePanRecognizerStateDidChange:(_UIScreenEdgePanRecognizer *)screenEdgePanRecognizer 
 {
-    if (screenEdgePanRecognizer.state == 1) 
+    if (screenEdgePanRecognizer.state == 1)
     {
         CGPoint location = MSHookIvar<CGPoint>(screenEdgePanRecognizer, "_lastTouchLocation");
         if (shouldBeOverridingForRecognizer == NO)
@@ -62,6 +62,7 @@ UIRectEdge currentEdge;
         }
     }
 }
+
 
 -(void) clear {
     dispatch_async(dispatch_get_main_queue(), ^{

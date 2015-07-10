@@ -1,5 +1,8 @@
 #import "RAHostedAppView.h"
 
+@interface RAHostedAppView ()
+@end
+
 @implementation RAHostedAppView
 -(id) initWithBundleIdentifier:(NSString*)bundleIdentifier
 {
@@ -26,9 +29,15 @@
     }
 }
 
+-(void) setBundleIdentifier:(NSString*)value
+{
+    _orientation = UIInterfaceOrientationPortrait;
+    _bundleIdentifier = value;
+    app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:value];
+}
+
 -(void) preloadApp
 {
-	app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleIdentifier];
     if (app == nil)
         return;
 	FBScene *scene = [app mainScene];
@@ -95,4 +104,27 @@
     FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
     [contextHostManager disableHostingForRequester:@"reachapp"];
 }
+
+-(void) rotateToOrientation:(UIInterfaceOrientation)o
+{
+    _orientation = o;
+    NSString *event = @"";
+    // force the last app to orient to the current apps orientation
+    if (o == UIInterfaceOrientationLandscapeRight)
+        event = @"com.efrederickson.reachapp.forcerotation-right";
+    else if (o == UIInterfaceOrientationLandscapeLeft)
+        event = @"com.efrederickson.reachapp.forcerotation-left";
+    else if (o == UIInterfaceOrientationPortrait)
+        event = @"com.efrederickson.reachapp.forcerotation-portrait";
+    else if (o == UIInterfaceOrientationPortraitUpsideDown)
+        event = @"com.efrederickson.reachapp.forcerotation-upsidedown";
+
+    CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    CFDictionaryAddValue(dictionary,  (__bridge const void*)@"bundleIdentifier",  (__bridge const void*)self.bundleIdentifier);
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), (__bridge CFStringRef)event, NULL, dictionary, true);
+    CFRelease(dictionary);
+}
+
+-(SBApplication*) app { return app; }
+-(NSString*) displayName { return app.displayName; }
 @end
