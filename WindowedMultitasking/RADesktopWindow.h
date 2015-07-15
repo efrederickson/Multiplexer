@@ -1,13 +1,16 @@
 #import "RAHostedAppView.h"
 
+@class RAWindowBar;
+
 @interface RADesktopWindow : UIWindow {
 	NSMutableArray *appViews;
 }
 
--(void) addAppWithView:(RAHostedAppView*)view animated:(BOOL)animated;
--(void) createAppWindowForSBApplication:(SBApplication*)app animated:(BOOL)animated;
--(void) createAppWindowWithIdentifier:(NSString*)identifier animated:(BOOL)animated;
+-(RAWindowBar*) addAppWithView:(RAHostedAppView*)view animated:(BOOL)animated;
+-(RAWindowBar*) createAppWindowForSBApplication:(SBApplication*)app animated:(BOOL)animated;
+-(RAWindowBar*) createAppWindowWithIdentifier:(NSString*)identifier animated:(BOOL)animated;
 
+-(void) addExistingWindow:(RAWindowBar*)window;
 -(void) removeAppWithIdentifier:(NSString*)identifier animated:(BOOL)animated;
 
 -(NSArray*) hostedWindows;

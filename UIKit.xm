@@ -204,6 +204,23 @@ void forceRotation_upsidedown(CFNotificationCenterRef center, void *observer, CF
 
 BOOL inapp_ScalingRotationMode = NO;
 
+void updateStatusBarHidden(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) 
+{
+    NSDictionary *info = (__bridge NSDictionary*)userInfo;
+    BOOL hideSB = info[@"hideStatusBar"] ? [info[@"hideStatusBar"] boolValue] : NO;
+    if ([NSBundle.mainBundle.bundleIdentifier isEqual:[info objectForKey:@"bundleIdentifier"]])
+    {
+        if (hideSB)
+        {
+            if (wasStatusBarHidden == -1)
+                wasStatusBarHidden = UIApplication.sharedApplication.statusBarHidden;
+            [UIApplication.sharedApplication _setStatusBarHidden:YES animationParameters:nil changeApplicationFlag:YES];
+        }
+        else
+            [UIApplication.sharedApplication _setStatusBarHidden:NO animationParameters:nil changeApplicationFlag:YES];
+    }
+}
+
 void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) 
 {
     NSDictionary *info = (__bridge NSDictionary*)userInfo;
@@ -294,6 +311,7 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
         CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_portrait, CFSTR("com.efrederickson.reachapp.forcerotation-portrait"), NULL, CFNotificationSuspensionBehaviorDrop);
         CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceRotation_upsidedown, CFSTR("com.efrederickson.reachapp.forcerotation-upsidedown"), NULL, CFNotificationSuspensionBehaviorDrop);
         
+        CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, updateStatusBarHidden, CFSTR("com.efrederickson.reachapp.updateStatusBar"), NULL, CFNotificationSuspensionBehaviorCoalesce);
         CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, forceResizing, CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, CFNotificationSuspensionBehaviorCoalesce);
         CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, endForceResizing, CFSTR("com.efrederickson.reachapp.endresizing"), NULL, CFNotificationSuspensionBehaviorDrop);
     }

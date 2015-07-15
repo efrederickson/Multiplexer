@@ -41,6 +41,11 @@ BOOL overrideUIWindow = NO;
 
 -(void) switchToDesktop:(NSUInteger)index
 {
+	[self switchToDesktop:index actuallyShow:YES];
+}
+
+-(void) switchToDesktop:(NSUInteger)index actuallyShow:(BOOL)show
+{
 	RADesktopWindow *newDesktop = windows[index];
 
 	currentDesktop.hidden = YES;
@@ -48,9 +53,13 @@ BOOL overrideUIWindow = NO;
 	[currentDesktop unloadApps];
 	[newDesktop loadApps];
 
+	if (show == NO)
+		newDesktop.hidden = YES;
 	overrideUIWindow = NO;
 	[newDesktop makeKeyAndVisible];
 	overrideUIWindow = YES;
+	if (show == NO)
+		newDesktop.hidden = YES;
 
 	currentDesktopIndex = index;
 	currentDesktop = newDesktop;
@@ -73,6 +82,7 @@ BOOL overrideUIWindow = NO;
 {
 	currentDesktop.hidden = NO;
 }
+
 -(RADesktopWindow*) desktopAtIndex:(NSUInteger)index { return windows[index]; }
 -(NSArray*) availableDesktops { return windows; }
 -(NSUInteger) currentDesktopIndex { return currentDesktopIndex; }
@@ -83,9 +93,13 @@ BOOL overrideUIWindow = NO;
 -(void) makeKeyAndVisible
 {
 	%orig;
+
 	if (overrideUIWindow)
 	{
-		if ([self isKindOfClass:[RAMissionControlWindow class]] || [self isKindOfClass:[%c(SBAppSwitcherWindow) class]])
+		static Class c1 = [RAMissionControlWindow class];
+		static Class c2 = [%c(SBAppSwitcherWindow) class];
+
+		if ([self isKindOfClass:c1] || [self isKindOfClass:c2])
 			return;
 		if (self != RADesktopManager.sharedInstance.currentDesktop)
 		{
@@ -104,3 +118,9 @@ BOOL overrideUIWindow = NO;
     %orig;
 }
 %end
+
+%ctor
+{
+	if ([NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"])
+		%init;
+}

@@ -119,7 +119,8 @@
     }
     padding = (self.frame.size.width - (numIconsPerLine * fullSize.width)) / numIconsPerLine;
 
-    UIScrollView *allAppsView = [[UIScrollView alloc] initWithFrame:CGRectMake(10, 0, self.frame.size.width - 10, self.frame.size.height)];
+    UIScrollView *allAppsView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width - 10, self.frame.size.height)];
+    grabberView.alpha = 0;
     allAppsView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.7];
 
 	CGSize contentSize = CGSizeMake(10, 10);
@@ -173,6 +174,7 @@
 
 -(void) appViewItemTap:(UITapGestureRecognizer*)recognizer
 {
+	grabberView.alpha = 1;
 	[RASwipeOverManager.sharedInstance showApp:recognizer.view.restorationIdentifier];
 }
 

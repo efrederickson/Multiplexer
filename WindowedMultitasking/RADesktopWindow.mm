@@ -12,7 +12,7 @@
 	return self;
 }
 
--(void) addAppWithView:(RAHostedAppView*)view animated:(BOOL)animated
+-(RAWindowBar*) addAppWithView:(RAHostedAppView*)view animated:(BOOL)animated
 {
 	view.frame = CGRectMake(0, 100, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height);
 	view.center = self.center;
@@ -29,17 +29,28 @@
 
 	[view loadApp];
 	windowBar.transform = CGAffineTransformMakeScale(0.5, 0.5);
+
+	return windowBar;
 }
 
--(void) createAppWindowForSBApplication:(SBApplication*)app animated:(BOOL)animated
+-(void) addExistingWindow:(RAWindowBar*)window
 {
-	[self createAppWindowWithIdentifier:app.bundleIdentifier animated:(BOOL)animated];
+	[appViews addObject:window.attachedView];
+	[self addSubview:window];
+
+	[self addAppWithView:window.attachedView animated:NO];
+	((UIView*)self.subviews[self.subviews.count - 1]).transform = window.transform;
 }
 
--(void) createAppWindowWithIdentifier:(NSString*)identifier animated:(BOOL)animated
+-(RAWindowBar*) createAppWindowForSBApplication:(SBApplication*)app animated:(BOOL)animated
+{
+	return [self createAppWindowWithIdentifier:app.bundleIdentifier animated:(BOOL)animated];
+}
+
+-(RAWindowBar*) createAppWindowWithIdentifier:(NSString*)identifier animated:(BOOL)animated
 {
 	RAHostedAppView *view = [[RAHostedAppView alloc] initWithBundleIdentifier:identifier];
-	[self addAppWithView:view animated:(BOOL)animated];
+	return [self addAppWithView:view animated:(BOOL)animated];
 }
 
 -(void) removeAppWithIdentifier:(NSString*)identifier animated:(BOOL)animated
@@ -94,7 +105,8 @@
 	}	
 }
 
-- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event 
+{
 	BOOL isContained = NO;
 	for (UIView *view in self.subviews)
 	{

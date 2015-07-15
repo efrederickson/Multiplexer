@@ -85,7 +85,7 @@
 	return ret;
 }
 
--(BOOL) canHandleMovementWithPoint:(CGPoint)point forEdge:(UIRectEdge)edge
+-(BOOL) canHandleMovementWithPoint:(CGPoint)point velocity:(CGPoint)velocity forEdge:(UIRectEdge)edge
 {
 	for (int i = 0; i < gestures.count; i++)
 	{
@@ -94,18 +94,18 @@
 		{
 			if (callback.conditionBlock)
 			{
-				if (callback.conditionBlock(point))
+				if (callback.conditionBlock(point, velocity))
 					return YES;
 			}
-			else if (callback.target && [callback.target respondsToSelector:@selector(RAGestureCallback_canHandle:)])
-				if ([callback.target RAGestureCallback_canHandle:point])
+			else if (callback.target && [callback.target respondsToSelector:@selector(RAGestureCallback_canHandle:velocity:)])
+				if ([callback.target RAGestureCallback_canHandle:point velocity:velocity])
 					return YES;
 		}
 	}
 	return NO;
 }
 
--(BOOL) handleMovementOrStateUpdate:(UIGestureRecognizerState)state withPoint:(CGPoint)point forEdge:(UIRectEdge)edge
+-(BOOL) handleMovementOrStateUpdate:(UIGestureRecognizerState)state withPoint:(CGPoint)point velocity:(CGPoint)velocity forEdge:(UIRectEdge)edge
 {
 	// If we don't do this check here, but in canHandleMovementWithPoint:forEdge:, the recognizer hooks will not begin tracking the swipe
 	// This is an issue if someone calls stopIgnoringSwipesForIdentifier: while a swipe is going on. 
@@ -125,25 +125,25 @@
 			BOOL isThisCallbackCapable = NO;
 			if (callback.conditionBlock)
 			{
-				if (callback.conditionBlock(point))
+				if (callback.conditionBlock(point, velocity))
 					isThisCallbackCapable = YES;
 			}
-			else if (callback.target && [callback.target respondsToSelector:@selector(RAGestureCallback_canHandle:)])
-				if ([callback.target RAGestureCallback_canHandle:point])
+			else if (callback.target && [callback.target respondsToSelector:@selector(RAGestureCallback_canHandle:velocity:)])
+				if ([callback.target RAGestureCallback_canHandle:point velocity:velocity])
 					isThisCallbackCapable = YES;
 
 			if (isThisCallbackCapable)
 			{	
 				if (callback.callbackBlock)
 				{
-					RAGestureCallbackResult result = callback.callbackBlock(state, point);
+					RAGestureCallbackResult result = callback.callbackBlock(state, point, velocity);
 					ret = YES;
 					if (result == RAGestureCallbackResultSuccessAndStop)
 						break;
 				}
-				else if (callback.target && [callback.target respondsToSelector:@selector(RAGestureCallback_handle:withPoint:forEdge:)])
+				else if (callback.target && [callback.target respondsToSelector:@selector(RAGestureCallback_handle:withPoint:velocity:forEdge:)])
 				{
-					RAGestureCallbackResult result = [callback.target RAGestureCallback_handle:state withPoint:point forEdge:edge];
+					RAGestureCallbackResult result = [callback.target RAGestureCallback_handle:state withPoint:point velocity:velocity forEdge:edge];
 					ret = YES;
 					if (result == RAGestureCallbackResultSuccessAndStop)
 						break;

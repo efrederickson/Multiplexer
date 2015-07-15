@@ -40,6 +40,11 @@ return sharedInstance;
 
 extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 
+@interface SBWallpaperController
++(id) sharedInstance;
+-(void) beginRequiringWithReason:(NSString*)reason;
+@end
+
 @interface SBAppSwitcherWindow : UIWindow
 @end
 
@@ -70,6 +75,8 @@ extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 - (void)_showControlCenterGestureEndedWithLocation:(CGPoint)arg1 velocity:(CGPoint)arg2;
 - (void)_showControlCenterGestureChangedWithLocation:(CGPoint)arg1 velocity:(CGPoint)arg2 duration:(CGFloat)arg3;
 - (void)_showControlCenterGestureBeganWithLocation:(CGPoint)arg1;
+- (void)restoreContentUpdatingStatusBar:(_Bool)arg1;
+-(void) restoreContentAndUnscatterIconsAnimated:(BOOL)arg1;
 @end
 
 @interface SBDisplayItem : NSObject <NSCopying>
@@ -470,6 +477,9 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @interface FBApplicationProcess : NSObject
 - (void)launchIfNecessary;
 - (BOOL)bootstrapAndExec;
+- (void)killForReason:(int)arg1 andReport:(BOOL)arg2 withDescription:(id)arg3 completion:(id/*block*/)arg4;
+- (void)killForReason:(int)arg1 andReport:(BOOL)arg2 withDescription:(id)arg3;
+
 @end
 
 @interface UITextEffectsWindow : UIWindow

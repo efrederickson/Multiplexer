@@ -5,6 +5,10 @@
 	RAHostedAppView *attachedView;
 }
 
+-(void) close;
+-(void) maximize;
+-(void) minimize;
+
 -(RAHostedAppView*) attachedView;
 -(void) attachView:(RAHostedAppView*)view;
 @end

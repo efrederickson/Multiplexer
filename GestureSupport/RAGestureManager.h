@@ -11,12 +11,12 @@ typedef enum {
 } RAGestureCallbackResult;
 
 @protocol RAGestureCallbackProtocol
--(BOOL) RAGestureCallback_canHandle:(CGPoint)point;
--(RAGestureCallbackResult) RAGestureCallback_handle:(UIGestureRecognizerState)state withPoint:(CGPoint)location forEdge:(UIRectEdge)edge;
+-(BOOL) RAGestureCallback_canHandle:(CGPoint)point velocity:(CGPoint)velocity;
+-(RAGestureCallbackResult) RAGestureCallback_handle:(UIGestureRecognizerState)state withPoint:(CGPoint)location velocity:(CGPoint)velocity forEdge:(UIRectEdge)edge;
 @end
 
-typedef BOOL(^RAGestureConditionBlock)(CGPoint location);
-typedef RAGestureCallbackResult(^RAGestureCallbackBlock)(UIGestureRecognizerState state, CGPoint location);
+typedef BOOL(^RAGestureConditionBlock)(CGPoint location, CGPoint velocity);
+typedef RAGestureCallbackResult(^RAGestureCallbackBlock)(UIGestureRecognizerState state, CGPoint location, CGPoint velocity);
 
 const NSUInteger RAGesturePriorityLow = 0;
 const NSUInteger RAGesturePriorityHigh = 10;
@@ -35,8 +35,8 @@ const NSUInteger RAGesturePriorityDefault = RAGesturePriorityLow;
 -(void) addGesture:(RAGestureCallback*)callback;
 -(void) removeGestureWithIdentifier:(NSString*)identifier;
 
--(BOOL) canHandleMovementWithPoint:(CGPoint)point forEdge:(UIRectEdge)edge;
--(BOOL) handleMovementOrStateUpdate:(UIGestureRecognizerState)state withPoint:(CGPoint)point forEdge:(UIRectEdge)edge;
+-(BOOL) canHandleMovementWithPoint:(CGPoint)point velocity:(CGPoint)velocity forEdge:(UIRectEdge)edge;
+-(BOOL) handleMovementOrStateUpdate:(UIGestureRecognizerState)state withPoint:(CGPoint)point velocity:(CGPoint)velocity forEdge:(UIRectEdge)edge;
 
 -(void) ignoreSwipesBeginningInRect:(CGRect)area forIdentifier:(NSString*)identifier;
 -(void) stopIgnoringSwipesForIdentifier:(NSString*)identifier;

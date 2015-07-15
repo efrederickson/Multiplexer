@@ -6,10 +6,15 @@
 #import "RADesktopManager.h"
 #import "RAWindowBar.h"
 #import "RAHostedAppView.h"
+#import "RASnapshotProvider.h"
+#import "RAAppKiller.h"
 
 @interface RAMissionControlManager () {
 	UIScrollView *desktopScrollView, *windowedAppScrollView, *otherRunningAppsScrollView;
 	UILabel *desktopLabel, *windowedLabel, *otherLabel;
+	
+	UIImageView *trashImageView;
+	UIImage *trashIcon;
 
 	NSMutableArray *appsWithoutWindows;
 	CGFloat width, height;
@@ -23,6 +28,7 @@
 		sharedInstance->runningApplications = [NSMutableArray array];
 		sharedInstance->width = UIScreen.mainScreen.bounds.size.width / 4.5714;
 		sharedInstance->height = UIScreen.mainScreen.bounds.size.height / 4.36;
+		sharedInstance->trashIcon = [UIImage imageWithContentsOfFile:@"/Library/ReachApp/Trash.png"]
 	);
 }
 
@@ -39,7 +45,10 @@
 		{
 			RAHostedAppView *hostedView = [((RAWindowBar*)view) attachedView];
 
-			SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:hostedView.bundleIdentifier];
+			UIImage *image = [RASnapshotProvider.sharedInstance snapshotForIdentifier:hostedView.bundleIdentifier];
+			[image drawInRect:CGRectMake(view.frame.origin.x, [hostedView convertPoint:hostedView.frame.origin toView:nil].y, view.frame.size.width, view.frame.size.height)];
+
+			/*SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:hostedView.bundleIdentifier];
 			FBScene *scene = [app mainScene];
     		FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
     		UIView *snapshotView = [contextHostManager snapshotViewWithFrame:hostedView.frame excludingContexts:@[] opaque:NO];
@@ -56,6 +65,7 @@
     		// TODO: needs to be improved, no status bar + it's slightly off
 			//CGContextDrawImage(c, CGRectMake(view.frame.origin.x + hostedView.frame.origin.x, view.frame.origin.y + hostedView.frame.origin.y, hostedView.frame.size.width, hostedView.frame.size.height), image.CGImage);
 			[image drawInRect:CGRectMake(view.frame.origin.x, [hostedView convertPoint:hostedView.frame.origin toView:nil].y, view.frame.size.width, view.frame.size.height)];
+			*/
 		}
 	}
 
@@ -131,8 +141,15 @@
 			preview.layer.borderColor = [UIColor whiteColor].CGColor;
 		}
 
-		UITapGestureRecognizer *g = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(activateDesktop:)];
+		UITapGestureRecognizer *g = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleDesktopTap:)];
+		g.numberOfTapsRequired = 1;
 		[preview addGestureRecognizer:g];
+
+		UITapGestureRecognizer *doubleTap = [[UITapGestureRecognizer alloc] initWithTarget: self action:@selector(handleDoubleDesktopTap:)];
+		doubleTap.numberOfTapsRequired = 2; 
+		[preview addGestureRecognizer:doubleTap];
+
+		[g requireGestureRecognizerToFail:doubleTap];
 
 		UIPanGestureRecognizer *swipeGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleDesktopPan:)];
 		[preview addGestureRecognizer:swipeGesture];
@@ -259,7 +276,9 @@
 		[UIView animateWithDuration:0.5 animations:^{ window.frame = CGRectMake(0, -window.frame.size.height, window.frame.size.width, window.frame.size.height); } completion:^(BOOL _) { destructor(); }];
 	else
 		destructor();
+
 	[RADesktopManager.sharedInstance reshowDesktop];
+	[RADesktopManager.sharedInstance.currentDesktop loadApps];
 }
 
 -(void) toggleMissionControl:(BOOL)animated
@@ -283,6 +302,17 @@
 
 	if (gesture.state == UIGestureRecognizerStateBegan)
 	{
+		if (!trashImageView || trashImageView.superview == nil /* new window perhaps */)
+		{
+			trashImageView = [[UIImageView alloc] initWithFrame:CGRectMake((UIScreen.mainScreen.bounds.size.width / 2) - (75/2), window.frame.size.height + 75, 75, 75)];
+			trashImageView.image = trashIcon;
+			[window addSubview:trashImageView];
+		}
+		[UIView animateWithDuration:0.4 animations:^{
+			trashImageView.alpha = 1;
+			trashImageView.frame = CGRectMake((UIScreen.mainScreen.bounds.size.width / 2) - (75/2), window.frame.size.height - (75+50), 75, 75);
+		}];
+
 		draggedView = [gesture.view snapshotViewAfterScreenUpdates:YES];
 		draggedView.frame = gesture.view.frame;
 		draggedView.center = [gesture.view.superview convertPoint:gesture.view.center toView:window];
@@ -306,20 +336,67 @@
 		center.x += initialCenter.x;
 		center.y += initialCenter.y;
 
-		for (UIView *subview in desktopScrollView.subviews)
-		{
-			if ([subview isKindOfClass:[RAMissionControlPreviewView class]])
-			{
-				if (CGRectContainsPoint((CGRect){ [desktopScrollView convertPoint:subview.frame.origin toView:window], subview.frame.size }, center))
-				{
-					RADesktopWindow *desktop = [RADesktopManager.sharedInstance desktopAtIndex:subview.tag];
-					SBApplication *app = ((RAMissionControlPreviewView*)gesture.view).application;
-					[RADesktopManager.sharedInstance.currentDesktop removeAppWithIdentifier:app.bundleIdentifier animated:NO];
-					[desktop createAppWindowForSBApplication:app animated:NO];
+		BOOL didKill = NO;
 
-					[self reloadDesktopSection];
-					[self reloadWindowedAppsSection];
-					[self reloadOtherAppsSection];
+		if (CGRectContainsPoint(trashImageView.frame, center))
+		{
+			SBApplication *app = ((RAMissionControlPreviewView*)gesture.view).application;
+			[RADesktopManager.sharedInstance removeAppWithIdentifier:app.bundleIdentifier animated:NO];
+			[RAAppKiller killAppWithSBApplication:app completion:^{
+				[runningApplications removeObject:app];
+
+				//NSLog(@"[ReachApp] killer of %@, %d", app.bundleIdentifier, app.pid);
+
+				[self performSelectorOnMainThread:@selector(reloadDesktopSection) withObject:nil waitUntilDone:YES];
+				[self performSelectorOnMainThread:@selector(reloadWindowedAppsSection) withObject:nil waitUntilDone:YES];
+				[self performSelectorOnMainThread:@selector(reloadOtherAppsSection) withObject:nil waitUntilDone:YES];
+			}];
+
+			didKill = YES;
+		}
+		[UIView animateWithDuration:0.4 animations:^{
+			trashImageView.alpha = 0;
+			trashImageView.frame = CGRectMake((UIScreen.mainScreen.bounds.size.width / 2) - (75/2), window.frame.size.height + 75, 75, 75);
+		}];
+
+		if (!didKill)
+		{
+			for (UIView *subview in desktopScrollView.subviews)
+			{
+				if ([subview isKindOfClass:[RAMissionControlPreviewView class]])
+				{
+					if (CGRectContainsPoint((CGRect){ [desktopScrollView convertPoint:subview.frame.origin toView:window], subview.frame.size }, center))
+					{
+						RADesktopWindow *desktop = [RADesktopManager.sharedInstance desktopAtIndex:subview.tag];
+						SBApplication *app = ((RAMissionControlPreviewView*)gesture.view).application;
+
+						BOOL useOldData = NO;
+						CGRect frame;
+						CGAffineTransform transform;
+						for (UIView *subview in RADesktopManager.sharedInstance.currentDesktop.subviews)
+							if ([subview isKindOfClass:[RAWindowBar class]])
+								if (((RAWindowBar*)subview).attachedView.app == app)
+								{
+									useOldData = YES;
+									transform = subview.transform;
+									subview.transform = CGAffineTransformIdentity;
+									frame = subview.frame;
+								}
+
+						[RADesktopManager.sharedInstance.currentDesktop removeAppWithIdentifier:app.bundleIdentifier animated:NO];
+						
+						RAWindowBar *bar = [desktop createAppWindowForSBApplication:app animated:NO];
+						if (useOldData)
+						{
+							bar.transform = CGAffineTransformIdentity;
+							bar.frame = frame;
+							bar.transform = transform;
+						}
+
+						[self reloadDesktopSection];
+						[self reloadWindowedAppsSection];
+						[self reloadOtherAppsSection];
+					}
 				}
 			}
 		}
@@ -374,6 +451,20 @@
 	int desktop = gesture.view.tag;
 	[self hideMissionControl:YES];
 	[RADesktopManager.sharedInstance switchToDesktop:desktop];
+}
+
+-(void) handleSingleDesktopTap:(UITapGestureRecognizer*)gesture
+{
+	int desktop = gesture.view.tag;
+	[RADesktopManager.sharedInstance switchToDesktop:desktop actuallyShow:NO];
+	[self reloadDesktopSection];
+	[self reloadWindowedAppsSection];
+	[self reloadOtherAppsSection];
+}
+
+-(void) handleDoubleDesktopTap:(UITapGestureRecognizer*)gesture
+{
+	[self activateDesktop:gesture];
 }
 
 -(void) topIconViewTap:(UITapGestureRecognizer*)gesture

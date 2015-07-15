@@ -155,6 +155,7 @@
 
 -(void) sizeViewForTranslation:(CGPoint)translation state:(UIGestureRecognizerState)state
 {
+	static CGFloat lastX = -1;
 	UIView *targetView = [overlayWindow isHidingUnderlyingApp] ? [overlayWindow viewWithTag:RASWIPEOVER_VIEW_TAG] : overlayWindow;
 
 	if (start == 0)
@@ -162,6 +163,7 @@
 	
 	if (state == UIGestureRecognizerStateEnded || state == UIGestureRecognizerStateCancelled || state == UIGestureRecognizerStateFailed)
 	{
+		lastX = -1;
 		start = 0;
 
 		CGFloat scale = (SCREEN_WIDTH - targetView.frame.origin.x) / [overlayWindow currentView].bounds.size.width;
@@ -180,10 +182,20 @@
 
 		if (overlayWindow.isHidingUnderlyingApp && [[overlayWindow currentView] isKindOfClass:[UIScrollView class]] == NO)
 		{
-			CGFloat scale = (SCREEN_WIDTH - (start + translation.x)) / [overlayWindow currentView].bounds.size.width;
-			scale = MIN(MAX(scale, 0.1), 0.98);
+			if (lastX == -1)
+				lastX = translation.x;
+			CGFloat newScale = (lastX - translation.x) / SCREEN_WIDTH;
+			lastX = translation.x; 
+
+			newScale = newScale + sqrt(targetView.transform.a * targetView.transform.a + targetView.transform.c * targetView.transform.c);
+			CGFloat scale = MIN(MAX(newScale, 0.1), 0.98);
 			targetView.transform = CGAffineTransformMakeScale(scale, scale);
 			targetView.center = (CGPoint) { SCREEN_WIDTH - (targetView.frame.size.width / 2), targetView.center.y };
+
+			//CGFloat scale = (SCREEN_WIDTH - (start + translation.x)) / [overlayWindow currentView].bounds.size.width;
+			//scale = MIN(MAX(scale, 0.1), 0.98);
+			//targetView.transform = CGAffineTransformMakeScale(scale, scale);
+			//targetView.center = (CGPoint) { SCREEN_WIDTH - (targetView.frame.size.width / 2), targetView.center.y };
 		} 
 		else
 		{

@@ -62,12 +62,12 @@
 	}
 }
 
-%new -(BOOL) RAGestureCallback_canHandle:(CGPoint)point
+%new -(BOOL) RAGestureCallback_canHandle:(CGPoint)point velocity:(CGPoint)velocity
 {
 	return self.isKeyWindow;
 }
 
-%new -(RAGestureCallbackResult) RAGestureCallback_handle:(UIGestureRecognizerState)state withPoint:(CGPoint)location forEdge:(UIRectEdge)edge
+%new -(RAGestureCallbackResult) RAGestureCallback_handle:(UIGestureRecognizerState)state withPoint:(CGPoint)location velocity:(CGPoint)velocity forEdge:(UIRectEdge)edge
 {
 	[[%c(SBUIController) sharedInstance] performSelector:@selector(_showNotificationsGestureFailed)];
 	[[%c(SBUIController) sharedInstance] performSelector:@selector(_showNotificationsGestureCancelled)];
@@ -146,17 +146,34 @@
 
 	if (state == UIGestureRecognizerStateChanged)	
 		fakeView.center = (CGPoint) { fakeView.center.x, origY + location.y };
-	//[RAMissionControlManager.sharedInstance showMissionControl:YES];
-
+	
 	if (state == UIGestureRecognizerStateEnded)
 	{
-		if (fakeView.frame.origin.y > -(UIScreen.mainScreen.bounds.size.height / 2))
+		//NSLog(@"[ReachApp] %@ + %@ = %@ > %@", NSStringFromCGPoint(fakeView.frame.origin), NSStringFromCGPoint(velocity), @(fakeView.frame.origin.y + velocity.y), @(-(UIScreen.mainScreen.bounds.size.height / 2)));
+
+		if (fakeView.frame.origin.y + velocity.y > -(UIScreen.mainScreen.bounds.size.height / 2))
 		{			
-			[UIView animateWithDuration:0.5 animations:^{
+			CGFloat distance = UIScreen.mainScreen.bounds.size.height - (fakeView.frame.origin.y + fakeView.frame.size.height);
+			CGFloat duration = MIN(distance / velocity.y, 0.3);
+
+			//NSLog(@"[ReachApp] dist %f, dur %f", distance, duration);
+
+			[UIView animateWithDuration:duration animations:^{
 				fakeView.frame = UIScreen.mainScreen.bounds;
 			} completion:^(BOOL _) {
+	            FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
+	                SBDeactivationSettings *settings = [[%c(SBDeactivationSettings) alloc] init];
+	                [settings setFlag:YES forDeactivationSetting:20];
+	                [settings setFlag:NO forDeactivationSetting:2];
+	                [UIApplication.sharedApplication._accessibilityFrontMostApplication _setDeactivationSettings:settings];
+	         
+	                SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
+	                [transaction begin];
+	            }];
+	            [(FBWorkspaceEventQueue*)[%c(FBWorkspaceEventQueue) sharedInstance] executeOrAppendEvent:event];
+
 				[[[%c(SBUIController) sharedInstance] _appSwitcherController] forceDismissAnimated:NO];
-				[[%c(SBUIController) sharedInstance] _animateStatusBarForSuspendGesture];
+				[[%c(SBUIController) sharedInstance] restoreContentUpdatingStatusBar:YES];
 				[RAMissionControlManager.sharedInstance showMissionControl:NO];
 				[fakeView removeFromSuperview];
 				fakeView = nil;
@@ -164,7 +181,12 @@
 		}
 		else
 		{
-			[UIView animateWithDuration:0.6 animations:^{
+			CGFloat distance = fakeView.frame.size.height + fakeView.frame.origin.y /* origin.y is less than 0 so the + is actually a - operation */;
+			CGFloat duration = MIN(distance / velocity.y, 0.3);
+
+			//NSLog(@"[ReachApp] dist %f, dur %f", distance, duration);
+
+			[UIView animateWithDuration:duration animations:^{
 				fakeView.frame = CGRectMake(fakeView.frame.origin.x, -fakeView.frame.size.height, fakeView.frame.size.width, fakeView.frame.size.height);
 			} completion:^(BOOL _) {
 				[fakeView removeFromSuperview];

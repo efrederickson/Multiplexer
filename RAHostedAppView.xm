@@ -1,6 +1,10 @@
 #import "RAHostedAppView.h"
 
-@interface RAHostedAppView ()
+@interface RAHostedAppView () {
+    NSTimer *verifyTimer;
+    BOOL isPreloading;
+    FBWindowContextHostManager *contextHostManager;
+}
 @end
 
 @implementation RAHostedAppView
@@ -20,8 +24,10 @@
 {
     if (app)
     {
-        if ([app mainScene] && ((SBReachabilityManager*)[%c(SBReachabilityManager) sharedInstance]).reachabilityModeActive)
+        if ([app mainScene])
         {
+            isPreloading = NO;
+            if (((SBReachabilityManager*)[%c(SBReachabilityManager) sharedInstance]).reachabilityModeActive)
             [[%c(SBWorkspace) sharedInstance] performSelector:@selector(RA_updateViewSizes) withObject:nil afterDelay:0.5]; // App is launched using ReachApp - animations commence. We have to wait for those animations to finish or this won't work.
         }
         else if (![app mainScene])
@@ -40,6 +46,7 @@
 {
     if (app == nil)
         return;
+    isPreloading = YES;
 	FBScene *scene = [app mainScene];
     if (![app pid] || scene == nil)
     {
@@ -58,7 +65,7 @@
         return;
 
 	FBScene *scene = [app mainScene];
-    FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
+    contextHostManager = [scene contextHostManager];
 
     FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
     SET_BACKGROUNDED(settings, NO);
@@ -71,6 +78,18 @@
     //view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
     [self addSubview:view];
+
+    verifyTimer = [NSTimer timerWithTimeInterval:1 target:self selector:@selector(verifyHostingAndRehostIfNecessary) userInfo:nil repeats:YES];
+    [NSRunLoop.currentRunLoop addTimer:verifyTimer forMode:NSRunLoopCommonModes];
+}
+
+-(void) verifyHostingAndRehostIfNecessary
+{
+    if (!isPreloading && (app.isRunning == NO || view.contextHosted == NO)) // && (app.pid == 0 || view == nil || view.manager == nil)) // || view._isReallyHosting == NO))
+    {
+        [self unloadApp];
+        [self loadApp];
+    }
 }
 
 -(void) setFrame:(CGRect)frame
@@ -89,10 +108,27 @@
         dict[@"hideStatusBarIfWanted"] = @(self.allowHidingStatusBar);
         CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, (__bridge CFDictionaryRef)dict, true);
     }
+    else if (self.bundleIdentifier)
+    {
+        NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+        dict[@"bundleIdentifier"] = self.bundleIdentifier;
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)dict, true);
+    }
+}
+
+-(void) setHideStatusBar:(BOOL)value
+{
+    _hideStatusBar = value;
+
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    dict[@"bundleIdentifier"] = self.bundleIdentifier;
+    dict[@"hideStatusBar"] = @(value);
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.updateStatusBar"), NULL, (__bridge CFDictionaryRef)dict, true);
 }
 
 -(void) unloadApp
 {
+    [verifyTimer invalidate];
 	FBScene *scene = [app mainScene];
 
     if (!scene) return;
@@ -101,8 +137,9 @@
     FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
     SET_BACKGROUNDED(settings, YES);
     [scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];
-    FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
+    //FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
     [contextHostManager disableHostingForRequester:@"reachapp"];
+    contextHostManager = nil;
 }
 
 -(void) rotateToOrientation:(UIInterfaceOrientation)o

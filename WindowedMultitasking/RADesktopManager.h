@@ -14,6 +14,7 @@
 -(NSUInteger) currentDesktopIndex;
 -(NSUInteger) numberOfDesktops;
 -(void) switchToDesktop:(NSUInteger)index;
+-(void) switchToDesktop:(NSUInteger)index actuallyShow:(BOOL)show;
 -(RADesktopWindow*) currentDesktop;
 -(NSArray*) availableDesktops;
 -(RADesktopWindow*) desktopAtIndex:(NSUInteger)index;

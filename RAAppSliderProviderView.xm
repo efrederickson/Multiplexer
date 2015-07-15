@@ -71,12 +71,12 @@
 	return currentView ? currentView.bundleIdentifier : nil;
 }
 
--(BOOL) RAGestureCallback_canHandle:(CGPoint)point
+-(BOOL) RAGestureCallback_canHandle:(CGPoint)point velocity:(CGPoint)velocity
 {
 	return point.y <= [self convertPoint:self.frame.origin toView:nil].y + self.frame.size.height;
 }
 
--(RAGestureCallbackResult) RAGestureCallback_handle:(UIGestureRecognizerState)state withPoint:(CGPoint)location forEdge:(UIRectEdge)edge
+-(RAGestureCallbackResult) RAGestureCallback_handle:(UIGestureRecognizerState)state withPoint:(CGPoint)location velocity:(CGPoint)velocity forEdge:(UIRectEdge)edge
 {
 	static BOOL didHandle = NO;
 	if (state == UIGestureRecognizerStateEnded)

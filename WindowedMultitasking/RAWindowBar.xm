@@ -1,5 +1,6 @@
 #import "RAWindowBar.h"
 #import "RADesktopManager.h"
+#import "RAWindowOverlayView.h"
 
 @interface RAWindowBar () {
 	CGPoint initialPoint;
@@ -8,7 +9,7 @@
 	UIPanGestureRecognizer *panGesture;
 	UIPinchGestureRecognizer *scaleGesture;
 	UILongPressGestureRecognizer *longPressGesture;
-	UITapGestureRecognizer *tapGesture;
+	UITapGestureRecognizer *tapGesture, *doubleTapGesture;
 	UIRotationGestureRecognizer *rotateGesture;
 
 	UILabel *titleLabel;
@@ -42,14 +43,23 @@
 	longPressGesture.minimumPressDuration = 0.7;
 	[self addGestureRecognizer:longPressGesture];
 
-	tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTap:)];
-	tapGesture.numberOfTapsRequired = 2;
-	tapGesture.delegate = self;
-	[self addGestureRecognizer:tapGesture];
-
 	rotateGesture = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(handleRotate:)];
 	rotateGesture.delegate = self;
 	[self addGestureRecognizer:rotateGesture];
+
+	tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+	tapGesture.numberOfTapsRequired = 1;
+	//tapGesture.delegate = self;
+	[self addGestureRecognizer:tapGesture];
+
+	doubleTapGesture = [[UITapGestureRecognizer alloc] initWithTarget: self action:@selector(handleDoubleTap:)];
+	doubleTapGesture.numberOfTapsRequired = 2; 
+	doubleTapGesture.delegate = self;
+	[self addGestureRecognizer:doubleTapGesture];
+
+	[tapGesture requireGestureRecognizerToFail:doubleTapGesture];
+	[tapGesture requireGestureRecognizerToFail:scaleGesture];
+	[tapGesture requireGestureRecognizerToFail:rotateGesture];
 
     self.userInteractionEnabled = YES;
     enableDrag = YES;
@@ -87,22 +97,37 @@
 	[self addSubview:swapOrientationButton];
 }
 
--(void) closeButtonTap:(id)arg1
+-(void) close
 {
-	[self handleLongPress:nil];
+	[RADesktopManager.sharedInstance removeAppWithIdentifier:self.attachedView.bundleIdentifier animated:YES];
 }
 
--(void) maximizeButtonTap:(id)arg1
+-(void) maximize
 {
 	[[%c(SBUIController) sharedInstance] activateApplicationAnimated:attachedView.app];
 }
 
--(void) minimizeButtonTap:(id)arg1
+-(void) minimize
 {
 	[attachedView rotateToOrientation:UIInterfaceOrientationPortrait];
 	[UIView animateWithDuration:0.7 animations:^{
 		self.transform = CGAffineTransformMakeScale(0.25, 0.25);
 	}];
+}
+
+-(void) closeButtonTap:(id)arg1
+{
+	[self close];
+}
+
+-(void) maximizeButtonTap:(id)arg1
+{
+	[self maximize];
+}
+
+-(void) minimizeButtonTap:(id)arg1
+{
+	[self minimize];
 }
 
 -(void) addRotation:(CGFloat)rads updateApp:(BOOL)update
@@ -154,7 +179,19 @@
 	if (!enableLongPress)
 		return;
 
-	[RADesktopManager.sharedInstance removeAppWithIdentifier:self.attachedView.bundleIdentifier animated:YES];
+	[self close];
+}
+
+-(void) handleTap:(UITapGestureRecognizer*)tap
+{
+	RAWindowOverlayView *overlay = [[RAWindowOverlayView alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height)];
+	overlay.alpha = 0;
+	[self addSubview:overlay];
+	overlay.appWindow = self;
+	[overlay show];
+	[UIView animateWithDuration:0.4 animations:^{
+		overlay.alpha = 1;
+	}];
 }
 
 -(void) handleDoubleTap:(UITapGestureRecognizer*)tap
@@ -173,9 +210,13 @@
 	if (sender.state == UIGestureRecognizerStateBegan)
 		initialPoint = sender.view.center;
 	else if (sender.state == UIGestureRecognizerStateChanged)
+	{
 		enableLongPress = NO;
+	}
 	else if (sender.state == UIGestureRecognizerStateEnded)
+	{
 		enableLongPress = YES;
+	}
 
     UIView *view = sender.view;
     CGPoint point = [sender translationInView:self.superview];

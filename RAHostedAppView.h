@@ -13,6 +13,7 @@
 
 @property (nonatomic) BOOL isTopApp;
 @property (nonatomic) BOOL allowHidingStatusBar;
+@property (nonatomic) BOOL hideStatusBar;
 
 -(SBApplication*) app;
 -(NSString*) displayName;

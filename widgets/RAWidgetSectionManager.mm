@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import "RAWidgetSectionManager.h"
 
-#define VERTICAL_PADDING (10)
+#define VERTICAL_PADDING (5)
 
 @implementation RAWidgetSectionManager
 
@@ -87,7 +87,7 @@
 					UILabel *titleView = [[UILabel alloc] initWithFrame:CGRectMake(10, currentY, 300, 20)];
 					titleView.text = section.displayName;
 					titleView.textColor = [UIColor whiteColor];
-					titleView.font = [UIFont fontWithName:@"HelveticaNeue" size:20];
+					titleView.font = [UIFont fontWithName:@"HelveticaNeue" size:16];
 					[view addSubview:titleView];
 					currentY += titleView.frame.size.height;
 				}
@@ -102,9 +102,11 @@
 				sectionView.frame = frame;
 				currentY += frame.size.height + VERTICAL_PADDING;
 
+				sectionView.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.1];
 				[view addSubview:sectionView];
 			}
-		} @catch (NSException *ex)
+		}
+		@catch (NSException *ex)
 		{
 			NSLog(@"[ReachApp] an error occurred creating the view for section '%@': %@", section.identifier, ex);
 		}

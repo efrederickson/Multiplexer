@@ -7,10 +7,50 @@ MultitaskingGestures source code: https://github.com/hamzasood/MultitaskingGestu
 License (GPL): https://github.com/hamzasood/MultitaskingGestures/blob/master/License.md
 */
 
+@interface _UIScreenEdgePanRecognizer (Velocity)
+-(CGPoint) RA_velocity;
+@end
+
 static BOOL isTracking = NO;
 static NSMutableSet *gestureRecognizers;
 BOOL shouldBeOverridingForRecognizer;
 UIRectEdge currentEdge;
+
+%hook _UIScreenEdgePanRecognizer
+struct VelocityData {
+    CGPoint velocity;
+    double timestamp;
+    CGPoint location;
+};
+
+static char velocityDataKey;
+
+- (void)incorporateTouchSampleAtLocation:(CGPoint)location timestamp:(double)timestamp modifier:(NSInteger)modifier interfaceOrientation:(UIInterfaceOrientation)orientation 
+{
+    %orig;
+
+    VelocityData newData;
+    VelocityData oldData;
+
+    [objc_getAssociatedObject(self, &velocityDataKey) getValue:&oldData];
+    
+    CGPoint velocity = CGPointMake((location.x - oldData.location.x) / (timestamp - oldData.timestamp), (location.y - oldData.location.y) / (timestamp - oldData.timestamp));
+    newData.velocity = velocity;
+    newData.location = location;
+    newData.timestamp = timestamp;
+
+    objc_setAssociatedObject(self, &velocityDataKey, [NSValue valueWithBytes:&newData objCType:@encode(VelocityData)], OBJC_ASSOCIATION_RETAIN);
+}
+
+%new
+- (CGPoint)RA_velocity 
+{
+    VelocityData data;
+    [objc_getAssociatedObject(self, &velocityDataKey) getValue:&data];
+
+    return data.velocity;
+}
+%end
 
 %hook SBHandMotionExtractor
 -(id) init 
@@ -37,9 +77,16 @@ UIRectEdge currentEdge;
             }
             else if (isTracking) // Move
             {
+                _UIScreenEdgePanRecognizer *targetRecognizer = nil;
+
                 for (_UIScreenEdgePanRecognizer *recognizer in gestureRecognizers)
+                {
                     [recognizer incorporateTouchSampleAtLocation:touch.unrotatedLocation timestamp:CACurrentMediaTime() modifier:touch.modifier interfaceOrientation:touch.interfaceOrientation];
-                [RAGestureManager.sharedInstance handleMovementOrStateUpdate:UIGestureRecognizerStateChanged withPoint:touch.location forEdge:currentEdge];
+
+                    if (recognizer.targetEdges & currentEdge) // TODO: verify
+                        targetRecognizer = recognizer;
+                }
+                [RAGestureManager.sharedInstance handleMovementOrStateUpdate:UIGestureRecognizerStateChanged withPoint:touch.location velocity:targetRecognizer.RA_velocity forEdge:currentEdge];
             }
         }
     });
@@ -51,10 +98,10 @@ UIRectEdge currentEdge;
     {
         CGPoint location = MSHookIvar<CGPoint>(screenEdgePanRecognizer, "_lastTouchLocation");
         if (shouldBeOverridingForRecognizer == NO)
-            shouldBeOverridingForRecognizer = [RAGestureManager.sharedInstance canHandleMovementWithPoint:location forEdge:screenEdgePanRecognizer.targetEdges];
+            shouldBeOverridingForRecognizer = [RAGestureManager.sharedInstance canHandleMovementWithPoint:location velocity:screenEdgePanRecognizer.RA_velocity forEdge:screenEdgePanRecognizer.targetEdges];
         if (shouldBeOverridingForRecognizer) 
         {
-            if ([RAGestureManager.sharedInstance handleMovementOrStateUpdate:UIGestureRecognizerStateBegan withPoint:location forEdge:screenEdgePanRecognizer.targetEdges])
+            if ([RAGestureManager.sharedInstance handleMovementOrStateUpdate:UIGestureRecognizerStateBegan withPoint:location velocity:screenEdgePanRecognizer.RA_velocity forEdge:screenEdgePanRecognizer.targetEdges])
             {
                 currentEdge = screenEdgePanRecognizer.targetEdges;
                 BKSHIDServicesCancelTouchesOnMainDisplay(); // Don't send to the app, or anywhere else
@@ -68,7 +115,14 @@ UIRectEdge currentEdge;
     dispatch_async(dispatch_get_main_queue(), ^{
         if (isTracking) // Ended
         {
-            [RAGestureManager.sharedInstance handleMovementOrStateUpdate:UIGestureRecognizerStateEnded withPoint:CGPointZero forEdge:currentEdge];
+            _UIScreenEdgePanRecognizer *targetRecognizer = nil;
+            for (_UIScreenEdgePanRecognizer *recognizer in gestureRecognizers)
+            {
+                if (recognizer.targetEdges & currentEdge) // TODO: verify
+                    targetRecognizer = recognizer;
+            }
+
+            [RAGestureManager.sharedInstance handleMovementOrStateUpdate:UIGestureRecognizerStateEnded withPoint:CGPointZero velocity:targetRecognizer.RA_velocity forEdge:currentEdge];
             for (_UIScreenEdgePanRecognizer *recognizer in gestureRecognizers)
                 [recognizer reset]; // remove current touches it's "incorporated"
             shouldBeOverridingForRecognizer = NO;
@@ -91,8 +145,8 @@ UIRectEdge currentEdge;
     for (int i = 0; i < edgeCount; i++) 
     {
         _UIScreenEdgePanRecognizer *recognizer = [[_UIScreenEdgePanRecognizer alloc] initWithType:2];
-        [recognizer setTargetEdges:edgesToWatch[i]];
-        [recognizer setScreenBounds:[[UIScreen mainScreen] bounds]];
+        recognizer.targetEdges = edgesToWatch[i];
+        recognizer.screenBounds = UIScreen.mainScreen.bounds;
         [gestureRecognizers addObject:recognizer];
     }
 

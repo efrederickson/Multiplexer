@@ -5,7 +5,7 @@
 
 %ctor
 {
-    [[RAGestureManager sharedInstance] addGestureRecognizer:^RAGestureCallbackResult(UIGestureRecognizerState state, CGPoint location) {
+    [[RAGestureManager sharedInstance] addGestureRecognizer:^RAGestureCallbackResult(UIGestureRecognizerState state, CGPoint location, CGPoint velocity) {
         static CGPoint startingPoint, lastPoint;
         CGPoint translation;
         switch (state) {
@@ -26,7 +26,7 @@
         lastPoint = location;
 
         return RAGestureCallbackResultSuccess;
-    } withCondition:^BOOL(CGPoint location) {
+    } withCondition:^BOOL(CGPoint location, CGPoint velocity) {
         if (RAKeyboardStateListener.sharedInstance.visible)
         {
             CGRect realKBFrame = CGRectMake(0, UIScreen.mainScreen.bounds.size.height, RAKeyboardStateListener.sharedInstance.size.width, RAKeyboardStateListener.sharedInstance.size.height);
