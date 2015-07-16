@@ -14,6 +14,12 @@
 
 -(RAWindowBar*) addAppWithView:(RAHostedAppView*)view animated:(BOOL)animated
 {
+	// Avoid adding duplicates - if it already exists as a window, return the existing window
+	for (RAWindowBar *bar in self.subviews)
+		if ([bar isKindOfClass:[RAWindowBar class]]) // Just verify
+			if (bar.attachedView.app == view.app)
+				return bar;
+
 	view.frame = CGRectMake(0, 100, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height);
 	view.center = self.center;
 

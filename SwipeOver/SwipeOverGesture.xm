@@ -2,8 +2,10 @@
 #import "RASwipeOverManager.h"
 #import "RAKeyboardStateListener.h"
 #import "RAMissionControlManager.h"
+#import "PDFImage.h"
+#import "PDFImageOptions.h"
 
-SBControlCenterGrabberView *grabberView;
+UIImageView *grabberView;
 BOOL isShowingGrabber = NO;
 BOOL isPastGrabber = NO;
 NSDate *lastTouch;
@@ -58,12 +60,15 @@ CGAffineTransform adjustTransformRotation()
             {
                 isShowingGrabber = YES;
 
-                grabberView = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:adjustFrameForRotation()];
-                [grabberView.chevronView setState:1 animated:NO];
-                grabberView.chevronView.transform = adjustTransformRotation();
-                grabberView.backgroundColor = [UIColor whiteColor];
+                //grabberView = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:adjustFrameForRotation()];
+                //[grabberView.chevronView setState:1 animated:NO];
+                //grabberView.chevronView.transform = adjustTransformRotation();
+                grabberView = [[UIImageView alloc] initWithFrame:adjustFrameForRotation()];
+                grabberView.image = [[PDFImage imageWithContentsOfFile:@"/Library/ReachApp/Grabber.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(grabberView.frame.size.width, grabberView.frame.size.height)]];
+
+                grabberView.backgroundColor = [UIColor clearColor];
                 grabberView.layer.cornerRadius = 5;
-                [UIWindow.keyWindow addSubview:grabberView];
+                [UIWindow.keyWindow addSubview:grabberView]; // The desktop view most likely
 
                 static void (^dismisser)() = ^{ // top kek, needs "static" so it's not a local, self-retaining block
                     if ([[NSDate date] timeIntervalSinceDate:lastTouch] > 2)

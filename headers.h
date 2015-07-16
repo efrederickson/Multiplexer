@@ -230,6 +230,9 @@ typedef NS_ENUM(NSInteger, UIScreenEdgePanRecognizerType) {
 @interface SBWorkspace 
 +(id) sharedInstance;
 -(BOOL) isUsingReachApp;
+- (void)_exitReachabilityModeWithCompletion:(id)arg1;
+- (void)_disableReachabilityImmediately:(_Bool)arg1;
+- (void)handleReachabilityModeDeactivated;
 -(void) RA_animateWidgetSelectorOut:(id)completion;
 -(void) RA_setView:(UIView*)view preferredHeight:(CGFloat)preferredHeight;
 -(void) RA_launchTopAppWithIdentifier:(NSString*) bundleIdentifier;

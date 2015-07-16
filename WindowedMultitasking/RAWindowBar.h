@@ -9,6 +9,10 @@
 -(void) maximize;
 -(void) minimize;
 
+-(void) showOverlay;
+-(void) hideOverlay;
+-(BOOL) isOverlayShowing;
+
 -(RAHostedAppView*) attachedView;
 -(void) attachView:(RAHostedAppView*)view;
 @end

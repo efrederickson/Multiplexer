@@ -79,6 +79,9 @@
 
     [self addSubview:view];
 
+    if (verifyTimer)
+        [verifyTimer invalidate];
+
     verifyTimer = [NSTimer timerWithTimeInterval:1 target:self selector:@selector(verifyHostingAndRehostIfNecessary) userInfo:nil repeats:YES];
     [NSRunLoop.currentRunLoop addTimer:verifyTimer forMode:NSRunLoopCommonModes];
 }
@@ -160,6 +163,18 @@
     CFDictionaryAddValue(dictionary,  (__bridge const void*)@"bundleIdentifier",  (__bridge const void*)self.bundleIdentifier);
     CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), (__bridge CFStringRef)event, NULL, dictionary, true);
     CFRelease(dictionary);
+}
+
+// This allows for any subviews with gestures (e.g. the SwipeOver bar with a negative y origin) to recieve touch events.
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event 
+{
+    BOOL isContained = NO;
+    for (UIView *subview in self.subviews)
+    {
+        if (CGRectContainsPoint(subview.frame, point)) // [self convertPoint:point toView:view]))
+            isContained = YES;
+    }
+    return isContained;
 }
 
 -(SBApplication*) app { return app; }

@@ -2,6 +2,8 @@
 #import "RASwipeOverManager.h"
 #import "RASwipeOverOverlay.h"
 #import "RAHostedAppView.h"
+#import "RADesktopManager.h"
+#import "RADesktopWindow.h"
 
 #define SCREEN_WIDTH (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation) ? UIScreen.mainScreen.bounds.size.height : UIScreen.mainScreen.bounds.size.width)
 #define VIEW_WIDTH(x) (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation) ? x.frame.size.height : x.frame.size.width)
@@ -42,6 +44,9 @@
 	currentAppIdentifier = nil;
 
 	[UIView animateWithDuration:0.3 animations:^{
+		if ([[overlayWindow currentView] isKindOfClass:[RAHostedAppView class]])
+			[((RAHostedAppView*)overlayWindow.currentView) viewWithTag:9903553].alpha = 0;
+
 		overlayWindow.frame = CGRectMake(SCREEN_WIDTH, overlayWindow.frame.origin.y, overlayWindow.frame.size.width, overlayWindow.frame.size.height);
 	} completion:^(BOOL _) {
 		[self closeCurrentView];
@@ -97,6 +102,15 @@
     view.frame = UIScreen.mainScreen.bounds;
     [view loadApp];
 
+    UIView *detachView = [[UIView alloc] initWithFrame:CGRectMake(0, -20, view.frame.size.width, 20)];
+    UITapGestureRecognizer *detachGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(detachViewAndCloseSwipeOver)];
+    [detachView addGestureRecognizer:detachGesture];
+    detachView.backgroundColor = [UIColor grayColor];
+    detachView.userInteractionEnabled = YES;
+    detachGesture.delegate = overlayWindow;
+    detachView.tag = 9903553;
+    [view addSubview:detachView];
+
     if (overlayWindow.isHidingUnderlyingApp == NO) // side-by-side
 	    view.frame = CGRectMake(10, 0, view.frame.size.width, view.frame.size.height);
 	else // overlay
@@ -137,6 +151,15 @@
 	overlayWindow.frame = CGRectOffset(overlayWindow.frame, SCREEN_WIDTH / 2, 0);
 	[self sizeViewForTranslation:CGPointZero state:UIGestureRecognizerStateEnded]; // force it
 	[self updateClientSizes:YES];
+}
+
+-(void) detachViewAndCloseSwipeOver
+{
+	SBApplication *app = ((RAHostedAppView*)overlayWindow.currentView).app;
+	[self stopUsingSwipeOver];
+
+	RADesktopWindow *desktop = RADesktopManager.sharedInstance.currentDesktop;
+	[desktop createAppWindowForSBApplication:app animated:YES];
 }
 
 -(void) updateClientSizes:(BOOL)reloadAppSelectorSizeNow

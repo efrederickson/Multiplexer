@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+        <key>compatible-modes</key>
+        <array>
+                <string>springboard</string>
+                <string>application</string>
+                <string>lockscreen</string>
+        </array>
+        <key>description</key>
+        <string>Toggle edit mode on all open windows</string>
+        <key>title</key>
+        <string>Toggle Edit Mode</string>
+</dict>
+</plist>

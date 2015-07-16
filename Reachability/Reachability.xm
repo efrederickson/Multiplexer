@@ -7,11 +7,12 @@
 #include <dlfcn.h>
 #include <sys/sysctl.h>
 #import <notify.h>
-
 #import "headers.h"
 #import "RAWidgetSectionManager.h"
 #import "RASettings.h"
 #import "RAAppSliderProviderView.h"
+#import "RADesktopManager.h"
+#import "RADesktopWindow.h"
 
 #define SPRINGBOARD ([NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"])
 
@@ -92,12 +93,12 @@ BOOL wasEnabled = NO;
 id SBWorkspace$sharedInstance;
 %hook SBWorkspace
 
-%new + (id) sharedInstance
+%new +(id) sharedInstance
 {
     return SBWorkspace$sharedInstance;
 }
 
-- (id) init
+-(id) init
 {
     SBWorkspace$sharedInstance = %orig;
     return SBWorkspace$sharedInstance;
@@ -301,9 +302,15 @@ id SBWorkspace$sharedInstance;
     draggerView.center = CGPointMake(grabberCenter_X, grabberCenter_Y);
     recognizer.delegate = (id<UIGestureRecognizerDelegate>)self;
     [draggerView addGestureRecognizer:recognizer];
+
     UILongPressGestureRecognizer *recognizer2 = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(RA_handleLongPress:)];
     recognizer2.delegate = (id<UILongPressGestureRecognizerDelegate>)self;
     [draggerView addGestureRecognizer:recognizer2];
+
+    UITapGestureRecognizer *recognizer3 = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(RA_detachAppAndClose:)];
+    recognizer3.numberOfTapsRequired = 2;
+    recognizer3.delegate = (id<UIGestureRecognizerDelegate>)self;
+    [draggerView addGestureRecognizer:recognizer3];
 
     [w addSubview:draggerView];
 
@@ -416,6 +423,19 @@ CGFloat startingY = -1;
 %new -(void) RA_handleLongPress:(UILongPressGestureRecognizer*)gesture
 {
     [self RA_showWidgetSelector];
+}
+
+%new -(void) RA_detachAppAndClose:(UITapGestureRecognizer*)gesture
+{
+    NSString *ident = lastBundleIdentifier;
+    if ([view isKindOfClass:[RAAppSliderProviderView class]])
+    {
+        RAAppSliderProviderView *temp = (RAAppSliderProviderView*)view;
+        ident = temp.currentBundleIdentifier;
+        [temp unload];
+    }
+    [self handleReachabilityModeDeactivated];
+    [RADesktopManager.sharedInstance.currentDesktop createAppWindowWithIdentifier:ident animated:YES];
 }
 
 %new - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer

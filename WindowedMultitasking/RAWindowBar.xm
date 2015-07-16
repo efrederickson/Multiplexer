@@ -6,6 +6,7 @@
 @interface RAWindowBar () {
 	CGPoint initialPoint;
 	BOOL enableDrag, enableLongPress;
+	BOOL sizingLocked;
 
 	UIPanGestureRecognizer *panGesture;
 	UIPinchGestureRecognizer *scaleGesture;
@@ -14,7 +15,7 @@
 	UIRotationGestureRecognizer *rotateGesture;
 
 	UILabel *titleLabel;
-	UIButton *closeButton, *maximizeButton, *minimizeButton, *swapOrientationButton;
+	UIButton *closeButton, *maximizeButton, *minimizeButton, *swapOrientationButton, *sizingLockButton;
 }
 @end
 
@@ -75,27 +76,55 @@
 
 	closeButton = [[UIButton alloc] init];
 	closeButton.frame = CGRectMake(5, 5, 20, 20);
-	[closeButton setTitle:@"X" forState:UIControlStateNormal];
+	[closeButton setTitle:@"×" forState:UIControlStateNormal];
 	[closeButton addTarget:self action:@selector(closeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
+	closeButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
+	closeButton.layer.cornerRadius = closeButton.frame.size.width / 2;
+	closeButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+	closeButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+	closeButton.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
 	[self addSubview:closeButton];
 
 	maximizeButton = [[UIButton alloc] init];
 	maximizeButton.frame = CGRectMake(30, 5, 20, 20);
 	[maximizeButton setTitle:@"+" forState:UIControlStateNormal];
 	[maximizeButton addTarget:self action:@selector(maximizeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
+	maximizeButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
+	maximizeButton.layer.cornerRadius = maximizeButton.frame.size.width / 2;
+	maximizeButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+	maximizeButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
 	[self addSubview:maximizeButton];
 
 	minimizeButton = [[UIButton alloc] init];
 	minimizeButton.frame = CGRectMake(55, 5, 20, 20);
 	[minimizeButton setTitle:@"-" forState:UIControlStateNormal];
 	[minimizeButton addTarget:self action:@selector(minimizeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
+	minimizeButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
+	minimizeButton.layer.cornerRadius = minimizeButton.frame.size.width / 2;
+	minimizeButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+	minimizeButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
 	[self addSubview:minimizeButton];
 
 	swapOrientationButton = [[UIButton alloc] init];
 	swapOrientationButton.frame = CGRectMake(self.frame.size.width - 25, 5, 20, 20);
 	[swapOrientationButton setTitle:@"↺" forState:UIControlStateNormal];
 	[swapOrientationButton addTarget:self action:@selector(swapOrientationButtonTap:) forControlEvents:UIControlEventTouchUpInside];
+	swapOrientationButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
+	swapOrientationButton.layer.cornerRadius = swapOrientationButton.frame.size.width / 2;
+	swapOrientationButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+	swapOrientationButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
 	[self addSubview:swapOrientationButton];
+
+	sizingLocked = YES;
+	sizingLockButton = [[UIButton alloc] init];
+	sizingLockButton.frame = CGRectMake(swapOrientationButton.frame.origin.x - 25, 5, 20, 20);
+	[sizingLockButton setTitle:@"🔒" forState:UIControlStateNormal];
+	[sizingLockButton addTarget:self action:@selector(sizingLockButtonTap:) forControlEvents:UIControlEventTouchUpInside];
+	sizingLockButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
+	sizingLockButton.layer.cornerRadius = sizingLockButton.frame.size.width / 2;
+	sizingLockButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+	sizingLockButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+	[self addSubview:sizingLockButton];
 }
 
 -(void) close
@@ -129,6 +158,16 @@
 -(void) minimizeButtonTap:(id)arg1
 {
 	[self minimize];
+}
+
+-(void) sizingLockButtonTap:(id)arg1
+{
+	sizingLocked = !sizingLocked;
+
+	if (sizingLocked)
+		[sizingLockButton setTitle:@"🔒" forState:UIControlStateNormal];
+	else
+		[sizingLockButton setTitle:@"🔓" forState:UIControlStateNormal];
 }
 
 -(void) addRotation:(CGFloat)rads updateApp:(BOOL)update
@@ -183,16 +222,29 @@
 	[self close];
 }
 
--(void) handleTap:(UITapGestureRecognizer*)tap
+-(void) showOverlay
 {
 	RAWindowOverlayView *overlay = [[RAWindowOverlayView alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height)];
 	overlay.alpha = 0;
+	overlay.tag = 465982;
 	[self addSubview:overlay];
 	overlay.appWindow = self;
 	[overlay show];
 	[UIView animateWithDuration:0.4 animations:^{
 		overlay.alpha = 1;
 	}];
+}
+
+-(void) hideOverlay
+{
+	[(RAWindowOverlayView*)[self viewWithTag:465982] dismiss];
+}
+
+-(BOOL) isOverlayShowing { return [self viewWithTag:465982] != nil; }
+
+-(void) handleTap:(UITapGestureRecognizer*)tap
+{
+	[self showOverlay];
 }
 
 -(void) handleDoubleTap:(UITapGestureRecognizer*)tap
