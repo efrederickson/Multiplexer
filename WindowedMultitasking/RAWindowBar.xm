@@ -1,6 +1,7 @@
 #import "RAWindowBar.h"
 #import "RADesktopManager.h"
 #import "RAWindowOverlayView.h"
+#import "RAWindowSnapDataProvider.h"
 
 @interface RAWindowBar () {
 	CGPoint initialPoint;
@@ -216,6 +217,12 @@
 	else if (sender.state == UIGestureRecognizerStateEnded)
 	{
 		enableLongPress = YES;
+
+		if ([RAWindowSnapDataProvider shouldSnapWindowAtLocation:self.frame])
+		{
+			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindowLocation:self.frame] animated:YES];
+			return;
+		}
 	}
 
     UIView *view = sender.view;

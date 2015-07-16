@@ -402,7 +402,8 @@
 		}
 
 		[UIView animateWithDuration:0.4 animations:^{ 
-			draggedView.center = initialCenter; 
+			if (!didKill)
+				draggedView.center = initialCenter; 
 		} completion:^(BOOL _) {
 			[draggedView removeFromSuperview];
 			draggedView = nil;
