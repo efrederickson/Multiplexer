@@ -755,6 +755,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 - (NSString*)bundleIdentifier;
 - (_Bool)_isRecentlyUpdated;
 - (_Bool)_isNewlyInstalled;
+-(UIInterfaceOrientation)statusBarOrientation;
 @end
 
 @interface SBIconBlurryBackgroundView : UIView

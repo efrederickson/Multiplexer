@@ -189,6 +189,9 @@
 
 			newScale = newScale + sqrt(targetView.transform.a * targetView.transform.a + targetView.transform.c * targetView.transform.c);
 			CGFloat scale = MIN(MAX(newScale, 0.1), 0.98);
+
+			NSLog(@"[ReachApp] %f %f", newScale, scale);
+
 			targetView.transform = CGAffineTransformMakeScale(scale, scale);
 			targetView.center = (CGPoint) { SCREEN_WIDTH - (targetView.frame.size.width / 2), targetView.center.y };
 

@@ -3,10 +3,106 @@
 #import "RAKeyboardStateListener.h"
 #import "RAMissionControlManager.h"
 
+SBControlCenterGrabberView *grabberView;
+BOOL isShowingGrabber = NO;
+BOOL isPastGrabber = NO;
+NSDate *lastTouch;
+CGPoint startingPoint;
+
+CGRect adjustFrameForRotation()
+{
+    CGFloat portraitWidth = 30;
+    CGFloat portraitHeight = 50;
+    switch ([[UIApplication.sharedApplication _accessibilityFrontMostApplication] statusBarOrientation])
+    {
+        case UIInterfaceOrientationPortrait:
+            NSLog(@"[ReachApp] portrait");
+            return (CGRect){ { UIScreen.mainScreen.bounds.size.width - portraitWidth + 5, (UIScreen.mainScreen.bounds.size.height - portraitHeight) / 2 }, { portraitWidth, portraitHeight } };
+        case UIInterfaceOrientationPortraitUpsideDown:
+            NSLog(@"[ReachApp] portrait upside down");
+            return (CGRect){ { 0, 0}, { 50, 50 } };
+        case UIInterfaceOrientationLandscapeLeft:
+            NSLog(@"[ReachApp] landscape left");
+            return (CGRect){ { (UIScreen.mainScreen.bounds.size.width - portraitHeight) / 2, 0 - 5 }, { portraitHeight, portraitWidth } };
+        case UIInterfaceOrientationLandscapeRight:
+            NSLog(@"[ReachApp] landscape right");
+            return (CGRect){ { UIScreen.mainScreen.bounds.size.height - portraitHeight, UIScreen.mainScreen.bounds.size.width - portraitWidth }, { portraitHeight, portraitWidth } };
+    }
+    return CGRectZero;
+}
+
+CGAffineTransform adjustTransformRotation()
+{    
+    switch ([[UIApplication.sharedApplication _accessibilityFrontMostApplication] statusBarOrientation])
+    {
+        case UIInterfaceOrientationPortrait:
+            return CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(90));
+        case UIInterfaceOrientationPortraitUpsideDown:
+            return CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(-90));
+        case UIInterfaceOrientationLandscapeLeft:
+            return CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(0));
+        case UIInterfaceOrientationLandscapeRight:
+            return CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(180));
+    }
+    return CGAffineTransformIdentity;
+}
+
 %ctor
 {
     [[RAGestureManager sharedInstance] addGestureRecognizer:^RAGestureCallbackResult(UIGestureRecognizerState state, CGPoint location, CGPoint velocity) {
-        static CGPoint startingPoint, lastPoint;
+        lastTouch = [NSDate date];
+
+        if ([UIApplication.sharedApplication _accessibilityFrontMostApplication] && UIApplication.sharedApplication.statusBarHidden)
+        {
+            if (isShowingGrabber == NO && isPastGrabber == NO)
+            {
+                isShowingGrabber = YES;
+
+                grabberView = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:adjustFrameForRotation()];
+                [grabberView.chevronView setState:1 animated:NO];
+                grabberView.chevronView.transform = adjustTransformRotation();
+                grabberView.backgroundColor = [UIColor whiteColor];
+                grabberView.layer.cornerRadius = 5;
+                [UIWindow.keyWindow addSubview:grabberView];
+
+                static void (^dismisser)() = ^{ // top kek, needs "static" so it's not a local, self-retaining block
+                    if ([[NSDate date] timeIntervalSinceDate:lastTouch] > 2)
+                    {
+                        [UIView animateWithDuration:0.2 animations:^{
+                            grabberView.frame = CGRectOffset(grabberView.frame, 40, 0);
+                        } completion:^(BOOL _) {
+                            [grabberView removeFromSuperview];
+                            grabberView = nil;
+                            isShowingGrabber = NO;
+                            isPastGrabber = NO;
+                        }];
+                    }
+                    else if (grabberView) // left there
+                    {
+                        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                            dismisser();
+                        });
+                    }
+                };
+                dismisser();
+
+                return RAGestureCallbackResultSuccess;
+            }
+            else if (CGRectContainsPoint(grabberView.frame, location))
+            {
+                [grabberView removeFromSuperview];
+                grabberView = nil;
+                isShowingGrabber = NO;
+                isPastGrabber = YES;
+            }
+            else if (isPastGrabber == NO)
+            {
+                startingPoint = CGPointZero;
+                isPastGrabber = NO;
+                return RAGestureCallbackResultSuccess;
+            }
+        }
+
         CGPoint translation;
         switch (state) {
             case UIGestureRecognizerStateBegan:
@@ -17,13 +113,15 @@
                 break;
             case UIGestureRecognizerStateEnded:
                 startingPoint = CGPointZero;
+                isPastGrabber = NO;
                 break;
         }
 
         if (![RASwipeOverManager.sharedInstance isUsingSwipeOver])
             [RASwipeOverManager.sharedInstance startUsingSwipeOver];
-        [RASwipeOverManager.sharedInstance sizeViewForTranslation:translation state:state];
-        lastPoint = location;
+        
+        if (state == UIGestureRecognizerStateChanged)
+            [RASwipeOverManager.sharedInstance sizeViewForTranslation:translation state:state];
 
         return RAGestureCallbackResultSuccess;
     } withCondition:^BOOL(CGPoint location, CGPoint velocity) {
