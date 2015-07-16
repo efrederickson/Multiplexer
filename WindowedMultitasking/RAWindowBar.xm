@@ -221,6 +221,9 @@
 		if ([RAWindowSnapDataProvider shouldSnapWindowAtLocation:self.frame])
 		{
 			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindowLocation:self.frame] animated:YES];
+			// Force tap to fail
+			tapGesture.enabled = NO;
+			tapGesture.enabled = YES;
 			return;
 		}
 	}

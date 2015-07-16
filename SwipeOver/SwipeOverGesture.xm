@@ -52,7 +52,7 @@ CGAffineTransform adjustTransformRotation()
     [[RAGestureManager sharedInstance] addGestureRecognizer:^RAGestureCallbackResult(UIGestureRecognizerState state, CGPoint location, CGPoint velocity) {
         lastTouch = [NSDate date];
 
-        if ([UIApplication.sharedApplication _accessibilityFrontMostApplication] && UIApplication.sharedApplication.statusBarHidden)
+        if ([[%c(SBUIController) sharedInstance] shouldShowControlCenterTabControlOnFirstSwipe])
         {
             if (isShowingGrabber == NO && isPastGrabber == NO)
             {

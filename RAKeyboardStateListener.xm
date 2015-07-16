@@ -50,10 +50,12 @@ void externalKeyboardDidHide(CFNotificationCenterRef center, void *observer, CFS
 
 %ctor
 {
+    // Any process
+    [RAKeyboardStateListener sharedInstance];
+
+    // Just SpringBoard
     if ([NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"])
     {
-        [RAKeyboardStateListener sharedInstance];
-
         CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, externalKeyboardDidShow, CFSTR("com.efrederickson.reachapp.keyboard.didShow"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, externalKeyboardDidHide, CFSTR("com.efrederickson.reachapp.keyboard.didHide"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
     }

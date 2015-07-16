@@ -77,6 +77,7 @@ extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 - (void)_showControlCenterGestureBeganWithLocation:(CGPoint)arg1;
 - (void)restoreContentUpdatingStatusBar:(_Bool)arg1;
 -(void) restoreContentAndUnscatterIconsAnimated:(BOOL)arg1;
+- (_Bool)shouldShowControlCenterTabControlOnFirstSwipe;
 @end
 
 @interface SBDisplayItem : NSObject <NSCopying>

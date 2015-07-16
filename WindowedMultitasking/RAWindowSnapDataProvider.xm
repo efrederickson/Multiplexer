@@ -11,7 +11,7 @@
 	// Convienence values
 	CGFloat width = UIScreen.mainScreen.bounds.size.width;
 	CGFloat height = UIScreen.mainScreen.bounds.size.height;
-	CGFloat oneThirdsHeight = height / 4;
+	//CGFloat oneThirdsHeight = height / 4;
 	CGFloat twoThirdsHeight = (height / 4) * 3;
 
 	CGFloat leftXBuffer = 25;
@@ -23,7 +23,7 @@
 		return RAWindowSnapLocationLeftTop;
 	if (location.origin.x < leftXBuffer && (location.origin.y >= twoThirdsHeight || location.origin.y + location.size.height > height))
 		return RAWindowSnapLocationLeftBottom;
-	if (location.origin.x < leftXBuffer && location.origin.y >= oneThirdsHeight && location.origin.y < twoThirdsHeight)
+	if (location.origin.x < leftXBuffer && location.origin.y >= height / 8 && location.origin.y < twoThirdsHeight)
 		return RAWindowSnapLocationLeftMiddle;
 
 	// Right
@@ -31,7 +31,7 @@
 		return RAWindowSnapLocationRightTop;
 	if (location.origin.x + location.size.width > rightXBuffer && (location.origin.y >= twoThirdsHeight || location.origin.y + location.size.height > height))
 		return RAWindowSnapLocationRightBottom;
-	if (location.origin.x + location.size.width > rightXBuffer && location.origin.y >= oneThirdsHeight && location.origin.y < twoThirdsHeight)
+	if (location.origin.x + location.size.width > rightXBuffer && location.origin.y >= height / 8 && location.origin.y < twoThirdsHeight)
 		return RAWindowSnapLocationRightMiddle;
 
 	if (location.origin.y + location.size.height > bottomBuffer)
