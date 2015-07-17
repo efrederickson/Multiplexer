@@ -1,5 +1,9 @@
 #import "RASettings.h"
 
+
+extern id/*RANCViewController* */ ncAppViewController;
+
+
 #define BOOL(key, default) ([_settings objectForKey:key] != nil ? [_settings[key] boolValue] : default) 
 
 NSDictionary *_settings = nil;
@@ -24,6 +28,10 @@ NSDictionary *_settings = nil;
 
 -(void) reloadSettings
 {
+	// Prepare specialized setting change cases
+	NSString *previousNCAppSetting = self.NCApp;
+
+	// Reload Settings
 	if (_settings)
 		_settings = nil;
 	CFStringRef appID = CFSTR("com.efrederickson.reachapp.settings");
@@ -36,6 +44,9 @@ NSDictionary *_settings = nil;
 		return;
 	}
 	CFRelease(keyList);
+
+	if ([previousNCAppSetting isEqual:self.NCApp] == NO)
+		[ncAppViewController performSelector:@selector(forceReloadAppLikelyBecauseTheSettingChanged)];
 }
 
 -(BOOL) enabled
@@ -122,5 +133,25 @@ NSDictionary *_settings = nil;
 -(BOOL) flipTopAndBottom
 {
 	return BOOL(@"flipTopAndBottom", NO);
+}
+
+-(NSString*) NCApp
+{
+	return _settings[@"NCApp"];
+}
+
+-(BOOL) alwaysEnableGestures
+{
+	return BOOL(@"alwaysEnableGestures", YES);
+}
+
+-(BOOL) snapWindows
+{
+	return BOOL(@"snapWindows", YES);
+}
+
+-(BOOL) launchIntoWindows
+{
+	return BOOL(@"launchIntoWindows", NO);
 }
 @end

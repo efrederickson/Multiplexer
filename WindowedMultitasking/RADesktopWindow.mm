@@ -34,6 +34,7 @@
 		[UIView animateWithDuration:0.5 animations:^{ windowBar.alpha = 1; }];
 
 	[view loadApp];
+	view.hideStatusBar = YES;
 	windowBar.transform = CGAffineTransformMakeScale(0.5, 0.5);
 
 	return windowBar;
@@ -111,12 +112,25 @@
 	}	
 }
 
+-(UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
+{
+    NSEnumerator *objects = [self.subviews reverseObjectEnumerator];
+    UIView *subview;
+    while ((subview = [objects nextObject])) 
+    {
+        UIView *success = [subview hitTest:[self convertPoint:point toView:subview] withEvent:event];
+        if (success)
+            return success;
+    }
+    return [super hitTest:point withEvent:event];
+}
+
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event 
 {
 	BOOL isContained = NO;
 	for (UIView *view in self.subviews)
 	{
-		if (CGRectContainsPoint(view.frame, point)) // [self convertPoint:point toView:view]))
+		if (CGRectContainsPoint(view.frame, point) || CGRectContainsPoint(view.frame, [view convertPoint:point fromView:self])) // [self convertPoint:point toView:view]))
 			isContained = YES;
 	}
 	return isContained;

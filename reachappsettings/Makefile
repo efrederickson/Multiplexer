@@ -6,7 +6,7 @@ LDFLAGS = -F$(THEOS)/frameworks
 include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = ReachAppSettings
-ReachAppSettings_FILES = ReachAppSettings.mm $(shell find $(THEOS)/include/SettingsKit -name '*.m')
+ReachAppSettings_FILES = ReachAppSettings.mm $(shell find $(THEOS)/include/SettingsKit -name '*.m') $(wildcard *.xm)
 ReachAppSettings_INSTALL_PATH = /Library/PreferenceBundles
 ReachAppSettings_FRAMEWORKS = UIKit MessageUI Social QuartzCore CoreGraphics
 ReachAppSettings_LIBRARIES = applist substrate

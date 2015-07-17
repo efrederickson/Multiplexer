@@ -35,7 +35,7 @@
 
 void externalKeyboardDidShow(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) 
 {
-    NSLog(@"[ReachApp] externalKeyboardDidShow");
+    //NSLog(@"[ReachApp] externalKeyboardDidShow");
     CGSize size = CGSizeFromString(((__bridge NSDictionary*)userInfo)[@"size"]);
 
     [RAKeyboardStateListener.sharedInstance _setVisible:YES];
@@ -44,7 +44,7 @@ void externalKeyboardDidShow(CFNotificationCenterRef center, void *observer, CFS
 
 void externalKeyboardDidHide(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) 
 {
-    NSLog(@"[ReachApp] externalKeyboardDidHide");
+    //NSLog(@"[ReachApp] externalKeyboardDidHide");
     [RAKeyboardStateListener.sharedInstance _setVisible:NO];
 }
 

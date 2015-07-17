@@ -21,4 +21,9 @@
 -(BOOL) unifyStatusBar;
 -(BOOL) flipTopAndBottom;
 
+-(NSString*) NCApp;
+
+-(BOOL) alwaysEnableGestures;
+-(BOOL) snapWindows;
+-(BOOL) launchIntoWindows;
 @end

@@ -1,5 +1,6 @@
 #import "RANCViewController.h"
 #import "RAHostedAppView.h"
+#import "RASettings.h"
 
 @interface RANCViewController () {
 	RAHostedAppView *appView;
@@ -25,6 +26,13 @@
 	[activityView startAnimating];
 }
 
+-(void) forceReloadAppLikelyBecauseTheSettingChanged
+{
+	[appView unloadApp];
+	appView = nil;
+}
+
+
 int patchOrientation(int in)
 {
 	if (in == 3)
@@ -37,7 +45,8 @@ int patchOrientation(int in)
 	[super viewDidAppear:animated];
 	if (!appView)
 	{
-		appView = [[RAHostedAppView alloc] initWithBundleIdentifier:@"com.apple.Preferences"];
+		NSString *ident = [RASettings.sharedInstance NCApp] ?: @"com.apple.Preferences";
+		appView = [[RAHostedAppView alloc] initWithBundleIdentifier:ident];
 		appView.frame = UIScreen.mainScreen.bounds;
 		[self.view addSubview:appView];
 

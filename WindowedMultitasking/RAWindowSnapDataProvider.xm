@@ -44,6 +44,7 @@
 
 +(void) snapWindow:(RAWindowBar*)window toLocation:(RAWindowSnapLocation)location animated:(BOOL)animated
 {
+	/*
 	// Convienence values
 	CGFloat width = UIScreen.mainScreen.bounds.size.width;
 	CGFloat height = UIScreen.mainScreen.bounds.size.height;
@@ -94,5 +95,58 @@
 	}
 	else
 		window.frame = (CGRect) { adjustedOrigin, frame.size };
+	*/
+
+
+	// Convienence values
+	CGFloat width = UIScreen.mainScreen.bounds.size.width;
+	CGFloat height = UIScreen.mainScreen.bounds.size.height;
+
+	// Target frame values
+	CGRect frame = window.frame;
+	CGPoint newCenter = window.center;
+
+	switch (location)
+	{
+		case RAWindowSnapLocationLeftTop:
+			newCenter = CGPointMake(frame.size.width / 2, (frame.size.height / 2) + 20);
+			break;
+		case RAWindowSnapLocationLeftMiddle:
+			newCenter.x = frame.size.width / 2;
+			break;
+		case RAWindowSnapLocationLeftBottom:
+			newCenter = CGPointMake(frame.size.width / 2, height - (frame.size.height / 2));
+			break;
+
+		case RAWindowSnapLocationRightTop:
+			newCenter = CGPointMake(width - (frame.size.width / 2), (frame.size.height / 2) + 20);
+			break;
+		case RAWindowSnapLocationRightMiddle:
+			newCenter.x = width - (frame.size.width / 2);
+			break;
+		case RAWindowSnapLocationRightBottom:
+			newCenter = CGPointMake(width - (frame.size.width / 2), height - (frame.size.height / 2));
+			break;
+
+		case RAWindowSnapLocationTop:
+			newCenter.y = (frame.size.height / 2) + 20;
+			break;
+		case RAWindowSnapLocationBottom:
+			newCenter.y = height - (frame.size.height / 2);
+			break;
+
+		case RAWindowSnapLocationInvalid:
+		default:
+			break;
+	}
+
+	if (animated)
+	{
+		[UIView animateWithDuration:0.2 animations:^{
+			window.center = newCenter;
+		}];
+	}
+	else
+		window.center = newCenter;
 }
 @end

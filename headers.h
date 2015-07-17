@@ -524,6 +524,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 
 @interface SBIcon (iOS81)
 -(BOOL) isBeta;
+- (_Bool)isApplicationIcon;
 @end
 
 @interface SBIconModel (iOS81)

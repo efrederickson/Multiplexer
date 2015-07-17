@@ -2,11 +2,16 @@
 #import "RADesktopManager.h"
 #import "RAWindowOverlayView.h"
 #import "RAWindowSnapDataProvider.h"
+#import "RASettings.h"
+
+const int rightSizeViewTag = 987654321;
+const int bottomSizeViewTag =  987654320;
 
 @interface RAWindowBar () {
 	CGPoint initialPoint;
 	BOOL enableDrag, enableLongPress;
 	BOOL sizingLocked;
+	BOOL isSnapped;
 
 	UIPanGestureRecognizer *panGesture;
 	UIPinchGestureRecognizer *scaleGesture;
@@ -118,6 +123,7 @@
 	sizingLocked = YES;
 	sizingLockButton = [[UIButton alloc] init];
 	sizingLockButton.frame = CGRectMake(swapOrientationButton.frame.origin.x - 25, 5, 20, 20);
+	sizingLockButton.titleLabel.font = [UIFont systemFontOfSize:13];
 	[sizingLockButton setTitle:@"🔒" forState:UIControlStateNormal];
 	[sizingLockButton addTarget:self action:@selector(sizingLockButtonTap:) forControlEvents:UIControlEventTouchUpInside];
 	sizingLockButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
@@ -165,9 +171,40 @@
 	sizingLocked = !sizingLocked;
 
 	if (sizingLocked)
+	{
 		[sizingLockButton setTitle:@"🔒" forState:UIControlStateNormal];
+
+		[[self viewWithTag:rightSizeViewTag] removeFromSuperview];
+		[[self viewWithTag:bottomSizeViewTag] removeFromSuperview];
+		self.attachedView.autosizesApp = NO;
+	}
 	else
+	{
 		[sizingLockButton setTitle:@"🔓" forState:UIControlStateNormal];
+
+		UIView *rightView = [[UIView alloc] initWithFrame:CGRectMake(self.bounds.size.width, 30, 20, self.bounds.size.height - 20)];
+		rightView.backgroundColor = self.backgroundColor;
+		rightView.tag = rightSizeViewTag;
+		rightView.userInteractionEnabled = YES;
+		[self addSubview:rightView];
+
+		UIView *bottomView = [[UIView alloc] initWithFrame:CGRectMake(0, self.bounds.size.height, self.bounds.size.width, 20)];
+		bottomView.backgroundColor = self.backgroundColor;
+		bottomView.tag = bottomSizeViewTag;
+		bottomView.userInteractionEnabled = YES;
+		[self addSubview:bottomView];
+
+		UIPanGestureRecognizer *tempGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+		tempGesture.delegate = self;
+		[rightView addGestureRecognizer:tempGesture];
+
+		tempGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
+		tempGesture.delegate = self;
+		[bottomView addGestureRecognizer:tempGesture];
+
+		self.attachedView.autosizesApp = YES;
+		self.attachedView.frame = self.attachedView.frame; // force update
+	}
 }
 
 -(void) addRotation:(CGFloat)rads updateApp:(BOOL)update
@@ -202,6 +239,9 @@
 
 - (void)handleRotate:(UIRotationGestureRecognizer *)gesture
 {
+	if ([RASettings.sharedInstance alwaysEnableGestures] == NO && self.isOverlayShowing == NO)
+		return;
+
     if (gesture.state == UIGestureRecognizerStateChanged)
     {
     	[self addRotation:gesture.rotation updateApp:NO];
@@ -257,7 +297,51 @@
 
 -(void) handlePan:(UIPanGestureRecognizer*)sender
 {
-	if (!enableDrag)
+	NSLog(@"[ReachApp] pan");
+
+	static void (^adjustFrames)(CGRect selfTarget) = ^(CGRect selfTarget) {
+		self.bounds = selfTarget;
+		[self viewWithTag:bottomSizeViewTag].bounds = CGRectMake(0, self.bounds.size.height, self.bounds.size.width, 20);
+		[self viewWithTag:rightSizeViewTag].bounds = CGRectMake(self.bounds.size.width, 30, 20, self.bounds.size.height - 20);
+		self.attachedView.bounds = CGRectMake(0, 30, self.bounds.size.width, self.bounds.size.height - 30);
+	};
+
+	BOOL didSize = NO;
+
+	if (sender.view.tag == bottomSizeViewTag)
+	{
+		static CGFloat orig;
+
+		if (sender.state == UIGestureRecognizerStateBegan)
+		{
+			orig = self.bounds.size.height;
+		}
+		else if (sender.state == UIGestureRecognizerStateChanged)
+		{
+			CGRect f = self.bounds;
+			f.size.height = orig + [sender translationInView:self].y;
+			adjustFrames(f);
+		}
+		didSize = YES;
+	}
+	if (sender.view.tag == rightSizeViewTag)
+	{
+		static CGFloat orig;
+
+		if (sender.state == UIGestureRecognizerStateBegan)
+		{
+			orig = self.bounds.size.width;
+		}
+		else if (sender.state == UIGestureRecognizerStateChanged)
+		{
+			CGRect f = self.bounds;
+			f.size.width = orig + [sender translationInView:self].x;
+			adjustFrames(f);
+		}
+		didSize = YES;
+	}
+
+	if (!enableDrag || didSize)
 		return;
 
 	if (sender.state == UIGestureRecognizerStateBegan)
@@ -270,9 +354,10 @@
 	{
 		enableLongPress = YES;
 
-		if ([RAWindowSnapDataProvider shouldSnapWindowAtLocation:self.frame])
+		if ([RASettings.sharedInstance snapWindows] && [RAWindowSnapDataProvider shouldSnapWindowAtLocation:self.frame])
 		{
 			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindowLocation:self.frame] animated:YES];
+			isSnapped = YES;
 			// Force tap to fail
 			tapGesture.enabled = NO;
 			tapGesture.enabled = YES;
@@ -280,6 +365,7 @@
 		}
 	}
 
+	isSnapped = NO;
     UIView *view = sender.view;
     CGPoint point = [sender translationInView:self.superview];
 
@@ -289,6 +375,9 @@
 
 - (void)handlePinch:(UIPinchGestureRecognizer *)gesture
 {
+	if ([RASettings.sharedInstance alwaysEnableGestures] == NO && self.isOverlayShowing == NO)
+		return;
+
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan:
         	enableDrag = NO; enableLongPress = NO;
@@ -300,12 +389,52 @@
             break;
         case UIGestureRecognizerStateEnded:
         	enableDrag = YES; enableLongPress = YES;
+			
+			if (isSnapped && [RAWindowSnapDataProvider shouldSnapWindowAtLocation:self.frame])
+			{
+				[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindowLocation:self.frame] animated:YES];
+				isSnapped = YES;
+				// Force tap to fail
+				tapGesture.enabled = NO;
+				tapGesture.enabled = YES;
+				return;
+			}
+
             break;
         default:
             break;
     }
 }
 
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer { return YES; }
+-(UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
+{
+    NSEnumerator *objects = [self.subviews reverseObjectEnumerator];
+    UIView *subview;
+    while ((subview = [objects nextObject])) 
+    {
+        UIView *success = [subview hitTest:[self convertPoint:point toView:subview] withEvent:event];
+        if (success)
+            return success;
+    }
+    return [super hitTest:point withEvent:event];
+}
+
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event 
+{
+	BOOL isContained = NO;
+	for (UIView *view in self.subviews)
+	{
+		if (CGRectContainsPoint(view.frame, point) || CGRectContainsPoint(view.frame, [view convertPoint:point fromView:self])) // [self convertPoint:point toView:view]))
+			isContained = YES;
+	}
+	return isContained || [super pointInside:point withEvent:event];
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer 
+{
+	if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]])
+		return NO;
+	return YES; 
+}
 -(RAHostedAppView*) attachedView { return attachedView; }
 @end
