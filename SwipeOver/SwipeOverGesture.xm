@@ -5,7 +5,7 @@
 #import "PDFImage.h"
 #import "PDFImageOptions.h"
 
-UIImageView *grabberView;
+UIView *grabberView;
 BOOL isShowingGrabber = NO;
 BOOL isPastGrabber = NO;
 NSDate *lastTouch;
@@ -15,6 +15,7 @@ CGRect adjustFrameForRotation()
 {
     CGFloat portraitWidth = 30;
     CGFloat portraitHeight = 50;
+
     switch ([[UIApplication.sharedApplication _accessibilityFrontMostApplication] statusBarOrientation])
     {
         case UIInterfaceOrientationPortrait:
@@ -25,7 +26,7 @@ CGRect adjustFrameForRotation()
             return (CGRect){ { 0, 0}, { 50, 50 } };
         case UIInterfaceOrientationLandscapeLeft:
             NSLog(@"[ReachApp] landscape left");
-            return (CGRect){ { (UIScreen.mainScreen.bounds.size.width - portraitHeight) / 2, 0 - 5 }, { portraitHeight, portraitWidth } };
+            return (CGRect){ { ((UIScreen.mainScreen.bounds.size.width - portraitWidth) / 2), 0 - 5 }, { portraitWidth, portraitHeight } };
         case UIInterfaceOrientationLandscapeRight:
             NSLog(@"[ReachApp] landscape right");
             return (CGRect){ { UIScreen.mainScreen.bounds.size.height - portraitHeight, UIScreen.mainScreen.bounds.size.width - portraitWidth }, { portraitHeight, portraitWidth } };
@@ -38,13 +39,13 @@ CGAffineTransform adjustTransformRotation()
     switch ([[UIApplication.sharedApplication _accessibilityFrontMostApplication] statusBarOrientation])
     {
         case UIInterfaceOrientationPortrait:
-            return CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(90));
-        case UIInterfaceOrientationPortraitUpsideDown:
-            return CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(-90));
-        case UIInterfaceOrientationLandscapeLeft:
             return CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(0));
-        case UIInterfaceOrientationLandscapeRight:
+        case UIInterfaceOrientationPortraitUpsideDown:
             return CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(180));
+        case UIInterfaceOrientationLandscapeLeft:
+            return CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(-90));
+        case UIInterfaceOrientationLandscapeRight:
+            return CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(90));
     }
     return CGAffineTransformIdentity;
 }
@@ -60,14 +61,22 @@ CGAffineTransform adjustTransformRotation()
             {
                 isShowingGrabber = YES;
 
-                //grabberView = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:adjustFrameForRotation()];
-                //[grabberView.chevronView setState:1 animated:NO];
-                //grabberView.chevronView.transform = adjustTransformRotation();
-                grabberView = [[UIImageView alloc] initWithFrame:adjustFrameForRotation()];
-                grabberView.image = [[PDFImage imageWithContentsOfFile:@"/Library/ReachApp/Grabber.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(grabberView.frame.size.width, grabberView.frame.size.height)]];
+                grabberView = [[UIView alloc] init];
 
-                grabberView.backgroundColor = [UIColor clearColor];
+                _UIBackdropView *bgView = [[%c(_UIBackdropView) alloc] initWithStyle:0];
+                bgView.frame = CGRectMake(0, 0, grabberView.frame.size.width, grabberView.frame.size.height);
+                [grabberView addSubview:bgView];
+
+                //grabberView.backgroundColor = UIColor.redColor;
+                grabberView.frame = adjustFrameForRotation();
+
+                UIImageView *imgView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, grabberView.frame.size.width, grabberView.frame.size.height)];
+                imgView.image = [[PDFImage imageWithContentsOfFile:@"/Library/ReachApp/Grabber.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(grabberView.frame.size.width, grabberView.frame.size.height)]];
+                [grabberView addSubview:imgView];
                 grabberView.layer.cornerRadius = 5;
+                grabberView.clipsToBounds = YES;
+
+                grabberView.transform = adjustTransformRotation();
                 [UIWindow.keyWindow addSubview:grabberView]; // The desktop view most likely
 
                 static void (^dismisser)() = ^{ // top kek, needs "static" so it's not a local, self-retaining block

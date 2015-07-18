@@ -18,4 +18,8 @@
 -(void) unloadApps;
 -(void) loadApps;
 -(void) closeAllApps;
+
+-(void) saveInfo;
+-(void) loadInfo;
+-(void) loadInfo:(NSInteger)index;
 @end

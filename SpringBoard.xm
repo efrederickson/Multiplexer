@@ -13,6 +13,8 @@
 #import "RASettings.h"
 #import "RASwipeOverManager.h"
 #import "RAMissionControlManager.h"
+#import "RADesktopManager.h"
+#import "RADesktopWindow.h"
 
 #define SPRINGBOARD ([NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"])
 
@@ -55,6 +57,27 @@
     return %orig;
 }
 %end
+
+%hook SpringBoard
+-(void) _performDeferredLaunchWork
+{
+    %orig;
+    [RADesktopManager.sharedInstance currentDesktop]; // load desktop (and previous windows!)
+}
+%end
+
+/*
+%hook SBRootFolderView
+- (_Bool)_hasMinusPages 
+{
+    return RADesktopManager.sharedInstance.currentDesktop.hostedWindows.count > 0 ? YES : %orig; 
+}
+- (unsigned long long)_minusPageCount 
+{
+    return RADesktopManager.sharedInstance.currentDesktop.hostedWindows.count > 0 ? 1 : %orig; 
+}
+%end
+*/
 
 void reloadSettings(CFNotificationCenterRef center,
                     void *observer,

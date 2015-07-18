@@ -1,9 +1,13 @@
 #import "headers.h"
 #import "RAHostedAppView.h"
 
+@class RADesktopWindow;
+
 @interface RAWindowBar : UIView<UIGestureRecognizerDelegate, UILongPressGestureRecognizerDelegate> {
 	RAHostedAppView *attachedView;
 }
+
+@property (nonatomic, weak) RADesktopWindow *desktop;
 
 -(void) close;
 -(void) maximize;

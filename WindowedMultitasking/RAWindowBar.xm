@@ -3,6 +3,7 @@
 #import "RAWindowOverlayView.h"
 #import "RAWindowSnapDataProvider.h"
 #import "RASettings.h"
+#import "RAWindowStatePreservationSystemManager.h"
 
 const int rightSizeViewTag = 987654321;
 const int bottomSizeViewTag =  987654320;
@@ -166,6 +167,16 @@ const int bottomSizeViewTag =  987654320;
 	[self minimize];
 }
 
+-(void) saveWindowInfo
+{
+	[RAWindowStatePreservationSystemManager.sharedInstance saveWindowInformation:self];
+	if (self.desktop)
+	{
+		NSLog(@"[ReachApp] - has desktop");
+		[self.desktop saveInfo];
+	}
+}
+
 -(void) sizingLockButtonTap:(id)arg1
 {
 	sizingLocked = !sizingLocked;
@@ -251,6 +262,7 @@ const int bottomSizeViewTag =  987654320;
     else if (gesture.state == UIGestureRecognizerStateEnded)
 	{
     	[self addRotation:0 updateApp:YES];
+		[self saveWindowInfo];
     }
 }
 
@@ -297,8 +309,6 @@ const int bottomSizeViewTag =  987654320;
 
 -(void) handlePan:(UIPanGestureRecognizer*)sender
 {
-	NSLog(@"[ReachApp] pan");
-
 	static void (^adjustFrames)(CGRect selfTarget) = ^(CGRect selfTarget) {
 		self.bounds = selfTarget;
 		[self viewWithTag:bottomSizeViewTag].bounds = CGRectMake(0, self.bounds.size.height, self.bounds.size.width, 20);
@@ -353,6 +363,7 @@ const int bottomSizeViewTag =  987654320;
 	else if (sender.state == UIGestureRecognizerStateEnded)
 	{
 		enableLongPress = YES;
+		[self saveWindowInfo];
 
 		if ([RASettings.sharedInstance snapWindows] && [RAWindowSnapDataProvider shouldSnapWindowAtLocation:self.frame])
 		{
@@ -399,6 +410,7 @@ const int bottomSizeViewTag =  987654320;
 				tapGesture.enabled = YES;
 				return;
 			}
+			[self saveWindowInfo];
 
             break;
         default:

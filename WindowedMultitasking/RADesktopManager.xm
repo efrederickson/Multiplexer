@@ -19,6 +19,7 @@ BOOL overrideUIWindow = NO;
 	[windows addObject:desktopWindow];
 	if (switchTo)
 		[self switchToDesktop:windows.count - 1];
+	[desktopWindow loadInfo:[windows indexOfObject:desktopWindow]];
 }
 
 -(void) removeDesktopAtIndex:(NSUInteger)index
@@ -30,6 +31,7 @@ BOOL overrideUIWindow = NO;
 		[self switchToDesktop:0];
 
 	RADesktopWindow *window = windows[index];
+	[window saveInfo];
 	[window closeAllApps];
 	[windows removeObjectAtIndex:index]; 
 }

@@ -1,5 +1,7 @@
 #import "RADesktopWindow.h"
 #import "RAWindowBar.h"
+#import "RAWindowStatePreservationSystemManager.h"
+#import "RADesktopManager.h"
 
 @implementation RADesktopWindow
 -(id) initWithFrame:(CGRect)frame
@@ -24,6 +26,7 @@
 	view.center = self.center;
 
 	RAWindowBar *windowBar = [[RAWindowBar alloc] init];
+	windowBar.desktop = self;
 	[windowBar attachView:view];
 	[appViews addObject:view];
 
@@ -36,6 +39,15 @@
 	[view loadApp];
 	view.hideStatusBar = YES;
 	windowBar.transform = CGAffineTransformMakeScale(0.5, 0.5);
+
+	if ([RAWindowStatePreservationSystemManager.sharedInstance hasWindowInformationForIdentifier:view.app.bundleIdentifier])
+	{
+		RAPreservedWindowInformation info = [RAWindowStatePreservationSystemManager.sharedInstance windowInformationForAppIdentifier:view.app.bundleIdentifier];
+		windowBar.center = info.center;
+		windowBar.transform = info.transform;
+	}
+
+	//[self saveInfo];
 
 	return windowBar;
 }
@@ -71,6 +83,7 @@
 				[view.superview removeFromSuperview];
 				[view removeFromSuperview];
 				[appViews removeObject:view];
+				[self saveInfo];
 			};
 			if (animated)
 				[UIView animateWithDuration:0.3 animations:^{
@@ -106,10 +119,36 @@
 
 -(void) closeAllApps
 {
-	while (appViews.count > 0)
+	//while (appViews.count > 0)
+	int i = appViews.count - 1;
+	while (i --> 0) // Always wanted to use that 😍
 	{
-		[self removeAppWithIdentifier:((RAHostedAppView*)appViews[0]).bundleIdentifier animated:YES];
+		[self removeAppWithIdentifier:((RAHostedAppView*)appViews[i]).bundleIdentifier animated:YES];
 	}	
+}
+
+-(void) saveInfo
+{
+	[RAWindowStatePreservationSystemManager.sharedInstance saveDesktopInformation:self];
+}
+
+-(void) loadInfo
+{
+	NSInteger index = [RADesktopManager.sharedInstance.availableDesktops indexOfObject:self];
+	if ([RAWindowStatePreservationSystemManager.sharedInstance hasDesktopInformationAtIndex:index] == NO)
+		return;
+	RAPreservedDesktopInformation info = [RAWindowStatePreservationSystemManager.sharedInstance desktopInformationForIndex:index];
+	for (NSString *bundleIdentifier in info.openApps)
+		[self createAppWindowWithIdentifier:bundleIdentifier animated:YES];
+}
+
+-(void) loadInfo:(NSInteger)index
+{
+	if ([RAWindowStatePreservationSystemManager.sharedInstance hasDesktopInformationAtIndex:index] == NO)
+		return;
+	RAPreservedDesktopInformation info = [RAWindowStatePreservationSystemManager.sharedInstance desktopInformationForIndex:index];
+	for (NSString *bundleIdentifier in info.openApps)
+		[self createAppWindowWithIdentifier:bundleIdentifier animated:YES];
 }
 
 -(UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
