@@ -70,8 +70,8 @@ CGAffineTransform adjustTransformRotation()
                 //grabberView.backgroundColor = UIColor.redColor;
                 grabberView.frame = adjustFrameForRotation();
 
-                UIImageView *imgView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, grabberView.frame.size.width, grabberView.frame.size.height)];
-                imgView.image = [[PDFImage imageWithContentsOfFile:@"/Library/ReachApp/Grabber.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(grabberView.frame.size.width, grabberView.frame.size.height)]];
+                UIImageView *imgView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, grabberView.frame.size.width - 20, grabberView.frame.size.height - 20)];
+                imgView.image = [[PDFImage imageWithContentsOfFile:@"/Library/ReachApp/Grabber.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(grabberView.frame.size.width - 20, grabberView.frame.size.height - 20)]];
                 [grabberView addSubview:imgView];
                 grabberView.layer.cornerRadius = 5;
                 grabberView.clipsToBounds = YES;
