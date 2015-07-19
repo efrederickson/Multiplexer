@@ -5,6 +5,8 @@
 #import <AppList/AppList.h>
 #import <substrate.h>
 #import <notify.h>
+#import "RAHeaderView.h"
+#import "PDFImage.h"
 
 #define PLIST_NAME @"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"
 
@@ -28,11 +30,23 @@
 @end
 
 @implementation ReachAppSettingsListController
+-(UIView*) headerView
+{
+    RAHeaderView *header = [[RAHeaderView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 95)];
+    header.colors = @[ 
+        (id) [UIColor colorWithRed:234/255.0f green:152/255.0f blue:115/255.0f alpha:1.0f].CGColor, 
+        (id) [UIColor colorWithRed:190/255.0f green:83/255.0f blue:184/255.0f alpha:1.0f].CGColor 
+    ];
+    //header.title = @"卐卐 TWEAK SUPREMACY 卍卍";
+    header.image = [[PDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/MainHeader.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(109.33, 41)]];
 
--(NSString*) headerText { return @"Empoleon"; }
--(NSString*) headerSubText { return @"卐卐 TWEAK SUPREMACY 卍卍"; }
+    UIView *notHeader = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 115)];
+    [notHeader addSubview:header];
 
--(NSString*) customTitle { return @"ReachApp"; }
+    return notHeader;
+}
+
+-(NSString*) customTitle { return @"卐 ReachApp 卍"; }
 
 -(BOOL) showHeartImage { return YES; }
 -(NSString*) shareMessage { return @"TODO"; }
@@ -54,14 +68,26 @@
              @{ },
              @{
                  @"cell": @"PSLinkListCell",
-                 @"label": @"NotificationCenter",
+                 @"label": @"NotificationCenter (Quick Access)",
                  @"detail": @"ReachAppNCAppSettingsListController",
                  },
              @{ },
              @{
                  @"cell": @"PSLinkListCell",
-                 @"label": @"Windowed Multitasking",
+                 @"label": @"Windowed Multitasking (Empoleon)",
                  @"detail": @"ReachAppWindowSettingsListController",
+                 },
+             @{ },
+             @{
+                 @"cell": @"PSLinkListCell",
+                 @"label": @"Mission Control",
+                 @"detail": @"ReachAppMCSettingsListController",
+                 },
+             @{ },
+             @{
+                 @"cell": @"PSLinkListCell",
+                 @"label": @"Backgrounder (Aura)",
+                 @"detail": @"ReachAppBackgrounderSettingsListController",
                  },
              ];
 }

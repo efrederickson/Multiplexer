@@ -4,6 +4,7 @@
     NSTimer *verifyTimer;
     BOOL isPreloading;
     FBWindowContextHostManager *contextHostManager;
+    UIActivityIndicatorView *activityView;
 }
 @end
 
@@ -68,6 +69,9 @@
     contextHostManager = [scene contextHostManager];
 
     FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
+    if (!settings)
+        return;
+
     SET_BACKGROUNDED(settings, NO);
     [scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];
 
@@ -84,15 +88,29 @@
 
     verifyTimer = [NSTimer timerWithTimeInterval:1 target:self selector:@selector(verifyHostingAndRehostIfNecessary) userInfo:nil repeats:YES];
     [NSRunLoop.currentRunLoop addTimer:verifyTimer forMode:NSRunLoopCommonModes];
+
+    if (!activityView)
+    {
+        activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+        [self addSubview:activityView];
+    }
+
+    CGFloat size = 50;
+    activityView.frame = CGRectMake((self.frame.size.width - size) / 2, (self.frame.size.height - size) / 2, size, size);
+
+    [activityView startAnimating];
 }
 
 -(void) verifyHostingAndRehostIfNecessary
 {
     if (!isPreloading && (app.isRunning == NO || view.contextHosted == NO)) // && (app.pid == 0 || view == nil || view.manager == nil)) // || view._isReallyHosting == NO))
     {
+        [activityView startAnimating];
         [self unloadApp];
         [self loadApp];
     }
+    else
+        [activityView stopAnimating];
 }
 
 -(void) setFrame:(CGRect)frame
@@ -131,6 +149,8 @@
 
 -(void) unloadApp
 {
+    if (activityView)
+        [activityView stopAnimating];
     [verifyTimer invalidate];
 	FBScene *scene = [app mainScene];
 

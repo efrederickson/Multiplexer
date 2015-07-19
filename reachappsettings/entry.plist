@@ -5,6 +5,6 @@
 	detail = ReachAppSettingsListController;
 	icon = ReachAppSettings.png;
 	isController = 1;
-	label = ReachApp;
+	label = Multiplexer;
     };
 }

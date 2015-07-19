@@ -5,6 +5,8 @@
 #import <AppList/AppList.h>
 #import <substrate.h>
 #import <notify.h>
+#import "RAHeaderView.h"
+#import "PDFImage.h"
 
 #define PLIST_NAME @"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"
 
@@ -28,9 +30,21 @@
 @end
 
 @implementation ReachAppWindowSettingsListController
--(NSString*) headerText { return @"The Widower"; }
--(NSString*) headerSubText { return @"Slide up from bottom left"; }
--(NSString*) customTitle { return @"Windows"; }
+-(UIView*) headerView
+{
+    RAHeaderView *header = [[RAHeaderView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 50)];
+    header.colors = @[ 
+        (id) [UIColor colorWithRed:255/255.0f green:94/255.0f blue:58/255.0f alpha:1.0f].CGColor,
+        (id) [UIColor colorWithRed:255/255.0f green:149/255.0f blue:0/255.0f alpha:1.0f].CGColor, 
+    ];
+    header.image = [[PDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/EmpoleonHeader.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(32, 32)]];
+
+    UIView *notHeader = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 70)];
+    [notHeader addSubview:header];
+
+    return notHeader;
+}
+-(NSString*) customTitle { return @"Empoleon"; }
 -(BOOL) showHeartImage { return NO; }
 
 -(NSArray*) customSpecifiers

@@ -5,6 +5,8 @@
 #import <AppList/AppList.h>
 #import <substrate.h>
 #import <notify.h>
+#import "RAHeaderView.h"
+#import "PDFImage.h"
 
 #define PLIST_NAME @"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"
 
@@ -28,8 +30,21 @@
 @end
 
 @implementation ReachAppNCAppSettingsListController
--(NSString*) headerText { return @"NotificationCenter"; }
--(NSString*) headerSubText { return @"Slide down from the top"; }
+-(UIView*) headerView
+{
+    RAHeaderView *header = [[RAHeaderView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 50)];
+    header.colors = @[ 
+        (id) [UIColor colorWithRed:90/255.0f green:212/255.0f blue:39/255.0f alpha:1.0f].CGColor,
+        (id) [UIColor colorWithRed:164/255.0f green:231/255.0f blue:134/255.0f alpha:1.0f].CGColor, 
+    ];
+    header.image = [[PDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/NCAppHeader.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(32, 32)]];
+
+    UIView *notHeader = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 70)];
+    [notHeader addSubview:header];
+
+    return notHeader;
+}
+
 -(NSString*) customTitle { return @"NC App"; }
 -(BOOL) showHeartImage { return NO; }
 

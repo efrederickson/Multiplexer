@@ -22,41 +22,45 @@
 -(void)viewWillDisappear:(BOOL)animated;
 @end
 
-@interface ReachAppSwipeOverSettingsListController: SKTintedListController<SKListControllerProtocol>
+@interface ALApplicationTableDataSource (Private)
+- (void)sectionRequestedSectionReload:(id)section animated:(BOOL)animated;
 @end
 
-@implementation ReachAppSwipeOverSettingsListController
+@interface ReachAppBackgrounderSettingsListController: SKTintedListController<SKListControllerProtocol>
+@end
+
+@implementation ReachAppBackgrounderSettingsListController
 -(UIView*) headerView
 {
     RAHeaderView *header = [[RAHeaderView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 50)];
     header.colors = @[ 
-        (id) [UIColor colorWithRed:88/255.0f green:86/255.0f blue:214/255.0f alpha:1.0f].CGColor,
-        (id) [UIColor colorWithRed:198/255.0f green:68/255.0f blue:252/255.0f alpha:1.0f].CGColor, 
+        (id) [UIColor colorWithRed:248/255.0f green:73/255.0f blue:88/255.0f alpha:1.0f].CGColor, 
+        (id) [UIColor colorWithRed:255/255.0f green:111/255.0f blue:124/255.0f alpha:1.0f].CGColor 
     ];
-    header.image = [[PDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/SwipeOverHeader.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(54, 32)]];
+    header.image = [[PDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/BackgrounderHeader.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(15, 33)]];
 
     UIView *notHeader = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 70)];
     [notHeader addSubview:header];
 
     return notHeader;
 }
--(NSString*) customTitle { return @"SwipeOver"; }
 
+-(NSString*) customTitle { return @"Aura"; }
 -(BOOL) showHeartImage { return NO; }
 
 -(NSArray*) customSpecifiers
 {
     return @[
-             @{ @"footerText": @"todo" },
+             @{ @"footerText": @"Enable/disable ReachApp. After any change to the settings, a respring is recommended but not required." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
-                 @"key": @"__todo__",
-                 @"label": @"todo",
+                 @"key": @"enabled",
+                 @"label": @"Enabled",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
-            ];
+
+             ];
 }
 @end
-

@@ -5,6 +5,8 @@
 #import <AppList/AppList.h>
 #import <substrate.h>
 #import <notify.h>
+#import "RAHeaderView.h"
+#import "PDFImage.h"
 
 #define PLIST_NAME @"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"
 
@@ -28,8 +30,22 @@
 @end
 
 @implementation ReachAppReachabilitySettingsListController
--(NSString*) headerText { return @"Reachability"; }
--(NSString*) headerSubText { return @"Double press TouchID button"; }
+-(UIView*) headerView
+{
+    RAHeaderView *header = [[RAHeaderView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 50)];
+    header.colors = @[ 
+        (id) [UIColor colorWithRed:29/255.0f green:119/255.0f blue:239/255.0f alpha:1.0f].CGColor, 
+        (id) [UIColor colorWithRed:82/255.0f green:191/255.0f blue:232/255.0f alpha:1.0f].CGColor 
+    ];
+    //header.title = @"ReachApp";
+    header.image = [[PDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/ReachAppHeader.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(27.15, 32)]];
+
+    UIView *notHeader = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 70)];
+    [notHeader addSubview:header];
+
+    return notHeader;
+}
+
 -(NSString*) customTitle { return @"Reachability"; }
 -(BOOL) showHeartImage { return NO; }
 
