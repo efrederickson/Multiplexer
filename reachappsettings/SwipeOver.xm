@@ -33,6 +33,7 @@
         (id) [UIColor colorWithRed:88/255.0f green:86/255.0f blue:214/255.0f alpha:1.0f].CGColor,
         (id) [UIColor colorWithRed:198/255.0f green:68/255.0f blue:252/255.0f alpha:1.0f].CGColor, 
     ];
+    header.shouldBlend = NO;
     header.image = [[PDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/SwipeOverHeader.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(54, 32)]];
 
     UIView *notHeader = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 70)];
@@ -41,7 +42,8 @@
     return notHeader;
 }
 -(NSString*) customTitle { return @"SwipeOver"; }
-
+-(UIColor*) tintColor { return [UIColor colorWithRed:88/255.0f green:86/255.0f blue:214/255.0f alpha:1.0f]; }
+-(UIColor*) switchTintColor { return [[UISwitch alloc] init].tintColor; }
 -(BOOL) showHeartImage { return NO; }
 
 -(NSArray*) customSpecifiers

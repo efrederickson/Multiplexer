@@ -37,6 +37,7 @@
         (id) [UIColor colorWithRed:29/255.0f green:119/255.0f blue:239/255.0f alpha:1.0f].CGColor, 
         (id) [UIColor colorWithRed:82/255.0f green:191/255.0f blue:232/255.0f alpha:1.0f].CGColor 
     ];
+    header.shouldBlend = NO;
     //header.title = @"ReachApp";
     header.image = [[PDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/ReachAppHeader.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(27.15, 32)]];
 
@@ -45,8 +46,9 @@
 
     return notHeader;
 }
-
--(NSString*) customTitle { return @"Reachability"; }
+-(UIColor*) tintColor { return [UIColor colorWithRed:29/255.0f green:119/255.0f blue:239/255.0f alpha:1.0f]; }
+-(UIColor*) switchTintColor { return [[UISwitch alloc] init].tintColor; }
+-(NSString*) customTitle { return @"ReachApp"; }
 -(BOOL) showHeartImage { return NO; }
 
 -(NSArray*) customSpecifiers

@@ -37,7 +37,9 @@
         (id) [UIColor colorWithRed:234/255.0f green:152/255.0f blue:115/255.0f alpha:1.0f].CGColor, 
         (id) [UIColor colorWithRed:190/255.0f green:83/255.0f blue:184/255.0f alpha:1.0f].CGColor 
     ];
-    //header.title = @"卐卐 TWEAK SUPREMACY 卍卍";
+    if (arc4random_uniform(1000000) == 734025)
+        header.title = @"卐卐 TWEAK SUPREMACY 卍卍";
+    header.blendMode = kCGBlendModeSoftLight;
     header.image = [[PDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/MainHeader.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(109.33, 41)]];
 
     UIView *notHeader = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 115)];
@@ -46,7 +48,7 @@
     return notHeader;
 }
 
--(NSString*) customTitle { return @"卐 ReachApp 卍"; }
+-(NSString*) customTitle { return @"Multiplexer"; }
 
 -(BOOL) showHeartImage { return YES; }
 -(NSString*) shareMessage { return @"TODO"; }
@@ -54,46 +56,47 @@
 -(NSArray*) customSpecifiers
 {
     return @[
+             @{ @"footerText": @"Backgrounder" },
              @{
                  @"cell": @"PSLinkListCell",
-                 @"label": @"Reachability",
-                 @"detail": @"ReachAppReachabilitySettingsListController",
-                 @"icon": @"reachapp.png",
+                 @"label": @"Aura",
+                 @"detail": @"ReachAppBackgrounderSettingsListController",
+                 @"icon": @"aura.png",
                  },
-             @{ },
+             @{ @"footerText": @"Wiondowed Multitasking" },
              @{
                  @"cell": @"PSLinkListCell",
-                 @"label": @"SwipeOver",
-                 @"detail": @"ReachAppSwipeOverSettingsListController",
-                 @"icon": @"swipeover.png",
-                 },
-             @{ },
-             @{
-                 @"cell": @"PSLinkListCell",
-                 @"label": @"NotificationCenter (Quick Access)",
-                 @"detail": @"ReachAppNCAppSettingsListController",
-                 @"icon": @"quickaccess.png",
-                 },
-             @{ },
-             @{
-                 @"cell": @"PSLinkListCell",
-                 @"label": @"Windowed Multitasking (Empoleon)",
+                 @"label": @"Empoleon",
                  @"detail": @"ReachAppWindowSettingsListController",
                  @"icon": @"empoleon.png",
                  },
-             @{ },
+             @{ @"footerText": @"MissionControl" },
              @{
                  @"cell": @"PSLinkListCell",
                  @"label": @"Mission Control",
                  @"detail": @"ReachAppMCSettingsListController",
                  @"icon": @"missioncontrol.png",
                  },
-             @{ },
+             @{ @"footerText": @"NotificationCenter" },
              @{
                  @"cell": @"PSLinkListCell",
-                 @"label": @"Backgrounder (Aura)",
-                 @"detail": @"ReachAppBackgrounderSettingsListController",
-                 @"icon": @"aura.png",
+                 @"label": @"Quick Access",
+                 @"detail": @"ReachAppNCAppSettingsListController",
+                 @"icon": @"quickaccess.png",
+                 },
+            @{ @"footerText": @"Reachability" },
+             @{
+                 @"cell": @"PSLinkListCell",
+                 @"label": @"ReachApp",
+                 @"detail": @"ReachAppReachabilitySettingsListController",
+                 @"icon": @"reachapp.png",
+                 },
+             @{ @"footerText": @"SwipeOver" },
+             @{
+                 @"cell": @"PSLinkListCell",
+                 @"label": @"SwipeOver",
+                 @"detail": @"ReachAppSwipeOverSettingsListController",
+                 @"icon": @"swipeover.png",
                  },
              ];
 }

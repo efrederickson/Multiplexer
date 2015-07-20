@@ -3,7 +3,7 @@
 	bundle = ReachAppSettings;
 	cell = PSLinkCell;
 	detail = ReachAppSettingsListController;
-	icon = ReachAppSettings.png;
+	icon = Multiplexer.png;
 	isController = 1;
 	label = Multiplexer;
     };

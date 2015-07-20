@@ -1,5 +1,24 @@
 #import "RAHeaderView.h"
 
+@implementation UIImage (ext)
+- (UIImage *)tintedImageWithColor:(UIColor *)tintColor blendingMode:(CGBlendMode)blendMode
+{
+    UIGraphicsBeginImageContextWithOptions(self.size, NO, 0.0f);
+    [tintColor setFill];
+    CGRect bounds = CGRectMake(0, 0, self.size.width, self.size.height);
+    UIRectFill(bounds);
+    [self drawInRect:bounds blendMode:blendMode alpha:1.0f];
+
+    if (blendMode != kCGBlendModeDestinationIn)
+        [self drawInRect:bounds blendMode:kCGBlendModeDestinationIn alpha:1.0];
+
+    UIImage *tintedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+
+    return tintedImage;
+}
+@end
+
 @implementation RAHeaderView
 + (Class)layerClass 
 {
@@ -24,6 +43,9 @@
 
 	    imageView = [[UIImageView alloc] initWithFrame:CGRectMake(frame.size.width - 210, 0, 200, 75)];
 	    [self addSubview:imageView];
+
+	    self.blendMode = kCGBlendModeOverlay;
+	    self.shouldBlend = YES;
 	}
 	return self;
 }
@@ -50,6 +72,11 @@
 		imageView.frame = (CGRect) { { self.frame.size.width - image.size.width - 20, (self.frame.size.height - image.size.height) / 2.0 }, image.size };
 	else
 		imageView.frame = (CGRect) { { (self.frame.size.width - image.size.width) / 2.0, (self.frame.size.height - image.size.height) / 2.0 }, image.size };
+	if (self.shouldBlend)
+	{
+		UIColor *color = [UIColor colorWithCGColor:(CGColorRef)((CAGradientLayer*)self.layer).colors[0]];
+		image = [image tintedImageWithColor:color blendingMode:self.blendMode];
+	}
 	imageView.image = image;
 }
 @end

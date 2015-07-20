@@ -37,6 +37,7 @@
         (id) [UIColor colorWithRed:90/255.0f green:212/255.0f blue:39/255.0f alpha:1.0f].CGColor,
         (id) [UIColor colorWithRed:164/255.0f green:231/255.0f blue:134/255.0f alpha:1.0f].CGColor, 
     ];
+    header.shouldBlend = NO;
     header.image = [[PDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/NCAppHeader.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(53, 32)]];
 
     UIView *notHeader = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 70)];
@@ -44,6 +45,8 @@
 
     return notHeader;
 }
+-(UIColor*) tintColor { return [UIColor colorWithRed:90/255.0f green:212/255.0f blue:39/255.0f alpha:1.0f]; }
+-(UIColor*) switchTintColor { return [[UISwitch alloc] init].tintColor; }
 
 -(NSString*) customTitle { return @"Quick Access"; }
 -(BOOL) showHeartImage { return NO; }
