@@ -37,7 +37,7 @@
         (id) [UIColor colorWithRed:90/255.0f green:212/255.0f blue:39/255.0f alpha:1.0f].CGColor,
         (id) [UIColor colorWithRed:164/255.0f green:231/255.0f blue:134/255.0f alpha:1.0f].CGColor, 
     ];
-    header.image = [[PDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/NCAppHeader.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(32, 32)]];
+    header.image = [[PDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/NCAppHeader.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(53, 32)]];
 
     UIView *notHeader = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 70)];
     [notHeader addSubview:header];
@@ -45,7 +45,7 @@
     return notHeader;
 }
 
--(NSString*) customTitle { return @"NC App"; }
+-(NSString*) customTitle { return @"Quick Access"; }
 -(BOOL) showHeartImage { return NO; }
 
 -(NSArray*) customSpecifiers

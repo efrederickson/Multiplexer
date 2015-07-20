@@ -58,36 +58,42 @@
                  @"cell": @"PSLinkListCell",
                  @"label": @"Reachability",
                  @"detail": @"ReachAppReachabilitySettingsListController",
+                 @"icon": @"reachapp.png",
                  },
              @{ },
              @{
                  @"cell": @"PSLinkListCell",
                  @"label": @"SwipeOver",
                  @"detail": @"ReachAppSwipeOverSettingsListController",
+                 @"icon": @"swipeover.png",
                  },
              @{ },
              @{
                  @"cell": @"PSLinkListCell",
                  @"label": @"NotificationCenter (Quick Access)",
                  @"detail": @"ReachAppNCAppSettingsListController",
+                 @"icon": @"quickaccess.png",
                  },
              @{ },
              @{
                  @"cell": @"PSLinkListCell",
                  @"label": @"Windowed Multitasking (Empoleon)",
                  @"detail": @"ReachAppWindowSettingsListController",
+                 @"icon": @"empoleon.png",
                  },
              @{ },
              @{
                  @"cell": @"PSLinkListCell",
                  @"label": @"Mission Control",
                  @"detail": @"ReachAppMCSettingsListController",
+                 @"icon": @"missioncontrol.png",
                  },
              @{ },
              @{
                  @"cell": @"PSLinkListCell",
                  @"label": @"Backgrounder (Aura)",
                  @"detail": @"ReachAppBackgrounderSettingsListController",
+                 @"icon": @"aura.png",
                  },
              ];
 }
