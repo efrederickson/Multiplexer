@@ -41,7 +41,7 @@
 
     return notHeader;
 }
--(NSString*) customTitle { return @"SwipeOver"; }
+-(NSString*) customTitle { return @"Swipe Over"; }
 -(UIColor*) tintColor { return [UIColor colorWithRed:88/255.0f green:86/255.0f blue:214/255.0f alpha:1.0f]; }
 -(UIColor*) switchTintColor { return [[UISwitch alloc] init].tintColor; }
 -(BOOL) showHeartImage { return NO; }

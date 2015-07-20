@@ -48,7 +48,7 @@
 }
 -(UIColor*) tintColor { return [UIColor colorWithRed:29/255.0f green:119/255.0f blue:239/255.0f alpha:1.0f]; }
 -(UIColor*) switchTintColor { return [[UISwitch alloc] init].tintColor; }
--(NSString*) customTitle { return @"ReachApp"; }
+-(NSString*) customTitle { return @"Reach App"; }
 -(BOOL) showHeartImage { return NO; }
 
 -(NSArray*) customSpecifiers

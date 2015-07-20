@@ -51,50 +51,50 @@
 -(NSString*) customTitle { return @"Multiplexer"; }
 
 -(BOOL) showHeartImage { return YES; }
--(NSString*) shareMessage { return @"TODO"; }
+-(NSString*) shareMessage { return @"I'm multitasking with Multiplexer, by @daementor and @drewplex"; }
 
 -(NSArray*) customSpecifiers
 {
     return @[
-             @{ @"footerText": @"Backgrounder" },
+             @{ @"footerText": @"Let apps run in the background." },
              @{
                  @"cell": @"PSLinkListCell",
                  @"label": @"Aura",
                  @"detail": @"ReachAppBackgrounderSettingsListController",
                  @"icon": @"aura.png",
                  },
-             @{ @"footerText": @"Wiondowed Multitasking" },
+             @{ @"footerText": @"Windowed multitasking." },
              @{
                  @"cell": @"PSLinkListCell",
                  @"label": @"Empoleon",
                  @"detail": @"ReachAppWindowSettingsListController",
                  @"icon": @"empoleon.png",
                  },
-             @{ @"footerText": @"MissionControl" },
+             @{ @"footerText": @"Manage multiple desktops and their windows" },
              @{
                  @"cell": @"PSLinkListCell",
                  @"label": @"Mission Control",
                  @"detail": @"ReachAppMCSettingsListController",
                  @"icon": @"missioncontrol.png",
                  },
-             @{ @"footerText": @"NotificationCenter" },
+             @{ @"footerText": @"Have an app in Notification Center." },
              @{
                  @"cell": @"PSLinkListCell",
                  @"label": @"Quick Access",
                  @"detail": @"ReachAppNCAppSettingsListController",
                  @"icon": @"quickaccess.png",
                  },
-            @{ @"footerText": @"Reachability" },
+            @{ @"footerText": @"Use app in Reachability alongside another." },
              @{
                  @"cell": @"PSLinkListCell",
-                 @"label": @"ReachApp",
+                 @"label": @"Reach App",
                  @"detail": @"ReachAppReachabilitySettingsListController",
                  @"icon": @"reachapp.png",
                  },
-             @{ @"footerText": @"SwipeOver" },
+             @{ @"footerText": @"Access another app simply by swiping in from the right side of the screen." },
              @{
                  @"cell": @"PSLinkListCell",
-                 @"label": @"SwipeOver",
+                 @"label": @"Swipe Over",
                  @"detail": @"ReachAppSwipeOverSettingsListController",
                  @"icon": @"swipeover.png",
                  },
