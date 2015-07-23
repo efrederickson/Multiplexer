@@ -33,6 +33,7 @@
 #define kBGModeAudio                   @"audio"
 #define kBGModeBluetoothCentral        @"bluetooth-central"
 #define kBGModeBluetoothPeripheral     @"bluetooth-peripheral"
+// newsstand-content
 
 extern "C" CFNotificationCenterRef CFNotificationCenterGetDistributedCenter(void);
 
@@ -57,6 +58,9 @@ extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 @interface LSApplicationProxy
 + (id)applicationProxyForIdentifier:(id)arg1;
 - (NSArray*) UIBackgroundModes;
+@property (nonatomic, readonly) NSURL *appStoreReceiptURL;
+@property (nonatomic, readonly) NSURL *bundleContainerURL;
+@property (nonatomic, readonly) NSURL *bundleURL;
 @end
 
 @interface SBWallpaperController
@@ -338,15 +342,37 @@ typedef NS_ENUM(NSInteger, UIScreenEdgePanRecognizerType) {
 
 typedef NS_ENUM(NSUInteger, BKSProcessAssertionReason)
 {
+    kProcessAssertionReasonNone = 0,
     kProcessAssertionReasonAudio = 1,
-    kProcessAssertionReasonLocation,
-    kProcessAssertionReasonExternalAccessory,
-    kProcessAssertionReasonFinishTask,
-    kProcessAssertionReasonBluetooth,
-    kProcessAssertionReasonNetworkAuthentication,
-    kProcessAssertionReasonBackgroundUI,
-    kProcessAssertionReasonInterAppAudioStreaming,
-    kProcessAssertionReasonViewServices
+    kProcessAssertionReasonLocation = 2,
+    kProcessAssertionReasonExternalAccessory = 3,
+    kProcessAssertionReasonFinishTask = 4,
+    kProcessAssertionReasonBluetooth = 5,
+    kProcessAssertionReasonNetworkAuthentication = 6,
+    kProcessAssertionReasonBackgroundUI = 7,
+    kProcessAssertionReasonInterAppAudioStreaming = 8,
+    kProcessAssertionReasonViewServices = 9,
+    kProcessAssertionReasonNewsstandDownload = 10,
+    kProcessAssertionReasonBackgroundDownload = 11,
+    kProcessAssertionReasonVOiP = 12,
+    kProcessAssertionReasonExtension = 13,
+    kProcessAssertionReasonContinuitySteams = 14,
+    // 15-9999 unknown
+    kProcessAssertionReasonActivation = 10000,
+    kProcessAssertionReasonSuspend = 10001,
+    kProcessAssertionReasonTransientWakeup = 10002,
+    kProcessAssertionReasonVOiP_PreiOS8 = 10003,
+    kProcessAssertionReasonPeriodicTask = kProcessAssertionReasonVOiP_PreiOS8,
+    kProcessAssertionReasonFinishTaskUnbounded = 10004,
+    kProcessAssertionReasonContinuous = 10005,
+    kProcessAssertionReasonBackgroundContentFetching = 10006,
+    kProcessAssertionReasonNotificationAction = 10007,
+    // 10008-49999 unknown
+    kProcessAssertionReasonFinishTaskAfterBackgroundContentFetching = 50000,
+    kProcessAssertionReasonFinishTaskAfterBackgroundDownload = 50001,
+    kProcessAssertionReasonFinishTaskAfterPeriodicTask = 50002,
+    kProcessAssertionReasonAFterNoficationAction = 50003,
+    // 50004+ unknown
 };
 
 typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)

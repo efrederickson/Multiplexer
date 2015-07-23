@@ -44,6 +44,20 @@
 	return enabled && ([dict objectForKey:@"preventDeath"] == nil ? NO : [dict[@"preventDeath"] boolValue]);
 }
 
+-(NSInteger) backgroundModeForIdentifier:(NSString*)identifier
+{
+	return [[RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier][@"backgroundMode"] intValue];
+}
+
+-(BOOL) hasUnlimitedBackgroundTime:(NSString*)identifier
+{
+	if (!identifier || ![RASettings.sharedInstance backgrounderEnabled]) return NO;
+	
+	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
+	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
+	return enabled && ([dict objectForKey:@"unlimitedBackgrounding"] == nil ? NO : [dict[@"unlimitedBackgrounding"] boolValue]);
+}
+
 -(BOOL) killProcessOnExit:(NSString*)identifier
 {
 	if (!identifier || ![RASettings.sharedInstance backgrounderEnabled]) return NO;

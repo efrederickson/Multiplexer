@@ -26,6 +26,8 @@ extern void RA_BGAppsControllerNeedsToReload();
     LSApplicationProxy *appInfo = [%c(LSApplicationProxy) applicationProxyForIdentifier:_identifier];
     NSArray *bgModes = appInfo.UIBackgroundModes;
 
+    BOOL exitsOnSuspend = [[NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/Info.plist",appInfo.bundleURL.absoluteString]]][@"UIApplicationExitsOnSuspend"] boolValue];
+
     return @[
              @{
                  @"cell": @"PSSwitchCell",
@@ -39,12 +41,18 @@ extern void RA_BGAppsControllerNeedsToReload();
              	@"cell": @"PSLinkListCell",
              	@"label": @"Background Mode",
              	@"key": @"backgroundMode",
-             	@"validTitles": @[ @"Native", /* @"Forced Native", */ @"Force Foreground", @"Disabled (Kill on exit)" ],
-             	@"validValues": @[ @1,        /* @2, */               @3,                  @4, ],
-                @"shortTitles": @[ @"Native", /* @"Native+", */       @"Forced",           @"Disabled" ],
+             	@"validTitles": @[ @"Native",                 /*@"Forced Native (old apps) [broken]",*/     @"Force Foreground",                 @"Disabled (Kill on exit)" ],
+             	@"validValues": @[ @(RABackgroundModeNative), /*@(RABackgroundModeForceNativeForOldApps),*/ @(RABackgroundModeForcedForeground), @(RABackgroundModeForceNone), ],
+                @"shortTitles": @[ @"Native",                 /*@"Native+ [broken]",*/                      @"Forced",                           @"Disabled" ],
              	@"default": @"1",
              	@"detail": @"PSListItemsController"
              	},
+             @{
+                @"cell": @"PSSwitchCell",
+                @"label": @"Unlimited Backgrounding Time",
+                @"key": @"unlimitedBackgrounding",
+                @"default": @NO,
+                },
              @{
              	@"cell": @"PSSwitchCell",
              	@"label": @"Auto Launch",
@@ -63,6 +71,13 @@ extern void RA_BGAppsControllerNeedsToReload();
                 @"key": @"preventDeath",
                 @"default": @NO,
                 @"label": @"Prevent Death",
+            },
+            @{ @"footerText": @"This switch causes applications to completely disable their backgrounding, natively. Apps such as BatteryLife, FinalFantasy2, and a certain Solitaire do this. This switch will not revert upon the uninstallation of Multiplexer. A respring may or may not be required to apply." },
+            @{
+                @"cell": @"PSSwitchCell",
+                @"key": @"UIApplicationExitsOnSuspend",
+                @"default": @(exitsOnSuspend),
+                @"label": @"Exit on Suspend",
             },
             @{ 
                 @"cell": @"PSGroupCell",
@@ -153,6 +168,25 @@ extern void RA_BGAppsControllerNeedsToReload();
 -(void)setPreferenceValue:(id)value specifier:(PSSpecifier*)specifier
 {
     //[super setPreferenceValue:value specifier:specifier];
+
+    if ([[specifier propertyForKey:@"key"] isEqualToString:@"UIApplicationExitsOnSuspend"])
+    {
+        LSApplicationProxy *appInfo = [%c(LSApplicationProxy) applicationProxyForIdentifier:_identifier];
+        NSString *path = [NSString stringWithFormat:@"%@/Info.plist",appInfo.bundleURL.absoluteString];
+        NSMutableDictionary *infoPlist = [NSMutableDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:path]];
+        infoPlist[@"UIApplicationExitsOnSuspend"] = value;
+        BOOL success = [infoPlist writeToURL:[NSURL URLWithString:path] atomically:YES];
+
+        if (!success)
+        {
+            NSMutableDictionary *daemonDict = [NSMutableDictionary dictionary];
+            daemonDict[@"bundleIdentifier"] = _identifier;
+            daemonDict[@"UIApplicationExitsOnSuspend"] = value;
+            [daemonDict writeToFile:@"/User/Library/.reachapp.uiappexitsonsuspend.wantstochangerootapp" atomically:YES];
+        }
+
+        return;
+    }
 
 	CFStringRef appID = CFSTR("com.efrederickson.reachapp.settings");
 

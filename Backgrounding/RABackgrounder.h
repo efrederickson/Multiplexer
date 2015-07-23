@@ -19,6 +19,8 @@ enum {
 
 -(BOOL) killProcessOnExit:(NSString*)identifier;
 -(BOOL) preventKillingOfIdentifier:(NSString*)identifier;
+-(NSInteger) backgroundModeForIdentifier:(NSString*)identifier;
+-(BOOL) hasUnlimitedBackgroundTime:(NSString*)identifier;
 
 -(void) setBackgroundStateIconInfo:(NSString*)info forIdentifier:(NSString*)identifier;
 -(BOOL) hasBackgroundStateIconInfoForIdentifier:(NSString*)identifier;

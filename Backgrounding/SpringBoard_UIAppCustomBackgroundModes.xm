@@ -1,8 +1,9 @@
 #import "headers.h"
 #import "RABackgrounder.h"
 
-@interface FBApplicationInfo
+@interface FBApplicationInfo : NSObject
 @property (nonatomic, copy) NSString *bundleIdentifier;
+-(BOOL) isExitsOnSuspend;
 @end
 
 %hook FBApplicationInfo
