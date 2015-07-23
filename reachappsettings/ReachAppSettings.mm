@@ -7,8 +7,7 @@
 #import <notify.h>
 #import "RAHeaderView.h"
 #import "PDFImage.h"
-
-#define PLIST_NAME @"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"
+#import "headers.h"
 
 @interface PSViewController (Protean)
 -(void) viewDidLoad;
@@ -37,8 +36,8 @@
         (id) [UIColor colorWithRed:234/255.0f green:152/255.0f blue:115/255.0f alpha:1.0f].CGColor, 
         (id) [UIColor colorWithRed:190/255.0f green:83/255.0f blue:184/255.0f alpha:1.0f].CGColor 
     ];
-    if (arc4random_uniform(1000000) == 734025)
-        header.title = @"卐卐 TWEAK SUPREMACY 卍卍";
+    //if (arc4random_uniform(1000000) == 734025)
+    //    header.title = @"卐卐 TWEAK SUPREMACY 卍卍";
     header.blendMode = kCGBlendModeSoftLight;
     header.image = [[PDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/MainHeader.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(109.33, 41)]];
 
@@ -58,45 +57,52 @@
     return @[
              @{ @"footerText": @"Let apps run in the background." },
              @{
-                 @"cell": @"PSLinkListCell",
+                 @"cell": @"PSLinkCell",
                  @"label": @"Aura",
                  @"detail": @"ReachAppBackgrounderSettingsListController",
-                 @"icon": @"aura.png",
+                 @"icon": [UIImage imageNamed:@"aura.png" inBundle:[NSBundle bundleForClass:self.class] compatibleWithTraitCollection:nil]
                  },
              @{ @"footerText": @"Windowed multitasking." },
              @{
-                 @"cell": @"PSLinkListCell",
+                 @"cell": @"PSLinkCell",
                  @"label": @"Empoleon",
                  @"detail": @"ReachAppWindowSettingsListController",
-                 @"icon": @"empoleon.png",
+                 @"icon": [UIImage imageNamed:@"empoleon.png" inBundle:[NSBundle bundleForClass:self.class] compatibleWithTraitCollection:nil]
                  },
-             @{ @"footerText": @"Manage multiple desktops and their windows" },
+             @{ @"footerText": @"Manage multiple desktops and their windows." },
              @{
-                 @"cell": @"PSLinkListCell",
+                 @"cell": @"PSLinkCell",
                  @"label": @"Mission Control",
                  @"detail": @"ReachAppMCSettingsListController",
-                 @"icon": @"missioncontrol.png",
+                 @"icon": [UIImage imageNamed:@"missioncontrol.png" inBundle:[NSBundle bundleForClass:self.class] compatibleWithTraitCollection:nil]
                  },
              @{ @"footerText": @"Have an app in Notification Center." },
              @{
-                 @"cell": @"PSLinkListCell",
+                 @"cell": @"PSLinkCell",
                  @"label": @"Quick Access",
                  @"detail": @"ReachAppNCAppSettingsListController",
-                 @"icon": @"quickaccess.png",
+                 @"icon": [UIImage imageNamed:@"quickaccess.png" inBundle:[NSBundle bundleForClass:self.class] compatibleWithTraitCollection:nil]
                  },
             @{ @"footerText": @"Use app in Reachability alongside another." },
              @{
-                 @"cell": @"PSLinkListCell",
+                 @"cell": @"PSLinkCell",
                  @"label": @"Reach App",
                  @"detail": @"ReachAppReachabilitySettingsListController",
-                 @"icon": @"reachapp.png",
+                 @"icon": [UIImage imageNamed:@"reachapp.png" inBundle:[NSBundle bundleForClass:self.class] compatibleWithTraitCollection:nil]
                  },
              @{ @"footerText": @"Access another app simply by swiping in from the right side of the screen." },
              @{
-                 @"cell": @"PSLinkListCell",
+                 @"cell": @"PSLinkCell",
                  @"label": @"Swipe Over",
                  @"detail": @"ReachAppSwipeOverSettingsListController",
-                 @"icon": @"swipeover.png",
+                 @"icon": [UIImage imageNamed:@"swipeover.png" inBundle:[NSBundle bundleForClass:self.class] compatibleWithTraitCollection:nil]
+                 },
+             @{ @"footerText": @"Questions? Problems?" },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"label": @"Support",
+                 @"detail": @"RASupportController",
+                 @"icon": [UIImage imageNamed:@"support.png" inBundle:[NSBundle bundleForClass:self.class] compatibleWithTraitCollection:nil]
                  },
              ];
 }

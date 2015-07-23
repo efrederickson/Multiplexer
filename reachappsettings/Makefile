@@ -1,6 +1,6 @@
 ARCHS = armv7 armv7s arm64
 TARGET = iPhone:clang:latest:latest
-CFLAGS = -fobjc-arc -I../
+CFLAGS = -fobjc-arc -I../ -I../Backgrounding/
 LDFLAGS = -F$(THEOS)/frameworks
 
 include $(THEOS)/makefiles/common.mk
@@ -15,6 +15,6 @@ ReachAppSettings_PRIVATE_FRAMEWORKS = Preferences
 include $(THEOS_MAKE_PATH)/bundle.mk
 
 internal-stage::
-	$(ECHO_NOTHING)cp $(THEOS)/include/SettingsKit/Resources/*.png $(THEOS_STAGING_DIR)/Library/PreferenceBundles/ReachAppSettings.bundle/$(ECHO_END)
+	$(ECHO_NOTHING)rsync -a -v --ignore-existing $(THEOS)/include/SettingsKit/Resources/*.png $(THEOS_STAGING_DIR)/Library/PreferenceBundles/ReachAppSettings.bundle/$(ECHO_END)
 	$(ECHO_NOTHING)mkdir -p $(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences$(ECHO_END)
 	$(ECHO_NOTHING)cp entry.plist $(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences/ReachAppSettings.plist$(ECHO_END)

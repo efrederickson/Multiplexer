@@ -20,6 +20,20 @@
 #import <notify.h>
 #import <IOKit/hid/IOHIDEvent.h>
 
+// ugh, i got so tired of typing this in by hand, plus it expands method declarations by a LOT.
+#define unsafe_id __unsafe_unretained id
+
+#define kBGModeUnboundedTaskCompletion @"unboundedTaskCompletion"
+#define kBGModeContinuous              @"continuous"
+#define kBGModeFetch                   @"fetch"
+#define kBGModeRemoteNotification      @"remote-notification"
+#define kBGModeExternalAccessory       @"external-accessory"
+#define kBGModeVOiP                    @"voip"
+#define kBGModeLocation                @"location"
+#define kBGModeAudio                   @"audio"
+#define kBGModeBluetoothCentral        @"bluetooth-central"
+#define kBGModeBluetoothPeripheral     @"bluetooth-peripheral"
+
 extern "C" CFNotificationCenterRef CFNotificationCenterGetDistributedCenter(void);
 
 #define RADIANS_TO_DEGREES(radians) ((radians) * (180.0 / M_PI))
@@ -40,9 +54,36 @@ return sharedInstance;
 
 extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 
+@interface LSApplicationProxy
++ (id)applicationProxyForIdentifier:(id)arg1;
+- (NSArray*) UIBackgroundModes;
+@end
+
 @interface SBWallpaperController
 +(id) sharedInstance;
 -(void) beginRequiringWithReason:(NSString*)reason;
+@end
+
+@interface BBAction
++ (id)actionWithCallblock:(id /* block */)arg1;
+@end
+
+@interface SBLockStateAggregator
+-(void) _updateLockState;
+-(BOOL) hasAnyLockState;
+@end
+
+@interface BBBulletinRequest : NSObject
+@property (nonatomic, copy) NSString *title;
+@property (nonatomic, copy) NSString *message;
+@property (nonatomic, copy) NSString *sectionID;
+@property (nonatomic, copy) BBAction *defaultAction;
+@end
+
+@interface SBBulletinBannerController : NSObject
++ (SBBulletinBannerController *)sharedInstance;
+- (void)observer:(id)observer addBulletin:(BBBulletinRequest *)bulletin forFeed:(int)feed;
+-(void) observer:(id)observer addBulletin:(BBBulletinRequest*) bulletin forFeed:(int)feed playLightsAndSirens:(BOOL)guess1 withReply:(id)guess2;
 @end
 
 @interface SBAppSwitcherWindow : UIWindow
@@ -331,6 +372,8 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 - (void)disableHostingForRequester:(id)arg1;
 - (void)_updateHostViewFrameForRequester:(id)arg1;
 - (void)invalidate;
+
+@property(copy, nonatomic) NSString *identifier; // @synthesize identifier=_identifier;
 @end
 
 @interface FBSSceneSettings : NSObject <NSCopying, NSMutableCopying>
@@ -393,11 +436,16 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 
 @end
 
+@interface FBProcess : NSObject
+@end
+
 @interface FBScene
 -(FBWindowContextHostManager*) contextHostManager;
 @property(readonly, retain, nonatomic) FBSMutableSceneSettings *mutableSettings; // @synthesize mutableSettings=_mutableSettings;
 - (void)updateSettings:(id)arg1 withTransitionContext:(id)arg2;
 - (void)_applyMutableSettings:(id)arg1 withTransitionContext:(id)arg2 completion:(id)arg3;
+@property (nonatomic, readonly) NSString *identifier;
+@property (nonatomic, readonly, retain) FBProcess *clientProcess;
 @end
 
 @interface SBApplication ()
@@ -483,6 +531,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 - (BOOL)bootstrapAndExec;
 - (void)killForReason:(int)arg1 andReport:(BOOL)arg2 withDescription:(id)arg3 completion:(id/*block*/)arg4;
 - (void)killForReason:(int)arg1 andReport:(BOOL)arg2 withDescription:(id)arg3;
+@property(readonly, copy, nonatomic) NSString *bundleIdentifier;
 
 @end
 

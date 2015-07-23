@@ -7,6 +7,7 @@
 #import <notify.h>
 #import "RAHeaderView.h"
 #import "PDFImage.h"
+#import <AppList/AppList.h>
 
 #define PLIST_NAME @"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"
 
@@ -55,16 +56,27 @@
 -(NSArray*) customSpecifiers
 {
     return @[
-             @{ @"footerText": @"Enable/disable ReachApp. After any change to the settings, a respring is recommended but not required." },
+             @{ @"footerText": @"Enable/disable Aura. After any change to the settings, a respring is recommended but not required." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
-                 @"key": @"enabled",
+                 @"key": @"backgrounderEnabled",
                  @"label": @"Enabled",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
+             @{ @"label": @"Global Settings" },
+             @{
+                @"cell": @"PSSwitchCell",
+                @"label": @"Placeholder",
+             },
+             @{ },
+             @{
+                @"cell": @"PSLinkCell",
+                @"label": @"Per App",
+                @"detail": @"RABGPerAppController",
+             },
              ];
 }
 @end

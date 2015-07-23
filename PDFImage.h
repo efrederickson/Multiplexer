@@ -28,9 +28,6 @@
 //	Available from GitHub
 //	https://github.com/tparry/PDFImage.framework
 
-//	Make PDF files smaller with PDFShaver.app
-//	https://github.com/tparry/PDFShaver.app
-
 #import <UIKit/UIKit.h>
 
 #import "PDFImageOptions.h"

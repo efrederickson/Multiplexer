@@ -1,5 +1,5 @@
 ARCHS = armv7 armv7s arm64
-CFLAGS = -I./ -Iwidgets/ -ISwipeOver/ -IReachability/ -IGestureSupport/ -IKeyboardSupport/ -IMissionControl/ -IWindowedMultitasking/ -INotificationCenterApp/
+CFLAGS = -I./ -Iwidgets/ -ISwipeOver/ -IReachability/ -IGestureSupport/ -IKeyboardSupport/ -IMissionControl/ -IWindowedMultitasking/ -INotificationCenterApp/ -IBackgrounding/ -IIntroTutorial/
 CFLAGS += -fobjc-arc
 THEOS_PACKAGE_DIR_NAME = debs
 TARGET = :clang:8.0
@@ -15,7 +15,9 @@ ReachApp_FILES = $(wildcard *.xm) $(wildcard *.mm) $(wildcard *.m) \
 	$(wildcard GestureSupport/*.xm) $(wildcard GestureSupport/*.mm) $(wildcard GestureSupport/*.m) \
 	$(wildcard MissionControl/*.xm) $(wildcard MissionControl/*.mm) $(wildcard MissionControl/*.m) \
 	$(wildcard WindowedMultitasking/*.xm) $(wildcard WindowedMultitasking/*.mm) $(wildcard WindowedMultitasking/*.m) \
-	$(wildcard NotificationCenterApp/*.xm) $(wildcard NotificationCenterApp/*.mm) $(wildcard NotificationCenterApp/*.m)
+	$(wildcard NotificationCenterApp/*.xm) $(wildcard NotificationCenterApp/*.mm) $(wildcard NotificationCenterApp/*.m) \
+	$(wildcard Backgrounding/*.xm) $(wildcard Backgrounding/*.mm) $(wildcard Backgrounding/*.m) \
+	$(wildcard IntroTutorial/*.xm) $(wildcard IntroTutorial/*.mm) $(wildcard IntroTutorial/*.m)
 	
 ReachApp_FRAMEWORKS = UIKit QuartzCore CoreGraphics 
 ReachApp_PRIVATE_FRAMEWORKS = GraphicsServices BackBoardServices
@@ -24,8 +26,8 @@ ReachApp_LIBRARIES = applist
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 after-install::
-#	install.exec "killall -9 SpringBoard"
-	install.exec "killall -9 Preferences"
+	install.exec "killall -9 SpringBoard"
+#	install.exec "killall -9 Preferences"
 SUBPROJECTS += reachappsettings
 SUBPROJECTS += reachappflipswitch
 include $(THEOS_MAKE_PATH)/aggregate.mk

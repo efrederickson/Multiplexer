@@ -26,4 +26,10 @@
 -(BOOL) alwaysEnableGestures;
 -(BOOL) snapWindows;
 -(BOOL) launchIntoWindows;
-@end
+
+-(BOOL) backgrounderEnabled;
+-(NSDictionary*) rawCompiledBackgrounderSettingsForIdentifier:(NSString*)identifier;
+
+-(BOOL) isFirstRun;
+-(void) setFirstRun:(BOOL)value;
+@end 

@@ -10,18 +10,24 @@
 #define SYSTEM_VERSION_LESS_THAN_OR_EQUAL_TO(v)     ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedDescending)
 
 
-// Data from http://iphonedevwiki.net/index.php/SBIconView#SBIconViewLocation
+BOOL override = NO;
 
-%hook SBIcon
-- (void)launchFromLocation:(int)arg1
+%hook SBIconController
+-(void)iconWasTapped:(SBApplicationIcon*)arg1 
 {
-	BOOL isProbablyHS = YES;// SYSTEM_VERSION_LESS_THAN_OR_EQUAL_TO(@"8.3") ? arg1 == 0 : arg1 == 1;
-
-	if (isProbablyHS && [RASettings.sharedInstance launchIntoWindows] && self.application)
+	if ([RASettings.sharedInstance launchIntoWindows] && arg1.application)
 	{
-		[RADesktopManager.sharedInstance.currentDesktop createAppWindowForSBApplication:self.application animated:YES];
+		[RADesktopManager.sharedInstance.currentDesktop createAppWindowForSBApplication:arg1.application animated:YES];
+		override = YES;
 	}
-	else
+	%orig;
+}
+
+-(void)_launchIcon:(id)icon
+{ 
+	if (!override) 
 		%orig;
+	else 
+		override = NO;
 }
 %end
