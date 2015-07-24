@@ -41,9 +41,9 @@ extern void RA_BGAppsControllerNeedsToReload();
              	@"cell": @"PSLinkListCell",
              	@"label": @"Background Mode",
              	@"key": @"backgroundMode",
-             	@"validTitles": @[ @"Native",                 /*@"Forced Native (old apps) [broken]",*/     @"Force Foreground",                 @"Disabled (Kill on exit)" ],
-             	@"validValues": @[ @(RABackgroundModeNative), /*@(RABackgroundModeForceNativeForOldApps),*/ @(RABackgroundModeForcedForeground), @(RABackgroundModeForceNone), ],
-                @"shortTitles": @[ @"Native",                 /*@"Native+ [broken]",*/                      @"Forced",                           @"Disabled" ],
+             	@"validTitles": @[ @"Native",                 /*@"Forced Native (old apps) [broken]",*/     @"Force Foreground",                 @"Disabled (Kill on exit)",      @"Suspend Immediately (SmartClose)" ],
+             	@"validValues": @[ @(RABackgroundModeNative), /*@(RABackgroundModeForceNativeForOldApps),*/ @(RABackgroundModeForcedForeground), @(RABackgroundModeForceNone),    @(RABackgroundModeSuspendImmediately)],
+                @"shortTitles": @[ @"Native",                 /*@"Native+ [broken]",*/                      @"Forced",                           @"Disabled",                     @"SmartClose" ],
              	@"default": @"1",
              	@"detail": @"PSListItemsController"
              	},
@@ -65,7 +65,7 @@ extern void RA_BGAppsControllerNeedsToReload();
          	 	@"key": @"autoRelaunch",
                  @"default": @NO,
          		},
-            @{ @"footerText": @"This will prevent most cases of the app being terminated (app switcher, low memory, etc). Please note that using if you enable this option, and your system runs low on memory or some other situation, it may yield unpredictable results." },
+            @{ @"footerText": @"This will prevent most cases of the app being terminated (app switcher, low memory, etc). Please note that if you enable this option, and your system runs low on memory or some other situation, it may yield unpredictable results. Enabling both this and \"Exit on Suspend\" (see below) will cause this switch to have no effect." },
             @{
                 @"cell": @"PSSwitchCell",
                 @"key": @"preventDeath",
@@ -155,7 +155,13 @@ extern void RA_BGAppsControllerNeedsToReload();
                 @"default": [self isBackgroundModeActive:kBGModeBluetoothPeripheral withAppInfo:bgModes],
             },
 
-         	@{ },
+         	@{ @"footerText": @"Description of icon letters: \n\
+N - native backgrounding \n\
+F - forced foreground \n\
+D - forced kill on exit \n\
+S - suspend immediately \n\
+U - unkillable \n\
+B - unlimited backgrounding time", },
          	@{
          		@"cell": @"PSSwitchCell",
          		@"label": @"Show Indicator on icon",

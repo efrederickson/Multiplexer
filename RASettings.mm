@@ -34,16 +34,31 @@ NSDictionary *_settings = nil;
 	// Reload Settings
 	if (_settings)
 		_settings = nil;
+	CFPreferencesAppSynchronize(CFSTR("com.efrederickson.reachapp.settings"));
 	CFStringRef appID = CFSTR("com.efrederickson.reachapp.settings");
 	CFArrayRef keyList = CFPreferencesCopyKeyList(appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-	if (!keyList) {
-		return;
+
+	BOOL failed = NO;
+
+	if (keyList) {
+		_settings = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+		CFRelease(keyList);
+		if (!_settings) {
+			NSLog(@"[ReachApp] failure loading dictionary");
+			failed = YES;
+		}
 	}
-	_settings = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-	if (!_settings) {
-		return;
+	else 
+	{
+		NSLog(@"[ReachApp] failure loading keyList");
+		failed = YES;
 	}
-	CFRelease(keyList);
+
+	if (failed)
+	{
+		_settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"];
+		NSLog(@"[ReachApp] settings sandbox load: %@", _settings == nil ? @"failed" : @"succeed");
+	}
 
 	if ([previousNCAppSetting isEqual:self.NCApp] == NO)
 		[ncAppViewController performSelector:@selector(forceReloadAppLikelyBecauseTheSettingChanged)];
@@ -96,7 +111,6 @@ NSDictionary *_settings = nil;
 
 -(BOOL) showAllAppsInWidgetSelector
 {
-	//NSLog(@"ReachApp: %@ %@", _settings, @(BOOL(@"showAllAppsInAppChooser", YES)));
 	return BOOL(@"showAllAppsInAppChooser", YES);
 }
 
@@ -158,6 +172,11 @@ NSDictionary *_settings = nil;
 -(BOOL) backgrounderEnabled
 {
 	return BOOL(@"backgrounderEnabled", YES);
+}
+
+-(BOOL) shouldShowIconIndicatorsGlobally
+{
+	return BOOL(@"showIconIndicators", YES);
 }
 
 -(NSDictionary*) rawCompiledBackgrounderSettingsForIdentifier:(NSString*)identifier

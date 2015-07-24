@@ -28,6 +28,7 @@
 -(BOOL) launchIntoWindows;
 
 -(BOOL) backgrounderEnabled;
+-(BOOL) shouldShowIconIndicatorsGlobally;
 -(NSDictionary*) rawCompiledBackgrounderSettingsForIdentifier:(NSString*)identifier;
 
 -(BOOL) isFirstRun;

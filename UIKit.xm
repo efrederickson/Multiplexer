@@ -302,6 +302,15 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
     }
 }
 
+void reloadSettings(CFNotificationCenterRef center,
+                    void *observer,
+                    CFStringRef name,
+                    const void *object,
+                    CFDictionaryRef userInfo)
+{
+    [RASettings.sharedInstance reloadSettings];
+}
+
 %ctor
 {
     if (!SPRINGBOARD)
@@ -316,4 +325,7 @@ void endForceResizing(CFNotificationCenterRef center, void *observer, CFStringRe
         CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, endForceResizing, CFSTR("com.efrederickson.reachapp.endresizing"), NULL, CFNotificationSuspensionBehaviorDrop);
     }
     %init;
+
+    CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &reloadSettings, CFSTR("com.efrederickson.reachapp.settings/reloadSettings"), NULL, 0);
+    reloadSettings(NULL, NULL, NULL, NULL, NULL);
 }

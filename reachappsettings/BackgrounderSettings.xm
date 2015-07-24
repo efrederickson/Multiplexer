@@ -63,13 +63,16 @@
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"backgrounderEnabled",
                  @"label": @"Enabled",
-                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
              @{ @"label": @"Global Settings" },
              @{
                 @"cell": @"PSSwitchCell",
-                @"label": @"Placeholder",
+                @"label": @"Show Icon Indicators",
+                @"default": @YES,
+                @"key": @"showIconIndicators",
+                @"defaults": @"com.efrederickson.reachapp.settings",
+                @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
              },
              @{ },
              @{

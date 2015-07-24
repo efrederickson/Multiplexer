@@ -57,6 +57,14 @@
     return @[
              @{ @"footerText": @"Let apps run in the background." },
              @{
+                 @"cell": @"PSSwitchCell",
+                 @"label": @"Enabled",
+                 @"icon": @"enabled.png",
+                 @"default": @YES,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+             @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Aura",
                  @"detail": @"ReachAppBackgrounderSettingsListController",

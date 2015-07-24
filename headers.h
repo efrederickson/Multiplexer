@@ -356,7 +356,7 @@ typedef NS_ENUM(NSUInteger, BKSProcessAssertionReason)
     kProcessAssertionReasonBackgroundDownload = 11,
     kProcessAssertionReasonVOiP = 12,
     kProcessAssertionReasonExtension = 13,
-    kProcessAssertionReasonContinuitySteams = 14,
+    kProcessAssertionReasonContinuityStreams = 14,
     // 15-9999 unknown
     kProcessAssertionReasonActivation = 10000,
     kProcessAssertionReasonSuspend = 10001,
@@ -550,6 +550,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @interface UIImage ()
 + (id)_applicationIconImageForBundleIdentifier:(id)arg1 format:(int)arg2 scale:(float)arg3;
 + (id)_applicationIconImageForBundleIdentifier:(id)arg1 format:(int)arg2;
+- (UIImage*) _flatImageWithColor: (UIColor*) color;
 @end
 
 @interface FBApplicationProcess : NSObject

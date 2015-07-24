@@ -1,30 +1,42 @@
 #import "headers.h"
 
-enum {
+enum RABackgroundMode {
     RABackgroundModeNative = 1,
     RABackgroundModeForceNativeForOldApps = 2,
     RABackgroundModeForcedForeground = 3,
     RABackgroundModeForceNone = 4,
-} RABackgroundMode;
+    RABackgroundModeSuspendImmediately = 5,
+};
 
-@interface RABackgrounder : NSObject {
-	NSMutableDictionary *backgroundStateInfo;
-}
+enum RAIconIndicatorViewInfo {
+	RAIconIndicatorViewInfoNone = 0,
+	RAIconIndicatorViewInfoNative = 1,
+	RAIconIndicatorViewInfoForced = 2,
+	RAIconIndicatorViewInfoSuspendImmediately = 4,
+
+	RAIconIndicatorViewInfoUnkillable = 8,
+	RAIconIndicatorViewInfoForceDeath = 16,
+
+	RAIconIndicatorViewInfoUnlimitedBackgroundTime = 32,
+};
+
+@interface RABackgrounder : NSObject
 +(id) sharedInstance;
 
 -(BOOL) shouldAutoLaunchApplication:(NSString*)identifier;
 -(BOOL) shouldAutoRelaunchApplication:(NSString*)identifier;
 
 -(BOOL) shouldKeepInForeground:(NSString*)identifier;
+-(BOOL) shouldSuspendImmediately:(NSString*)identifier;
 
 -(BOOL) killProcessOnExit:(NSString*)identifier;
 -(BOOL) preventKillingOfIdentifier:(NSString*)identifier;
 -(NSInteger) backgroundModeForIdentifier:(NSString*)identifier;
 -(BOOL) hasUnlimitedBackgroundTime:(NSString*)identifier;
 
--(void) setBackgroundStateIconInfo:(NSString*)info forIdentifier:(NSString*)identifier;
--(BOOL) hasBackgroundStateIconInfoForIdentifier:(NSString*)identifier;
--(NSString*) descriptionForBackgroundStateInfoWithIdentifier:(NSString*)identifier;
-
 -(BOOL) application:(NSString*)identifier overrideBackgroundMode:(NSString*)mode;
+
+-(RAIconIndicatorViewInfo) allAggregatedIndicatorInfoForIdentifier:(NSString*)identifier;
+-(void) updateIconIndicatorForIdentifier:(NSString*)identifier withInfo:(RAIconIndicatorViewInfo)info;
+-(BOOL) shouldShowIndicatorForIdentifier:(NSString*)identifier;
 @end
