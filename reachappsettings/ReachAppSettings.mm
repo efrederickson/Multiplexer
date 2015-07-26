@@ -121,7 +121,7 @@
 #if DEBUG
                     arc4random_uniform(10000) == 9901 ? @"2fast5me" : 
 #endif
-                    @"© Elijah Frederickson & Andrew Abosh.",
+                    @"© 2015 Elijah Frederickson & Andrew Abosh.",
 #if DEBUG
                     @" **DEBUG** "
 #else
@@ -143,7 +143,7 @@
 
              @{
                  @"cell": @"PSLinkCell",
-                 @"label": @"View the Tutorial",
+                 @"label": @"Tutorial",
                  @"action": @"showTutorial",
                  @"icon": @"tutorial.png"
                  },

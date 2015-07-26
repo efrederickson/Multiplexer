@@ -148,7 +148,12 @@ There was much knowledge to be gained from perusing those sources, however no co
 \n\
 \n\
 Beta Testers:\n\
-TODO\n\
+Beta382\n\
+Bindersfullofwoman\n\
+Djaovx\n\
+Moshed\n\
+Nexuist\n\
+TM3Dev
 \n\
 \n\
 And thanks to all who tested beta versions and/or reported feedback. \n\
