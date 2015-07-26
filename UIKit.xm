@@ -243,7 +243,6 @@ void forceResizing(CFNotificationCenterRef center, void *observer, CFStringRef n
         }
         overrideDisplay = YES;
 
-
         if (!inapp_ScalingRotationMode)
         {
             if (overrideWidth != -1)

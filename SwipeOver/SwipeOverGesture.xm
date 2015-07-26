@@ -4,6 +4,7 @@
 #import "RAMissionControlManager.h"
 #import "PDFImage.h"
 #import "PDFImageOptions.h"
+#import "RASettings.h"
 
 UIView *grabberView;
 BOOL isShowingGrabber = NO;
@@ -55,7 +56,7 @@ CGAffineTransform adjustTransformRotation()
     [[RAGestureManager sharedInstance] addGestureRecognizer:^RAGestureCallbackResult(UIGestureRecognizerState state, CGPoint location, CGPoint velocity) {
         lastTouch = [NSDate date];
 
-        if ([[%c(SBUIController) sharedInstance] shouldShowControlCenterTabControlOnFirstSwipe])
+        if ([[%c(SBUIController) sharedInstance] shouldShowControlCenterTabControlOnFirstSwipe] || [RASettings.sharedInstance alwaysShowSOGrabber])
         {
             if (isShowingGrabber == NO && isPastGrabber == NO)
             {

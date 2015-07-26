@@ -220,4 +220,9 @@ NSDictionary *_settings = nil;
 {
 	CFPreferencesSetAppValue(CFSTR("isFirstRun"), value ? kCFBooleanTrue : kCFBooleanFalse, CFSTR("com.efrederickson.reachapp.settings"));
 }
+
+-(BOOL) alwaysShowSOGrabber
+{
+	return BOOL(@"alwaysShowSOGrabber", NO);
+}
 @end

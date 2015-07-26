@@ -42,9 +42,9 @@
         (id) [UIColor colorWithRed:190/255.0f green:83/255.0f blue:184/255.0f alpha:1.0f].CGColor 
     ];
 #if DEBUG
-    if (arc4random_uniform(1000000) == 734025)
+    if (arc4random_uniform(1000000) == 11)
         header.title = @"卐卐 TWEAK SUPREMACY 卍卍";
-    else if (arc4random_uniform(1000000) >= 900000)
+    else if (arc4random_uniform(1000000) >= 300000)
         header.title = @"dank memes";
 #endif
     header.blendMode = kCGBlendModeSoftLight;
@@ -72,7 +72,7 @@
                  @"key": @"enabled",
                  @"label": @"Enabled",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-                 @"icon": RSIMG(@"enabled.png")
+                 @"icon": RSIMG(@"ra_enabled.png")
                  },
 
              @{ @"footerText": @"Let apps run in the background." },
@@ -117,22 +117,28 @@
                  @"detail": @"ReachAppSwipeOverSettingsListController",
                  @"icon": RSIMG(@"swipeover.png")
                  },
-             @{ @"footerText": 
+             @{ @"footerText": [NSString stringWithFormat:@"%@%@",
 #if DEBUG
                     arc4random_uniform(10000) == 9901 ? @"2fast5me" : 
 #endif
-                    @"© Elijah Frederickson & Andrew Abosh." },
+                    @"© Elijah Frederickson & Andrew Abosh.",
+#if DEBUG
+                    @" **DEBUG** "
+#else
+                    @""
+#endif
+                     ]},
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Creators",
                  @"detail": @"RAMakersController",
-                 @"icon": RSIMG(@"makers.png")
+                 @"icon": RSIMG(@"ra_makers.png")
                  },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Support",
                  @"action": @"showSupportDialog",
-                 @"icon": RSIMG(@"support.png")
+                 @"icon": RSIMG(@"ra_support.png")
                  },
 
              @{

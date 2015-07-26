@@ -137,18 +137,21 @@ static char velocityDataKey;
 
 %ctor 
 {
-    class_addProtocol(objc_getClass("SBHandMotionExtractor"), @protocol(_UIScreenEdgePanRecognizerDelegate));
-    
-    UIRectEdge edgesToWatch[] = { UIRectEdgeBottom, UIRectEdgeLeft, UIRectEdgeRight, UIRectEdgeTop };
-    int edgeCount = sizeof(edgesToWatch) / sizeof(UIRectEdge);
-    gestureRecognizers = [[NSMutableSet alloc] initWithCapacity:edgeCount];
-    for (int i = 0; i < edgeCount; i++) 
+    IF_SPRINGBOARD
     {
-        _UIScreenEdgePanRecognizer *recognizer = [[_UIScreenEdgePanRecognizer alloc] initWithType:2];
-        recognizer.targetEdges = edgesToWatch[i];
-        recognizer.screenBounds = UIScreen.mainScreen.bounds;
-        [gestureRecognizers addObject:recognizer];
-    }
+        class_addProtocol(objc_getClass("SBHandMotionExtractor"), @protocol(_UIScreenEdgePanRecognizerDelegate));
+        
+        UIRectEdge edgesToWatch[] = { UIRectEdgeBottom, UIRectEdgeLeft, UIRectEdgeRight, UIRectEdgeTop };
+        int edgeCount = sizeof(edgesToWatch) / sizeof(UIRectEdge);
+        gestureRecognizers = [[NSMutableSet alloc] initWithCapacity:edgeCount];
+        for (int i = 0; i < edgeCount; i++) 
+        {
+            _UIScreenEdgePanRecognizer *recognizer = [[_UIScreenEdgePanRecognizer alloc] initWithType:2];
+            recognizer.targetEdges = edgesToWatch[i];
+            recognizer.screenBounds = UIScreen.mainScreen.bounds;
+            [gestureRecognizers addObject:recognizer];
+        }
 
-    %init;
+        %init;
+    }
 }

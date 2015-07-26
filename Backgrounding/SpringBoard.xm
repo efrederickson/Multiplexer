@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+NSMutableDictionary *suspendImmediatelyVerifierDict = [NSMutableDictionary dictionary];
+
 %hook SBApplication
 - (BOOL)shouldAutoRelaunchAfterExit
 {
@@ -33,7 +35,7 @@
 %hook FBUIApplicationWorkspaceScene
 -(void) host:(__unsafe_unretained FBScene*)arg1 didUpdateSettings:(__unsafe_unretained FBSSceneSettings*)arg2 withDiff:(unsafe_id)arg3 transitionContext:(unsafe_id)arg4 completion:(unsafe_id)arg5
 {
-    if (arg1 && arg1.identifier && arg2)
+    if (arg1 && arg1.identifier && arg2) // TODO: sanity check to prevent NC App crash. untested.
     {
         if ([RABackgrounder.sharedInstance killProcessOnExit:arg1.identifier] && arg2.backgrounded == YES)
         {
@@ -55,7 +57,19 @@
         else if ([RABackgrounder.sharedInstance backgroundModeForIdentifier:arg1.identifier] == RABackgroundModeNative && arg2.backgrounded)
             [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
         else if ([RABackgrounder.sharedInstance shouldSuspendImmediately:arg1.identifier] && arg2.backgrounded)
+        {
             [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
+
+            SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:arg1.identifier];
+            if ([suspendImmediatelyVerifierDict objectForKey:arg1.identifier] == nil)
+                suspendImmediatelyVerifierDict[arg1.identifier] = [[%c(BKSProcessAssertion) alloc] initWithPID:app.pid flags:ProcessAssertionFlagNone reason:kProcessAssertionReasonSuspend name:@"ReachApp.Backgrounder.susepndImmediately" withHandler:nil];
+        }
+        else if ([RABackgrounder.sharedInstance shouldSuspendImmediately:arg1.identifier] && arg2.backgrounded == NO && [suspendImmediatelyVerifierDict objectForKey:arg1.identifier] != nil)
+        {
+            BKSProcessAssertion *assertion = suspendImmediatelyVerifierDict[arg1.identifier];
+            [assertion invalidate];
+            [suspendImmediatelyVerifierDict removeObjectForKey:arg1.identifier];
+        }
     }
 
     %orig(arg1, arg2, arg3, arg4, arg5);

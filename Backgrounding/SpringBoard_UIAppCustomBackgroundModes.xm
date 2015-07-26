@@ -22,7 +22,7 @@
 {
     if ([NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.springboard"] == NO) // TODO: this is a hack that prevents SpringBoard from not starting
     {
-        //NSLog(@"[ReachApp] BKSProcessAssertion initWithPID:%d flags:%d reason:%d name:%@ withHandler:%@", arg1, arg2, arg3, arg4, arg5);
+        NSLog(@"[ReachApp] BKSProcessAssertion initWithPID:%d flags:%d reason:%d name:%@ withHandler:%@", arg1, arg2, arg3, arg4, arg5);
 
         NSString *identifier = objc_getClass("SBApplicationController") == nil ? NSBundle.mainBundle.bundleIdentifier : [[%c(SBApplicationController) sharedInstance] applicationWithPid:arg1].bundleIdentifier;
         if ([RABackgrounder.sharedInstance shouldSuspendImmediately:identifier])

@@ -52,10 +52,10 @@
              @{ @"footerText": @"todo" },
              @{
                  @"cell": @"PSSwitchCell",
-                 @"default": @YES,
+                 @"default": @NO,
                  @"defaults": @"com.efrederickson.reachapp.settings",
-                 @"key": @"__todo__",
-                 @"label": @"todo",
+                 @"key": @"alwaysShowSOGrabber",
+                 @"label": @"Always Show Grabber",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
             ];

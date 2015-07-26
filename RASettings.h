@@ -34,4 +34,6 @@
 
 -(BOOL) isFirstRun;
 -(void) setFirstRun:(BOOL)value;
+
+-(BOOL) alwaysShowSOGrabber;
 @end 

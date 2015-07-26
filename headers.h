@@ -26,6 +26,10 @@
 #define NSLog 
 #endif
 
+#define IS_SPRINGBOARD [NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"]
+#define IF_SPRINGBOARD if (IS_SPRINGBOARD)
+#define IF_THIS_PROCESS(x) if ([[x objectForKey:@"bundleIdentifier"] isEqual:NSBundle.mainBundle.bundleIdentifier])
+
 // ugh, i got so tired of typing this in by hand, plus it expands method declarations by a LOT.
 #define unsafe_id __unsafe_unretained id
 

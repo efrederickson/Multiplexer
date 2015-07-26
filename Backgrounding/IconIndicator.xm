@@ -1,5 +1,6 @@
 #import "RABackgrounder.h"
 #import "RASettings.h"
+#import "RAIconBadgeView.h"
 
 NSMutableArray *managedIconViews = [NSMutableArray array];
 
@@ -100,17 +101,20 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 		return;
 	}
 
-	SBIconBadgeView *badge = [self viewWithTag:9962] ?: [[%c(SBIconBadgeView) alloc] init];
-	badge.tag = 9962;
-	
-	SBDarkeningImageView *imgView = MSHookIvar<SBDarkeningImageView*>(badge, "_backgroundView");
-	UIImage *img = [%c(SBIconBadgeView) _checkoutImageForText:text highlighted:NO];
+	RAIconBadgeView *badge = (RAIconBadgeView*)[self viewWithTag:9962];
+	if (!badge)
+	{
+		badge = [[RAIconBadgeView alloc] init];
+		badge.tag = 9962;
 
-	[badge _crossfadeToTextImage:img withPreparation:nil animation:nil completion:nil];
-	[badge _resizeForTextImage:img];
+		badge.textColor = UIColor.whiteColor;
+		badge.textAlignment = NSTextAlignmentCenter;
+		badge.clipsToBounds = YES;
+		badge.layer.cornerRadius = 12;
+		badge.backgroundColor = [UIColor colorWithRed:60/255.0f green:108/255.0f blue:255/255.0f alpha:1.0f];
+	}
 
-	SBIconAccessoryImage *image = [[%c(SBIconAccessoryImage) alloc] initWithImage:[[%c(SBIconBadgeView) _checkoutBackgroundImage] _flatImageWithColor:[UIColor colorWithRed:60/255.0f green:108/255.0f blue:255/255.0f alpha:1.0f]]];
-	[imgView setImage:image brightness:1];
+	badge.text = text;
 
 	if (!badge.superview)
 		[self addSubview:badge];
