@@ -147,12 +147,6 @@
                  @"action": @"showTutorial",
                  @"icon": @"tutorial.png"
                  },
-             @{
-                 @"cell": @"PSLinkCell",
-                 @"label": @"View the FAQ",
-                 @"action": @"showFAQ",
-                 @"icon": @"tutorial.png"
-                 },
              ];
 }
 

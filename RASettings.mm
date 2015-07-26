@@ -44,20 +44,20 @@ NSDictionary *_settings = nil;
 		_settings = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
 		CFRelease(keyList);
 		if (!_settings) {
-			NSLog(@"[ReachApp] failure loading from CFPreferences");
+			//NSLog(@"[ReachApp] failure loading from CFPreferences");
 			failed = YES;
 		}
 	}
 	else 
 	{
-		NSLog(@"[ReachApp] failure loading keyList");
+		//NSLog(@"[ReachApp] failure loading keyList");
 		failed = YES;
 	}
 
 	if (failed)
 	{
 		_settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"];
-		NSLog(@"[ReachApp] settings sandbox load: %@", _settings == nil ? @"failed" : @"succeed");
+		//NSLog(@"[ReachApp] settings sandbox load: %@", _settings == nil ? @"failed" : @"succeed");
 	}
 
 	if ([previousNCAppSetting isEqual:self.NCApp] == NO)

@@ -17,23 +17,48 @@
 }
 %end
 
+BOOL enableSBApp = NO;
+
 %hook BKSProcessAssertion
 - (id)initWithPID:(int)arg1 flags:(unsigned int)arg2 reason:(unsigned int)arg3 name:(unsafe_id)arg4 withHandler:(unsafe_id)arg5
 {
-    if ([NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.springboard"] == NO) // TODO: this is a hack that prevents SpringBoard from not starting
+    //if ([NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.springboard"] == NO) // TODO: this is a hack that prevents SpringBoard from not starting
     {
-        NSLog(@"[ReachApp] BKSProcessAssertion initWithPID:%d flags:%d reason:%d name:%@ withHandler:%@", arg1, arg2, arg3, arg4, arg5);
+        NSString *identifier = enableSBApp == NO || objc_getClass("SBApplicationController") == nil ? NSBundle.mainBundle.bundleIdentifier : [[%c(SBApplicationController) sharedInstance] applicationWithPid:arg1].bundleIdentifier;
+        
+        NSLog(@"[ReachApp] BKSProcessAssertion initWithPID:%d flags:%d reason:%d name:%@ withHandler:%@ identifier:%@", arg1, arg2, arg3, arg4, arg5, identifier);
 
-        NSString *identifier = objc_getClass("SBApplicationController") == nil ? NSBundle.mainBundle.bundleIdentifier : [[%c(SBApplicationController) sharedInstance] applicationWithPid:arg1].bundleIdentifier;
         if ([RABackgrounder.sharedInstance shouldSuspendImmediately:identifier])
         {
-            if (arg3 >= kProcessAssertionReasonAudio && arg3 <= kProcessAssertionReasonVOiP) // In most cases arg3 == 4 (finish task)
+            //NSLog(@"[ReachApp] shouldSuspendImmediately: %@", identifier);
+            if ((arg3 >= kProcessAssertionReasonAudio && arg3 <= kProcessAssertionReasonVOiP)) // In most cases arg3 == 4 (finish task)
             {
-                //NSLog(@"[ReachApp] blocking BKSProcessAssertion");
+                NSLog(@"[ReachApp] blocking BKSProcessAssertion");
+                arg2 = ProcessAssertionFlagAllowIdleSleep; //PreventSuspend;
+                arg3 = kProcessAssertionReasonSuspend;
+                if (arg5)
+                {
+                    void (^arg5fix)() = arg5;
+                    arg5fix();
+                }
                 return nil;
             }
+            //else if (arg3 == kProcessAssertionReasonActivation)
+            //{
+            //    arg2 = ProcessAssertionFlagAllowIdleSleep;
+            //}
         }
     }
     return %orig(arg1, arg2, arg3, arg4, arg5);
+}
+%end
+
+%hook SBLockStateAggregator
+-(void) _updateLockState
+{
+    %orig;
+    
+    if (![self hasAnyLockState])
+        enableSBApp = YES;
 }
 %end

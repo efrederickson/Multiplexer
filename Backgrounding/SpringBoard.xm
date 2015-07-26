@@ -60,9 +60,12 @@ NSMutableDictionary *suspendImmediatelyVerifierDict = [NSMutableDictionary dicti
         {
             [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
 
-            SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:arg1.identifier];
-            if ([suspendImmediatelyVerifierDict objectForKey:arg1.identifier] == nil)
-                suspendImmediatelyVerifierDict[arg1.identifier] = [[%c(BKSProcessAssertion) alloc] initWithPID:app.pid flags:ProcessAssertionFlagNone reason:kProcessAssertionReasonSuspend name:@"ReachApp.Backgrounder.susepndImmediately" withHandler:nil];
+            //SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:arg1.identifier];
+            //if ([suspendImmediatelyVerifierDict objectForKey:arg1.identifier] == nil)
+            //{
+                //suspendImmediatelyVerifierDict[arg1.identifier] = [[%c(BKSProcessAssertion) alloc] initWithPID:app.pid flags:ProcessAssertionFlagAllowIdleSleep reason:kProcessAssertionReasonSuspend name:@"ReachApp.Backgrounder.susepndImmediately" withHandler:nil];
+                //NSLog(@"[ReachApp] creating BKSProcessAssertion to suspend %@:%d", app.bundleIdentifier, app.pid);
+            //}
         }
         else if ([RABackgrounder.sharedInstance shouldSuspendImmediately:arg1.identifier] && arg2.backgrounded == NO && [suspendImmediatelyVerifierDict objectForKey:arg1.identifier] != nil)
         {

@@ -372,7 +372,7 @@ typedef NS_ENUM(NSUInteger, BKSProcessAssertionReason)
     kProcessAssertionReasonSuspend = 10001,
     kProcessAssertionReasonTransientWakeup = 10002,
     kProcessAssertionReasonVOiP_PreiOS8 = 10003,
-    kProcessAssertionReasonPeriodicTask = kProcessAssertionReasonVOiP_PreiOS8,
+    kProcessAssertionReasonPeriodicTask_iOS8 = kProcessAssertionReasonVOiP_PreiOS8,
     kProcessAssertionReasonFinishTaskUnbounded = 10004,
     kProcessAssertionReasonContinuous = 10005,
     kProcessAssertionReasonBackgroundContentFetching = 10006,
