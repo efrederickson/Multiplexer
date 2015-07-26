@@ -22,7 +22,7 @@
 %hook BKSProcessAssertion
 - (id)initWithPID:(int)arg1 flags:(unsigned int)arg2 reason:(unsigned int)arg3 name:(unsafe_id)arg4 withHandler:(unsafe_id)arg5
 {
-    //if ([NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.springboard"] == NO) // TODO: this is a hack that prevents SpringBoard from not starting
+    if ([NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.springboard"] == NO) // TODO: this is a hack that prevents SpringBoard from not starting
     {
         NSString *identifier = /*enableSBApp == NO || */objc_getClass("SBApplicationController") == nil ? NSBundle.mainBundle.bundleIdentifier : [[%c(SBApplicationController) sharedInstance] applicationWithPid:arg1].bundleIdentifier;
         
