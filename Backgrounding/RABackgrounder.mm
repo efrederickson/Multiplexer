@@ -1,10 +1,6 @@
 #import "RABackgrounder.h"
 #import "RASettings.h"
 
-@interface SBIconView (ReachApp)
--(void) RA_updateIndicatorView:(RAIconIndicatorViewInfo)info;
-@end
-
 @implementation RABackgrounder
 +(id) sharedInstance
 {

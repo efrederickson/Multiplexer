@@ -1,4 +1,5 @@
 #import "RAHostedAppView.h"
+#import "BioLockdown.h"
 
 @interface RAHostedAppView () {
     NSTimer *verifyTimer;
@@ -59,13 +60,9 @@
     // it will call it again.
 }
 
--(void) loadApp
+-(void) _actualLoadApp
 {
-	[self preloadApp];
-    if (!app)
-        return;
-
-	FBScene *scene = [app mainScene];
+    FBScene *scene = [app mainScene];
     contextHostManager = [scene contextHostManager];
 
     FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
@@ -88,6 +85,24 @@
 
     verifyTimer = [NSTimer timerWithTimeInterval:1 target:self selector:@selector(verifyHostingAndRehostIfNecessary) userInfo:nil repeats:YES];
     [NSRunLoop.currentRunLoop addTimer:verifyTimer forMode:NSRunLoopCommonModes];
+}
+
+-(void) loadApp
+{
+	[self preloadApp];
+    if (!app)
+        return;
+
+    IF_BIOLOCKDOWN {
+        BIOLOCKDOWN_AUTHENTICATE_APP(app.bundleIdentifier, ^{
+            [self _actualLoadApp];
+        }, ^{
+            NSLog(@"[ReachApp] BioLockdown authentication failed");
+            //[self loadApp];
+        });
+    }
+    else
+        [self _actualLoadApp];
 
     if (!activityView)
     {

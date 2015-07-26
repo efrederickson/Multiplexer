@@ -44,7 +44,7 @@ NSDictionary *_settings = nil;
 		_settings = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
 		CFRelease(keyList);
 		if (!_settings) {
-			NSLog(@"[ReachApp] failure loading dictionary");
+			NSLog(@"[ReachApp] failure loading from CFPreferences");
 			failed = YES;
 		}
 	}
@@ -177,6 +177,11 @@ NSDictionary *_settings = nil;
 -(BOOL) shouldShowIconIndicatorsGlobally
 {
 	return BOOL(@"showIconIndicators", YES);
+}
+
+-(BOOL) showNativeStateIconIndicators
+{
+	return BOOL(@"showNativeStateIconIndicators", YES);
 }
 
 -(NSDictionary*) rawCompiledBackgrounderSettingsForIdentifier:(NSString*)identifier

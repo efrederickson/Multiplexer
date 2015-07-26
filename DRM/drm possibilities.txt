@@ -1,0 +1,38 @@
+
+
+
+license file format:
+
+
+byte 0 -    udid length
+byte 1-n    udid
+
+byte n+1    trial expiry length
+byte n+o    trial expiry (timeIntervalSince1970: compare current timeIntervalSince1970 to this one)
+
+byte        featuresPurchasedLength
+byte[]      each int is a enum value for the purchased features. allows splitting something like backgrounder from Empoleon purchases
+
+
+
+
+
+
+
+license verifier steps:
+
+
+1. attempt to load from license file
+	a. if trial expired, goto 3
+	b. if in trial or purchased, goto 4
+
+2. attempt to verify from server & download license file
+	a. if valid, create license and goto 4
+	b. if confirmed invalid, goto 3
+	c. if any possible failure, goto 4
+
+
+3. show "purchase now" & ads
+
+
+4. do nothing else

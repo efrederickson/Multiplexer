@@ -1,3 +1,4 @@
+DEBUG = 1
 ARCHS = armv7 armv7s arm64
 CFLAGS = -I./ -Iwidgets/ -ISwipeOver/ -IReachability/ -IGestureSupport/ -IKeyboardSupport/ -IMissionControl/ -IWindowedMultitasking/ -INotificationCenterApp/ -IBackgrounding/ -IIntroTutorial/
 CFLAGS += -fobjc-arc
@@ -26,8 +27,8 @@ ReachApp_LIBRARIES = applist
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 after-install::
-#	install.exec "killall -9 SpringBoard"
-	install.exec "killall -9 Preferences"
+	install.exec "killall -9 SpringBoard"
+#	install.exec "killall -9 Preferences"
 SUBPROJECTS += reachappsettings
 SUBPROJECTS += reachappflipswitch
 SUBPROJECTS += reachappfsdaemon

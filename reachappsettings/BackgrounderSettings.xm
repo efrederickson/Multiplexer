@@ -74,6 +74,14 @@
                 @"defaults": @"com.efrederickson.reachapp.settings",
                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
              },
+             @{
+                @"cell": @"PSSwitchCell",
+                @"label": @"Show Native Mode Indicators",
+                @"default": @YES,
+                @"key": @"showNativeStateIconIndicators",
+                @"defaults": @"com.efrederickson.reachapp.settings",
+                @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+             },
              @{ },
              @{
                 @"cell": @"PSLinkCell",

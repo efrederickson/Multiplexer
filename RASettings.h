@@ -29,6 +29,7 @@
 
 -(BOOL) backgrounderEnabled;
 -(BOOL) shouldShowIconIndicatorsGlobally;
+-(BOOL) showNativeStateIconIndicators;
 -(NSDictionary*) rawCompiledBackgrounderSettingsForIdentifier:(NSString*)identifier;
 
 -(BOOL) isFirstRun;

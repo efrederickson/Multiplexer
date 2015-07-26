@@ -1,6 +1,8 @@
 #import "RABackgrounder.h"
 #import "RASettings.h"
 
+NSMutableArray *managedIconViews = [NSMutableArray array];
+
 @interface SBIconAccessoryImage : UIImage
 -(id)initWithImage:(id)arg1 ;
 @end
@@ -52,6 +54,12 @@
 - (void)settings:(id)arg1 changedValueForKey:(id)arg2;
 @end
 
+#define SET_INFO_(x, y)    objc_setAssociatedObject(x, @selector(RA_setIndicatorViewInfo), [NSNumber numberWithInt:y], OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+#define GET_INFO_(x)       [objc_getAssociatedObject(x, @selector(RA_setIndicatorViewInfo)) intValue]
+#define SET_INFO(y)        SET_INFO_(self, y)
+#define GET_INFO           GET_INFO_(self)
+
+
 NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 {
 	NSMutableString *ret = [[NSMutableString alloc] init];
@@ -59,7 +67,7 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 	if (info & RAIconIndicatorViewInfoNone)
 		return nil;
 
-	if (info & RAIconIndicatorViewInfoNative)
+	if ([RASettings.sharedInstance showNativeStateIconIndicators] && (info & RAIconIndicatorViewInfoNative))
 		[ret appendString:@"N"];
 	
 	if (info & RAIconIndicatorViewInfoForced)
@@ -86,34 +94,40 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 	[[self viewWithTag:9962] removeFromSuperview];
 
 	NSString *text = stringFromIndicatorInfo(info);
-	if ((text == nil || text.length == 0) || (self.icon == nil || self.icon.application == nil || ![RABackgrounder.sharedInstance shouldShowIndicatorForIdentifier:self.icon.application.bundleIdentifier]) || [RASettings.sharedInstance backgrounderEnabled] == NO)
+	if ((text == nil || text.length == 0) || (self.icon == nil || self.icon.application == nil || self.icon.application.isRunning == NO || ![RABackgrounder.sharedInstance shouldShowIndicatorForIdentifier:self.icon.application.bundleIdentifier]) || [RASettings.sharedInstance backgrounderEnabled] == NO)
 	{
+		[managedIconViews removeObject:self];
 		return;
 	}
 
-	SBIconBadgeView *badge = [[%c(SBIconBadgeView) alloc] init];
+	SBIconBadgeView *badge = [self viewWithTag:9962] ?: [[%c(SBIconBadgeView) alloc] init];
 	badge.tag = 9962;
 	
-
+	SBDarkeningImageView *imgView = MSHookIvar<SBDarkeningImageView*>(badge, "_backgroundView");
 	UIImage *img = [%c(SBIconBadgeView) _checkoutImageForText:text highlighted:NO];
-	//[badge _configureAnimatedForText:text highlighted:YES withPreparation:nil animation:nil completion:nil];
+
 	[badge _crossfadeToTextImage:img withPreparation:nil animation:nil completion:nil];
 	[badge _resizeForTextImage:img];
 
-	SBDarkeningImageView *imgView = MSHookIvar<SBDarkeningImageView*>(badge, "_backgroundView");
 	SBIconAccessoryImage *image = [[%c(SBIconAccessoryImage) alloc] initWithImage:[[%c(SBIconBadgeView) _checkoutBackgroundImage] _flatImageWithColor:[UIColor colorWithRed:60/255.0f green:108/255.0f blue:255/255.0f alpha:1.0f]]];
 	[imgView setImage:image brightness:1];
-
-	[badge setAccessoryBrightness:1];
 
 	if (!badge.superview)
 		[self addSubview:badge];
 
 	CGPoint overhang = [%c(SBIconBadgeView) _overhang];
 	badge.frame = CGRectMake(-overhang.x, -overhang.y, badge.frame.size.width, badge.frame.size.height);
+	if ([managedIconViews containsObject:self] == NO)
+		[managedIconViews addObject:self];
+	SET_INFO(info);
+}
+
+%new -(void) RA_updateIndicatorViewWithExistingInfo
+{
+	if ([self viewWithTag:9962])
+		[self RA_updateIndicatorView:GET_INFO];
 }
 %end
-
 
 %hook SBApplication
 - (void)setApplicationState:(unsigned int)arg1
@@ -122,6 +136,9 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 
     if (self.isRunning == NO)
     	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:RAIconIndicatorViewInfoNone];
+
+    //for (SBIconView *view in [managedIconViews copy])
+    //	[view RA_updateIndicatorViewWithExistingInfo];
 }
 %end
 

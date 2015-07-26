@@ -8,6 +8,9 @@
 #import "RAHostedAppView.h"
 #import "RASnapshotProvider.h"
 #import "RAAppKiller.h"
+#import "RAGestureManager.h"
+
+extern BOOL overrideCC;
 
 @interface RAMissionControlManager () {
 	UIScrollView *desktopScrollView, *windowedAppScrollView, *otherRunningAppsScrollView;
@@ -88,6 +91,8 @@
 	[window makeKeyAndVisible];
 	if (animated)
 		[UIView animateWithDuration:0.5 animations:^{ window.alpha = 1; }];
+
+	overrideCC = YES;
 }
 
 -(void) createWindow
@@ -279,6 +284,7 @@
 
 	[RADesktopManager.sharedInstance reshowDesktop];
 	[RADesktopManager.sharedInstance.currentDesktop loadApps];
+	overrideCC = NO;
 }
 
 -(void) toggleMissionControl:(BOOL)animated

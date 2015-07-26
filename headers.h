@@ -20,6 +20,12 @@
 #import <notify.h>
 #import <IOKit/hid/IOHIDEvent.h>
 
+#if DEBUG
+#define NSLog NSLog
+#else
+#define NSLog 
+#endif
+
 // ugh, i got so tired of typing this in by hand, plus it expands method declarations by a LOT.
 #define unsafe_id __unsafe_unretained id
 
@@ -673,6 +679,12 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 	UIImage *_ghostlyImage;
 	BOOL _ghostlyPending;
 }
+
+
+-(void) RA_updateIndicatorView:(NSInteger)info;
+-(void) RA_updateIndicatorViewWithExistingInfo;
+
+
 + (CGSize)defaultIconSize;
 + (CGSize)defaultIconImageSize;
 + (BOOL)allowsRecycling;

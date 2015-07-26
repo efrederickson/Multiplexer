@@ -2,6 +2,11 @@
 #import <SettingsKit/SKListControllerProtocol.h>
 #import <SettingsKit/SKTintedListController.h>
 #import <Preferences/PSSwitchTableCell.h>
+#import <SettingsKit/SKStandardController.h>
+#import <SettingsKit/SKPersonCell.h>
+#import <SettingsKit/SKSharedHelper.h>
+#include <sys/sysctl.h>
+#include <sys/utsname.h>
 #import <AppList/AppList.h>
 #import <substrate.h>
 #import <notify.h>
@@ -25,7 +30,7 @@
 - (void)sectionRequestedSectionReload:(id)section animated:(BOOL)animated;
 @end
 
-@interface ReachAppSettingsListController: SKTintedListController<SKListControllerProtocol>
+@interface ReachAppSettingsListController: SKTintedListController<SKListControllerProtocol, MFMailComposeViewControllerDelegate>
 @end
 
 @implementation ReachAppSettingsListController
@@ -36,8 +41,12 @@
         (id) [UIColor colorWithRed:234/255.0f green:152/255.0f blue:115/255.0f alpha:1.0f].CGColor, 
         (id) [UIColor colorWithRed:190/255.0f green:83/255.0f blue:184/255.0f alpha:1.0f].CGColor 
     ];
-    //if (arc4random_uniform(1000000) == 734025)
-    //    header.title = @"卐卐 TWEAK SUPREMACY 卍卍";
+#if DEBUG
+    if (arc4random_uniform(1000000) == 734025)
+        header.title = @"卐卐 TWEAK SUPREMACY 卍卍";
+    else if (arc4random_uniform(1000000) >= 900000)
+        header.title = @"dank memes";
+#endif
     header.blendMode = kCGBlendModeSoftLight;
     header.image = [[PDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/MainHeader.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(109.33, 41)]];
 
@@ -55,7 +64,7 @@
 -(NSArray*) customSpecifiers
 {
     return @[
-             @{ @"footerText": @"Let apps run in the background." },
+             @{ @"footerText": @"Quickly enable or disable Multiplexer." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
@@ -63,57 +72,107 @@
                  @"key": @"enabled",
                  @"label": @"Enabled",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 @"icon": RSIMG(@"enabled.png")
                  },
 
-             @{ },
+             @{ @"footerText": @"Let apps run in the background." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Aura",
                  @"detail": @"ReachAppBackgrounderSettingsListController",
-                 @"icon": [UIImage imageNamed:@"aura.png" inBundle:[NSBundle bundleForClass:self.class] compatibleWithTraitCollection:nil]
+                 @"icon": RSIMG(@"aura.png")
                  },
              @{ @"footerText": @"Windowed multitasking." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Empoleon",
                  @"detail": @"ReachAppWindowSettingsListController",
-                 @"icon": [UIImage imageNamed:@"empoleon.png" inBundle:[NSBundle bundleForClass:self.class] compatibleWithTraitCollection:nil]
+                 @"icon": RSIMG(@"empoleon.png")
                  },
              @{ @"footerText": @"Manage multiple desktops and their windows." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Mission Control",
                  @"detail": @"ReachAppMCSettingsListController",
-                 @"icon": [UIImage imageNamed:@"missioncontrol.png" inBundle:[NSBundle bundleForClass:self.class] compatibleWithTraitCollection:nil]
+                 @"icon": RSIMG(@"missioncontrol.png")
                  },
              @{ @"footerText": @"Have an app in Notification Center." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Quick Access",
                  @"detail": @"ReachAppNCAppSettingsListController",
-                 @"icon": [UIImage imageNamed:@"quickaccess.png" inBundle:[NSBundle bundleForClass:self.class] compatibleWithTraitCollection:nil]
+                 @"icon": RSIMG(@"quickaccess.png")
                  },
             @{ @"footerText": @"Use app in Reachability alongside another." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Reach App",
                  @"detail": @"ReachAppReachabilitySettingsListController",
-                 @"icon": [UIImage imageNamed:@"reachapp.png" inBundle:[NSBundle bundleForClass:self.class] compatibleWithTraitCollection:nil]
+                 @"icon": RSIMG(@"reachapp.png")
                  },
              @{ @"footerText": @"Access another app simply by swiping in from the right side of the screen." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Swipe Over",
                  @"detail": @"ReachAppSwipeOverSettingsListController",
-                 @"icon": [UIImage imageNamed:@"swipeover.png" inBundle:[NSBundle bundleForClass:self.class] compatibleWithTraitCollection:nil]
+                 @"icon": RSIMG(@"swipeover.png")
                  },
-             @{ @"footerText": @"Questions? Problems?" },
+             @{ @"footerText": 
+#if DEBUG
+                    arc4random_uniform(10000) == 9901 ? @"2fast5me" : 
+#endif
+                    @"© Elijah Frederickson & Andrew Abosh." },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"label": @"Creators",
+                 @"detail": @"RAMakersController",
+                 @"icon": RSIMG(@"makers.png")
+                 },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Support",
-                 @"detail": @"RASupportController",
-                 @"icon": [UIImage imageNamed:@"support.png" inBundle:[NSBundle bundleForClass:self.class] compatibleWithTraitCollection:nil]
+                 @"action": @"showSupportDialog",
+                 @"icon": RSIMG(@"support.png")
+                 },
+
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"label": @"View the Tutorial",
+                 @"action": @"showTutorial",
+                 @"icon": @"tutorial.png"
+                 },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"label": @"View the FAQ",
+                 @"action": @"showFAQ",
+                 @"icon": @"tutorial.png"
                  },
              ];
+}
+
+-(void) showSupportDialog
+{
+    MFMailComposeViewController *mailViewController;
+    if ([MFMailComposeViewController canSendMail])
+    {
+        mailViewController = [[MFMailComposeViewController alloc] init];
+        mailViewController.mailComposeDelegate = self;
+        [mailViewController setSubject:@"Multiplexer"];
+        
+        struct utsname systemInfo;
+        uname(&systemInfo);
+        NSString *sysInfo = [NSString stringWithCString:systemInfo.machine encoding:NSUTF8StringEncoding];
+        
+        NSString *msg = [NSString stringWithFormat:@"\n\n%@ %@\nModel: %@\n", [UIDevice currentDevice].systemName, [UIDevice currentDevice].systemVersion, sysInfo];
+        [mailViewController setMessageBody:msg isHTML:NO];
+        [mailViewController setToRecipients:@[@"elijahandandrew@gmail.com"]];
+            
+        [self.rootController presentViewController:mailViewController animated:YES completion:nil];
+    }
+
+}
+
+-(void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error{
+    [self dismissViewControllerAnimated:YES completion:NULL];
 }
 @end
