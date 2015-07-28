@@ -8,6 +8,7 @@
 #import "RAHeaderView.h"
 #import "PDFImage.h"
 #import <AppList/AppList.h>
+#import "RABackgrounder.h"
 
 #define PLIST_NAME @"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"
 
@@ -73,7 +74,20 @@
                 @"key": @"showIconIndicators",
                 @"defaults": @"com.efrederickson.reachapp.settings",
                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-             },
+             },             
+             @{
+                @"cell": @"PSLinkListCell",
+                @"label": @"Background Mode",
+                @"key": @"globalBackgroundMode",
+                @"validTitles": @[ @"Native",                 /*@"Forced Native (old apps) [broken]",*/     @"Force Foreground",                 @"Disabled (Kill on exit)",      @"Suspend Immediately (SmartClose)" ],
+                @"validValues": @[ @(RABackgroundModeNative), /*@(RABackgroundModeForceNativeForOldApps),*/ @(RABackgroundModeForcedForeground), @(RABackgroundModeForceNone),    @(RABackgroundModeSuspendImmediately)],
+                @"shortTitles": @[ @"Native",                 /*@"Native+ [broken]",*/                      @"Forced",                           @"Disabled",                     @"SmartClose" ],
+                @"default": @(RABackgroundModeNative),
+                @"detail": @"PSListItemsController",
+                @"defaults": @"com.efrederickson.reachapp.settings",
+                @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                @"staticTextMessage": @"Does not apply to enabled apps with differing background modes in the \"Per App\" section."
+                },
              @{
                 @"cell": @"PSSwitchCell",
                 @"label": @"Show Native Mode Indicators",

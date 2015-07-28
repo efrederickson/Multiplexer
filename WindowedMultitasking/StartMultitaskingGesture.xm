@@ -1,6 +1,7 @@
 #import "headers.h"
 #import "RADesktopManager.h"
 #import "RAGestureManager.h"
+#import "RASettings.h"
 
 BOOL overrideCC = NO;
 
@@ -17,6 +18,23 @@ BOOL overrideCC = NO;
         %orig;
 }
 %end
+
+BOOL locationIsInValidArea(CGFloat x)
+{
+    if (x == 0) return YES; // more than likely, UIGestureRecognizerStateEnded
+
+    switch ([RASettings.sharedInstance windowedMultitaskingGrabArea])
+    {
+        case RAGrabAreaBottomLeftThird:
+            return x <= UIScreen.mainScreen.bounds.size.width / 3.0;
+        case RAGrabAreaBottomMiddleThird:
+            return x >= UIScreen.mainScreen.bounds.size.width / 3.0 && x <= (UIScreen.mainScreen.bounds.size.width / 3.0) * 2;
+        case RAGrabAreaBottomRightThird:
+            return x >= (UIScreen.mainScreen.bounds.size.width / 3.0) * 2;
+        default:
+            return NO;
+    }
+}
 
 %ctor
 {
@@ -73,6 +91,6 @@ BOOL overrideCC = NO;
 
         return RAGestureCallbackResultSuccess;
     } withCondition:^BOOL(CGPoint location, CGPoint velocity) {
-        return location.x <= 100 && ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && [UIApplication.sharedApplication _accessibilityFrontMostApplication] != nil;
+        return [RASettings.sharedInstance windowedMultitaskingEnabled] && locationIsInValidArea(location.x) && ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && [UIApplication.sharedApplication _accessibilityFrontMostApplication] != nil;
     } forEdge:UIRectEdgeBottom identifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture" priority:RAGesturePriorityDefault];
 }

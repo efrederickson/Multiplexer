@@ -34,7 +34,7 @@
             if ((arg3 >= kProcessAssertionReasonAudio && arg3 <= kProcessAssertionReasonVOiP)) // In most cases arg3 == 4 (finish task)
             {
                 NSLog(@"[ReachApp] blocking BKSProcessAssertion");
-                arg2 = ProcessAssertionFlagAllowIdleSleep; //PreventSuspend;
+                arg2 = ProcessAssertionFlagAllowIdleSleep;
                 arg3 = kProcessAssertionReasonSuspend;
                 if (arg5)
                 {

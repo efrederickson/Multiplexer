@@ -25,9 +25,9 @@
 	{
 		SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:identifier];
 
-		if (app)
+		if (app && app.mainSceneID)
 		{
-			CGRect frame;
+			CGRect frame = CGRectMake(0, 0, 0, 0);
 			UIView *view = [%c(SBUIController) _zoomViewWithSplashboardLaunchImageForApplication:app sceneID:app.mainSceneID screen:UIScreen.mainScreen interfaceOrientation:0 includeStatusBar:YES snapshotFrame:&frame];
 
 			if (view)

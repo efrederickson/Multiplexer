@@ -51,6 +51,25 @@ CGAffineTransform adjustTransformRotation()
     return CGAffineTransformIdentity;
 }
 
+BOOL swipeOverLocationIsInValidArea(CGFloat y)
+{
+    if (y == 0) return YES; // more than likely, UIGestureRecognizerStateEnded
+
+    switch ([RASettings.sharedInstance swipeOverGrabArea])
+    {
+        case RAGrabAreaSideAnywhere:
+            return YES;
+        case RAGrabAreaSideTopThird:
+            return y <= UIScreen.mainScreen.bounds.size.height / 3.0;
+        case RAGrabAreaSideMiddleThird:
+            return y >= UIScreen.mainScreen.bounds.size.height / 3.0 && y <= (UIScreen.mainScreen.bounds.size.height / 3.0) * 2;
+        case RAGrabAreaSideBottomThird:
+            return y >= (UIScreen.mainScreen.bounds.size.height / 3.0) * 2;
+        default:
+            return NO;
+    }
+}
+
 %ctor
 {
     [[RAGestureManager sharedInstance] addGestureRecognizer:^RAGestureCallbackResult(UIGestureRecognizerState state, CGPoint location, CGPoint velocity) {
@@ -149,6 +168,6 @@ CGAffineTransform adjustTransformRotation()
                 return NO;
         }
         
-        return ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && ![[%c(SBUIController) sharedInstance] isAppSwitcherShowing] && !RAMissionControlManager.sharedInstance.isShowingMissionControl;
+        return [RASettings.sharedInstance swipeOverEnabled] && ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && ![[%c(SBUIController) sharedInstance] isAppSwitcherShowing] && !RAMissionControlManager.sharedInstance.isShowingMissionControl && swipeOverLocationIsInValidArea(location.y);
     } forEdge:UIRectEdgeRight identifier:@"com.efrederickson.reachapp.swipeover.systemgesture" priority:RAGesturePriorityDefault];
 }

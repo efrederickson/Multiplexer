@@ -42,26 +42,19 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	return popped == -1 ? -1 : (popped == mode ? 1 : 0);
 }
 
+-(RABackgroundMode) globalBackgroundMode
+{
+	return (RABackgroundMode)[RASettings.sharedInstance globalBackgroundMode];
+}
+
 -(BOOL) shouldKeepInForeground:(NSString*)identifier
 {
-	if (!identifier || ![RASettings.sharedInstance backgrounderEnabled]) return NO;
-	
-	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
-	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
-
-	NSInteger temporaryOverride = [self popTemporaryOverrideForApplication:identifier is:RABackgroundModeForcedForeground];
-	return [RASettings.sharedInstance backgrounderEnabled] && enabled && (temporaryOverride == -1 ? ([dict objectForKey:@"backgroundMode"] == nil ? NO : [dict[@"backgroundMode"] intValue] == RABackgroundModeForcedForeground) : temporaryOverride);
+	return [self backgroundModeForIdentifier:identifier] == RABackgroundModeForcedForeground;
 }
 
 -(BOOL) shouldSuspendImmediately:(NSString*)identifier
 {
-	if (!identifier || ![RASettings.sharedInstance backgrounderEnabled]) return NO;
-	
-	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
-	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
-
-	NSInteger temporaryOverride = [self popTemporaryOverrideForApplication:identifier is:RABackgroundModeSuspendImmediately];
-	return [RASettings.sharedInstance backgrounderEnabled] && enabled && (temporaryOverride == -1 ? ([dict objectForKey:@"backgroundMode"] == nil ? NO : [dict[@"backgroundMode"] intValue] == RABackgroundModeSuspendImmediately) : temporaryOverride);
+	return [self backgroundModeForIdentifier:identifier] == RABackgroundModeSuspendImmediately;
 }
 
 -(BOOL) preventKillingOfIdentifier:(NSString*)identifier
@@ -75,11 +68,18 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 
 -(NSInteger) backgroundModeForIdentifier:(NSString*)identifier
 {
+	if (!identifier || [RASettings.sharedInstance backgrounderEnabled] == NO)
+		return RABackgroundModeNative;
+
 	NSInteger temporaryOverride = [self popTemporaryOverrideForApplication:identifier];
 	if (temporaryOverride != -1)
 		return temporaryOverride;
 
-	return [RASettings.sharedInstance backgrounderEnabled] ? RABackgroundModeNative : [[RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier][@"backgroundMode"] intValue];
+	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
+	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
+	if (!enabled)
+		return [self globalBackgroundMode];
+	return [dict[@"backgroundMode"] intValue];
 }
 
 -(BOOL) hasUnlimitedBackgroundTime:(NSString*)identifier
@@ -93,11 +93,7 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 
 -(BOOL) killProcessOnExit:(NSString*)identifier
 {
-	if (!identifier || ![RASettings.sharedInstance backgrounderEnabled]) return NO;
-	
-	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
-	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
-	return [RASettings.sharedInstance backgrounderEnabled] && enabled && ([dict objectForKey:@"backgroundMode"] == nil ? NO : [dict[@"backgroundMode"] intValue] == RABackgroundModeForceNone);
+	return [self backgroundModeForIdentifier:identifier] == RABackgroundModeForceNone;
 }
 
 -(void) temporarilyApplyBackgroundingMode:(RABackgroundMode)mode forApplication:(SBApplication*)app andCloseForegroundApp:(BOOL)close
@@ -107,12 +103,7 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	if (close)
 	{
         FBWorkspaceEvent *event = [objc_getClass("FBWorkspaceEvent") eventWithName:@"ActivateSpringBoard" handler:^{
-            SBDeactivationSettings *settings = [[objc_getClass("SBDeactivationSettings") alloc] init];
-            [settings setFlag:YES forDeactivationSetting:20];
-            [settings setFlag:NO forDeactivationSetting:2];
-            [UIApplication.sharedApplication._accessibilityFrontMostApplication _setDeactivationSettings:settings];
-     
-            SBAppToAppWorkspaceTransaction *transaction = [[objc_getClass("SBAppToAppWorkspaceTransaction") alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
+            SBAppToAppWorkspaceTransaction *transaction = [[objc_getClass("SBAppToAppWorkspaceTransaction") alloc] initWithAlertManager:nil exitedApp:app];
             [transaction begin];
         }];
         [(FBWorkspaceEventQueue*)[objc_getClass("FBWorkspaceEventQueue") sharedInstance] executeOrAppendEvent:event];
@@ -133,9 +124,10 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 
 	if ([self backgroundModeForIdentifier:identifier] == RABackgroundModeNative)
 		info |= RAIconIndicatorViewInfoNative;
-
-	if ([self backgroundModeForIdentifier:identifier] == RABackgroundModeForcedForeground)
+	else if ([self backgroundModeForIdentifier:identifier] == RABackgroundModeForcedForeground)
 		info |= RAIconIndicatorViewInfoForced;
+	else if ([self shouldSuspendImmediately:identifier])
+		info |= RAIconIndicatorViewInfoSuspendImmediately;
 
 	if ([self killProcessOnExit:identifier])
 		info |= RAIconIndicatorViewInfoForceDeath;
@@ -146,8 +138,6 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	if ([self hasUnlimitedBackgroundTime:identifier])
 		info |= RAIconIndicatorViewInfoUnlimitedBackgroundTime;
 
-	if ([self shouldSuspendImmediately:identifier])
-		info |= RAIconIndicatorViewInfoSuspendImmediately;
 
 	return (RAIconIndicatorViewInfo)info;
 }

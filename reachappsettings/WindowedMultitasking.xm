@@ -7,6 +7,7 @@
 #import <notify.h>
 #import "RAHeaderView.h"
 #import "PDFImage.h"
+#import "RASettings.h"
 
 #define PLIST_NAME @"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"
 
@@ -53,6 +54,27 @@
 -(NSArray*) customSpecifiers
 {
     return @[
+                 @{ @"footerText": @"" },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @YES,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"windowedMultitaskingEnabled",
+                 @"label": @"Enabled",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+
+             @{ @"label": @"Swipe Up From Bottom..."},
+             @{
+                 @"cell": @"PSSegmentCell",
+                 @"validTitles": @[ @"Left (Default)",            @"Middle",                      @"Right" ],
+                 @"validValues": @[ @(RAGrabAreaBottomLeftThird), @(RAGrabAreaBottomMiddleThird), @(RAGrabAreaBottomRightThird), ],
+                 @"default": @(RAGrabAreaBottomLeftThird),
+                 @"key": @"windowedMultitaskingGrabArea",
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+
              @{ @"footerText": @"If this is off, you cannot resize, rotate, etc. windows unless the overlay is showing." },
              @{
                  @"cell": @"PSSwitchCell",

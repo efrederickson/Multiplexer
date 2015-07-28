@@ -1,5 +1,6 @@
 #import "RASettings.h"
 #import "headers.h"
+#import "RABackgrounder.h"
 
 extern id/*RANCViewController* */ ncAppViewController;
 
@@ -9,7 +10,7 @@ extern id/*RANCViewController* */ ncAppViewController;
 NSDictionary *_settings = nil;
 
 @implementation RASettings
-+(id)sharedInstance
++(instancetype)sharedInstance
 {
 	RASettings *shared = nil;
 	if (shared == nil)
@@ -199,6 +200,11 @@ NSDictionary *_settings = nil;
 	return BOOL(@"snapRotation", YES);
 }
 
+-(NSInteger) globalBackgroundMode
+{
+	return [_settings objectForKey:@"globalBackgroundMode"] == nil ? RABackgroundModeNative : [_settings[@"globalBackgroundMode"] intValue];
+}
+
 -(NSDictionary*) rawCompiledBackgrounderSettingsForIdentifier:(NSString*)identifier
 {
 	NSMutableDictionary *ret = [NSMutableDictionary dictionary];
@@ -239,5 +245,18 @@ NSDictionary *_settings = nil;
 -(BOOL) alwaysShowSOGrabber
 {
 	return BOOL(@"alwaysShowSOGrabber", NO);
+}
+
+-(BOOL) swipeOverEnabled { return BOOL(@"swipeOverEnabled", YES); }
+-(BOOL) windowedMultitaskingEnabled { return BOOL(@"windowedMultitaskingEnabled", YES); }
+
+-(RAGrabArea) windowedMultitaskingGrabArea
+{
+	return [_settings objectForKey:@"windowedMultitaskingGrabArea"] == nil ? RAGrabAreaBottomLeftThird : (RAGrabArea)[_settings[@"windowedMultitaskingGrabArea"] intValue];
+}
+
+-(RAGrabArea) swipeOverGrabArea
+{
+	return [_settings objectForKey:@"swipeOverGrabArea"] == nil ? RAGrabAreaSideAnywhere : (RAGrabArea)[_settings[@"swipeOverGrabArea"] intValue];
 }
 @end

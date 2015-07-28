@@ -7,6 +7,7 @@
 #import <notify.h>
 #import "RAHeaderView.h"
 #import "PDFImage.h"
+#import "RASettings.h"
 
 #define PLIST_NAME @"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"
 
@@ -49,7 +50,28 @@
 -(NSArray*) customSpecifiers
 {
     return @[
-             @{ @"footerText": @"todo" },
+             @{ },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @YES,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"swipeOverEnabled",
+                 @"label": @"Enabled",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+
+             @{ @"label": @"Swipe In From..."},
+             @{
+                 @"cell": @"PSSegmentCell",
+                 @"validTitles": @[ @"Anywhere (Default)",            @"Top",                      @"Middle",           @"Bottom" ],
+                 @"validValues": @[ @(RAGrabAreaSideAnywhere), @(RAGrabAreaSideTopThird), @(RAGrabAreaSideMiddleThird), @(RAGrabAreaSideBottomThird) ],
+                 @"default": @(RAGrabAreaSideAnywhere),
+                 @"key": @"swipeOverGrabArea",
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+
+             @{ @"footerText": @"Even when not in fullscreen, the grabber will show" },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @NO,

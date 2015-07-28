@@ -1,7 +1,18 @@
 #import <UIKit/UIKit.h>
 
+enum RAGrabArea {
+	RAGrabAreaBottomLeftThird = 1,
+	RAGrabAreaBottomMiddleThird = 2,
+	RAGrabAreaBottomRightThird = 3,
+
+	RAGrabAreaSideAnywhere,
+	RAGrabAreaSideTopThird,
+	RAGrabAreaSideMiddleThird,
+	RAGrabAreaSideBottomThird,
+};
+
 @interface RASettings : NSObject
-+(id)sharedInstance;
++(instancetype)sharedInstance;
 
 -(void) reloadSettings;
 
@@ -28,6 +39,7 @@
 -(BOOL) snapRotation;
 -(BOOL) launchIntoWindows;
 
+-(NSInteger) globalBackgroundMode;
 -(BOOL) backgrounderEnabled;
 -(BOOL) shouldShowIconIndicatorsGlobally;
 -(BOOL) showNativeStateIconIndicators;
@@ -39,5 +51,10 @@
 -(BOOL) isFirstRun;
 -(void) setFirstRun:(BOOL)value;
 
+-(BOOL) swipeOverEnabled;
 -(BOOL) alwaysShowSOGrabber;
+
+-(BOOL) windowedMultitaskingEnabled;
+-(RAGrabArea) windowedMultitaskingGrabArea;
+-(RAGrabArea) swipeOverGrabArea;
 @end 

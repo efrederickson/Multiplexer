@@ -8,7 +8,7 @@
 {
 	_textField = [[UITextField alloc] initWithFrame:CGRectMake(0, 30, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height - RAKeyboardStateListener.sharedInstance.size.height)];
 	_textField.backgroundColor = [UIColor grayColor];
-	//_textField.alpha = 0;
+	_textField.alpha = 0;
 	[self addSubview:_textField];
 
 	self.frame = UIScreen.mainScreen.bounds;
