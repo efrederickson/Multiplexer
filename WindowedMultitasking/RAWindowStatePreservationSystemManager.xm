@@ -89,4 +89,10 @@
 
 	return info;
 }
+
+-(void) removeWindowInformationForIdentifier:(NSString*)appIdentifier
+{
+	[dict removeObjectForKey:appIdentifier];
+	[self saveInfo];
+}
 @end

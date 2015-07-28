@@ -4,6 +4,6 @@
 -(UIWindowLevel) windowLevel
 {
 	//return UIWindowLevelStatusBar + 1;
-	return 9999; 
+	return 99999999; 
 }
 @end

@@ -53,7 +53,6 @@ BOOL shouldSendKeyEvents;
 {
     if (isTopApp)
     {
-        NSLog(@"[ReachApp] text view FR");
         CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.updateKeyboardWindow"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": NSBundle.mainBundle.bundleIdentifier, @"wantsKeyboard": @YES}, NO);
     }
 

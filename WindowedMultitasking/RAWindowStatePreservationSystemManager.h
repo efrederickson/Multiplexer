@@ -29,4 +29,5 @@ struct RAPreservedDesktopInformation {
 -(void) saveWindowInformation:(RAWindowBar*)window;
 -(BOOL) hasWindowInformationForIdentifier:(NSString*)appIdentifier;
 -(RAPreservedWindowInformation) windowInformationForAppIdentifier:(NSString*)identifier;
+-(void) removeWindowInformationForIdentifier:(NSString*)appIdentifier;
 @end

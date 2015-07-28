@@ -184,6 +184,21 @@ NSDictionary *_settings = nil;
 	return BOOL(@"showNativeStateIconIndicators", YES);
 }
 
+-(BOOL) missionControlEnabled
+{
+	return BOOL(@"missionControlEnabled", YES);
+}
+
+-(BOOL) replaceAppSwitcherWithMC
+{
+	return BOOL(@"replaceAppSwitcherWithMC", NO);
+}
+
+-(BOOL) snapRotation
+{
+	return BOOL(@"snapRotation", YES);
+}
+
 -(NSDictionary*) rawCompiledBackgrounderSettingsForIdentifier:(NSString*)identifier
 {
 	NSMutableDictionary *ret = [NSMutableDictionary dictionary];

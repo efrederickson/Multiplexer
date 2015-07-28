@@ -53,13 +53,21 @@
 -(NSArray*) customSpecifiers
 {
     return @[
-             @{ @"footerText": @"aaa" },
+             @{ @"footerText": @"" },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
-                 @"key": @"",
-                 @"label": @"aaa",
+                 @"key": @"missionControlEnabled",
+                 @"label": @"Enabled",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @NO,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"replaceAppSwitcherWithMC",
+                 @"label": @"Replace App Switcher",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
              ];

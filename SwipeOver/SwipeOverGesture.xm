@@ -149,6 +149,6 @@ CGAffineTransform adjustTransformRotation()
                 return NO;
         }
         
-        return ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && !RAMissionControlManager.sharedInstance.isShowingMissionControl;
+        return ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && ![[%c(SBUIController) sharedInstance] isAppSwitcherShowing] && !RAMissionControlManager.sharedInstance.isShowingMissionControl;
     } forEdge:UIRectEdgeRight identifier:@"com.efrederickson.reachapp.swipeover.systemgesture" priority:RAGesturePriorityDefault];
 }

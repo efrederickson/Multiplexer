@@ -2,6 +2,7 @@
 #import "RAGestureManager.h"
 #import "RAMissionControlManager.h"
 #import "RAMissionControlWindow.h"
+#import "RASettings.h"
 
 %hook SBAppSwitcherController
 - (void)forceDismissAnimated:(_Bool)arg1
@@ -30,11 +31,26 @@
 
 - (_Bool)_activateAppSwitcher
 {
+	if ([RASettings.sharedInstance replaceAppSwitcherWithMC])
+	{
+		[RAMissionControlManager.sharedInstance showMissionControl:YES];
+		
+        FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
+            SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
+            [transaction begin];
+        }];
+        [[%c(FBWorkspaceEventQueue) sharedInstance] executeOrAppendEvent:event];
+
+		return YES;
+	}
+
 	BOOL s = %orig;
-	if (s)
+	if (s && [RASettings.sharedInstance missionControlEnabled])
+	{
 		[UIView animateWithDuration:0.3 animations:^{
 			[[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999].alpha = 1;
 		}];
+	}
 	return s;
 }
 %end
@@ -44,7 +60,7 @@
 {
 	%orig;
 
-	if ([self viewWithTag:999] == nil)
+	if ([self viewWithTag:999] == nil && ([RASettings.sharedInstance missionControlEnabled] && ![RASettings.sharedInstance replaceAppSwitcherWithMC]))
 	{
 		SBControlCenterGrabberView *grabber = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:CGRectMake(0, 0, 50, 30)];
 		grabber.center = CGPointMake(self.frame.size.width / 2, 20/2);
@@ -162,11 +178,6 @@
 				fakeView.frame = UIScreen.mainScreen.bounds;
 			} completion:^(BOOL _) {
 	            FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
-	                SBDeactivationSettings *settings = [[%c(SBDeactivationSettings) alloc] init];
-	                [settings setFlag:YES forDeactivationSetting:20];
-	                [settings setFlag:NO forDeactivationSetting:2];
-	                [UIApplication.sharedApplication._accessibilityFrontMostApplication _setDeactivationSettings:settings];
-	         
 	                SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
 	                [transaction begin];
 	            }];

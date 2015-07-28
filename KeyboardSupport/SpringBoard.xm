@@ -19,7 +19,7 @@ void handleKeyboardNeeds(CFNotificationCenterRef center, void *observer, CFStrin
 
 	if (wantsKeyboard)
 	{
-		NSLog(@"[ReachApp] showing keyboard");
+		//NSLog(@"[ReachApp] showing keyboard");
 		keyboardWindow = [[RAKeyboardWindow alloc] init];
 		overrideDisableForStatusBar = YES;
     	[keyboardWindow setupForKeyboardAndShow];
@@ -28,7 +28,7 @@ void handleKeyboardNeeds(CFNotificationCenterRef center, void *observer, CFStrin
 	}
 	else
 	{
-		NSLog(@"[ReachApp] resigning keyboard");
+		//NSLog(@"[ReachApp] resigning keyboard");
 		[keyboardWindow resignKeyboard];
 		keyboardWindow = nil;
 		bundleIdentifierThatWantsKeyboard = nil;

@@ -58,11 +58,6 @@ BOOL overrideCC = NO;
                 } completion:^(BOOL _) {
                     // Close app
                     FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
-                        SBDeactivationSettings *settings = [[%c(SBDeactivationSettings) alloc] init];
-                        [settings setFlag:YES forDeactivationSetting:20];
-                        [settings setFlag:NO forDeactivationSetting:2];
-                        [UIApplication.sharedApplication._accessibilityFrontMostApplication _setDeactivationSettings:settings];
-                 
                         SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
                         [transaction begin];
                     }];

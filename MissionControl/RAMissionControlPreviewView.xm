@@ -8,6 +8,11 @@
 
     SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:self.application.bundleIdentifier];
     iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
+
+    iconView.layer.shadowRadius = 12; // iconView.layer.cornerRadius;
+    iconView.layer.shadowOpacity = 0.8;
+    iconView.layer.shadowOffset = CGSizeMake(0, 0);
+
     [self addSubview:iconView];
     [self updateIconViewFrame];
 }
@@ -17,12 +22,6 @@
 	if (!iconView)
 		return;
 	[self bringSubviewToFront:iconView];
-	// slightly offscreen
-	//iconView.center = CGPointMake(self.center.x, self.frame.size.height);
-	//iconView.frame = CGRectMake((self.frame.size.width / 2) - (iconView.frame.size.width / 2), self.frame.size.height - (iconView.frame.size.height / 2), iconView.frame.size.width, iconView.frame.size.height);
-	// bottom aligned
-	//iconView.frame = CGRectMake((self.frame.size.width / 2) - (iconView.frame.size.width / 2), self.frame.size.height - (iconView.frame.size.height), iconView.frame.size.width, iconView.frame.size.height);
-	// center
 	iconView.frame = CGRectMake( (self.frame.size.width / 2) - (iconView.frame.size.width / 2), (self.frame.size.height / 2) - (iconView.frame.size.height / 2), iconView.frame.size.width, iconView.frame.size.height );
 	iconView.iconLabelAlpha = 0;
 }

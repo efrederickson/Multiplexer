@@ -25,12 +25,16 @@
 
 -(BOOL) alwaysEnableGestures;
 -(BOOL) snapWindows;
+-(BOOL) snapRotation;
 -(BOOL) launchIntoWindows;
 
 -(BOOL) backgrounderEnabled;
 -(BOOL) shouldShowIconIndicatorsGlobally;
 -(BOOL) showNativeStateIconIndicators;
 -(NSDictionary*) rawCompiledBackgrounderSettingsForIdentifier:(NSString*)identifier;
+
+-(BOOL) missionControlEnabled;
+-(BOOL) replaceAppSwitcherWithMC;
 
 -(BOOL) isFirstRun;
 -(void) setFirstRun:(BOOL)value;

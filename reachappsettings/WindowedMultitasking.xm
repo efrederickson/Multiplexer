@@ -72,6 +72,14 @@
                  @"label": @"Snap Windows",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @YES,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"snapRotation",
+                 @"label": @"Rotation Snapping",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
 
              @{ @"footerText": @"Launches app into windows instead of fullscreen" },
              @{

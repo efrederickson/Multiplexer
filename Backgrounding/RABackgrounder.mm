@@ -1,6 +1,8 @@
 #import "RABackgrounder.h"
 #import "RASettings.h"
 
+NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
+
 @implementation RABackgrounder
 +(id) sharedInstance
 {
@@ -25,6 +27,21 @@
 	return enabled && ([dict objectForKey:@"autoRelaunch"] == nil ? NO : [dict[@"autoRelaunch"] boolValue]);
 }
 
+-(NSInteger) popTemporaryOverrideForApplication:(NSString*)identifier
+{
+	if (![temporaryOverrides objectForKey:identifier])
+		return -1;
+	RABackgroundMode override = (RABackgroundMode)[temporaryOverrides[identifier] intValue];
+	[temporaryOverrides removeObjectForKey:identifier];
+	return override;
+}
+
+-(NSInteger) popTemporaryOverrideForApplication:(NSString*)identifier is:(RABackgroundMode)mode
+{
+	NSInteger popped = [self popTemporaryOverrideForApplication:identifier];
+	return popped == -1 ? -1 : (popped == mode ? 1 : 0);
+}
+
 -(BOOL) shouldKeepInForeground:(NSString*)identifier
 {
 	if (!identifier || ![RASettings.sharedInstance backgrounderEnabled]) return NO;
@@ -32,7 +49,8 @@
 	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
 	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
 
-	return enabled && ([dict objectForKey:@"backgroundMode"] == nil ? NO : [dict[@"backgroundMode"] intValue] == RABackgroundModeForcedForeground);
+	NSInteger temporaryOverride = [self popTemporaryOverrideForApplication:identifier is:RABackgroundModeForcedForeground];
+	return enabled && (temporaryOverride == -1 ? ([dict objectForKey:@"backgroundMode"] == nil ? NO : [dict[@"backgroundMode"] intValue] == RABackgroundModeForcedForeground) : temporaryOverride);
 }
 
 -(BOOL) shouldSuspendImmediately:(NSString*)identifier
@@ -42,7 +60,8 @@
 	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
 	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
 
-	return enabled && ([dict objectForKey:@"backgroundMode"] == nil ? NO : [dict[@"backgroundMode"] intValue] == RABackgroundModeSuspendImmediately);
+	NSInteger temporaryOverride = [self popTemporaryOverrideForApplication:identifier is:RABackgroundModeSuspendImmediately];
+	return enabled && (temporaryOverride == -1 ? ([dict objectForKey:@"backgroundMode"] == nil ? NO : [dict[@"backgroundMode"] intValue] == RABackgroundModeSuspendImmediately) : temporaryOverride);
 }
 
 -(BOOL) preventKillingOfIdentifier:(NSString*)identifier
@@ -56,6 +75,10 @@
 
 -(NSInteger) backgroundModeForIdentifier:(NSString*)identifier
 {
+	NSInteger temporaryOverride = [self popTemporaryOverrideForApplication:identifier];
+	if (temporaryOverride != -1)
+		return temporaryOverride;
+
 	return [[RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier][@"backgroundMode"] intValue];
 }
 
@@ -75,6 +98,25 @@
 	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
 	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
 	return enabled && ([dict objectForKey:@"backgroundMode"] == nil ? NO : [dict[@"backgroundMode"] intValue] == RABackgroundModeForceNone);
+}
+
+-(void) temporarilyApplyBackgroundingMode:(RABackgroundMode)mode forApplication:(SBApplication*)app andCloseForegroundApp:(BOOL)close
+{
+	temporaryOverrides[app.bundleIdentifier] = @(mode);
+
+	if (close)
+	{
+        FBWorkspaceEvent *event = [objc_getClass("FBWorkspaceEvent") eventWithName:@"ActivateSpringBoard" handler:^{
+            SBDeactivationSettings *settings = [[objc_getClass("SBDeactivationSettings") alloc] init];
+            [settings setFlag:YES forDeactivationSetting:20];
+            [settings setFlag:NO forDeactivationSetting:2];
+            [UIApplication.sharedApplication._accessibilityFrontMostApplication _setDeactivationSettings:settings];
+     
+            SBAppToAppWorkspaceTransaction *transaction = [[objc_getClass("SBAppToAppWorkspaceTransaction") alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
+            [transaction begin];
+        }];
+        [(FBWorkspaceEventQueue*)[objc_getClass("FBWorkspaceEventQueue") sharedInstance] executeOrAppendEvent:event];
+	}
 }
 
 -(BOOL) application:(NSString*)identifier overrideBackgroundMode:(NSString*)mode

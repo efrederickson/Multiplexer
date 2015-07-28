@@ -4,6 +4,7 @@
 #import "RAWindowSnapDataProvider.h"
 #import "RASettings.h"
 #import "RAWindowStatePreservationSystemManager.h"
+#import "RAResourceImageProvider.h"
 
 const int rightSizeViewTag = 987654321;
 const int bottomSizeViewTag =  987654320;
@@ -33,8 +34,8 @@ const int bottomSizeViewTag =  987654320;
 
 	CGRect myFrame = view.frame;
 	self.frame = myFrame;
-	view.frame = CGRectMake(0, 30, self.frame.size.width, self.frame.size.height);
-	myFrame.size.height += 30;
+	view.frame = CGRectMake(0, 40, self.frame.size.width, self.frame.size.height);
+	myFrame.size.height += 40;
 	self.frame = myFrame;
 	[self addSubview:view];
 
@@ -73,64 +74,58 @@ const int bottomSizeViewTag =  987654320;
     enableDrag = YES;
     enableLongPress = YES;
 
-    titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, myFrame.size.width, 30)];
+    titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, myFrame.size.width, 40)];
     titleLabel.textAlignment = NSTextAlignmentCenter;
     titleLabel.font = [UIFont systemFontOfSize:18];
     titleLabel.textColor = [UIColor whiteColor];
     titleLabel.text = [view displayName];
     [self addSubview:titleLabel];
 
-	closeButton = [[UIButton alloc] init];
-	closeButton.frame = CGRectMake(5, 5, 20, 20);
-	[closeButton setTitle:@"×" forState:UIControlStateNormal];
+	closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+	closeButton.frame = CGRectMake(5, 5, 30, 30);
+	[closeButton setImage:[[RAResourceImageProvider imageForFilename:@"Close" constrainedToSize:CGSizeMake(30, 30)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
+	closeButton.clipsToBounds = YES;
 	[closeButton addTarget:self action:@selector(closeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
 	closeButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
 	closeButton.layer.cornerRadius = closeButton.frame.size.width / 2;
-	closeButton.titleLabel.textAlignment = NSTextAlignmentCenter;
-	closeButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
-	closeButton.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
 	[self addSubview:closeButton];
 
-	maximizeButton = [[UIButton alloc] init];
-	maximizeButton.frame = CGRectMake(30, 5, 20, 20);
-	[maximizeButton setTitle:@"+" forState:UIControlStateNormal];
+	maximizeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+	maximizeButton.frame = CGRectMake(45, 5, 30, 30);
+	[maximizeButton setBackgroundImage:[[RAResourceImageProvider imageForFilename:@"Plus" constrainedToSize:CGSizeMake(30, 30)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
+	maximizeButton.clipsToBounds = YES;
 	[maximizeButton addTarget:self action:@selector(maximizeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
 	maximizeButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
 	maximizeButton.layer.cornerRadius = maximizeButton.frame.size.width / 2;
-	maximizeButton.titleLabel.textAlignment = NSTextAlignmentCenter;
-	maximizeButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
 	[self addSubview:maximizeButton];
 
-	minimizeButton = [[UIButton alloc] init];
-	minimizeButton.frame = CGRectMake(55, 5, 20, 20);
-	[minimizeButton setTitle:@"-" forState:UIControlStateNormal];
+	minimizeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+	minimizeButton.frame = CGRectMake(85, 5, 30, 30);
+	[minimizeButton setBackgroundImage:[[RAResourceImageProvider imageForFilename:@"Minus" constrainedToSize:CGSizeMake(30, 30)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
+	minimizeButton.clipsToBounds = YES;
 	[minimizeButton addTarget:self action:@selector(minimizeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
 	minimizeButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
 	minimizeButton.layer.cornerRadius = minimizeButton.frame.size.width / 2;
-	minimizeButton.titleLabel.textAlignment = NSTextAlignmentCenter;
-	minimizeButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
 	[self addSubview:minimizeButton];
 
-	swapOrientationButton = [[UIButton alloc] init];
-	swapOrientationButton.frame = CGRectMake(self.frame.size.width - 25, 5, 20, 20);
+	swapOrientationButton = [UIButton buttonWithType:UIButtonTypeCustom];
+	swapOrientationButton.frame = CGRectMake(self.frame.size.width - 35, 5, 30, 30);
+	swapOrientationButton.clipsToBounds = YES;
 	[swapOrientationButton setTitle:@"↺" forState:UIControlStateNormal];
 	[swapOrientationButton addTarget:self action:@selector(swapOrientationButtonTap:) forControlEvents:UIControlEventTouchUpInside];
 	swapOrientationButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
 	swapOrientationButton.layer.cornerRadius = swapOrientationButton.frame.size.width / 2;
-	swapOrientationButton.titleLabel.textAlignment = NSTextAlignmentCenter;
-	swapOrientationButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
 	[self addSubview:swapOrientationButton];
 
-	sizingLocked = YES;
-	sizingLockButton = [[UIButton alloc] init];
-	sizingLockButton.frame = CGRectMake(swapOrientationButton.frame.origin.x - 25, 5, 20, 20);
+	sizingLocked = NO;
+	sizingLockButton = [UIButton buttonWithType:UIButtonTypeCustom];
+	sizingLockButton.frame = CGRectMake(swapOrientationButton.frame.origin.x - 35, 5, 30, 30);
 	sizingLockButton.titleLabel.font = [UIFont systemFontOfSize:13];
-	[sizingLockButton setTitle:@"🔒" forState:UIControlStateNormal];
+	[sizingLockButton setBackgroundImage:[[RAResourceImageProvider imageForFilename:@"Unlocked" constrainedToSize:CGSizeMake(20, 20)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
+	sizingLockButton.clipsToBounds = YES;
 	[sizingLockButton addTarget:self action:@selector(sizingLockButtonTap:) forControlEvents:UIControlEventTouchUpInside];
 	sizingLockButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
 	sizingLockButton.layer.cornerRadius = sizingLockButton.frame.size.width / 2;
-	sizingLockButton.titleLabel.textAlignment = NSTextAlignmentCenter;
-	sizingLockButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
 	[self addSubview:sizingLockButton];
 }
 
@@ -183,16 +178,16 @@ const int bottomSizeViewTag =  987654320;
 
 	if (sizingLocked)
 	{
-		[sizingLockButton setTitle:@"🔒" forState:UIControlStateNormal];
+		[sizingLockButton setBackgroundImage:[[RAResourceImageProvider imageForFilename:@"Lock" constrainedToSize:CGSizeMake(20, 20)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
 
-		[[self viewWithTag:rightSizeViewTag] removeFromSuperview];
-		[[self viewWithTag:bottomSizeViewTag] removeFromSuperview];
-		self.attachedView.autosizesApp = NO;
+		//[[self viewWithTag:rightSizeViewTag] removeFromSuperview];
+		//[[self viewWithTag:bottomSizeViewTag] removeFromSuperview];
+		//self.attachedView.autosizesApp = NO;
 	}
 	else
 	{
-		[sizingLockButton setTitle:@"🔓" forState:UIControlStateNormal];
-
+		[sizingLockButton setBackgroundImage:[[RAResourceImageProvider imageForFilename:@"Unlocked" constrainedToSize:CGSizeMake(20, 20)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
+/*
 		UIView *rightView = [[UIView alloc] initWithFrame:CGRectMake(self.bounds.size.width, 30, 20, self.bounds.size.height - 20)];
 		rightView.backgroundColor = self.backgroundColor;
 		rightView.tag = rightSizeViewTag;
@@ -215,31 +210,62 @@ const int bottomSizeViewTag =  987654320;
 
 		self.attachedView.autosizesApp = YES;
 		self.attachedView.frame = self.attachedView.frame; // force update
+*/
 	}
 }
 
 -(void) addRotation:(CGFloat)rads updateApp:(BOOL)update
 {
+	if (sizingLocked)
+		return;
+	
 	if (rads != 0)
 		self.transform = CGAffineTransformRotate(self.transform, rads);
 
     if (update)
 	{
     	CGFloat currentRotation = RADIANS_TO_DEGREES(atan2(self.transform.b, self.transform.a));
+    	CGFloat rotateSnapDegrees = 0;
 
     	if (currentRotation < 0) currentRotation = 360 + currentRotation;
 
     	UIInterfaceOrientation o = UIInterfaceOrientationPortrait;
     	if (currentRotation >= 315 || currentRotation <= 45)
+    	{
     		o = UIInterfaceOrientationPortrait;
+    		rotateSnapDegrees = 360 - currentRotation;
+    	}
     	else if (currentRotation > 45 && currentRotation <= 135)
+    	{
     		o = UIInterfaceOrientationLandscapeLeft;
+    		rotateSnapDegrees = 90 - currentRotation;
+    	}
     	else if (currentRotation > 135 && currentRotation <= 215)
+    	{
     		o = UIInterfaceOrientationPortraitUpsideDown;
+    		rotateSnapDegrees = 180 - currentRotation;
+    	}
     	else
+    	{
     		o = UIInterfaceOrientationLandscapeRight;
+    		rotateSnapDegrees = 270 - currentRotation;
+    	}
+
+    	if ([RASettings.sharedInstance snapRotation])
+	    	[UIView animateWithDuration:0.2 animations:^{
+		    	self.transform = CGAffineTransformRotate(self.transform, DEGREES_TO_RADIANS(rotateSnapDegrees));
+		    	//CGFloat scale = sqrt(self.transform.a * self.transform.a + self.transform.c * self.transform.c);
+		    	//self.transform = CGAffineTransformRotate(CGAffineTransformMakeScale(scale, scale), DEGREES_TO_RADIANS(rotateSnapDegrees));
+		    }];
 
     	[attachedView rotateToOrientation:o];
+
+
+		if ([RASettings.sharedInstance snapWindows] && [RAWindowSnapDataProvider shouldSnapWindowAtLocation:self.frame])
+		{
+			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindowLocation:self.frame] animated:YES];
+			isSnapped = YES;
+		}
     }
 }
 

@@ -35,7 +35,7 @@ NSMutableDictionary *suspendImmediatelyVerifierDict = [NSMutableDictionary dicti
 %hook FBUIApplicationWorkspaceScene
 -(void) host:(__unsafe_unretained FBScene*)arg1 didUpdateSettings:(__unsafe_unretained FBSSceneSettings*)arg2 withDiff:(unsafe_id)arg3 transitionContext:(unsafe_id)arg4 completion:(unsafe_id)arg5
 {
-    if (arg1 && arg1.identifier && arg2) // TODO: sanity check to prevent NC App crash. untested.
+    if (arg1 && arg1.identifier && arg2 && arg1.clientProcess) // TODO: sanity check to prevent NC App crash. untested/not working.
     {
         if ([RABackgrounder.sharedInstance killProcessOnExit:arg1.identifier] && arg2.backgrounded == YES)
         {

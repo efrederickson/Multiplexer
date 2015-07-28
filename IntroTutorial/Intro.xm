@@ -14,15 +14,13 @@
 			request.title = @"Multiplexer";
 			request.message = @"Thank you for installing Multiplexer! Tap here to view the tutorial.";
 			request.sectionID = @"com.apple.Preferences";
-			/*request.defaultAction = [%c(BBAction) actionWithCallblock:^{
-				UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Multiplexer" message:@"TODO: intro tutorial" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-			    [alert show];
-			}];*/
+			request.date = [NSDate date];
 			SBBulletinBannerController *bannerController = [%c(SBBulletinBannerController) sharedInstance];
-			[bannerController observer:nil addBulletin:request forFeed:2 playLightsAndSirens:YES withReply:^{
-				UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Multiplexer" message:@"TODO: intro tutorial" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-			    [alert show];
-			}];
+			if ([bannerController respondsToSelector:@selector(observer:addBulletin:forFeed:playLightsAndSirens:withReply:)]) 
+				[bannerController observer:nil addBulletin:request forFeed:2 playLightsAndSirens:YES withReply:nil];
+			else
+				[bannerController observer:nil addBulletin:request forFeed:2];
+			
 			[RASettings.sharedInstance setFirstRun:NO];
 		}
 	}

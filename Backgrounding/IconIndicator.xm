@@ -55,10 +55,11 @@ NSMutableArray *managedIconViews = [NSMutableArray array];
 - (void)settings:(id)arg1 changedValueForKey:(id)arg2;
 @end
 
-#define SET_INFO_(x, y)    objc_setAssociatedObject(x, @selector(RA_setIndicatorViewInfo), [NSNumber numberWithInt:y], OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-#define GET_INFO_(x)       [objc_getAssociatedObject(x, @selector(RA_setIndicatorViewInfo)) intValue]
-#define SET_INFO(y)        SET_INFO_(self, y)
-#define GET_INFO           GET_INFO_(self)
+NSMutableDictionary *indicatorStateDict = [NSMutableDictionary dictionary];
+#define SET_INFO_(x, y)    indicatorStateDict[x] = [NSNumber numberWithInt:y]
+#define GET_INFO_(x)       [indicatorStateDict[x] intValue]
+#define SET_INFO(y)        if (self.icon && self.icon.application) SET_INFO_(self.icon.application.bundleIdentifier, y);
+#define GET_INFO           (self.icon && self.icon.application ? GET_INFO_(self.icon.application.bundleIdentifier) : RAIconIndicatorViewInfoNone)
 
 
 NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
@@ -98,6 +99,7 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 	if ((text == nil || text.length == 0) || (self.icon == nil || self.icon.application == nil || self.icon.application.isRunning == NO || ![RABackgrounder.sharedInstance shouldShowIndicatorForIdentifier:self.icon.application.bundleIdentifier]) || [RASettings.sharedInstance backgrounderEnabled] == NO)
 	{
 		[managedIconViews removeObject:self];
+		SET_INFO(0);
 		return;
 	}
 
@@ -128,8 +130,15 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 
 %new -(void) RA_updateIndicatorViewWithExistingInfo
 {
-	if ([self viewWithTag:9962])
+	//if ([self viewWithTag:9962])
 		[self RA_updateIndicatorView:GET_INFO];
+}
+
+-(void) layoutSubviews
+{
+    %orig;
+
+    [self RA_updateIndicatorView:GET_INFO];
 }
 %end
 
@@ -153,3 +162,15 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 	%orig;
 }
 %end
+
+%hook SBIconViewMap
+- (id)mappedIconViewForIcon:(id)arg1
+{
+    SBIconView *iconView = %orig;
+
+    [iconView RA_updateIndicatorViewWithExistingInfo];
+    return iconView;
+}
+%end
+
+

@@ -9,6 +9,8 @@
 #import "RASnapshotProvider.h"
 #import "RAAppKiller.h"
 #import "RAGestureManager.h"
+#import "RAWindowStatePreservationSystemManager.h"
+#import "RALockStateUpdater.h"
 
 extern BOOL overrideCC;
 
@@ -24,6 +26,7 @@ extern BOOL overrideCC;
 }
 @end
 
+
 @implementation RAMissionControlManager
 +(instancetype) sharedInstance
 {
@@ -31,7 +34,7 @@ extern BOOL overrideCC;
 		sharedInstance->runningApplications = [NSMutableArray array];
 		sharedInstance->width = UIScreen.mainScreen.bounds.size.width / 4.5714;
 		sharedInstance->height = UIScreen.mainScreen.bounds.size.height / 4.36;
-		sharedInstance->trashIcon = [UIImage imageWithContentsOfFile:@"/Library/ReachApp/Trash.png"]
+		sharedInstance->trashIcon = [UIImage imageWithContentsOfFile:@"/Library/ReachApp/Trash.png"];
 	);
 }
 
@@ -87,10 +90,14 @@ extern BOOL overrideCC;
 	[self createWindow];
 
 	if (animated)
-		window.alpha = 0;
+		//window.alpha = 0;
+		window.frame = CGRectMake(0, -window.frame.size.height, window.frame.size.width, window.frame.size.height);
+	
 	[window makeKeyAndVisible];
 	if (animated)
-		[UIView animateWithDuration:0.5 animations:^{ window.alpha = 1; }];
+		//[UIView animateWithDuration:0.5 animations:^{ window.alpha = 1; }];
+		[UIView animateWithDuration:0.5 animations:^{ window.frame = CGRectMake(0, 0, window.frame.size.width, window.frame.size.height); } completion:nil];
+	
 
 	overrideCC = YES;
 }
@@ -99,7 +106,7 @@ extern BOOL overrideCC;
 {
 	window = [[RAMissionControlWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
 
-	_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:0];
+	_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:1];
 	blurView.frame = window.frame;
 	[window addSubview:blurView];
 
@@ -116,23 +123,34 @@ extern BOOL overrideCC;
 -(void) reloadDesktopSection
 {
 	// DESKTOP
+	CGFloat y = 25;
+
 	if (desktopScrollView)
 	{
 		[desktopScrollView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
 	}
 	else
 	{
-		desktopScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 20, window.frame.size.width, height * 1.2)];
+		desktopLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, y, window.frame.size.width - 20, 20)];
+		desktopLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
+		desktopLabel.textColor = UIColor.whiteColor;
+		desktopLabel.text = @"Desktops";
+		[window addSubview:desktopLabel];
+
+		y = y + desktopLabel.frame.size.height + 3;
+
+		desktopScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y, window.frame.size.width, height * 1.2)];
+		desktopScrollView.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.3];
+
 		[window addSubview:desktopScrollView];
-		desktopScrollView.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.1];
 	}
 
-	CGFloat x = 20;
+	CGFloat x = 15;
 	int desktopIndex = 0;
 	for (RADesktopWindow *desktop in RADesktopManager.sharedInstance.availableDesktops)
 	{
 		RAMissionControlPreviewView *preview = [[RAMissionControlPreviewView alloc] initWithFrame:CGRectMake(x, 20, width, height)];
-		x += 20 + preview.frame.size.width;
+		x += 7 + preview.frame.size.width;
 
 		[desktopScrollView addSubview:preview];
 		preview.image = [self renderPreviewForDesktop:desktop];
@@ -182,8 +200,8 @@ extern BOOL overrideCC;
 {
 	appsWithoutWindows = [runningApplications mutableCopy];
 
-	CGFloat x = 20;
-	CGFloat y = desktopScrollView.frame.origin.y + desktopScrollView.frame.size.height + 20;
+	CGFloat x = 15;
+	CGFloat y = desktopScrollView.frame.origin.y + desktopScrollView.frame.size.height + 5;
 
 	if (windowedAppScrollView)
 	{
@@ -191,23 +209,25 @@ extern BOOL overrideCC;
 	}
 	else
 	{
-		windowedLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, y, window.frame.size.width - 20, 20)];
-		windowedLabel.font = [UIFont systemFontOfSize:18];
+		windowedLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, y, window.frame.size.width - 20, 20)];
+		windowedLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
 		windowedLabel.textColor = UIColor.whiteColor;
 		windowedLabel.text = @"On This Desktop";
 		[window addSubview:windowedLabel];
 
-		windowedAppScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + 30, window.frame.size.width, height * 1.2)];
+		windowedAppScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + windowedLabel.frame.size.height + 3, window.frame.size.width, height * 1.2)];
+		windowedAppScrollView.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.3];
+
 		[window addSubview:windowedAppScrollView];
-		windowedAppScrollView.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.1];
 	}
 
+	BOOL empty = YES;
 	for (RAHostedAppView *app in RADesktopManager.sharedInstance.currentDesktop.hostedWindows)
 	{
 		SBApplication *sbapp = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:app.bundleIdentifier];
 		[appsWithoutWindows removeObject:sbapp];
-		RAMissionControlPreviewView *preview = [[RAMissionControlPreviewView alloc] initWithFrame:CGRectMake(x, 0, width, height)];
-		x += 20 + preview.frame.size.width;
+		RAMissionControlPreviewView *preview = [[RAMissionControlPreviewView alloc] initWithFrame:CGRectMake(x, (windowedAppScrollView.frame.size.height - height) / 2, width, height)];
+		x += 7 + preview.frame.size.width;
 
 		preview.application = sbapp;
 		[windowedAppScrollView addSubview:preview];
@@ -220,14 +240,27 @@ extern BOOL overrideCC;
 		[preview addGestureRecognizer:swipeGesture];
 
 		preview.userInteractionEnabled = YES;
+		empty = NO;
 	}
+
+	if (empty)
+	{
+		UILabel *emptyLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, (windowedAppScrollView.frame.size.height - 30) / 2, windowedAppScrollView.frame.size.width, 30)];
+		emptyLabel.textAlignment = NSTextAlignmentCenter;
+		emptyLabel.font = [UIFont fontWithName:@"Helvetica" size:25];
+		emptyLabel.text = @"No Cards";
+		emptyLabel.textColor = [UIColor whiteColor];
+		emptyLabel.alpha = 0.7;
+		[windowedAppScrollView addSubview:emptyLabel];
+	}
+
 	windowedAppScrollView.contentSize = CGSizeMake(MAX(x, UIScreen.mainScreen.bounds.size.width + 1), height * 1.2); // make slightly scrollable
 }
 
 -(void) reloadOtherAppsSection
 {
-	CGFloat x = 20;
-	CGFloat y = windowedAppScrollView.frame.origin.y + windowedAppScrollView.frame.size.height + 20;
+	CGFloat x = 15;
+	CGFloat y = windowedAppScrollView.frame.origin.y + windowedAppScrollView.frame.size.height + 5;
 
 	if (otherRunningAppsScrollView)
 	{
@@ -235,21 +268,25 @@ extern BOOL overrideCC;
 	}
 	else
 	{
-		otherLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, y, window.frame.size.width - 20, 20)];
-		otherLabel.font = [UIFont systemFontOfSize:18];
+		otherLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, y, window.frame.size.width - 20, 20)];
+		otherLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
 		otherLabel.textColor = UIColor.whiteColor;
 		otherLabel.text = @"Running Elsewhere";
 		[window addSubview:otherLabel];
 
-		otherRunningAppsScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + 30, window.frame.size.width, height * 1.2)];
+		otherRunningAppsScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + otherLabel.frame.size.height + 3, window.frame.size.width, height * 1.2)];
+		otherRunningAppsScrollView.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.3];
+
 		[window addSubview:otherRunningAppsScrollView];
-		otherRunningAppsScrollView.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.1];
 	}
 
+	BOOL empty = YES;
 	for (SBApplication *app in appsWithoutWindows)
 	{
-		RAMissionControlPreviewView *preview = [[RAMissionControlPreviewView alloc] initWithFrame:CGRectMake(x, 0, width, height)];
-		x += 20 + preview.frame.size.width;
+		empty = NO;
+
+		RAMissionControlPreviewView *preview = [[RAMissionControlPreviewView alloc] initWithFrame:CGRectMake(x, (otherRunningAppsScrollView.frame.size.height - height) / 2, width, height)];
+		x += 6 + preview.frame.size.width;
 
 		preview.application = app;
 		[otherRunningAppsScrollView addSubview:preview];
@@ -263,6 +300,18 @@ extern BOOL overrideCC;
 
 		preview.userInteractionEnabled = YES;
 	}
+
+	if (empty)
+	{
+		UILabel *emptyLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, (windowedAppScrollView.frame.size.height - 30) / 2, windowedAppScrollView.frame.size.width, 30)];
+		emptyLabel.textAlignment = NSTextAlignmentCenter;
+		emptyLabel.font = [UIFont fontWithName:@"Helvetica" size:25];
+		emptyLabel.text = @"No Cards";
+		emptyLabel.textColor = [UIColor whiteColor];
+		emptyLabel.alpha = 0.7;
+		[windowedAppScrollView addSubview:emptyLabel];
+	}
+
 	otherRunningAppsScrollView.contentSize = CGSizeMake(MAX(x, UIScreen.mainScreen.bounds.size.width + 1), height * 1.2); // make slightly scrollable
 }
 
@@ -308,6 +357,7 @@ extern BOOL overrideCC;
 
 	if (gesture.state == UIGestureRecognizerStateBegan)
 	{
+
 		if (!trashImageView || trashImageView.superview == nil /* new window perhaps */)
 		{
 			trashImageView = [[UIImageView alloc] initWithFrame:CGRectMake((UIScreen.mainScreen.bounds.size.width / 2) - (75/2), window.frame.size.height + 75, 75, 75)];
@@ -319,12 +369,16 @@ extern BOOL overrideCC;
 			trashImageView.frame = CGRectMake((UIScreen.mainScreen.bounds.size.width / 2) - (75/2), window.frame.size.height - (75+50), 75, 75);
 		}];
 
-		draggedView = [gesture.view snapshotViewAfterScreenUpdates:YES];
-		draggedView.frame = gesture.view.frame;
-		draggedView.center = [gesture.view.superview convertPoint:gesture.view.center toView:window];
+		if (draggedView == nil)
+		{
+			draggedView = [gesture.view snapshotViewAfterScreenUpdates:YES];
+			draggedView.frame = gesture.view.frame;
+			draggedView.center = [gesture.view.superview convertPoint:gesture.view.center toView:window];
+	
+			[window addSubview:draggedView];
+			gesture.view.alpha = 0.6;
+		}
 		initialCenter = draggedView.center;
-		[window addSubview:draggedView];
-		gesture.view.alpha = 0.6;
 	}
 	else if (gesture.state == UIGestureRecognizerStateChanged)
 	{
@@ -348,6 +402,7 @@ extern BOOL overrideCC;
 		{
 			SBApplication *app = ((RAMissionControlPreviewView*)gesture.view).application;
 			[RADesktopManager.sharedInstance removeAppWithIdentifier:app.bundleIdentifier animated:NO];
+			[RAWindowStatePreservationSystemManager.sharedInstance removeWindowInformationForIdentifier:app.bundleIdentifier];
 			[RAAppKiller killAppWithSBApplication:app completion:^{
 				[runningApplications removeObject:app];
 
@@ -494,5 +549,16 @@ extern BOOL overrideCC;
 		[RAMissionControlManager.sharedInstance.runningApplications addObject:self];
 	else if (!self.isRunning && [RAMissionControlManager.sharedInstance.runningApplications containsObject:self])
 		[RAMissionControlManager.sharedInstance.runningApplications removeObject:self];
+}
+%end
+
+%hook SBLockStateAggregator
+-(void) _updateLockState
+{
+    %orig;
+    
+    if ([self hasAnyLockState])
+		if (RAMissionControlManager.sharedInstance.isShowingMissionControl)
+			[RAMissionControlManager.sharedInstance hideMissionControl:NO];
 }
 %end

@@ -92,6 +92,7 @@ extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 @property (nonatomic, copy) NSString *message;
 @property (nonatomic, copy) NSString *sectionID;
 @property (nonatomic, copy) BBAction *defaultAction;
+@property (nonatomic, copy) NSDate *date;
 @end
 
 @interface SBBulletinBannerController : NSObject
@@ -132,7 +133,7 @@ extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 - (void)_showControlCenterGestureBeganWithLocation:(CGPoint)arg1;
 - (void)restoreContentUpdatingStatusBar:(_Bool)arg1;
 -(void) restoreContentAndUnscatterIconsAnimated:(BOOL)arg1;
-- (_Bool)shouldShowControlCenterTabControlOnFirstSwipe;
+- (_Bool)shouldShowControlCenterTabControlOnFirstSwipe;- (_Bool)isAppSwitcherShowing;
 @end
 
 @interface SBDisplayItem : NSObject <NSCopying>
@@ -934,6 +935,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @property(copy, nonatomic) NSString *message;
 @property(copy, nonatomic) NSString *subtitle;
 @property(copy, nonatomic) NSString *title;
+@property(copy, nonatomic) NSDate *date;
 @end
 
 @interface BBServer
