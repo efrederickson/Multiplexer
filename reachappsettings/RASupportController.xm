@@ -149,11 +149,12 @@ There was much knowledge to be gained from perusing those sources, however no co
 \n\
 Beta Testers:\n\
 Beta382\n\
-Bindersfullofwoman\n\
+Bindersfullofwomen\n\
 Djaovx\n\
+Jack Haal\n\
 Moshed\n\
 Nexuist\n\
-TM3Dev
+xTM3x
 \n\
 \n\
 And thanks to all who tested beta versions and/or reported feedback. \n\
