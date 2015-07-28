@@ -15,7 +15,7 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	
 	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
 	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
-	return enabled && ([dict objectForKey:@"autoLaunch"] == nil ? NO : [dict[@"autoLaunch"] boolValue]);
+	return [RASettings.sharedInstance backgrounderEnabled] && enabled && ([dict objectForKey:@"autoLaunch"] == nil ? NO : [dict[@"autoLaunch"] boolValue]);
 }
 
 -(BOOL) shouldAutoRelaunchApplication:(NSString*)identifier
@@ -24,7 +24,7 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	
 	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
 	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
-	return enabled && ([dict objectForKey:@"autoRelaunch"] == nil ? NO : [dict[@"autoRelaunch"] boolValue]);
+	return [RASettings.sharedInstance backgrounderEnabled] && enabled && ([dict objectForKey:@"autoRelaunch"] == nil ? NO : [dict[@"autoRelaunch"] boolValue]);
 }
 
 -(NSInteger) popTemporaryOverrideForApplication:(NSString*)identifier
@@ -50,7 +50,7 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
 
 	NSInteger temporaryOverride = [self popTemporaryOverrideForApplication:identifier is:RABackgroundModeForcedForeground];
-	return enabled && (temporaryOverride == -1 ? ([dict objectForKey:@"backgroundMode"] == nil ? NO : [dict[@"backgroundMode"] intValue] == RABackgroundModeForcedForeground) : temporaryOverride);
+	return [RASettings.sharedInstance backgrounderEnabled] && enabled && (temporaryOverride == -1 ? ([dict objectForKey:@"backgroundMode"] == nil ? NO : [dict[@"backgroundMode"] intValue] == RABackgroundModeForcedForeground) : temporaryOverride);
 }
 
 -(BOOL) shouldSuspendImmediately:(NSString*)identifier
@@ -61,7 +61,7 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
 
 	NSInteger temporaryOverride = [self popTemporaryOverrideForApplication:identifier is:RABackgroundModeSuspendImmediately];
-	return enabled && (temporaryOverride == -1 ? ([dict objectForKey:@"backgroundMode"] == nil ? NO : [dict[@"backgroundMode"] intValue] == RABackgroundModeSuspendImmediately) : temporaryOverride);
+	return [RASettings.sharedInstance backgrounderEnabled] && enabled && (temporaryOverride == -1 ? ([dict objectForKey:@"backgroundMode"] == nil ? NO : [dict[@"backgroundMode"] intValue] == RABackgroundModeSuspendImmediately) : temporaryOverride);
 }
 
 -(BOOL) preventKillingOfIdentifier:(NSString*)identifier
@@ -70,7 +70,7 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	
 	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
 	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
-	return enabled && ([dict objectForKey:@"preventDeath"] == nil ? NO : [dict[@"preventDeath"] boolValue]);
+	return [RASettings.sharedInstance backgrounderEnabled] && enabled && ([dict objectForKey:@"preventDeath"] == nil ? NO : [dict[@"preventDeath"] boolValue]);
 }
 
 -(NSInteger) backgroundModeForIdentifier:(NSString*)identifier
@@ -79,7 +79,7 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	if (temporaryOverride != -1)
 		return temporaryOverride;
 
-	return [[RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier][@"backgroundMode"] intValue];
+	return [RASettings.sharedInstance backgrounderEnabled] ? RABackgroundModeNative : [[RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier][@"backgroundMode"] intValue];
 }
 
 -(BOOL) hasUnlimitedBackgroundTime:(NSString*)identifier
@@ -88,7 +88,7 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	
 	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
 	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
-	return enabled && ([dict objectForKey:@"unlimitedBackgrounding"] == nil ? NO : [dict[@"unlimitedBackgrounding"] boolValue]);
+	return [RASettings.sharedInstance backgrounderEnabled] && enabled && ([dict objectForKey:@"unlimitedBackgrounding"] == nil ? NO : [dict[@"unlimitedBackgrounding"] boolValue]);
 }
 
 -(BOOL) killProcessOnExit:(NSString*)identifier
@@ -97,7 +97,7 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	
 	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
 	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
-	return enabled && ([dict objectForKey:@"backgroundMode"] == nil ? NO : [dict[@"backgroundMode"] intValue] == RABackgroundModeForceNone);
+	return [RASettings.sharedInstance backgrounderEnabled] && enabled && ([dict objectForKey:@"backgroundMode"] == nil ? NO : [dict[@"backgroundMode"] intValue] == RABackgroundModeForceNone);
 }
 
 -(void) temporarilyApplyBackgroundingMode:(RABackgroundMode)mode forApplication:(SBApplication*)app andCloseForegroundApp:(BOOL)close
@@ -124,7 +124,7 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
 	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
 	id val = dict[@"backgroundModes"][mode];
-	return enabled && [val boolValue];
+	return [RASettings.sharedInstance backgrounderEnabled] && enabled && [val boolValue];
 }
 
 -(RAIconIndicatorViewInfo) allAggregatedIndicatorInfoForIdentifier:(NSString*)identifier

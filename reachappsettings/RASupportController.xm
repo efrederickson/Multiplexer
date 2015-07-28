@@ -153,7 +153,8 @@ Bindersfullofwoman\n\
 Djaovx\n\
 Moshed\n\
 Nexuist\n\
-TM3Dev
+TM3Dev\n\
+JackHaal\n\
 \n\
 \n\
 And thanks to all who tested beta versions and/or reported feedback. \n\

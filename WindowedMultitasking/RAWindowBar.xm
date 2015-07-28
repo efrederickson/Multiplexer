@@ -415,12 +415,16 @@ const int bottomSizeViewTag =  987654320;
 	if ([RASettings.sharedInstance alwaysEnableGestures] == NO && self.isOverlayShowing == NO)
 		return;
 
+	//CGFloat oldScale = sqrt(self.transform.a * self.transform.a + self.transform.c * self.transform.c);
+	//CGFloat newScale = (oldScale + gesture.scale);
+	//newScale = MIN(MAX(newScale, 0.1), 0.98);
+	//newScale -= oldScale;
+
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan:
         	enableDrag = NO; enableLongPress = NO;
             break;
         case UIGestureRecognizerStateChanged:
-            //self.bounds = (CGRect){ self.bounds.origin, {self.bounds.size.width * gesture.scale, self.bounds.size.height * gesture.scale} };
             [self setTransform:CGAffineTransformScale(self.transform, gesture.scale, gesture.scale)];
             gesture.scale = 1.0;
             break;
@@ -442,6 +446,18 @@ const int bottomSizeViewTag =  987654320;
         default:
             break;
     }
+}
+
+-(void) setTransform:(CGAffineTransform)trans
+{
+	[super setTransform:trans];
+
+	/*if (self.frame.origin.x < 0 || self.frame.origin.x + self.frame.size.width > UIScreen.mainScreen.bounds.size.width)
+		[UIView animateWithDuration:0.1 animations:^{
+			CGFloat oldScale = sqrt(self.transform.a * self.transform.a + self.transform.c * self.transform.c);
+			CGFloat scale = UIScreen.mainScreen.bounds.size.width / (self.frame.origin.x + self.frame.size.width);
+			self.transform = CGAffineTransformScale(self.transform, fabs(oldScale - scale), fabs(oldScale - scale));
+		}];*/
 }
 
 -(UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event

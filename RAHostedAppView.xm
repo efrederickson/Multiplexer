@@ -6,6 +6,9 @@
     BOOL isPreloading;
     FBWindowContextHostManager *contextHostManager;
     UIActivityIndicatorView *activityView;
+
+    UILabel *biolockdownDidFailLabel;
+    UITapGestureRecognizer *biolockdownFailedRetryTapGesture;
 }
 @end
 
@@ -94,12 +97,26 @@
         return;
 
     IF_BIOLOCKDOWN {
+
+        id failedBlock = ^{
+            if (!biolockdownDidFailLabel)
+            {
+                biolockdownDidFailLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, (self.frame.size.height - 40) / 2, self.frame.size.width, 40)];
+                biolockdownDidFailLabel.textColor = [UIColor whiteColor];
+                biolockdownDidFailLabel.textAlignment = NSTextAlignmentCenter;
+                biolockdownDidFailLabel.font = [UIFont systemFontOfSize:36];
+                biolockdownDidFailLabel.text = [NSString stringWithFormat:@"BioLockdown authentication failed for %@. Tap to try again.",self.app.displayName];
+                [self addSubview:biolockdownDidFailLabel];
+
+                biolockdownFailedRetryTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(loadApp)];
+                [self addGestureRecognizer:biolockdownFailedRetryTapGesture];
+                self.userInteractionEnabled = YES;
+            }
+        };
+
         BIOLOCKDOWN_AUTHENTICATE_APP(app.bundleIdentifier, ^{
             [self _actualLoadApp];
-        }, ^{
-            NSLog(@"[ReachApp] BioLockdown authentication failed");
-            //[self loadApp];
-        });
+        }, failedBlock /* stupid commas */);
     }
     else
         [self _actualLoadApp];
@@ -168,6 +185,15 @@
         [activityView stopAnimating];
     [verifyTimer invalidate];
 	FBScene *scene = [app mainScene];
+
+    if (biolockdownDidFailLabel)
+    {
+        [biolockdownDidFailLabel removeFromSuperview];
+        biolockdownDidFailLabel = nil;
+
+        [self removeGestureRecognizer:biolockdownFailedRetryTapGesture];
+        self.userInteractionEnabled = NO;
+    }
 
     if (!scene) return;
     CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": self.bundleIdentifier }, NO);   

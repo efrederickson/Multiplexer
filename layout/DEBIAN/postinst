@@ -4,4 +4,4 @@ chgrp staff /Library/LaunchDaemons/com.efrederickson.reachapp.fsdaemon.plist
 chown root /Library/LaunchDaemons/com.efrederickson.reachapp.fsdaemon.plist
 launchctl load -w /Library/LaunchDaemons/com.efrederickson.reachapp.fsdaemon.plist
 
-echo "ReachApp is of #ded. Long live Gary"
+echo "The best Multitasker you've never used... Until now."

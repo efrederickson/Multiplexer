@@ -5,6 +5,7 @@
 @interface RANCViewController () {
 	RAHostedAppView *appView;
 	UIActivityIndicatorView *activityView;
+	UILabel *isLockedLabel;
 
 	NSTimer *activityViewCheckTimer;
 }
@@ -43,6 +44,28 @@ int patchOrientation(int in)
 -(void) viewDidAppear:(BOOL)animated
 {
 	[super viewDidAppear:animated];
+
+	if ([[%c(SBLockScreenManager) sharedInstance] isUILocked])
+	{
+		if (isLockedLabel == nil)
+		{
+			isLockedLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 320, 400)];
+			isLockedLabel.numberOfLines = 2;
+			isLockedLabel.textAlignment = NSTextAlignmentCenter;
+			isLockedLabel.textColor = [UIColor whiteColor];
+			isLockedLabel.font = [UIFont systemFontOfSize:36];
+			[self.view addSubview:isLockedLabel];
+		}
+
+		isLockedLabel.frame = CGRectMake((self.view.frame.size.width - isLockedLabel.frame.size.width) / 2, (self.view.frame.size.height - isLockedLabel.frame.size.height) / 2, isLockedLabel.frame.size.width, isLockedLabel.frame.size.height);
+
+		isLockedLabel.hidden = NO;
+		isLockedLabel.text = [NSString stringWithFormat:@"Unlock to use\nQuick Access"];
+		[activityView stopAnimating];
+		return;
+	}
+	isLockedLabel.hidden = YES;
+
 	if (!appView)
 	{
 		NSString *ident = [RASettings.sharedInstance NCApp] ?: @"com.apple.Preferences";

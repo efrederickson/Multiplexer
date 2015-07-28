@@ -25,16 +25,21 @@
 	{
 		SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:identifier];
 
-		CGRect frame;
-		UIView *view = [%c(SBUIController) _zoomViewWithSplashboardLaunchImageForApplication:app sceneID:app.mainSceneID screen:UIScreen.mainScreen interfaceOrientation:0 includeStatusBar:YES snapshotFrame:&frame];
+		if (app)
+		{
+			CGRect frame;
+			UIView *view = [%c(SBUIController) _zoomViewWithSplashboardLaunchImageForApplication:app sceneID:app.mainSceneID screen:UIScreen.mainScreen interfaceOrientation:0 includeStatusBar:YES snapshotFrame:&frame];
 
-		UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].bounds.size, YES, [UIScreen mainScreen].scale);
-		CGContextRef c = UIGraphicsGetCurrentContext();
-		//CGContextSetAllowsAntialiasing(c, YES);
-		[view.layer renderInContext:c];
-		image = UIGraphicsGetImageFromCurrentImageContext();
-		UIGraphicsEndImageContext();
-
+			if (view)
+			{
+				UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].bounds.size, YES, [UIScreen mainScreen].scale);
+				CGContextRef c = UIGraphicsGetCurrentContext();
+				//CGContextSetAllowsAntialiasing(c, YES);
+				[view.layer renderInContext:c];
+				image = UIGraphicsGetImageFromCurrentImageContext();
+				UIGraphicsEndImageContext();
+			}
+		}
 		if (!image) // we can only hope it does not reach this point of desperation
 			image = [UIImage imageWithContentsOfFile:[NSString stringWithFormat:@"%@/Default.png", app.path]];
 	}

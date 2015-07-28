@@ -357,7 +357,6 @@ extern BOOL overrideCC;
 
 	if (gesture.state == UIGestureRecognizerStateBegan)
 	{
-
 		if (!trashImageView || trashImageView.superview == nil /* new window perhaps */)
 		{
 			trashImageView = [[UIImageView alloc] initWithFrame:CGRectMake((UIScreen.mainScreen.bounds.size.width / 2) - (75/2), window.frame.size.height + 75, 75, 75)];
