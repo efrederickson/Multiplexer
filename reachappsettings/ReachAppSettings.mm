@@ -103,7 +103,7 @@
                  @"detail": @"ReachAppNCAppSettingsListController",
                  @"icon": RSIMG(@"quickaccess.png")
                  },
-            @{ @"footerText": @"Use app in Reachability alongside another." },
+            @{ @"footerText": @"Use an app in Reachability alongside another." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Reach App",
