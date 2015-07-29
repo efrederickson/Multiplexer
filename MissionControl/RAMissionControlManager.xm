@@ -199,6 +199,10 @@ extern BOOL overrideCC;
 -(void) reloadWindowedAppsSection
 {
 	appsWithoutWindows = [runningApplications mutableCopy];
+	NSArray *visibleIcons = [[[%c(SBIconViewMap) homescreenMap] iconModel] visibleIconIdentifiers];
+	for (SBApplication *app in runningApplications)
+		if ([visibleIcons containsObject:app.bundleIdentifier] == NO)
+			[appsWithoutWindows removeObject:app];
 
 	CGFloat x = 15;
 	CGFloat y = desktopScrollView.frame.origin.y + desktopScrollView.frame.size.height + 5;
@@ -236,7 +240,8 @@ extern BOOL overrideCC;
 		UITapGestureRecognizer *g = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(topIconViewTap:)];
 		[preview addGestureRecognizer:g];
 
-		UIPanGestureRecognizer *swipeGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleAppPreviewPan:)];
+		UILongPressGestureRecognizer *swipeGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleAppPreviewPan:)];
+		swipeGesture.minimumPressDuration = 0.2;
 		[preview addGestureRecognizer:swipeGesture];
 
 		preview.userInteractionEnabled = YES;
@@ -295,7 +300,8 @@ extern BOOL overrideCC;
 		UITapGestureRecognizer *g = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(topIconViewTap:)];
 		[preview addGestureRecognizer:g];
 
-		UIPanGestureRecognizer *swipeGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleAppPreviewPan:)];
+		UILongPressGestureRecognizer *swipeGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleAppPreviewPan:)];
+		swipeGesture.minimumPressDuration = 0.2;
 		[preview addGestureRecognizer:swipeGesture];
 
 		preview.userInteractionEnabled = YES;
@@ -350,10 +356,13 @@ extern BOOL overrideCC;
 	[self reloadDesktopSection];
 }
 
--(void) handleAppPreviewPan:(UIPanGestureRecognizer*)gesture
+-(void) handleAppPreviewPan:(UILongPressGestureRecognizer*)gesture
 {
 	static CGPoint initialCenter;
 	static UIView *draggedView;
+	static CGPoint lastPoint;
+
+	CGPoint point = [gesture locationInView:window];
 
 	if (gesture.state == UIGestureRecognizerStateBegan)
 	{
@@ -376,24 +385,35 @@ extern BOOL overrideCC;
 	
 			[window addSubview:draggedView];
 			gesture.view.alpha = 0.6;
+
+			[UIView animateWithDuration:0.3 animations:^{
+				draggedView.transform = CGAffineTransformMakeScale(1.1, 1.1);
+			}];
 		}
 		initialCenter = draggedView.center;
 	}
 	else if (gesture.state == UIGestureRecognizerStateChanged)
 	{
-		CGPoint newCenter = [gesture translationInView:draggedView];
-		newCenter.x += initialCenter.x;
-		newCenter.y += initialCenter.y;
+		//CGPoint newCenter = [gesture translationInView:draggedView];
+		//newCenter.x += initialCenter.x;
+		//newCenter.y += initialCenter.y;
+		//draggedView.center = newCenter;
 
-		draggedView.center = newCenter;
+        CGPoint center = draggedView.center;
+        center.x += point.x - lastPoint.x;
+        center.y += point.y - lastPoint.y;
+        draggedView.center = center;
 	}
 	else
 	{
 		gesture.view.alpha = 1;
 
-		CGPoint center = [gesture translationInView:draggedView];
-		center.x += initialCenter.x;
-		center.y += initialCenter.y;
+		//CGPoint center = [gesture translationInView:draggedView];
+		//center.x += initialCenter.x;
+		//center.y += initialCenter.y;
+        CGPoint center = draggedView.center;
+        center.x += point.x - lastPoint.x;
+        center.y += point.y - lastPoint.y;
 
 		BOOL didKill = NO;
 
@@ -463,12 +483,16 @@ extern BOOL overrideCC;
 
 		[UIView animateWithDuration:0.4 animations:^{ 
 			if (!didKill)
+			{
+				draggedView.transform = CGAffineTransformIdentity;
 				draggedView.center = initialCenter; 
+			}
 		} completion:^(BOOL _) {
 			[draggedView removeFromSuperview];
 			draggedView = nil;
 		}];
 	}
+	lastPoint = point;
 }
 
 -(void) handleDesktopPan:(UIPanGestureRecognizer*)gesture

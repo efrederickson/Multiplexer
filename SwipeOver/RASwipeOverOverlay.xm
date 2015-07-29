@@ -117,13 +117,13 @@
         numIconsPerLine++;
         tmpWidth += fullSize.width + 20;
     }
-    padding = (self.frame.size.width - (numIconsPerLine * fullSize.width)) / numIconsPerLine;
+    padding = (self.frame.size.width - (numIconsPerLine * fullSize.width)) / (numIconsPerLine + 1);
 
     UIScrollView *allAppsView = [[UIScrollView alloc] initWithFrame:CGRectMake(isHidingUnderlyingApp ? 0 : 10, 0, self.frame.size.width - (isHidingUnderlyingApp ? 0 : 10), self.frame.size.height)];
     grabberView.alpha = 0;
     allAppsView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.7];
 
-	CGSize contentSize = CGSizeMake(10, 10);
+	CGSize contentSize = CGSizeMake(padding, 10);
 	SBApplication *app = nil;
 	int horizontal = 0;
 
@@ -157,7 +157,7 @@
         if (horizontal >= numIconsPerLine)
         {
         	horizontal = 0;
-        	contentSize.width = 10;
+        	contentSize.width = padding;
         	contentSize.height += iconView.frame.size.height + 10;
         }
 
@@ -167,6 +167,7 @@
         [allAppsView addSubview:iconView];
 	}
 	contentSize.width = allAppsView.frame.size.width;
+	contentSize.height += fullSize.height;
 	[allAppsView setContentSize:contentSize];
 	allAppsView.tag = RASWIPEOVER_VIEW_TAG;
 	[self addSubview:allAppsView];
