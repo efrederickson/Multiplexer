@@ -36,7 +36,7 @@
 		[RAMissionControlManager.sharedInstance showMissionControl:YES];
 		
         FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
-            SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
+            SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppExitedWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
             [transaction begin];
         }];
         [[%c(FBWorkspaceEventQueue) sharedInstance] executeOrAppendEvent:event];

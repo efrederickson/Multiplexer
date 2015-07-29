@@ -74,7 +74,15 @@
                 @"key": @"showIconIndicators",
                 @"defaults": @"com.efrederickson.reachapp.settings",
                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-             },             
+             },                          
+             @{
+                @"cell": @"PSSwitchCell",
+                @"label": @"Exit app after Menu",
+                @"default": @YES,
+                @"key": @"exitAppAfterUsingActivatorAction",
+                @"defaults": @"com.efrederickson.reachapp.settings",
+                @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+             },        
              @{
                 @"cell": @"PSLinkListCell",
                 @"label": @"Background Mode",

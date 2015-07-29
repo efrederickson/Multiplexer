@@ -103,7 +103,7 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	if (close)
 	{
         FBWorkspaceEvent *event = [objc_getClass("FBWorkspaceEvent") eventWithName:@"ActivateSpringBoard" handler:^{
-            SBAppToAppWorkspaceTransaction *transaction = [[objc_getClass("SBAppToAppWorkspaceTransaction") alloc] initWithAlertManager:nil exitedApp:app];
+            SBAppToAppWorkspaceTransaction *transaction = [[objc_getClass("SBAppExitedWorkspaceTransaction") alloc] initWithAlertManager:nil exitedApp:app];
             [transaction begin];
         }];
         [(FBWorkspaceEventQueue*)[objc_getClass("FBWorkspaceEventQueue") sharedInstance] executeOrAppendEvent:event];

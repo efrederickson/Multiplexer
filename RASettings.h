@@ -54,6 +54,8 @@ enum RAGrabArea {
 -(BOOL) swipeOverEnabled;
 -(BOOL) alwaysShowSOGrabber;
 
+-(BOOL) exitAppAfterUsingActivatorAction;
+
 -(BOOL) windowedMultitaskingEnabled;
 -(RAGrabArea) windowedMultitaskingGrabArea;
 -(RAGrabArea) swipeOverGrabArea;

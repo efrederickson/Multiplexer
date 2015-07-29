@@ -249,6 +249,7 @@ NSDictionary *_settings = nil;
 
 -(BOOL) swipeOverEnabled { return BOOL(@"swipeOverEnabled", YES); }
 -(BOOL) windowedMultitaskingEnabled { return BOOL(@"windowedMultitaskingEnabled", YES); }
+-(BOOL) exitAppAfterUsingActivatorAction { return BOOL(@"exitAppAfterUsingActivatorAction", YES); }
 
 -(RAGrabArea) windowedMultitaskingGrabArea
 {
