@@ -241,7 +241,7 @@ extern BOOL overrideCC;
 		[preview addGestureRecognizer:g];
 
 		UILongPressGestureRecognizer *swipeGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleAppPreviewPan:)];
-		swipeGesture.minimumPressDuration = 0.2;
+		swipeGesture.minimumPressDuration = 0.1;
 		[preview addGestureRecognizer:swipeGesture];
 
 		preview.userInteractionEnabled = YES;
@@ -301,7 +301,7 @@ extern BOOL overrideCC;
 		[preview addGestureRecognizer:g];
 
 		UILongPressGestureRecognizer *swipeGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleAppPreviewPan:)];
-		swipeGesture.minimumPressDuration = 0.2;
+		swipeGesture.minimumPressDuration = 0.1;
 		[preview addGestureRecognizer:swipeGesture];
 
 		preview.userInteractionEnabled = YES;

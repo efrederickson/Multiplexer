@@ -1,4 +1,5 @@
 #import "RAWindowOverlayView.h"
+#import "RAResourceImageProvider.h"
 
 @implementation RAWindowOverlayView
 -(void) show
@@ -16,7 +17,7 @@
 	closeButton.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.3];
 	closeButton.titleLabel.textColor = [UIColor whiteColor];
 	closeButton.frame = CGRectMake((self.frame.size.width / 2) - (125/2), (self.frame.size.height / 3) - (125), 125, 125);
-	[closeButton setTitle:@"X" forState:UIControlStateNormal];
+	[closeButton setImage:[[RAResourceImageProvider imageForFilename:@"Close" constrainedToSize:CGSizeMake(30, 30)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
 	closeButton.titleLabel.font = [UIFont systemFontOfSize:36];
 	[closeButton addTarget:self action:@selector(closeButtonTap) forControlEvents:UIControlEventTouchUpInside];
 	closeButton.layer.cornerRadius = 125/2;
@@ -26,7 +27,7 @@
 	maximizeButton.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.3];
 	maximizeButton.titleLabel.textColor = [UIColor whiteColor];
 	maximizeButton.frame = CGRectMake((self.frame.size.width / 2) - (125/2), (self.frame.size.height / 2) - (125/2), 125, 125);
-	[maximizeButton setTitle:@"+" forState:UIControlStateNormal];
+	[maximizeButton setImage:[[RAResourceImageProvider imageForFilename:@"Plus" constrainedToSize:CGSizeMake(30, 30)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
 	maximizeButton.titleLabel.font = [UIFont systemFontOfSize:36];
 	[maximizeButton addTarget:self action:@selector(maximizeButtonTap) forControlEvents:UIControlEventTouchUpInside];
 	maximizeButton.layer.cornerRadius = 125/2;
@@ -36,7 +37,7 @@
 	minimizeButton.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.3];
 	minimizeButton.titleLabel.textColor = [UIColor whiteColor];
 	minimizeButton.frame = CGRectMake((self.frame.size.width / 2) - (125/2), ((self.frame.size.height / 3) * 2) - (0), 125, 125);
-	[minimizeButton setTitle:@"-" forState:UIControlStateNormal];
+	[minimizeButton setImage:[[RAResourceImageProvider imageForFilename:@"Minus" constrainedToSize:CGSizeMake(30, 30)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
 	minimizeButton.titleLabel.font = [UIFont systemFontOfSize:36];
 	[minimizeButton addTarget:self action:@selector(minimizeButtonTap) forControlEvents:UIControlEventTouchUpInside];
 	minimizeButton.layer.cornerRadius = 125/2;

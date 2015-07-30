@@ -30,7 +30,7 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
 %hook UIWindow
 -(void) setFrame:(CGRect) frame
 {
-    if (overrideDisplay && (overrideWidth != -1 || overrideHeight != -1))
+    if ([self.class isEqual:UITextEffectsWindow.class] == NO && overrideDisplay && (overrideWidth != -1 || overrideHeight != -1))
     {
         if ([oldFrames objectForKey:@(self.hash)] == nil)
             [oldFrames setObject:[NSValue valueWithCGRect:frame] forKey:@(self.hash)];

@@ -2,17 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>Label</key>
-	<string>com.efrederickson.reachapp.fsdaemon</string>
-	<key>Program</key>
-	<string>/usr/bin/ReachAppFSDaemon</string>
-	<key>RunAtLoad</key>
+	<key>Disabled</key>
 	<false/>
+	<key>Label</key>
+	<string>com.efrederickson.reachapp.keyboaddaemon</string>
+	<key>Program</key>
+	<string>/usr/bin/ReachAppKeyboardDaemon</string>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
 	<key>StandardErrorPath</key>
 	<string>/dev/null</string>
-	<key>WatchPaths</key>
-	<array>
-		<string>/User/Library/.reachapp.uiappexitsonsuspend.wantstochangerootapp</string>
-	</array>
 </dict>
 </plist>

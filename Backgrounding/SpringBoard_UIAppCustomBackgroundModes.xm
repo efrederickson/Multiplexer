@@ -26,7 +26,7 @@
     {
         NSString *identifier = /*enableSBApp == NO || */objc_getClass("SBApplicationController") == nil ? NSBundle.mainBundle.bundleIdentifier : [[%c(SBApplicationController) sharedInstance] applicationWithPid:arg1].bundleIdentifier;
         
-        NSLog(@"[ReachApp] BKSProcessAssertion initWithPID:%d flags:%d reason:%d name:%@ withHandler:%@ identifier:%@", arg1, arg2, arg3, arg4, arg5, identifier);
+        //NSLog(@"[ReachApp] BKSProcessAssertion initWithPID:%d flags:%d reason:%d name:%@ withHandler:%@ identifier:%@", arg1, arg2, arg3, arg4, arg5, identifier);
 
         if ([RABackgrounder.sharedInstance shouldSuspendImmediately:identifier])
         {

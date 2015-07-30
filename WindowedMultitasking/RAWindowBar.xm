@@ -12,7 +12,7 @@ const int bottomSizeViewTag =  987654320;
 @interface RAWindowBar () {
 	CGPoint initialPoint;
 	BOOL enableDrag, enableLongPress;
-	BOOL sizingLocked;
+	BOOL sizingLocked, appRotationLocked;
 	BOOL isSnapped;
 
 	UIPanGestureRecognizer *panGesture;
@@ -118,6 +118,7 @@ const int bottomSizeViewTag =  987654320;
 	[self addSubview:swapOrientationButton];
 
 	sizingLocked = NO;
+	appRotationLocked = NO;
 	sizingLockButton = [UIButton buttonWithType:UIButtonTypeCustom];
 	sizingLockButton.frame = CGRectMake(swapOrientationButton.frame.origin.x - 35, 5, 30, 30);
 	sizingLockButton.titleLabel.font = [UIFont systemFontOfSize:13];
@@ -174,43 +175,22 @@ const int bottomSizeViewTag =  987654320;
 
 -(void) sizingLockButtonTap:(id)arg1
 {
-	sizingLocked = !sizingLocked;
+	if ([RASettings.sharedInstance windowRotationLockMode] == 0)
+	{
+		sizingLocked = !sizingLocked;
+	}
+	else
+	{
+		appRotationLocked = !appRotationLocked;
+	}
 
-	if (sizingLocked)
+	if (sizingLocked || appRotationLocked)
 	{
 		[sizingLockButton setBackgroundImage:[[RAResourceImageProvider imageForFilename:@"Lock" constrainedToSize:CGSizeMake(20, 20)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
-
-		//[[self viewWithTag:rightSizeViewTag] removeFromSuperview];
-		//[[self viewWithTag:bottomSizeViewTag] removeFromSuperview];
-		//self.attachedView.autosizesApp = NO;
 	}
 	else
 	{
 		[sizingLockButton setBackgroundImage:[[RAResourceImageProvider imageForFilename:@"Unlocked" constrainedToSize:CGSizeMake(20, 20)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
-/*
-		UIView *rightView = [[UIView alloc] initWithFrame:CGRectMake(self.bounds.size.width, 30, 20, self.bounds.size.height - 20)];
-		rightView.backgroundColor = self.backgroundColor;
-		rightView.tag = rightSizeViewTag;
-		rightView.userInteractionEnabled = YES;
-		[self addSubview:rightView];
-
-		UIView *bottomView = [[UIView alloc] initWithFrame:CGRectMake(0, self.bounds.size.height, self.bounds.size.width, 20)];
-		bottomView.backgroundColor = self.backgroundColor;
-		bottomView.tag = bottomSizeViewTag;
-		bottomView.userInteractionEnabled = YES;
-		[self addSubview:bottomView];
-
-		UIPanGestureRecognizer *tempGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
-		tempGesture.delegate = self;
-		[rightView addGestureRecognizer:tempGesture];
-
-		tempGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
-		tempGesture.delegate = self;
-		[bottomView addGestureRecognizer:tempGesture];
-
-		self.attachedView.autosizesApp = YES;
-		self.attachedView.frame = self.attachedView.frame; // force update
-*/
 	}
 }
 
@@ -251,7 +231,7 @@ const int bottomSizeViewTag =  987654320;
     		rotateSnapDegrees = 270 - currentRotation;
     	}
 
-    	if ([RASettings.sharedInstance snapRotation])
+    	if ([RASettings.sharedInstance snapRotation] && !appRotationLocked)
 	    	[UIView animateWithDuration:0.2 animations:^{
 		    	self.transform = CGAffineTransformRotate(self.transform, DEGREES_TO_RADIANS(rotateSnapDegrees));
 		    	//CGFloat scale = sqrt(self.transform.a * self.transform.a + self.transform.c * self.transform.c);
@@ -259,7 +239,6 @@ const int bottomSizeViewTag =  987654320;
 		    }];
 
     	[attachedView rotateToOrientation:o];
-
 
 		if ([RASettings.sharedInstance snapWindows] && [RAWindowSnapDataProvider shouldSnapWindowAtLocation:self.frame])
 		{
@@ -420,12 +399,26 @@ const int bottomSizeViewTag =  987654320;
 	//newScale = MIN(MAX(newScale, 0.1), 0.98);
 	//newScale -= oldScale;
 
+	CGFloat scale;
+	CGFloat rotation = atan2(self.transform.b, self.transform.a);
+
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan:
         	enableDrag = NO; enableLongPress = NO;
             break;
         case UIGestureRecognizerStateChanged:
             [self setTransform:CGAffineTransformScale(self.transform, gesture.scale, gesture.scale)];
+            
+            scale = sqrt(self.transform.a * self.transform.a + self.transform.c * self.transform.c);
+            if (scale > 1.0)
+            {
+            	[self setTransform:CGAffineTransformRotate(CGAffineTransformMakeScale(1, 1), rotation)];
+            }
+            else if (scale < 0.15)
+            {
+            	[self setTransform:CGAffineTransformRotate(CGAffineTransformMakeScale(0.15, 0.15), rotation)];
+            }
+
             gesture.scale = 1.0;
             break;
         case UIGestureRecognizerStateEnded:

@@ -152,7 +152,7 @@ NSDictionary *_settings = nil;
 
 -(NSString*) NCApp
 {
-	return _settings[@"NCApp"];
+	return [_settings objectForKey:@"NCApp"] == nil ? @"com.apple.Preferences" : _settings[@"NCApp"];
 }
 
 -(BOOL) alwaysEnableGestures
@@ -203,6 +203,11 @@ NSDictionary *_settings = nil;
 -(NSInteger) globalBackgroundMode
 {
 	return [_settings objectForKey:@"globalBackgroundMode"] == nil ? RABackgroundModeNative : [_settings[@"globalBackgroundMode"] intValue];
+}
+
+-(NSInteger) windowRotationLockMode
+{
+	return [_settings objectForKey:@"windowRotationLockMode"] == nil ? 0 : [_settings[@"windowRotationLockMode"] intValue];
 }
 
 -(NSDictionary*) rawCompiledBackgrounderSettingsForIdentifier:(NSString*)identifier

@@ -32,4 +32,5 @@ after-install::
 SUBPROJECTS += reachappsettings
 SUBPROJECTS += reachappflipswitch
 SUBPROJECTS += reachappfsdaemon
+SUBPROJECTS += reachappkeyboarddaemon
 include $(THEOS_MAKE_PATH)/aggregate.mk

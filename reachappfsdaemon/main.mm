@@ -20,8 +20,8 @@ int main(int argc, char **argv, char **envp) {
 
     if (!success)
     	NSLog(@"[ReachApp] FS Daemon: error writing to plist: %@", path);
-    else
-    	[NSFileManager.defaultManager removeItemAtPath:path error:nil];
+
+	[NSFileManager.defaultManager removeItemAtPath:path error:nil];
 
 	[pool release];
 	return 0;

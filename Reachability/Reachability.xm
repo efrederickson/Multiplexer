@@ -434,6 +434,10 @@ CGFloat startingY = -1;
         ident = temp.currentBundleIdentifier;
         [temp unload];
     }
+
+    if (!ident || ident.length == 0)
+        return;
+
     [self handleReachabilityModeDeactivated];
     [RADesktopManager.sharedInstance.currentDesktop createAppWindowWithIdentifier:ident animated:YES];
 }

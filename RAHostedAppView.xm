@@ -173,6 +173,9 @@
 {
     _hideStatusBar = value;
 
+    if (!self.bundleIdentifier)
+        return;
+
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     dict[@"bundleIdentifier"] = self.bundleIdentifier;
     dict[@"hideStatusBar"] = @(value);
@@ -196,7 +199,7 @@
     }
 
     if (!scene) return;
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": self.bundleIdentifier }, NO);   
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": app.bundleIdentifier }, NO);   
 
     FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
     SET_BACKGROUNDED(settings, YES);
@@ -221,7 +224,7 @@
         event = @"com.efrederickson.reachapp.forcerotation-upsidedown";
 
     CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-    CFDictionaryAddValue(dictionary,  (__bridge const void*)@"bundleIdentifier",  (__bridge const void*)self.bundleIdentifier);
+    CFDictionaryAddValue(dictionary,  (__bridge const void*)@"bundleIdentifier",  (__bridge const void*)app.bundleIdentifier);
     CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), (__bridge CFStringRef)event, NULL, dictionary, true);
     CFRelease(dictionary);
 }

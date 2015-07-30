@@ -71,7 +71,7 @@
 	view.clipsToBounds = YES;
 	//view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
-	CGFloat currentY = 10;
+	CGFloat currentY = VERTICAL_PADDING;
 
 	for (RAWidgetSection* section in [self enabledSections])
 	{

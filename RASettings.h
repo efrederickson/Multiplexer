@@ -57,6 +57,7 @@ enum RAGrabArea {
 -(BOOL) exitAppAfterUsingActivatorAction;
 
 -(BOOL) windowedMultitaskingEnabled;
+-(NSInteger) windowRotationLockMode;
 -(RAGrabArea) windowedMultitaskingGrabArea;
 -(RAGrabArea) swipeOverGrabArea;
 @end 

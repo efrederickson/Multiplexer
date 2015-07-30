@@ -103,6 +103,17 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
+             @{ @"label": @"Lock button action" },
+             @{
+                 @"cell": @"PSSegmentCell",
+                 @"validTitles": @[ @"Lock all rotation", @"Lock app rotation" ],
+                 @"validValues": @[ @0, @1 ],
+                 @"default": @0,
+                 @"key": @"windowRotationLockMode",
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+
              @{ @"footerText": @"Launches app into windows instead of fullscreen" },
              @{
                  @"cell": @"PSSwitchCell",

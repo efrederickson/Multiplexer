@@ -30,6 +30,7 @@
 -(void) forceReloadAppLikelyBecauseTheSettingChanged
 {
 	[appView unloadApp];
+	[appView removeFromSuperview];
 	appView = nil;
 }
 
@@ -59,16 +60,19 @@ int patchOrientation(int in)
 
 		isLockedLabel.frame = CGRectMake((self.view.frame.size.width - isLockedLabel.frame.size.width) / 2, (self.view.frame.size.height - isLockedLabel.frame.size.height) / 2, isLockedLabel.frame.size.width, isLockedLabel.frame.size.height);
 
-		isLockedLabel.hidden = NO;
 		isLockedLabel.text = [NSString stringWithFormat:@"Unlock to use\nQuick Access"];
 		[activityView stopAnimating];
 		return;
 	}
-	isLockedLabel.hidden = YES;
+	else if (isLockedLabel)
+	{
+		[isLockedLabel removeFromSuperview];
+		isLockedLabel = nil;
+	}
 
 	if (!appView)
 	{
-		NSString *ident = [RASettings.sharedInstance NCApp] ?: @"com.apple.Preferences";
+		NSString *ident = [RASettings.sharedInstance NCApp];
 		appView = [[RAHostedAppView alloc] initWithBundleIdentifier:ident];
 		appView.frame = UIScreen.mainScreen.bounds;
 		[self.view addSubview:appView];
@@ -81,13 +85,15 @@ int patchOrientation(int in)
 
 	if (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation))
 	{
-		//appView.autosizesApp = YES;
+		appView.autosizesApp = YES;
+		appView.allowHidingStatusBar = YES;
 		appView.transform = CGAffineTransformIdentity;
 		appView.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
 	}
 	else
 	{
 		appView.autosizesApp = NO;
+		appView.allowHidingStatusBar = YES;
 
 		// Reset
 		appView.transform = CGAffineTransformIdentity;
@@ -101,7 +107,7 @@ int patchOrientation(int in)
 		frame.origin.y = 0;
 		appView.frame = frame;
 	}
-//[appView rotateToOrientation:UIDevice.currentDevice.orientation];
+	//[appView rotateToOrientation:UIApplication.sharedApplication.statusBarOrientation];
 
 	activityViewCheckTimer = [NSTimer timerWithTimeInterval:1 target:self selector:@selector(checkIfAppIsRunningAtAllAndStopTimerIfSo) userInfo:nil repeats:YES];
 	[[NSRunLoop currentRunLoop] addTimer:activityViewCheckTimer forMode:NSRunLoopCommonModes];

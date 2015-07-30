@@ -1,29 +1,53 @@
 #import "RAKeyboardWindow.h"
 #import "headers.h"
 #import "RAKeyboardStateListener.h"
+#import "RADesktopManager.h"
 
 @implementation RAKeyboardWindow
-
--(void) setupForKeyboardAndShow
+-(void) setupForKeyboardAndShow:(NSString*)identifier
 {
-	_textField = [[UITextField alloc] initWithFrame:CGRectMake(0, 30, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height - RAKeyboardStateListener.sharedInstance.size.height)];
-	_textField.backgroundColor = [UIColor grayColor];
-	_textField.alpha = 0;
-	[self addSubview:_textField];
+	self.userInteractionEnabled = YES;
+	
+	if (kbView)
+		[self removeKeyboard];
 
-	self.frame = UIScreen.mainScreen.bounds;
+	kbView = [[RARemoteKeyboardView alloc] initWithFrame:UIScreen.mainScreen.bounds];
+	[kbView connectToKeyboardWindowForApp:identifier];
+	[self addSubview:kbView];
+
 	self.windowLevel = 9999;
+	self.frame = UIScreen.mainScreen.bounds;
 	[self makeKeyAndVisible];
-	[_textField becomeFirstResponder];
 }
 
--(void) resignKeyboard
+-(void) removeKeyboard
 {
-	[_textField resignFirstResponder];
+	[kbView connectToKeyboardWindowForApp:nil];
+	[kbView removeFromSuperview];
+	kbView = nil;
 }
 
-- (BOOL)_ignoresHitTest 
+-(UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
-	return YES;
+    NSEnumerator *objects = [self.subviews reverseObjectEnumerator];
+    UIView *subview;
+    while ((subview = [objects nextObject])) 
+    {
+        UIView *success = [subview hitTest:[self convertPoint:point toView:subview] withEvent:event];
+        if (success)
+            return success;
+    }
+    return [super hitTest:point withEvent:event];
+}
+
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event 
+{
+	BOOL isContained = NO;
+	for (UIView *view in self.subviews)
+	{
+		if (CGRectContainsPoint(view.frame, point) || CGRectContainsPoint(view.frame, [view convertPoint:point fromView:self])) // [self convertPoint:point toView:view]))
+			isContained = YES;
+	}
+	return isContained;
 }
 @end

@@ -1,9 +1,10 @@
 #import <UIKit/UIKit.h>
+#import "RARemoteKeyboardView.h"
 
 @interface RAKeyboardWindow : UIWindow {
-	UITextField *_textField;
+	RARemoteKeyboardView *kbView;
 }
 
--(void) setupForKeyboardAndShow;
--(void) resignKeyboard;
+-(void) setupForKeyboardAndShow:(NSString*)identifier;
+-(void) removeKeyboard;
 @end

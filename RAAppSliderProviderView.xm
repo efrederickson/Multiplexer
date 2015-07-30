@@ -25,14 +25,12 @@
 
 -(void) unload
 {
-	NSLog(@"[ReachApp] unlaod one");
 	if (!currentView || !currentView.bundleIdentifier)
 		return;
 
     CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentView.bundleIdentifier }, NO);
 
 	[RAGestureManager.sharedInstance removeGestureWithIdentifier:currentView.bundleIdentifier];
-	NSLog(@"[ReachApp] unload 2]");
 	[currentView unloadApp];
 }
 
