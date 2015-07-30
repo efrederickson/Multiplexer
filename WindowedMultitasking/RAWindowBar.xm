@@ -231,14 +231,13 @@ const int bottomSizeViewTag =  987654320;
     		rotateSnapDegrees = 270 - currentRotation;
     	}
 
-    	if ([RASettings.sharedInstance snapRotation] && !appRotationLocked)
+    	if ([RASettings.sharedInstance snapRotation])
 	    	[UIView animateWithDuration:0.2 animations:^{
 		    	self.transform = CGAffineTransformRotate(self.transform, DEGREES_TO_RADIANS(rotateSnapDegrees));
-		    	//CGFloat scale = sqrt(self.transform.a * self.transform.a + self.transform.c * self.transform.c);
-		    	//self.transform = CGAffineTransformRotate(CGAffineTransformMakeScale(scale, scale), DEGREES_TO_RADIANS(rotateSnapDegrees));
 		    }];
 
-    	[attachedView rotateToOrientation:o];
+		if (!appRotationLocked)
+	    	[attachedView rotateToOrientation:o];
 
 		if ([RASettings.sharedInstance snapWindows] && [RAWindowSnapDataProvider shouldSnapWindowAtLocation:self.frame])
 		{

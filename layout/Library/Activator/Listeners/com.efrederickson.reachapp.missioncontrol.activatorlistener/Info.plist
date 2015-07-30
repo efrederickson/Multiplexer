@@ -9,7 +9,7 @@
                 <string>lockscreen</string>
         </array>
         <key>description</key>
-        <string>Activate ReachApp's Mission Control</string>
+        <string>Activate Multiplexer's Mission Control</string>
         <key>title</key>
         <string>Activate Mission Control</string>
 </dict>
