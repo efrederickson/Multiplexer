@@ -28,6 +28,8 @@ extern void RA_BGAppsControllerNeedsToReload();
 
     BOOL exitsOnSuspend = [[NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/Info.plist",appInfo.bundleURL.absoluteString]]][@"UIApplicationExitsOnSuspend"] boolValue];
 
+    BOOL preventDeath = [[self getActualPrefValue:@"preventDeath"] boolValue]; // Default is NO so it should work fine
+
     return @[
              @{
                  @"cell": @"PSSwitchCell",
@@ -71,6 +73,8 @@ extern void RA_BGAppsControllerNeedsToReload();
                 @"key": @"preventDeath",
                 @"default": @NO,
                 @"label": @"Prevent Death",
+                @"enabled": @(!exitsOnSuspend),
+                @"reloadSpecifiers": @YES,
             },
             @{ @"footerText": @"This switch causes applications to completely disable their backgrounding, natively. Apps such as BatteryLife, FinalFantasy2, and a certain Solitaire do this. This switch will not revert upon the uninstallation of Multiplexer. A respring may or may not be required to apply." },
             @{
@@ -78,6 +82,7 @@ extern void RA_BGAppsControllerNeedsToReload();
                 @"key": @"UIApplicationExitsOnSuspend",
                 @"default": @(exitsOnSuspend),
                 @"label": @"Exit on Suspend",
+                @"enabled": @(!preventDeath),
             },
             @{ 
                 @"cell": @"PSGroupCell",
@@ -191,6 +196,8 @@ B - unlimited backgrounding time", },
             [daemonDict writeToFile:@"/User/Library/.reachapp.uiappexitsonsuspend.wantstochangerootapp" atomically:YES];
         }
 
+        [self reloadSpecifiers];
+
         return;
     }
 
@@ -204,22 +211,42 @@ B - unlimited backgrounding time", },
     CFPreferencesAppSynchronize(appID);
     CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.settings/reloadSettings"), nil, nil, YES);
     RA_BGAppsControllerNeedsToReload();
+
+    if ([[specifier propertyForKey:@"reloadSpecifiers"] boolValue])
+        [self reloadSpecifiers];
 }
 
- -(id)readPreferenceValue:(PSSpecifier*)specifier
- {
-	CFStringRef appID = CFSTR("com.efrederickson.reachapp.settings");
-	CFArrayRef keyList = CFPreferencesCopyKeyList(appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-	if (!keyList) {
-		return [specifier propertyForKey:@"default"];
-	}
-	NSDictionary *_settings = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-	CFRelease(keyList);
-	if (!_settings) {
-		return [specifier propertyForKey:@"default"];
-	}
+-(id) getActualPrefValue:(NSString*)basename
+{
+    CFStringRef appID = CFSTR("com.efrederickson.reachapp.settings");
+    CFArrayRef keyList = CFPreferencesCopyKeyList(appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    if (!keyList) {
+        return nil;
+    }
+    NSDictionary *_settings = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    CFRelease(keyList);
+    if (!_settings) {
+        return nil;
+    }
+
+    NSString *key = [NSString stringWithFormat:@"backgrounder-%@-%@",_identifier,basename];
+    return [_settings objectForKey:key] == nil ? nil : _settings[key];
+}
+
+-(id)readPreferenceValue:(PSSpecifier*)specifier
+{
+    CFStringRef appID = CFSTR("com.efrederickson.reachapp.settings");
+    CFArrayRef keyList = CFPreferencesCopyKeyList(appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    if (!keyList) {
+    	return [specifier propertyForKey:@"default"];
+    }
+    NSDictionary *_settings = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    CFRelease(keyList);
+    if (!_settings) {
+    	return [specifier propertyForKey:@"default"];
+    }
 
     NSString *key = [specifier propertyForKey:@"prefix"] ? [NSString stringWithFormat:@"backgrounder-%@-%@-%@",_identifier,[specifier propertyForKey:@"prefix"],[specifier propertyForKey:@"key"]] : [NSString stringWithFormat:@"backgrounder-%@-%@",_identifier,[specifier propertyForKey:@"key"]];
     return [_settings objectForKey:key] == nil ? [specifier propertyForKey:@"default"] : _settings[key];
- }
+}
 @end
