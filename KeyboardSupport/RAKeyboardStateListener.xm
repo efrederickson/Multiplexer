@@ -3,7 +3,7 @@
 #import <execinfo.h>
 #import <AppSupport/CPDistributedMessagingCenter.h>
 
-extern BOOL isTopApp;
+extern BOOL overrideDisplay;
 BOOL isShowing = NO;
 extern CPDistributedMessagingCenter *messagingCenter;
 
@@ -20,7 +20,7 @@ extern CPDistributedMessagingCenter *messagingCenter;
     _size = [[notif.userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
     CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.keyboard.didShow"), NULL, (__bridge CFDictionaryRef)@{ @"size": NSStringFromCGSize(_size) }, true);
 
-    if (isTopApp)
+    if (overrideDisplay)
     {
         if (!messagingCenter)
         {
@@ -45,7 +45,7 @@ extern CPDistributedMessagingCenter *messagingCenter;
     _visible = NO;
     CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.keyboard.didHide"), NULL, NULL, true);
 
-    if (isTopApp || isShowing)
+    if (overrideDisplay || isShowing)
     {
         isShowing = NO;
         if (!messagingCenter)
