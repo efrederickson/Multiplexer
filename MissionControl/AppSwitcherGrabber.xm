@@ -80,7 +80,7 @@
 
 %new -(BOOL) RAGestureCallback_canHandle:(CGPoint)point velocity:(CGPoint)velocity
 {
-	return self.isKeyWindow;
+	return [RASettings.sharedInstance missionControlEnabled] && self.isKeyWindow;
 }
 
 %new -(RAGestureCallbackResult) RAGestureCallback_handle:(UIGestureRecognizerState)state withPoint:(CGPoint)location velocity:(CGPoint)velocity forEdge:(UIRectEdge)edge
