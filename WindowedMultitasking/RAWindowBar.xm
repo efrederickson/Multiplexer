@@ -359,7 +359,10 @@ const int bottomSizeViewTag =  987654320;
 		return;
 
 	if (sender.state == UIGestureRecognizerStateBegan)
+	{
+		[self.superview bringSubviewToFront:self];
 		initialPoint = sender.view.center;
+	}
 	else if (sender.state == UIGestureRecognizerStateChanged)
 	{
 		enableLongPress = NO;
