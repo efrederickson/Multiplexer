@@ -8,6 +8,9 @@
 {
 	NSInteger numberOfWindows = desktop.hostedWindows.count;
 
+	if (numberOfWindows == 0)
+		return;
+
 	NSMutableArray *windows = [NSMutableArray array];
 	for (UIView *view in desktop.subviews)
 		if ([view isKindOfClass:[RAWindowBar class]])
@@ -84,10 +87,9 @@
 			int currentPane = 0;
 
 			for (RAWindowBar *bar in windows)
+			{
 				[bar scaleTo:maxScale animated:YES];
 
-			for (RAWindowBar *bar in windows)
-			{
 				if (y == 0) // 20 = statusbar
 					y = 20 + (bar.frame.size.height / 2.0);
 				if (x == 0)
