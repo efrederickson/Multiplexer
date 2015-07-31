@@ -6,6 +6,7 @@ enum RABackgroundMode {
     RABackgroundModeForcedForeground = 3,
     RABackgroundModeForceNone = 4,
     RABackgroundModeSuspendImmediately = 5,
+    RABackgroundModeUnlimitedBackgroundingTime = 6,
 };
 
 enum RAIconIndicatorViewInfo {

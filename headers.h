@@ -20,6 +20,8 @@
 #import <notify.h>
 #import <IOKit/hid/IOHIDEvent.h>
 
+#define LOCALIZE(x) [RALocalizer localizedStringForKey:x]
+
 #if DEBUG
 #define NSLog NSLog
 #else

@@ -84,11 +84,7 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 
 -(BOOL) hasUnlimitedBackgroundTime:(NSString*)identifier
 {
-	if (!identifier || ![RASettings.sharedInstance backgrounderEnabled]) return NO;
-	
-	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
-	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
-	return [RASettings.sharedInstance backgrounderEnabled] && enabled && ([dict objectForKey:@"unlimitedBackgrounding"] == nil ? NO : [dict[@"unlimitedBackgrounding"] boolValue]);
+	return [self backgroundModeForIdentifier:identifier] == RABackgroundModeUnlimitedBackgroundingTime;
 }
 
 -(BOOL) killProcessOnExit:(NSString*)identifier

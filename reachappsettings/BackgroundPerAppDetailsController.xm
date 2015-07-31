@@ -43,18 +43,12 @@ extern void RA_BGAppsControllerNeedsToReload();
              	@"cell": @"PSLinkListCell",
              	@"label": @"Background Mode",
              	@"key": @"backgroundMode",
-             	@"validTitles": @[ @"Native",                 /*@"Forced Native (old apps) [broken]",*/     @"Force Foreground",                 @"Disabled (Kill on exit)",      @"Suspend Immediately (SmartClose)" ],
-             	@"validValues": @[ @(RABackgroundModeNative), /*@(RABackgroundModeForceNativeForOldApps),*/ @(RABackgroundModeForcedForeground), @(RABackgroundModeForceNone),    @(RABackgroundModeSuspendImmediately)],
-                @"shortTitles": @[ @"Native",                 /*@"Native+ [broken]",*/                      @"Forced",                           @"Disabled",                     @"SmartClose" ],
+             	@"validTitles": @[ @"Native",                 /*@"Forced Native (old apps) [broken]",*/     @"Unlimited Backgrounding Time",                  @"Force Foreground",                 @"Disabled (Kill on exit)",      @"Suspend Immediately (SmartClose)" ],
+             	@"validValues": @[ @(RABackgroundModeNative), /*@(RABackgroundModeForceNativeForOldApps),*/ @(RABackgroundModeUnlimitedBackgroundingTime),    @(RABackgroundModeForcedForeground), @(RABackgroundModeForceNone),    @(RABackgroundModeSuspendImmediately)],
+                @"shortTitles": @[ @"Native",                 /*@"Native+ [broken]",*/                      @"∞",                                             @"Forced",                           @"Disabled",                     @"SmartClose" ],
              	@"default": @(RABackgroundModeNative),
              	@"detail": @"PSListItemsController"
              	},
-             @{
-                @"cell": @"PSSwitchCell",
-                @"label": @"Unlimited Backgrounding Time",
-                @"key": @"unlimitedBackgrounding",
-                @"default": @NO,
-                },
              @{
              	@"cell": @"PSSwitchCell",
              	@"label": @"Auto Launch",

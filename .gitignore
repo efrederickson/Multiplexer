@@ -13,3 +13,5 @@ backboardd_headers/
 disabled*
 DISABLED*
 build_and_deploy.sh
+sloc.sh
+
