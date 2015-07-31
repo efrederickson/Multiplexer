@@ -259,7 +259,7 @@ extern BOOL overrideCC;
 		[windowedAppScrollView addSubview:emptyLabel];
 	}
 
-	windowedAppScrollView.contentSize = CGSizeMake(MAX(x, UIScreen.mainScreen.bounds.size.width + 1), height * 1.2); // make slightly scrollable
+	windowedAppScrollView.contentSize = CGSizeMake(MAX(x, UIScreen.mainScreen.bounds.size.width + (empty ? 0 : 1)), height * 1.2); // make slightly scrollable
 }
 
 -(void) reloadOtherAppsSection
@@ -318,7 +318,7 @@ extern BOOL overrideCC;
 		[windowedAppScrollView addSubview:emptyLabel];
 	}
 
-	otherRunningAppsScrollView.contentSize = CGSizeMake(MAX(x, UIScreen.mainScreen.bounds.size.width + 1), height * 1.2); // make slightly scrollable
+	otherRunningAppsScrollView.contentSize = CGSizeMake(MAX(x, UIScreen.mainScreen.bounds.size.width + (empty ? 0 : 1)), height * 1.2); // make slightly scrollable
 }
 
 -(void) hideMissionControl:(BOOL)animated
