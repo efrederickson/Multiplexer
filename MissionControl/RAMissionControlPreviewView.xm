@@ -6,8 +6,10 @@
 {
 	self.image = [RASnapshotProvider.sharedInstance snapshotForIdentifier:self.application.bundleIdentifier];
 
-    SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:self.application.bundleIdentifier];
-    iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
+	if (!icon)
+    	icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:self.application.bundleIdentifier];
+    if (icon && !iconView)
+	    iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
 
     iconView.layer.shadowRadius = 12; // iconView.layer.cornerRadius;
     iconView.layer.shadowOpacity = 0.8;

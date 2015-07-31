@@ -38,48 +38,6 @@ extern BOOL overrideCC;
 	);
 }
 
--(UIImage*) renderPreviewForDesktop:(RADesktopWindow*)desktop
-{
-	UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].bounds.size, YES, [UIScreen mainScreen].scale);
-	CGContextRef c = UIGraphicsGetCurrentContext();
-	[MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer renderInContext:c]; // Wallpaper
-	[[[[%c(SBUIController) sharedInstance] window] layer] renderInContext:c]; // Icons
-	[desktop.layer renderInContext:c]; // Desktop windows
-	for (UIView *view in desktop.subviews) // Application views
-	{
-		if ([view isKindOfClass:[RAWindowBar class]])
-		{
-			RAHostedAppView *hostedView = [((RAWindowBar*)view) attachedView];
-
-			UIImage *image = [RASnapshotProvider.sharedInstance snapshotForIdentifier:hostedView.bundleIdentifier];
-			[image drawInRect:CGRectMake(view.frame.origin.x, [hostedView convertPoint:hostedView.frame.origin toView:nil].y, view.frame.size.width, view.frame.size.height)];
-
-			/*SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:hostedView.bundleIdentifier];
-			FBScene *scene = [app mainScene];
-    		FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
-    		UIView *snapshotView = [contextHostManager snapshotViewWithFrame:hostedView.frame excludingContexts:@[] opaque:NO];
-    		
-			UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].bounds.size, YES, [UIScreen mainScreen].scale);
-			CGContextRef c2 = UIGraphicsGetCurrentContext();
-			//CGContextSetRGBFillColor(c2, 0, 0, 0, 0); // CGContextSetGrayFillColor
-    		//snapshotView.layer.frame = (CGRect) { [desktop convertPoint:view.frame.origin toView:nil], view.frame.size };
-    		//snapshotView.transform = view.transform;
-    		[snapshotView.layer renderInContext:c2];
-    		UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-    		UIGraphicsEndImageContext();
-
-    		// TODO: needs to be improved, no status bar + it's slightly off
-			//CGContextDrawImage(c, CGRectMake(view.frame.origin.x + hostedView.frame.origin.x, view.frame.origin.y + hostedView.frame.origin.y, hostedView.frame.size.width, hostedView.frame.size.height), image.CGImage);
-			[image drawInRect:CGRectMake(view.frame.origin.x, [hostedView convertPoint:hostedView.frame.origin toView:nil].y, view.frame.size.width, view.frame.size.height)];
-			*/
-		}
-	}
-
-	UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-	UIGraphicsEndImageContext();
-	return image;
-}
-
 -(void) showMissionControl:(BOOL)animated
 {
 	_isShowingMissionControl = YES;
@@ -153,7 +111,7 @@ extern BOOL overrideCC;
 		x += 7 + preview.frame.size.width;
 
 		[desktopScrollView addSubview:preview];
-		preview.image = [self renderPreviewForDesktop:desktop];
+		preview.image = [RASnapshotProvider.sharedInstance snapshotForDesktop:desktop];
 
 		if (desktop == RADesktopManager.sharedInstance.currentDesktop)
 		{
@@ -473,6 +431,9 @@ extern BOOL overrideCC;
 							bar.frame = frame;
 							bar.transform = transform;
 						}
+
+						[RASnapshotProvider.sharedInstance forceReloadSnapshotOfDesktop:RADesktopManager.sharedInstance.currentDesktop];
+						[RASnapshotProvider.sharedInstance forceReloadSnapshotOfDesktop:desktop];
 
 						[self reloadDesktopSection];
 						[self reloadWindowedAppsSection];

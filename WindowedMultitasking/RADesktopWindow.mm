@@ -2,6 +2,7 @@
 #import "RAWindowBar.h"
 #import "RAWindowStatePreservationSystemManager.h"
 #import "RADesktopManager.h"
+#import "RASnapshotProvider.h"
 
 @implementation RADesktopWindow
 -(id) initWithFrame:(CGRect)frame
@@ -130,6 +131,7 @@
 -(void) saveInfo
 {
 	[RAWindowStatePreservationSystemManager.sharedInstance saveDesktopInformation:self];
+	[RASnapshotProvider.sharedInstance forceReloadSnapshotOfDesktop:self];
 }
 
 -(void) loadInfo
