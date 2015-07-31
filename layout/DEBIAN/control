@@ -1,4 +1,4 @@
-Package: com.efrederickson.empoleon
+Package: org.thebigboss.multiplexer
 Name: Multiplexer
 Depends: mobilesubstrate, firmware (>= 8.0), applist, preferenceloader
 Conflicts: cc.tweak.statushud
@@ -7,6 +7,6 @@ Version: 0.1
 Architecture: iphoneos-arm
 Description: All sorts of multitasking. 
 Depiction: http://elijahandandrew.com/repo/depictions/Multiplexer/index.html
-Maintainer: Elijah Frederickson <elijah.frederickson@gmail.com>
+Maintainer: Elijah and Andrew <elijahandandrew@gmail.com>
 Author: Elijah and Andrew <elijahandandrew@gmail.com>
 Section: Tweaks
