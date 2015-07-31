@@ -88,8 +88,9 @@
 					titleView.text = section.displayName;
 					titleView.textColor = [UIColor whiteColor];
 					titleView.font = [UIFont fontWithName:@"HelveticaNeue" size:16];
+					[titleView sizeToFit];
 					[view addSubview:titleView];
-					currentY += titleView.frame.size.height;
+					currentY += titleView.frame.size.height + VERTICAL_PADDING;
 				}
 				
 				//sectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
