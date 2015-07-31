@@ -3,6 +3,7 @@
 #import "RAMissionControlManager.h"
 #import "RAMissionControlWindow.h"
 #import "RASettings.h"
+#import "RASnapshotProvider.h"
 
 %hook SBAppSwitcherController
 - (void)forceDismissAnimated:(_Bool)arg1
@@ -93,63 +94,82 @@
 
 	if (!fakeView)
 	{
-		fakeView = [[UIView alloc] initWithFrame:self.frame];
+		UIImage *snapshot = [RASnapshotProvider.sharedInstance storedSnapshotOfMissionControl];
 
-		CGFloat width = UIScreen.mainScreen.bounds.size.width / 4.5714;
-		CGFloat height = UIScreen.mainScreen.bounds.size.height / 4.36;
+		if (snapshot)
+		{
+			fakeView = [[UIImageView alloc] initWithFrame:self.frame];
+			((UIImageView*)fakeView).image = snapshot;
+			[self addSubview:fakeView];
+		}
+		else
+		{
+			fakeView = [[UIView alloc] initWithFrame:self.frame];
 
-		_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:0];
-		blurView.frame = fakeView.frame;
-		[fakeView addSubview:blurView];
+			CGFloat width = UIScreen.mainScreen.bounds.size.width / 4.5714;
+			CGFloat height = UIScreen.mainScreen.bounds.size.height / 4.36;
 
-		UIScrollView *desktopScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 20, fakeView.frame.size.width, height * 1.2)];
-		[fakeView addSubview:desktopScrollView];
-		desktopScrollView.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.1];
+			_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:1];
+			blurView.frame = fakeView.frame;
+			[fakeView addSubview:blurView];
 
-		CGFloat x = 20;
+			UILabel *desktopLabel, *windowedLabel, *otherLabel;
+			UIScrollView *desktopScrollView, *windowedAppScrollView, *otherRunningAppsScrollView;
 
-		UIButton *newDesktopButton = [[UIButton alloc] init];
-		newDesktopButton.frame = CGRectMake(x, 20, width, height);
-		newDesktopButton.backgroundColor = [UIColor darkGrayColor];
-		[newDesktopButton setTitle:@"+" forState:UIControlStateNormal];
-		newDesktopButton.titleLabel.font = [UIFont systemFontOfSize:36];
-		[newDesktopButton addTarget:self action:@selector(createNewDesktop) forControlEvents:UIControlEventTouchUpInside];
-		[desktopScrollView addSubview:newDesktopButton];
-		x += 20 + newDesktopButton.frame.size.width;
+			CGFloat x = 15;
+			CGFloat y = 25;
 
-		desktopScrollView.contentSize = CGSizeMake(MAX(x, UIScreen.mainScreen.bounds.size.width + 1), height * 1.2); // make slightly scrollable
-	
-		x = 20;
-		CGFloat y = desktopScrollView.frame.origin.y + desktopScrollView.frame.size.height + 20;
+			desktopLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, y, fakeView.frame.size.width - 20, 20)];
+			desktopLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
+			desktopLabel.textColor = UIColor.whiteColor;
+			desktopLabel.text = @"Desktops";
+			[fakeView addSubview:desktopLabel];
 
-		UILabel *windowedLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, y, fakeView.frame.size.width - 20, 20)];
-		windowedLabel.font = [UIFont systemFontOfSize:18];
-		windowedLabel.textColor = UIColor.whiteColor;
-		windowedLabel.text = @"On This Desktop";
-		[fakeView addSubview:windowedLabel];
+			y = y + desktopLabel.frame.size.height + 3;
 
-		UIScrollView *windowedAppScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + 30, fakeView.frame.size.width, height * 1.2)];
-		[fakeView addSubview:windowedAppScrollView];
-		windowedAppScrollView.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.1];
+			desktopScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y, fakeView.frame.size.width, height * 1.2)];
+			desktopScrollView.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.3];
 
-		windowedAppScrollView.contentSize = CGSizeMake(MAX(x, UIScreen.mainScreen.bounds.size.width + 1), height * 1.2); // make slightly scrollable
+			[fakeView addSubview:desktopScrollView];
 
-		x = 20;
-		y = windowedAppScrollView.frame.origin.y + windowedAppScrollView.frame.size.height + 20;
+			UIButton *newDesktopButton = [[UIButton alloc] init];
+			newDesktopButton.frame = CGRectMake(x, 20, width, height);
+			newDesktopButton.backgroundColor = [UIColor darkGrayColor];
+			[newDesktopButton setTitle:@"+" forState:UIControlStateNormal];
+			newDesktopButton.titleLabel.font = [UIFont systemFontOfSize:36];
+			[newDesktopButton addTarget:self action:@selector(createNewDesktop) forControlEvents:UIControlEventTouchUpInside];
+			[desktopScrollView addSubview:newDesktopButton];
 
-		UILabel *otherLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, y, fakeView.frame.size.width - 20, 20)];
-		otherLabel.font = [UIFont systemFontOfSize:18];
-		otherLabel.textColor = UIColor.whiteColor;
-		otherLabel.text = @"Running Elsewhere";
-		[fakeView addSubview:otherLabel];
+			x = 15;
+			y = desktopScrollView.frame.origin.y + desktopScrollView.frame.size.height + 5;
 
-		UIScrollView *otherRunningAppsScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + 30, fakeView.frame.size.width, height * 1.2)];
-		[fakeView addSubview:otherRunningAppsScrollView];
-		otherRunningAppsScrollView.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.1];
-	
-		otherRunningAppsScrollView.contentSize = CGSizeMake(MAX(x, UIScreen.mainScreen.bounds.size.width + 1), height * 1.2); // make slightly scrollable
+			windowedLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, y, fakeView.frame.size.width - 20, 20)];
+			windowedLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
+			windowedLabel.textColor = UIColor.whiteColor;
+			windowedLabel.text = @"On This Desktop";
+			[fakeView addSubview:windowedLabel];
 
-		[self addSubview:fakeView];
+			windowedAppScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + windowedLabel.frame.size.height + 3, fakeView.frame.size.width, height * 1.2)];
+			windowedAppScrollView.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.3];
+
+			[fakeView addSubview:windowedAppScrollView];
+
+			x = 15;
+			y = windowedAppScrollView.frame.origin.y + windowedAppScrollView.frame.size.height + 5;
+
+			otherLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, y, fakeView.frame.size.width - 20, 20)];
+			otherLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
+			otherLabel.textColor = UIColor.whiteColor;
+			otherLabel.text = @"Running Elsewhere";
+			[fakeView addSubview:otherLabel];
+
+			otherRunningAppsScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + otherLabel.frame.size.height + 3, fakeView.frame.size.width, height * 1.2)];
+			otherRunningAppsScrollView.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.3];
+
+			[fakeView addSubview:otherRunningAppsScrollView];
+
+			[self addSubview:fakeView];
+		}
 	}
 
 	if (origY == -1)

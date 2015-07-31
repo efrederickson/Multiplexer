@@ -10,6 +10,7 @@
 
 @property (nonatomic, readonly) BOOL isShowingMissionControl;
 
+-(void) createWindow;
 -(void) showMissionControl:(BOOL)animated;
 -(void) hideMissionControl:(BOOL)animated;
 -(void) toggleMissionControl:(BOOL)animated;

@@ -62,6 +62,12 @@ extern BOOL overrideCC;
 
 -(void) createWindow
 {
+	if (window)
+	{
+		window.hidden = YES;
+		window = nil;
+	}
+
 	window = [[RAMissionControlWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
 
 	_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:1];
@@ -281,6 +287,8 @@ extern BOOL overrideCC;
 
 -(void) hideMissionControl:(BOOL)animated
 {
+	[RASnapshotProvider.sharedInstance storeSnapshotOfMissionControl:window];
+
 	void (^destructor)() = ^{
 		_isShowingMissionControl = NO;
 		window.hidden = YES;

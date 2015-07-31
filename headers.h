@@ -534,6 +534,9 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 - (void)_hostingStatusChanged;
 - (BOOL)_isReallyHosting;
 - (void)updateFrame;
+
+@property(retain, nonatomic) UIColor *backgroundColorWhileNotHosting;
+@property(retain, nonatomic) UIColor *backgroundColorWhileHosting;
 @end
 @interface FBWindowContextHostView : UIView
 @end

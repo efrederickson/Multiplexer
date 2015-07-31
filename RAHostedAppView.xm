@@ -32,8 +32,8 @@
         if ([app mainScene])
         {
             isPreloading = NO;
-            if (((SBReachabilityManager*)[%c(SBReachabilityManager) sharedInstance]).reachabilityModeActive)
-            [[%c(SBWorkspace) sharedInstance] performSelector:@selector(RA_updateViewSizes) withObject:nil afterDelay:0.5]; // App is launched using ReachApp - animations commence. We have to wait for those animations to finish or this won't work.
+            if (((SBReachabilityManager*)[%c(SBReachabilityManager) sharedInstance]).reachabilityModeActive && [[%c(SBWorkspace) sharedInstance] respondsToSelector:@selector(RA_updateViewSizes)])
+                [[%c(SBWorkspace) sharedInstance] performSelector:@selector(RA_updateViewSizes) withObject:nil afterDelay:0.5]; // App is launched using ReachApp - animations commence. We have to wait for those animations to finish or this won't work.
         }
         else if (![app mainScene])
             [self preloadApp];
@@ -77,6 +77,7 @@
 
     [contextHostManager enableHostingForRequester:@"reachapp" orderFront:YES];
     view = [contextHostManager hostViewForRequester:@"reachapp" enableAndOrderFront:YES];
+    //view.backgroundColorWhileNotHosting = [UIColor clearColor];
 
     view.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height);
     //view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;

@@ -58,6 +58,27 @@
 	[imageCache removeObjectForKey:identifier];
 }
 
+-(UIImage*) storedSnapshotOfMissionControl
+{
+	return [imageCache objectForKey:@"missioncontrol"];
+}
+
+-(void) storeSnapshotOfMissionControl:(UIWindow*)window
+{
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+		UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].bounds.size, YES, [UIScreen mainScreen].scale);
+		CGContextRef c = UIGraphicsGetCurrentContext();
+		//CGContextSetAllowsAntialiasing(c, YES);
+		[window.layer renderInContext:c];
+		UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+		UIGraphicsEndImageContext();
+
+		if (image)
+			[imageCache setObject:image forKey:@"missioncontrol"];
+	});
+
+}
+
 -(NSString*) createKeyForDesktop:(RADesktopWindow*)desktop
 {
 	return [NSString stringWithFormat:@"desktop-%lu", (unsigned long)desktop.hash];

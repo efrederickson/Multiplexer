@@ -111,8 +111,6 @@ int patchOrientation(int in)
 
 	activityViewCheckTimer = [NSTimer timerWithTimeInterval:1 target:self selector:@selector(checkIfAppIsRunningAtAllAndStopTimerIfSo) userInfo:nil repeats:YES];
 	[[NSRunLoop currentRunLoop] addTimer:activityViewCheckTimer forMode:NSRunLoopCommonModes];
-
-	NSLog(@"[ReachApp] hello");
 }
 
 -(void) viewDidDisappear:(BOOL)animated
@@ -124,8 +122,6 @@ int patchOrientation(int in)
 
 	appView.hideStatusBar = NO;
 	[appView unloadApp];
-
-	NSLog(@"[ReachApp] bye");
 }
 
 -(void) checkIfAppIsRunningAtAllAndStopTimerIfSo
@@ -134,7 +130,7 @@ int patchOrientation(int in)
 	if (appView.app.isRunning)
 	{
 		appView.hideStatusBar = YES; // verify status bar is hidden (doesn't happen the first load)
-	[appView rotateToOrientation:patchOrientation(UIDevice.currentDevice.orientation)];
+	//[appView rotateToOrientation:patchOrientation(UIDevice.currentDevice.orientation)];
 
 		[activityViewCheckTimer invalidate];
 		[activityView stopAnimating];
