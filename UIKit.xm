@@ -80,8 +80,11 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
 - (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(id)arg2 changeApplicationFlag:(BOOL)arg3
 {
 	if ([RASettings.sharedInstance unifyStatusBar])
+    {
 	    arg1 = ((forcingRotation&&NO) || overrideDisplay) ? (isTopApp ? NO : YES) : arg1;
-    %orig(arg1, arg2, YES);
+        arg3 = YES;
+    }
+    %orig(arg1, arg2, arg3);
 }
 
 /*

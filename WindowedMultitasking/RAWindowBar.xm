@@ -168,7 +168,6 @@ const int bottomSizeViewTag =  987654320;
 	[RAWindowStatePreservationSystemManager.sharedInstance saveWindowInformation:self];
 	if (self.desktop)
 	{
-		NSLog(@"[ReachApp] - has desktop");
 		[self.desktop saveInfo];
 	}
 }
@@ -192,6 +191,19 @@ const int bottomSizeViewTag =  987654320;
 	{
 		[sizingLockButton setBackgroundImage:[[RAResourceImageProvider imageForFilename:@"Unlocked" constrainedToSize:CGSizeMake(20, 20)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
 	}
+}
+
+
+-(void) scaleTo:(CGFloat)scale animated:(BOOL)animate
+{
+	CGFloat rotation = atan2(self.transform.b, self.transform.a);
+
+	if (animate)
+		[UIView animateWithDuration:0.2 animations:^{
+	    	[self setTransform:CGAffineTransformRotate(CGAffineTransformMakeScale(scale, scale), rotation)];
+	    }];
+	else 
+		[self setTransform:CGAffineTransformRotate(CGAffineTransformMakeScale(scale, scale), rotation)];
 }
 
 -(void) addRotation:(CGFloat)rads updateApp:(BOOL)update

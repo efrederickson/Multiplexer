@@ -70,6 +70,7 @@ extern CPDistributedMessagingCenter *messagingCenter;
         NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
         [center addObserver:self selector:@selector(didShow:) name:UIKeyboardDidShowNotification object:nil];
         [center addObserver:self selector:@selector(didHide) name:UIKeyboardWillHideNotification object:nil];
+        [center addObserver:self selector:@selector(didHide) name:UIApplicationWillResignActiveNotification object:nil];
     }
     return self;
 }

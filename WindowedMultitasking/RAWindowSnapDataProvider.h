@@ -14,6 +14,10 @@ enum RAWindowSnapLocation {
 
 	RAWindowSnapLocationBottom,
 	RAWindowSnapLocationTop,
+	RAWindowSnapLocationBottomCenter,
+
+	RAWindowSnapLocationBottomLeft = RAWindowSnapLocationLeftBottom,
+	RAWindowSnapLocationBottomRight = RAWindowSnapLocationRightBottom,
 
 	RAWindowSnapLocationRight = RAWindowSnapLocationRightMiddle,
 	RAWindowSnapLocationLeft = RAWindowSnapLocationLeftMiddle,

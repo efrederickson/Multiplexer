@@ -135,6 +135,11 @@
 			newCenter.y = height - (frame.size.height / 2);
 			break;
 
+		case RAWindowSnapLocationBottomCenter:
+			newCenter.x = width / 2.0;
+			newCenter.y = height - (frame.size.height / 2);
+			break;
+
 		case RAWindowSnapLocationInvalid:
 		default:
 			break;

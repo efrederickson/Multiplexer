@@ -20,7 +20,6 @@
 	{
 		contexts = [NSMutableDictionary dictionary];
         messagingCenter = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.efrederickson.reachapp.keyboardMessaging"];
-
         springboardCenter = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.efrederickson.reachapp.keyboardMessaging.springBoard"];
 
         void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);

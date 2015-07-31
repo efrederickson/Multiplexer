@@ -19,4 +19,8 @@
 
 -(RAHostedAppView*) attachedView;
 -(void) attachView:(RAHostedAppView*)view;
+
+-(void) scaleTo:(CGFloat)scale animated:(BOOL)animate;
+
+-(void) saveWindowInfo;
 @end
