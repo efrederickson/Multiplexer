@@ -11,6 +11,14 @@ static RAActivatorListener *sharedInstance;
 @implementation RAActivatorListener
 - (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event
 {
+	if (RAMissionControlManager.sharedInstance.missionControlEnabled == NO)
+	{
+		FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
+			SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
+			[transaction begin];
+		}];
+		[(FBWorkspaceEventQueue*)[%c(FBWorkspaceEventQueue) sharedInstance] executeOrAppendEvent:event];
+	}
     [RAMissionControlManager.sharedInstance toggleMissionControl:YES];
     [event setHandled:YES];
 }

@@ -7,6 +7,7 @@
 #import <notify.h>
 #import "RAHeaderView.h"
 #import "PDFImage.h"
+#import <libactivator/libactivator.h>
 
 #define PLIST_NAME @"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"
 
@@ -70,6 +71,28 @@
                  @"label": @"Replace App Switcher",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
+                 @{ },
+             @{
+                    @"cell": @"PSLinkCell",
+                    @"action": @"showActivatorAction",
+                    @"label": @"Secondary Activation Method",
+                    //@"enabled": objc_getClass("LAEventSettingsController") != nil,
+                 },
              ];
+}
+-(void) showActivatorAction
+{
+    id activator = objc_getClass("LAListenerSettingsViewController");
+    if (!activator)
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:LOCALIZE(@"Multiplexer") message:@"Activator must be installed to use this feature." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show];
+    }
+    else
+    {
+        LAListenerSettingsViewController *vc = [[objc_getClass("LAListenerSettingsViewController") alloc] init];
+        vc.listenerName = @"com.efrederickson.reachapp.missioncontrol.activatorlistener";
+        [self.rootController pushViewController:vc animated:YES];
+    }
 }
 @end

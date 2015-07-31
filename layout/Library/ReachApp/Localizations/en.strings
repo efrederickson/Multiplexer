@@ -1,6 +1,6 @@
 "BIOLOCKDOWN_AUTH_DESCRIPTION" = "Multiplexer requires authentication";
 "BIOLOCKDOWN_AUTH_FAILED" = "BioLockdown authentication failed for %@. Tap to try again.";
-"MULTIPLEXER" = "MULTIPLEXER";
+"MULTIPLEXER" = "Multiplexer";
 "BACKGROUNDER_POPUP_SWITCHER_TEXT" = "Which backgrounding mode would you like to enable for %@?";
 "CANCEL" = "Cancel";
 "FORCE_FOREGROUND" = "Force Foreground";

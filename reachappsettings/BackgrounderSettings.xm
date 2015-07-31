@@ -9,6 +9,7 @@
 #import "PDFImage.h"
 #import <AppList/AppList.h>
 #import "RABackgrounder.h"
+#import <libactivator/libactivator.h>
 
 #define PLIST_NAME @"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"
 
@@ -75,6 +76,12 @@
                 @"defaults": @"com.efrederickson.reachapp.settings",
                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
              },    
+             @{
+                @"cell": @"PSLinkCell",
+                @"action": @"showActivatorAction",
+                @"label": @"Activation method",
+                //@"enabled": objc_getClass("LAEventSettingsController") != nil,
+             },
 
              @{ @"label": @"Global Settings" },
              @{
@@ -114,5 +121,21 @@
                 @"detail": @"RABGPerAppController",
              },
              ];
+}
+
+-(void) showActivatorAction
+{
+    id activator = objc_getClass("LAListenerSettingsViewController");
+    if (!activator)
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:LOCALIZE(@"Multiplexer") message:@"Activator must be installed to use this feature." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show];
+    }
+    else
+    {
+        LAListenerSettingsViewController *vc = [[objc_getClass("LAListenerSettingsViewController") alloc] init];
+        vc.listenerName = @"com.efrederickson.reachapp.backgrounder.togglemode";
+        [self.rootController pushViewController:vc animated:YES];
+    }
 }
 @end

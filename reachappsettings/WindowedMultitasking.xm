@@ -8,6 +8,7 @@
 #import "RAHeaderView.h"
 #import "PDFImage.h"
 #import "RASettings.h"
+#import <libactivator/libactivator.h>
 
 #define PLIST_NAME @"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"
 
@@ -114,6 +115,20 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
+             @{ },
+             @{
+                @"cell": @"PSLinkCell",
+                @"action": @"showActivatorAction",
+                @"label": @"Sort Windows Activation",
+                //@"enabled": objc_getClass("LAEventSettingsController") != nil,
+             },
+             @{
+                @"cell": @"PSLinkCell",
+                @"action": @"showActivatorAction2",
+                @"label": @"Show Overlays Activation",
+                //@"enabled": objc_getClass("LAEventSettingsController") != nil,
+             },
+
              @{ @"footerText": @"Launches app into windows instead of fullscreen" },
              @{
                  @"cell": @"PSSwitchCell",
@@ -124,5 +139,37 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
              ];
+}
+
+-(void) showActivatorAction
+{
+    id activator = objc_getClass("LAListenerSettingsViewController");
+    if (!activator)
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:LOCALIZE(@"Multiplexer") message:@"Activator must be installed to use this feature." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show];
+    }
+    else
+    {
+        LAListenerSettingsViewController *vc = [[objc_getClass("LAListenerSettingsViewController") alloc] init];
+        vc.listenerName = @"com.efrederickson.reachapp.windowedmultitasking.sortWindows";
+        [self.rootController pushViewController:vc animated:YES];
+    }
+}
+
+-(void) showActivatorAction2
+{
+    id activator = objc_getClass("LAListenerSettingsViewController");
+    if (!activator)
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:LOCALIZE(@"Multiplexer") message:@"Activator must be installed to use this feature." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show];
+    }
+    else
+    {
+        LAListenerSettingsViewController *vc = [[objc_getClass("LAListenerSettingsViewController") alloc] init];
+        vc.listenerName = @"com.efrederickson.reachapp.windowedmultitasking.toggleEditMode";
+        [self.rootController pushViewController:vc animated:YES];
+    }
 }
 @end
