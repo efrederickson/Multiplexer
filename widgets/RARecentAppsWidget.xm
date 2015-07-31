@@ -16,7 +16,7 @@
 -(BOOL) enabled { return [RASettings.sharedInstance showRecentAppsInWidgetSelector]; }
 
 -(NSInteger) sortOrder { return 1; }
--(NSString*) displayName { return @"Recent"; }
+-(NSString*) displayName { return LOCALIZE(@"RECENTS"); }
 -(NSString*) identifier { return @"com.efrederickson.reachapp.widgets.sections.recentapps"; }
 
 -(UIView*) viewForFrame:(CGRect)frame preferredIconSize:(CGSize)size_ iconsThatFitPerLine:(NSInteger)iconsPerLine spacing:(CGFloat)spacing

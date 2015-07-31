@@ -11,7 +11,7 @@
 
 -(NSString*) displayName 
 {
-	return @"Widgets";
+	return LOCALIZE(@"WIDGETS");
 }
 
 -(NSString*) identifier 

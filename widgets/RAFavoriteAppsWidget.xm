@@ -8,7 +8,7 @@
 -(BOOL) enabled { return YES; }
 
 -(NSInteger) sortOrder { return 2; }
--(NSString*) displayName { return @"Favorites"; }
+-(NSString*) displayName { return LOCALIZE(@"FAVORITES"); }
 -(NSString*) identifier { return @"com.efrederickson.reachapp.widgets.sections.favoriteapps"; }
 
 -(UIView*) viewForFrame:(CGRect)frame preferredIconSize:(CGSize)size_ iconsThatFitPerLine:(NSInteger)iconsPerLine spacing:(CGFloat)spacing

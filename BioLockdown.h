@@ -26,7 +26,7 @@ __attribute__((visibility("hidden")))
 #define BIOLOCKDOWN_AUTHENTICATE_APP(ident, success, failure_) \
 	if ([[objc_getClass("BioLockdownController") sharedController] requiresAuthenticationForIdentifier:ident]) \
 	{ \
-		[[objc_getClass("BioLockdownController") sharedController] authenticateForIdentifier:ident actionDescription:@"Multiplexer requires authentication" completion:success failure:failure_]; \
+		[[objc_getClass("BioLockdownController") sharedController] authenticateForIdentifier:ident actionDescription:LOCALIZE(@"BIOLOCKDOWN_AUTH_DESCRIPTION") completion:success failure:failure_]; \
 	} \
 	else \
 		success()

@@ -30,7 +30,7 @@ RANCViewController *ncAppViewController;
 + (NSString *)_localizableTitleForBulletinViewControllerOfClass:(Class)aClass
 {
 	if (aClass == [RANCViewController class]) 
-		return ncAppViewController.hostedApp.displayName ?: getAppName() ?: @"App";
+		return ncAppViewController.hostedApp.displayName ?: getAppName() ?: LOCALIZE(@"APP");
 	else 
 		return %orig;
 }

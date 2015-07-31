@@ -106,7 +106,7 @@
                 biolockdownDidFailLabel.textColor = [UIColor whiteColor];
                 biolockdownDidFailLabel.textAlignment = NSTextAlignmentCenter;
                 biolockdownDidFailLabel.font = [UIFont systemFontOfSize:36];
-                biolockdownDidFailLabel.text = [NSString stringWithFormat:@"BioLockdown authentication failed for %@. Tap to try again.",self.app.displayName];
+                biolockdownDidFailLabel.text = [NSString stringWithFormat:LOCALIZE(@"BIOLOCKDOWN_AUTH_FAILED"),self.app.displayName];
                 [self addSubview:biolockdownDidFailLabel];
 
                 biolockdownFailedRetryTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(loadApp)];

@@ -9,7 +9,7 @@
 
 -(NSInteger) sortOrder { return 3; }
 
--(NSString*) displayName { return @"All Apps"; }
+-(NSString*) displayName { return LOCALIZE(@"ALL_APPS"); }
 -(NSString*) identifier { return @"com.efrederickson.reachapp.widgets.sections.allapps"; }
 
 -(UIView*) viewForFrame:(CGRect)frame preferredIconSize:(CGSize)size_ iconsThatFitPerLine:(NSInteger)iconsPerLine spacing:(CGFloat)spacing

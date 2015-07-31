@@ -11,8 +11,8 @@
 		if ([RASettings.sharedInstance isFirstRun])
 		{
 			BBBulletinRequest *request = [[%c(BBBulletinRequest) alloc] init];
-			request.title = @"Multiplexer";
-			request.message = @"Thank you for installing Multiplexer! Tap here to view the tutorial.";
+			request.title = LOCALIZE(@"MULTIPLEXER");
+			request.message = LOCALIZE(@"THANK_YOU_TEXT");
 			request.sectionID = @"com.apple.Preferences";
 			request.date = [NSDate date];
 			SBBulletinBannerController *bannerController = [%c(SBBulletinBannerController) sharedInstance];

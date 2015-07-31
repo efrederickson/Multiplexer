@@ -60,7 +60,7 @@ int patchOrientation(int in)
 
 		isLockedLabel.frame = CGRectMake((self.view.frame.size.width - isLockedLabel.frame.size.width) / 2, (self.view.frame.size.height - isLockedLabel.frame.size.height) / 2, isLockedLabel.frame.size.width, isLockedLabel.frame.size.height);
 
-		isLockedLabel.text = [NSString stringWithFormat:@"Unlock to use\nQuick Access"];
+		isLockedLabel.text = LOCALIZE(@"UNLOCK_FOR_NCAPP");
 		[activityView stopAnimating];
 		return;
 	}
