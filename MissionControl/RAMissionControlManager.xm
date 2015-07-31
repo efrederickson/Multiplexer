@@ -98,7 +98,7 @@ extern BOOL overrideCC;
 		//[UIView animateWithDuration:0.5 animations:^{ window.alpha = 1; }];
 		[UIView animateWithDuration:0.5 animations:^{ window.frame = CGRectMake(0, 0, window.frame.size.width, window.frame.size.height); } completion:nil];
 	
-
+	[RAGestureManager.sharedInstance addGestureRecognizerWithTarget:self forEdge:UIRectEdgeBottom identifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture"];
 	overrideCC = YES;
 }
 
@@ -339,6 +339,7 @@ extern BOOL overrideCC;
 
 	[RADesktopManager.sharedInstance reshowDesktop];
 	[RADesktopManager.sharedInstance.currentDesktop loadApps];
+	[RAGestureManager.sharedInstance removeGestureWithIdentifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture"];
 	overrideCC = NO;
 }
 
@@ -556,6 +557,50 @@ extern BOOL overrideCC;
 {
 	[self hideMissionControl:YES];
 	[UIApplication.sharedApplication launchApplicationWithIdentifier:[[[gesture view] performSelector:@selector(application)] bundleIdentifier] suspended:NO];
+}
+
+-(BOOL) RAGestureCallback_canHandle:(CGPoint)point velocity:(CGPoint)velocity
+{
+	return self.isShowingMissionControl;
+}
+
+-(RAGestureCallbackResult) RAGestureCallback_handle:(UIGestureRecognizerState)state withPoint:(CGPoint)location velocity:(CGPoint)velocity forEdge:(UIRectEdge)edge
+{
+	static CGPoint initialCenter;
+
+	if (state == UIGestureRecognizerStateEnded)
+	{
+		if (window.frame.origin.y + window.frame.size.height + velocity.y < UIScreen.mainScreen.bounds.size.height / 2)
+		{
+			// Close
+			CGFloat distance = UIScreen.mainScreen.bounds.size.height - (window.frame.origin.y + window.frame.size.height);
+			CGFloat duration = MIN(distance / velocity.y, 0.3);
+
+			[UIView animateWithDuration:duration animations:^{
+				window.center = CGPointMake(window.center.x, -initialCenter.y);
+			} completion:^(BOOL _) {
+				[self hideMissionControl:NO];
+			}];
+		}
+		else
+		{
+			CGFloat distance = window.frame.size.height + window.frame.origin.y /* origin.y is less than 0 so the + is actually a - operation */;
+			CGFloat duration = MIN(distance / velocity.y, 0.3);
+
+			[UIView animateWithDuration:duration animations:^{
+				window.center = initialCenter;
+			}];
+		}
+	}
+	else if (state == UIGestureRecognizerStateBegan)
+	{
+		initialCenter = window.center;
+	}
+	else
+	{
+		window.center = CGPointMake(window.center.x, location.y - initialCenter.y);
+	}
+	return RAGestureCallbackResultSuccess;
 }
 
 -(RAMissionControlWindow*) missionControlWindow { if (!window) [self createWindow]; return window; }

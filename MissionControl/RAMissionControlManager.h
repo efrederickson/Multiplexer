@@ -1,7 +1,8 @@
 #import "headers.h"
 #import "RAMissionControlWindow.h"
+#import "RAGestureManager.h"
 
-@interface RAMissionControlManager : NSObject {
+@interface RAMissionControlManager : NSObject<RAGestureCallbackProtocol> {
 	RAMissionControlWindow *window;
 	NSMutableArray *runningApplications;
 }
