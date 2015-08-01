@@ -1,10 +1,10 @@
 #!/bin/bash
 
-chgrp staff /Library/LaunchDaemons/com.efrederickson.reachapp.fsdaemon.plist
+chgrp wheel /Library/LaunchDaemons/com.efrederickson.reachapp.fsdaemon.plist
 chown root /Library/LaunchDaemons/com.efrederickson.reachapp.fsdaemon.plist
 launchctl load -w /Library/LaunchDaemons/com.efrederickson.reachapp.fsdaemon.plist
 
-chgrp staff /Library/LaunchDaemons/com.efrederickson.reachapp.keyboarddaemon.plist
+chgrp wheel /Library/LaunchDaemons/com.efrederickson.reachapp.keyboarddaemon.plist
 chown root /Library/LaunchDaemons/com.efrederickson.reachapp.keyboarddaemon.plist
 launchctl load -w /Library/LaunchDaemons/com.efrederickson.reachapp.keyboarddaemon.plist
 

@@ -68,7 +68,7 @@ extern void RA_BGAppsControllerNeedsToReload();
                 @"default": @NO,
                 @"label": @"Prevent Death",
                 @"enabled": @(!exitsOnSuspend),
-                @"reloadSpecifiers": @YES,
+                @"reloadSpecifiersXX": @YES,
             },
             @{ @"footerText": @"This switch causes applications to completely disable their backgrounding, natively. Apps such as BatteryLife, FinalFantasy2, and a certain Solitaire do this. This switch will not revert upon the uninstallation of Multiplexer. A respring may or may not be required to apply." },
             @{
@@ -77,6 +77,7 @@ extern void RA_BGAppsControllerNeedsToReload();
                 @"default": @(exitsOnSuspend),
                 @"label": @"Exit on Suspend",
                 @"enabled": @(!preventDeath),
+                @"reloadSpecifiersXX": @YES,
             },
             @{ 
                 @"cell": @"PSGroupCell",
@@ -190,7 +191,8 @@ B - unlimited backgrounding time", },
             [daemonDict writeToFile:@"/User/Library/.reachapp.uiappexitsonsuspend.wantstochangerootapp" atomically:YES];
         }
 
-        [self reloadSpecifiers];
+        if ([[specifier propertyForKey:@"reloadSpecifiers"] boolValue])
+            [self reloadSpecifiers];
 
         return;
     }

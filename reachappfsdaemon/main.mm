@@ -10,6 +10,12 @@ int main(int argc, char **argv, char **envp) {
 	NSAutoreleasePool *pool = [NSAutoreleasePool new];
 
 	NSString *filePath = @"/User/Library/.reachapp.uiappexitsonsuspend.wantstochangerootapp";
+    if ([NSFileManager.defaultManager fileExistsAtPath:filePath] == NO)
+    {
+        NSLog(@"[ReachApp] FS Daemon: plist does not exist");
+        return 0;
+    }
+
 	NSDictionary *contents = [NSDictionary dictionaryWithContentsOfFile:filePath];
 
     LSApplicationProxy *appInfo = [objc_getClass("LSApplicationProxy") applicationProxyForIdentifier:contents[@"bundleIdentifier"]];
@@ -20,8 +26,8 @@ int main(int argc, char **argv, char **envp) {
 
     if (!success)
     	NSLog(@"[ReachApp] FS Daemon: error writing to plist: %@", path);
-
-	[NSFileManager.defaultManager removeItemAtPath:path error:nil];
+    else
+    	[NSFileManager.defaultManager removeItemAtPath:path error:nil];
 
 	[pool release];
 	return 0;

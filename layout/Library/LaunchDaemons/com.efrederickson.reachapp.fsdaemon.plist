@@ -14,5 +14,9 @@
 	<array>
 		<string>/User/Library/.reachapp.uiappexitsonsuspend.wantstochangerootapp</string>
 	</array>
+	<key>user</key>
+	<string>root</string>
+	<key>group</key>
+	<string>wheel</string>
 </dict>
 </plist>
