@@ -11,6 +11,8 @@
 -(void) removeDesktopAtIndex:(NSUInteger)index;
 -(void) removeAppWithIdentifier:(NSString*)bundleIdentifier animated:(BOOL)animated;
 
+-(BOOL) isAppOpened:(NSString*)identifier;
+
 -(NSUInteger) currentDesktopIndex;
 -(NSUInteger) numberOfDesktops;
 -(void) switchToDesktop:(NSUInteger)index;

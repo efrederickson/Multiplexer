@@ -38,8 +38,8 @@
                 arg3 = kProcessAssertionReasonSuspend;
                 if (arg5)
                 {
-                    void (^arg5fix)() = arg5;
-                    arg5fix();
+                    //void (^arg5fix)() = arg5;
+                    //arg5fix();
                 }
                 return nil;
             }

@@ -41,7 +41,7 @@
 #define kBGModeFetch                   @"fetch"
 #define kBGModeRemoteNotification      @"remote-notification"
 #define kBGModeExternalAccessory       @"external-accessory"
-#define kBGModeVOiP                    @"voip"
+#define kBGModeVoIP                    @"voip"
 #define kBGModeLocation                @"location"
 #define kBGModeAudio                   @"audio"
 #define kBGModeBluetoothCentral        @"bluetooth-central"
@@ -68,12 +68,28 @@ return sharedInstance;
 
 extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 
+
+
+@interface UIScreen (ohBoy)
+-(CGRect) _interfaceOrientedBounds;
+@end
+
+@interface UIAutoRotatingWindow : UIWindow
+- (void)updateForOrientation:(UIInterfaceOrientation)arg1;
+@end
+
 @interface LSApplicationProxy
 + (id)applicationProxyForIdentifier:(id)arg1;
 - (NSArray*) UIBackgroundModes;
 @property (nonatomic, readonly) NSURL *appStoreReceiptURL;
 @property (nonatomic, readonly) NSURL *bundleContainerURL;
 @property (nonatomic, readonly) NSURL *bundleURL;
+@end
+
+@interface UIViewController ()
+- (void)setInterfaceOrientation:(UIInterfaceOrientation)arg1;
+- (void)_setInterfaceOrientationOnModalRecursively:(int)arg1;
+- (void)_updateInterfaceOrientationAnimated:(BOOL)arg1;
 @end
 
 @interface SBWallpaperController
@@ -223,6 +239,8 @@ typedef NS_ENUM(NSInteger, UIScreenEdgePanRecognizerType) {
 @interface _UIBackdropView : UIView
 @property (retain, nonatomic) _UIBackdropViewSettings *outputSettings;
 @property (retain, nonatomic) _UIBackdropViewSettings *inputSettings;
+-(void) setBlurRadius:(CGFloat)radius;
+-(void) setBlurRadiusSetOnce:(BOOL)v;
 @end
 
 @interface SBOffscreenSwipeGestureRecognizer : NSObject // SBPanGestureRecognizer <_UIScreenEdgePanRecognizerDelegate>
@@ -506,6 +524,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @interface SBApplication ()
 -(void) _setDeactivationSettings:(SBDeactivationSettings*)arg1;
 -(FBScene*) mainScene;
+-(id) mainScreenContextHostManager;
 -(id) mainSceneID;
 - (void)activate;
 
@@ -519,10 +538,12 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @property(readonly, nonatomic) int pid;
 @end
 
-@interface SBApplicationController
+@interface SBApplicationController : NSObject
 +(id) sharedInstance;
 -(SBApplication*) applicationWithBundleIdentifier:(NSString*)identifier;
+-(SBApplication*) applicationWithDisplayIdentifier:(NSString*)identifier;
 -(SBApplication*)applicationWithPid:(int)arg1;
+-(SBApplication*) RA_applicationWithBundleIdentifier:(NSString*)bundleIdentifier;
 @end
 
 @interface FBWindowContextHostWrapperView : UIView
@@ -607,6 +628,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 - (void)_setRotatableViewOrientation:(int)arg1 updateStatusBar:(BOOL)arg2 duration:(double)arg3 force:(BOOL)arg4;
 - (void)_rotateWindowToOrientation:(int)arg1 updateStatusBar:(BOOL)arg2 duration:(double)arg3 skipCallbacks:(BOOL)arg4;
 - (unsigned int)_contextId;
+-(UIInterfaceOrientation) _windowInterfaceOrientation;
 @end
 
 @interface UIApplication ()

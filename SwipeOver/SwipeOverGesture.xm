@@ -17,20 +17,23 @@ CGRect adjustFrameForRotation()
     CGFloat portraitWidth = 30;
     CGFloat portraitHeight = 50;
 
+    CGFloat width = UIScreen.mainScreen._interfaceOrientedBounds.size.width;
+    CGFloat height = UIScreen.mainScreen._interfaceOrientedBounds.size.height;
+
     switch ([[UIApplication.sharedApplication _accessibilityFrontMostApplication] statusBarOrientation])
     {
         case UIInterfaceOrientationPortrait:
             NSLog(@"[ReachApp] portrait");
-            return (CGRect){ { UIScreen.mainScreen.bounds.size.width - portraitWidth + 5, (UIScreen.mainScreen.bounds.size.height - portraitHeight) / 2 }, { portraitWidth, portraitHeight } };
+            return (CGRect){ { width - portraitWidth + 5, (height - portraitHeight) / 2 }, { portraitWidth, portraitHeight } };
         case UIInterfaceOrientationPortraitUpsideDown:
             NSLog(@"[ReachApp] portrait upside down");
             return (CGRect){ { 0, 0}, { 50, 50 } };
         case UIInterfaceOrientationLandscapeLeft:
             NSLog(@"[ReachApp] landscape left");
-            return (CGRect){ { ((UIScreen.mainScreen.bounds.size.width - portraitWidth) / 2), 0 - 5 }, { portraitWidth, portraitHeight } };
+            return (CGRect){ { ((width - portraitWidth) / 2), 0 - 5 }, { portraitWidth, portraitHeight } };
         case UIInterfaceOrientationLandscapeRight:
             NSLog(@"[ReachApp] landscape right");
-            return (CGRect){ { UIScreen.mainScreen.bounds.size.height - portraitHeight, UIScreen.mainScreen.bounds.size.width - portraitWidth }, { portraitHeight, portraitWidth } };
+            return (CGRect){ { height - portraitHeight, width - portraitWidth }, { portraitHeight, portraitWidth } };
     }
     return CGRectZero;
 }
@@ -60,11 +63,11 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
         case RAGrabAreaSideAnywhere:
             return YES;
         case RAGrabAreaSideTopThird:
-            return y <= UIScreen.mainScreen.bounds.size.height / 3.0;
+            return y <= UIScreen.mainScreen._interfaceOrientedBounds.size.height / 3.0;
         case RAGrabAreaSideMiddleThird:
-            return y >= UIScreen.mainScreen.bounds.size.height / 3.0 && y <= (UIScreen.mainScreen.bounds.size.height / 3.0) * 2;
+            return y >= UIScreen.mainScreen._interfaceOrientedBounds.size.height / 3.0 && y <= (UIScreen.mainScreen._interfaceOrientedBounds.size.height / 3.0) * 2;
         case RAGrabAreaSideBottomThird:
-            return y >= (UIScreen.mainScreen.bounds.size.height / 3.0) * 2;
+            return y >= (UIScreen.mainScreen._interfaceOrientedBounds.size.height / 3.0) * 2;
         default:
             return NO;
     }
@@ -161,7 +164,7 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
     } withCondition:^BOOL(CGPoint location, CGPoint velocity) {
         if (RAKeyboardStateListener.sharedInstance.visible)
         {
-            CGRect realKBFrame = CGRectMake(0, UIScreen.mainScreen.bounds.size.height, RAKeyboardStateListener.sharedInstance.size.width, RAKeyboardStateListener.sharedInstance.size.height);
+            CGRect realKBFrame = CGRectMake(0, UIScreen.mainScreen._interfaceOrientedBounds.size.height, RAKeyboardStateListener.sharedInstance.size.width, RAKeyboardStateListener.sharedInstance.size.height);
             realKBFrame = CGRectOffset(realKBFrame, 0, -realKBFrame.size.height);
 
             if (CGRectContainsPoint(realKBFrame, location))

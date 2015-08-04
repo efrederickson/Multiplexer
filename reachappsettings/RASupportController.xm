@@ -132,7 +132,7 @@
                  @"cell": @"PSLinkCell",
                  @"label": @"Source Code",
                  @"action": @"openGithub",
-                 @"icon": RSIMG(@"github.png")
+                 @"icon": @"github.png"
                  },
 
              @{ @"cell": @"PSGroupCell",

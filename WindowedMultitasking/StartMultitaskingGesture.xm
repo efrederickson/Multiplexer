@@ -2,6 +2,7 @@
 #import "RADesktopManager.h"
 #import "RAGestureManager.h"
 #import "RASettings.h"
+#import "RAHostManager.h"
 
 BOOL overrideCC = NO;
 
@@ -26,11 +27,11 @@ BOOL locationIsInValidArea(CGFloat x)
     switch ([RASettings.sharedInstance windowedMultitaskingGrabArea])
     {
         case RAGrabAreaBottomLeftThird:
-            return x <= UIScreen.mainScreen.bounds.size.width / 3.0;
+            return x <= UIScreen.mainScreen._interfaceOrientedBounds.size.width / 3.0;
         case RAGrabAreaBottomMiddleThird:
-            return x >= UIScreen.mainScreen.bounds.size.width / 3.0 && x <= (UIScreen.mainScreen.bounds.size.width / 3.0) * 2;
+            return x >= UIScreen.mainScreen._interfaceOrientedBounds.size.width / 3.0 && x <= (UIScreen.mainScreen._interfaceOrientedBounds.size.width / 3.0) * 2;
         case RAGrabAreaBottomRightThird:
-            return x >= (UIScreen.mainScreen.bounds.size.width / 3.0) * 2;
+            return x >= (UIScreen.mainScreen._interfaceOrientedBounds.size.width / 3.0) * 2;
         default:
             return NO;
     }
@@ -56,12 +57,13 @@ BOOL locationIsInValidArea(CGFloat x)
             [[%c(SBUIController) sharedInstance] restoreContentAndUnscatterIconsAnimated:NO];
 
             // Assign view
-            appView = [MSHookIvar<UIView*>(topApp.mainScene.contextHostManager, "_hostView") superview];
+            //appView = [MSHookIvar<UIView*>(topApp.mainScene.contextHostManager, "_hostView") superview];
+            appView = [RAHostManager systemHostViewForApplication:topApp].superview;
         }
         else if (state == UIGestureRecognizerStateChanged)
         {
             lastY = location.y;
-            CGFloat scale = location.y / UIScreen.mainScreen.bounds.size.height;
+            CGFloat scale = location.y / UIScreen.mainScreen._interfaceOrientedBounds.size.height;
             scale = MIN(MAX(scale, 0.3), 1);
             appView.transform = CGAffineTransformMakeScale(scale, scale);
         }
@@ -69,7 +71,7 @@ BOOL locationIsInValidArea(CGFloat x)
         {
             overrideCC = NO;
 
-            if (lastY <= (UIScreen.mainScreen.bounds.size.height / 4) * 3) // 75% down
+            if (lastY <= (UIScreen.mainScreen._interfaceOrientedBounds.size.height / 4) * 3 && lastY != 0) // 75% down, 0 == gesture ended in most situations
             {
                 [UIView animateWithDuration:0.2 animations:^{
                     appView.transform = CGAffineTransformMakeScale(0.5, 0.5);

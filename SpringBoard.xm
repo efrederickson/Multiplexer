@@ -7,7 +7,7 @@
 #include <dlfcn.h>
 #include <sys/sysctl.h>
 #import <notify.h>
-
+#import "RACompatibilitySystem.h"
 #import "headers.h"
 #import "RAWidgetSectionManager.h"
 #import "RASettings.h"
@@ -63,6 +63,19 @@
 {
     %orig;
     [RADesktopManager.sharedInstance currentDesktop]; // load desktop (and previous windows!)
+}
+%end
+
+%hook SBApplicationController
+%new -(SBApplication*) RA_applicationWithBundleIdentifier:(NSString*)bundleIdentifier
+{
+    if ([self respondsToSelector:@selector(applicationWithBundleIdentifier:)])
+        return [self applicationWithBundleIdentifier:bundleIdentifier];
+    else if ([self respondsToSelector:@selector(applicationWithDisplayIdentifier:)])
+        return [self applicationWithDisplayIdentifier:bundleIdentifier];
+
+    [RACompatibilitySystem showWarning:@"Unable to find valid -[SBApplicationController applicationWithBundleIdentifier:] replacement"];
+    return nil;
 }
 %end
 

@@ -12,6 +12,8 @@
 -(void) close;
 -(void) maximize;
 -(void) minimize;
+-(void) sizingLockButtonTap:(id)arg1;
+-(BOOL) isLocked;
 
 -(void) showOverlay;
 -(void) hideOverlay;
@@ -23,4 +25,7 @@
 -(void) scaleTo:(CGFloat)scale animated:(BOOL)animate;
 
 -(void) saveWindowInfo;
+
+-(void) disableLongPress;
+-(void) enableLongPress;
 @end

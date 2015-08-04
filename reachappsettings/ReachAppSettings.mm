@@ -72,7 +72,7 @@
                  @"key": @"enabled",
                  @"label": @"Enabled",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-                 @"icon": RSIMG(@"ra_enabled.png")
+                 @"icon": @"ra_enabled.png"
                  },
 
              @{ @"footerText": @"Let apps run in the background." },
@@ -80,42 +80,42 @@
                  @"cell": @"PSLinkCell",
                  @"label": @"Aura",
                  @"detail": @"ReachAppBackgrounderSettingsListController",
-                 @"icon": RSIMG(@"aura.png")
+                 @"icon": @"aura.png"
                  },
              @{ @"footerText": @"Windowed multitasking." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Empoleon",
                  @"detail": @"ReachAppWindowSettingsListController",
-                 @"icon": RSIMG(@"empoleon.png")
+                 @"icon": @"empoleon.png"
                  },
              @{ @"footerText": @"Manage multiple desktops and their windows." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Mission Control",
                  @"detail": @"ReachAppMCSettingsListController",
-                 @"icon": RSIMG(@"missioncontrol.png")
+                 @"icon": @"missioncontrol.png"
                  },
              @{ @"footerText": @"Have an app in Notification Center." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Quick Access",
                  @"detail": @"ReachAppNCAppSettingsListController",
-                 @"icon": RSIMG(@"quickaccess.png")
+                 @"icon": @"quickaccess.png"
                  },
             @{ @"footerText": @"Use an app in Reachability alongside another." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Reach App",
                  @"detail": @"ReachAppReachabilitySettingsListController",
-                 @"icon": RSIMG(@"reachapp.png")
+                 @"icon": @"reachapp.png"
                  },
              @{ @"footerText": @"Access another app simply by swiping in from the right side of the screen." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Swipe Over",
                  @"detail": @"ReachAppSwipeOverSettingsListController",
-                 @"icon": RSIMG(@"swipeover.png")
+                 @"icon": @"swipeover.png"
                  },
              @{ @"footerText": [NSString stringWithFormat:@"%@%@",
 #if DEBUG
@@ -123,7 +123,7 @@
 #endif
                     @"© 2015 Elijah Frederickson & Andrew Abosh.",
 #if DEBUG
-                    @" **DEBUG** "
+                    @"\n**DEBUG** "
 #else
                     @""
 #endif
@@ -132,13 +132,13 @@
                  @"cell": @"PSLinkCell",
                  @"label": @"Creators",
                  @"detail": @"RAMakersController",
-                 @"icon": RSIMG(@"ra_makers.png")
+                 @"icon": @"ra_makers.png"
                  },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Support",
                  @"action": @"showSupportDialog",
-                 @"icon": RSIMG(@"ra_support.png")
+                 @"icon": @"ra_support.png"
                  },
 
              @{

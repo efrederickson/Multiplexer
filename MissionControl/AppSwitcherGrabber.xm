@@ -34,13 +34,10 @@
 {
 	if ([RASettings.sharedInstance replaceAppSwitcherWithMC])
 	{
-		[RAMissionControlManager.sharedInstance showMissionControl:YES];
-		
-        FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
-            SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppExitedWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
-            [transaction begin];
-        }];
-        [[%c(FBWorkspaceEventQueue) sharedInstance] executeOrAppendEvent:event];
+		if (RAMissionControlManager.sharedInstance.isShowingMissionControl == NO)
+		{
+			[RAMissionControlManager.sharedInstance showMissionControl:YES];
+	    }
 
 		return YES;
 	}
@@ -56,15 +53,24 @@
 }
 %end
 
-%hook SBAppSwitcherWindow
--(void) addSubview:(UIView*)view
+
+@interface SBAppSwitcherController ()
+-(UIView*) view;
+@end
+
+//%hook SBAppSwitcherWindow
+%hook SBAppSwitcherController
+//-(void) addSubview:(UIView*)view
+-(void)viewDidAppear:(BOOL)a
 {
 	%orig;
 
-	if ([self viewWithTag:999] == nil && ([RASettings.sharedInstance missionControlEnabled] && ![RASettings.sharedInstance replaceAppSwitcherWithMC]))
+	UIView *view = MSHookIvar<UIView*>(self, "_contentView");
+
+	if ([view viewWithTag:999] == nil && ([RASettings.sharedInstance missionControlEnabled] && ![RASettings.sharedInstance replaceAppSwitcherWithMC]))
 	{
 		SBControlCenterGrabberView *grabber = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:CGRectMake(0, 0, 50, 30)];
-		grabber.center = CGPointMake(self.frame.size.width / 2, 20/2);
+		grabber.center = CGPointMake(view.frame.size.width / 2, 20/2);
 		
 		[grabber.chevronView setState:1 animated:YES];
 
@@ -73,15 +79,18 @@
 
 		//[grabber.chevronView setState:1 animated:YES];
 		grabber.tag = 999;
-		[self addSubview:grabber];
+		[view addSubview:grabber];
 
 		[RAGestureManager.sharedInstance addGestureRecognizerWithTarget:(NSObject<RAGestureCallbackProtocol> *)self forEdge:UIRectEdgeTop identifier:@"com.efrederickson.reachapp.appswitchergrabber"];
 	}
+	else
+		((UIView*)[view viewWithTag:999]).center = CGPointMake(view.frame.size.width / 2, 20/2);
+		
 }
 
 %new -(BOOL) RAGestureCallback_canHandle:(CGPoint)point velocity:(CGPoint)velocity
 {
-	return [RASettings.sharedInstance missionControlEnabled] && self.isKeyWindow;
+	return [RASettings.sharedInstance missionControlEnabled] && self.view.window.isKeyWindow;
 }
 
 %new -(RAGestureCallbackResult) RAGestureCallback_handle:(UIGestureRecognizerState)state withPoint:(CGPoint)location velocity:(CGPoint)velocity forEdge:(UIRectEdge)edge
@@ -91,6 +100,7 @@
 
 	static CGFloat origY = -1;
 	static UIView *fakeView;
+	UIView *view = MSHookIvar<UIView*>(self, "_contentView");
 
 	if (!fakeView)
 	{
@@ -98,16 +108,16 @@
 
 		if (snapshot)
 		{
-			fakeView = [[UIImageView alloc] initWithFrame:self.frame];
+			fakeView = [[UIImageView alloc] initWithFrame:view.frame];
 			((UIImageView*)fakeView).image = snapshot;
-			[self addSubview:fakeView];
+			[view addSubview:fakeView];
 		}
 		else
 		{
-			fakeView = [[UIView alloc] initWithFrame:self.frame];
+			fakeView = [[UIView alloc] initWithFrame:view.frame];
 
-			CGFloat width = UIScreen.mainScreen.bounds.size.width / 4.5714;
-			CGFloat height = UIScreen.mainScreen.bounds.size.height / 4.36;
+			CGFloat width = UIScreen.mainScreen._interfaceOrientedBounds.size.width / 4.5714;
+			CGFloat height = UIScreen.mainScreen._interfaceOrientedBounds.size.height / 4.36;
 
 			_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:1];
 			blurView.frame = fakeView.frame;
@@ -137,7 +147,6 @@
 			newDesktopButton.backgroundColor = [UIColor darkGrayColor];
 			[newDesktopButton setTitle:@"+" forState:UIControlStateNormal];
 			newDesktopButton.titleLabel.font = [UIFont systemFontOfSize:36];
-			[newDesktopButton addTarget:self action:@selector(createNewDesktop) forControlEvents:UIControlEventTouchUpInside];
 			[desktopScrollView addSubview:newDesktopButton];
 
 			x = 15;
@@ -168,7 +177,7 @@
 
 			[fakeView addSubview:otherRunningAppsScrollView];
 
-			[self addSubview:fakeView];
+			[view addSubview:fakeView];
 		}
 	}
 
@@ -187,22 +196,16 @@
 	{
 		//NSLog(@"[ReachApp] %@ + %@ = %@ > %@", NSStringFromCGPoint(fakeView.frame.origin), NSStringFromCGPoint(velocity), @(fakeView.frame.origin.y + velocity.y), @(-(UIScreen.mainScreen.bounds.size.height / 2)));
 
-		if (fakeView.frame.origin.y + velocity.y > -(UIScreen.mainScreen.bounds.size.height / 2))
+		if (fakeView.frame.origin.y + velocity.y > -(UIScreen.mainScreen._interfaceOrientedBounds.size.height / 2))
 		{			
-			CGFloat distance = UIScreen.mainScreen.bounds.size.height - (fakeView.frame.origin.y + fakeView.frame.size.height);
+			CGFloat distance = UIScreen.mainScreen._interfaceOrientedBounds.size.height - (fakeView.frame.origin.y + fakeView.frame.size.height);
 			CGFloat duration = MIN(distance / velocity.y, 0.3);
 
 			//NSLog(@"[ReachApp] dist %f, dur %f", distance, duration);
 
 			[UIView animateWithDuration:duration animations:^{
-				fakeView.frame = UIScreen.mainScreen.bounds;
+				fakeView.frame = UIScreen.mainScreen._interfaceOrientedBounds;
 			} completion:^(BOOL _) {
-	            FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
-	                SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
-	                [transaction begin];
-	            }];
-	            [(FBWorkspaceEventQueue*)[%c(FBWorkspaceEventQueue) sharedInstance] executeOrAppendEvent:event];
-
 				[[[%c(SBUIController) sharedInstance] _appSwitcherController] forceDismissAnimated:NO];
 				[[%c(SBUIController) sharedInstance] restoreContentUpdatingStatusBar:YES];
 				[RAMissionControlManager.sharedInstance showMissionControl:NO];

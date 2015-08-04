@@ -4,7 +4,6 @@
 
 @interface RANCViewController () {
 	RAHostedAppView *appView;
-	UIActivityIndicatorView *activityView;
 	UILabel *isLockedLabel;
 
 	NSTimer *activityViewCheckTimer;
@@ -12,21 +11,6 @@
 @end
 
 @implementation RANCViewController
--(void) viewWillAppear:(BOOL)animated
-{
-	[super viewWillAppear:animated];
-	if (!activityView)
-	{
-		activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
-		[self.view addSubview:activityView];
-	}
-
-	CGFloat size = 50;
-	activityView.frame = CGRectMake((self.view.frame.size.width - size) / 2, (self.view.frame.size.height - size) / 2, size, size);
-
-	[activityView startAnimating];
-}
-
 -(void) forceReloadAppLikelyBecauseTheSettingChanged
 {
 	[appView unloadApp];
@@ -40,6 +24,25 @@ int patchOrientation(int in)
 	if (in == 3)
 		return 1;
 	return in;
+}
+
+int rotationDegsForOrientation(int o)
+{
+	if (o == UIInterfaceOrientationLandscapeRight)
+		return 270;
+	else if (o == UIInterfaceOrientationLandscapeLeft)
+		return 90;
+	return 0;
+}
+
+-(void) viewWillAppear:(BOOL)animated
+{
+	[super viewWillAppear:animated];
+
+	if (appView)
+	{
+		[appView loadApp];
+	}
 }
 
 -(void) viewDidAppear:(BOOL)animated
@@ -61,7 +64,6 @@ int patchOrientation(int in)
 		isLockedLabel.frame = CGRectMake((self.view.frame.size.width - isLockedLabel.frame.size.width) / 2, (self.view.frame.size.height - isLockedLabel.frame.size.height) / 2, isLockedLabel.frame.size.width, isLockedLabel.frame.size.height);
 
 		isLockedLabel.text = LOCALIZE(@"UNLOCK_FOR_NCAPP");
-		[activityView stopAnimating];
 		return;
 	}
 	else if (isLockedLabel)
@@ -83,7 +85,7 @@ int patchOrientation(int in)
 	[appView loadApp];
 	appView.hideStatusBar = YES;
 
-	if (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation))
+	if (NO)// (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation))
 	{
 		appView.autosizesApp = YES;
 		appView.allowHidingStatusBar = YES;
@@ -99,13 +101,15 @@ int patchOrientation(int in)
 		appView.transform = CGAffineTransformIdentity;
 		appView.frame = UIScreen.mainScreen.bounds;
 
-		CGFloat scale = self.view.frame.size.height / UIScreen.mainScreen.bounds.size.height;
-		appView.transform = CGAffineTransformMakeScale(scale, scale);
+		appView.transform = CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(rotationDegsForOrientation(UIApplication.sharedApplication.statusBarOrientation)));
+		CGFloat scale = self.view.frame.size.height / UIScreen.mainScreen._interfaceOrientedBounds.size.height;
+		appView.transform = CGAffineTransformScale(appView.transform, scale, scale);
 		
 		// Align vertically
-		CGRect frame = appView.frame;
-		frame.origin.y = 0;
-		appView.frame = frame;
+		CGRect f = appView.frame;
+		f.origin.y = 0;
+		f.origin.x = (self.view.frame.size.width - f.size.width) / 2.0;
+		appView.frame = f;
 	}
 	//[appView rotateToOrientation:UIApplication.sharedApplication.statusBarOrientation];
 
@@ -118,7 +122,6 @@ int patchOrientation(int in)
 	[super viewDidDisappear:animated];
 
 	[activityViewCheckTimer invalidate];
-	[activityView stopAnimating];
 
 	appView.hideStatusBar = NO;
 	[appView unloadApp];
@@ -130,10 +133,9 @@ int patchOrientation(int in)
 	if (appView.app.isRunning)
 	{
 		appView.hideStatusBar = YES; // verify status bar is hidden (doesn't happen the first load)
-	//[appView rotateToOrientation:patchOrientation(UIDevice.currentDevice.orientation)];
+		//[appView rotateToOrientation:patchOrientation(UIApplication.sharedApplication.statusBarOrientation)];
 
 		[activityViewCheckTimer invalidate];
-		[activityView stopAnimating];
 	}
 }
 

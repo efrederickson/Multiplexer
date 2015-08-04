@@ -41,7 +41,7 @@
 	isHidingUnderlyingApp = YES;
 
 	// TODO: use UIBlurEffect?
-	darkenerView = [[UIView alloc] initWithFrame:UIScreen.mainScreen.bounds];
+	darkenerView = [[UIView alloc] initWithFrame:self.frame];
 	darkenerView.backgroundColor = [UIColor blackColor];
 	darkenerView.alpha = 0.35;
 	darkenerView.userInteractionEnabled = YES;

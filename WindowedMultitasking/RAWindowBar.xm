@@ -83,7 +83,7 @@ const int bottomSizeViewTag =  987654320;
 
 	closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
 	closeButton.frame = CGRectMake(5, 5, 30, 30);
-	[closeButton setImage:[[RAResourceImageProvider imageForFilename:@"Close" constrainedToSize:CGSizeMake(30, 30)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
+	[closeButton setImage:[RAResourceImageProvider imageForFilename:@"Close" size:CGSizeMake(30, 30) tintedTo:[UIColor colorWithRed:255/255.0f green:112/255.0f blue:112/255.0f alpha:1.0f]] forState:UIControlStateNormal];
 	closeButton.clipsToBounds = YES;
 	[closeButton addTarget:self action:@selector(closeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
 	closeButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
@@ -92,7 +92,7 @@ const int bottomSizeViewTag =  987654320;
 
 	maximizeButton = [UIButton buttonWithType:UIButtonTypeCustom];
 	maximizeButton.frame = CGRectMake(45, 5, 30, 30);
-	[maximizeButton setBackgroundImage:[[RAResourceImageProvider imageForFilename:@"Plus" constrainedToSize:CGSizeMake(30, 30)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
+	[maximizeButton setBackgroundImage:[RAResourceImageProvider imageForFilename:@"Plus" size:CGSizeMake(30, 30) tintedTo:[UIColor colorWithRed:115/255.0f green:232/255.0f blue:166/255.0f alpha:1.0f]] forState:UIControlStateNormal];
 	maximizeButton.clipsToBounds = YES;
 	[maximizeButton addTarget:self action:@selector(maximizeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
 	maximizeButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
@@ -101,7 +101,7 @@ const int bottomSizeViewTag =  987654320;
 
 	minimizeButton = [UIButton buttonWithType:UIButtonTypeCustom];
 	minimizeButton.frame = CGRectMake(85, 5, 30, 30);
-	[minimizeButton setBackgroundImage:[[RAResourceImageProvider imageForFilename:@"Minus" constrainedToSize:CGSizeMake(30, 30)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
+	[minimizeButton setBackgroundImage:[RAResourceImageProvider imageForFilename:@"Minus" size:CGSizeMake(30, 30) tintedTo:[UIColor colorWithRed:90/255.0f green:191/255.0f blue:255/255.0f alpha:1.0f]] forState:UIControlStateNormal];
 	minimizeButton.clipsToBounds = YES;
 	[minimizeButton addTarget:self action:@selector(minimizeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
 	minimizeButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
@@ -115,14 +115,14 @@ const int bottomSizeViewTag =  987654320;
 	[swapOrientationButton addTarget:self action:@selector(swapOrientationButtonTap:) forControlEvents:UIControlEventTouchUpInside];
 	swapOrientationButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
 	swapOrientationButton.layer.cornerRadius = swapOrientationButton.frame.size.width / 2;
-	[self addSubview:swapOrientationButton];
+	//[self addSubview:swapOrientationButton];
 
 	sizingLocked = NO;
 	appRotationLocked = NO;
 	sizingLockButton = [UIButton buttonWithType:UIButtonTypeCustom];
-	sizingLockButton.frame = CGRectMake(swapOrientationButton.frame.origin.x - 35, 5, 30, 30);
+	sizingLockButton.frame = swapOrientationButton.frame;
 	sizingLockButton.titleLabel.font = [UIFont systemFontOfSize:13];
-	[sizingLockButton setBackgroundImage:[[RAResourceImageProvider imageForFilename:@"Unlocked" constrainedToSize:CGSizeMake(20, 20)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
+	[sizingLockButton setImage:[RAResourceImageProvider imageForFilename:@"Unlocked" size:CGSizeMake(20, 20) tintedTo:[UIColor colorWithRed:185/255.0f green:116/255.0f blue:245/255.0f alpha:1.0f]] forState:UIControlStateNormal];
 	sizingLockButton.clipsToBounds = YES;
 	[sizingLockButton addTarget:self action:@selector(sizingLockButtonTap:) forControlEvents:UIControlEventTouchUpInside];
 	sizingLockButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
@@ -172,6 +172,18 @@ const int bottomSizeViewTag =  987654320;
 	}
 }
 
+-(BOOL) isLocked
+{
+	if ([RASettings.sharedInstance windowRotationLockMode] == 0)
+	{
+		return sizingLocked;
+	}
+	else
+	{
+		return appRotationLocked;
+	}
+}
+
 -(void) sizingLockButtonTap:(id)arg1
 {
 	if ([RASettings.sharedInstance windowRotationLockMode] == 0)
@@ -185,11 +197,11 @@ const int bottomSizeViewTag =  987654320;
 
 	if (sizingLocked || appRotationLocked)
 	{
-		[sizingLockButton setBackgroundImage:[[RAResourceImageProvider imageForFilename:@"Lock" constrainedToSize:CGSizeMake(20, 20)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
+		[sizingLockButton setImage:[RAResourceImageProvider imageForFilename:@"Lock" size:CGSizeMake(20, 20) tintedTo:[UIColor colorWithRed:185/255.0f green:116/255.0f blue:245/255.0f alpha:1.0f]] forState:UIControlStateNormal];
 	}
 	else
 	{
-		[sizingLockButton setBackgroundImage:[[RAResourceImageProvider imageForFilename:@"Unlocked" constrainedToSize:CGSizeMake(20, 20)] _flatImageWithColor:[UIColor whiteColor]] forState:UIControlStateNormal];
+		[sizingLockButton setImage:[RAResourceImageProvider imageForFilename:@"Unlocked" size:CGSizeMake(20, 20) tintedTo:[UIColor colorWithRed:185/255.0f green:116/255.0f blue:245/255.0f alpha:1.0f]] forState:UIControlStateNormal];
 	}
 }
 
@@ -259,6 +271,18 @@ const int bottomSizeViewTag =  987654320;
     }
 }
 
+-(void) disableLongPress
+{
+	enableLongPress = NO;
+	longPressGesture.enabled = NO;
+	longPressGesture.enabled = YES;
+}
+
+-(void) enableLongPress
+{
+	enableLongPress = YES;
+}
+
 -(void) swapOrientationButtonTap:(id)arg1
 {
 	[self addRotation:DEGREES_TO_RADIANS(90) updateApp:YES];
@@ -285,20 +309,27 @@ const int bottomSizeViewTag =  987654320;
 -(void) handleLongPress:(UILongPressGestureRecognizer*)sender
 {
 	if (!enableLongPress)
+	{
 		return;
+	}
 
 	[self close];
 }
 
 -(void) showOverlay
 {
-	RAWindowOverlayView *overlay = [[RAWindowOverlayView alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height)];
+	RAWindowOverlayView *overlay = [[RAWindowOverlayView alloc] initWithFrame:CGRectMake(0, 40, self.bounds.size.width, self.bounds.size.height - 40)];
 	overlay.alpha = 0;
 	overlay.tag = 465982;
-	[self addSubview:overlay];
 	overlay.appWindow = self;
 	[overlay show];
+	[self addSubview:overlay];
+
 	[UIView animateWithDuration:0.4 animations:^{
+		closeButton.alpha = 0;
+		maximizeButton.alpha = 0;
+		minimizeButton.alpha = 0;
+		sizingLockButton.alpha = 0;
 		overlay.alpha = 1;
 	}];
 }
@@ -306,13 +337,20 @@ const int bottomSizeViewTag =  987654320;
 -(void) hideOverlay
 {
 	[(RAWindowOverlayView*)[self viewWithTag:465982] dismiss];
+	[UIView animateWithDuration:0.5 animations:^{
+		closeButton.alpha = 1;
+		maximizeButton.alpha = 1;
+		minimizeButton.alpha = 1;
+		sizingLockButton.alpha = 1;
+	}];
 }
 
 -(BOOL) isOverlayShowing { return [self viewWithTag:465982] != nil; }
 
 -(void) handleTap:(UITapGestureRecognizer*)tap
 {
-	[self showOverlay];
+	if (!self.isOverlayShowing)
+		[self showOverlay];
 }
 
 -(void) handleDoubleTap:(UITapGestureRecognizer*)tap

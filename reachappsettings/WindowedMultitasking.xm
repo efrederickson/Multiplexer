@@ -86,6 +86,16 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
+             @{ @"footerText": @"If this is on, tapping an icon on the overlay will be slightly delayed until the bounce animation has completed." },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @NO,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"windowedMultitaskingCompleteAnimations",
+                 @"label": @"Complete Animations",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+
              @{ @"footerText": @"Unobtrusively snaps windows" },
              @{
                  @"cell": @"PSSwitchCell",

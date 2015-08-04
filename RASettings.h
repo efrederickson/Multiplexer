@@ -38,6 +38,7 @@ enum RAGrabArea {
 -(BOOL) snapWindows;
 -(BOOL) snapRotation;
 -(BOOL) launchIntoWindows;
+-(BOOL) windowedMultitaskingCompleteAnimations;
 
 -(NSInteger) globalBackgroundMode;
 -(BOOL) backgrounderEnabled;

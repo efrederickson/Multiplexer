@@ -14,6 +14,7 @@
 -(void) removeAppWithIdentifier:(NSString*)identifier animated:(BOOL)animated;
 
 -(NSArray*) hostedWindows;
+-(BOOL) isAppOpened:(NSString*)identifier;
 
 -(void) unloadApps;
 -(void) loadApps;

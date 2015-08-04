@@ -74,6 +74,11 @@ NSCache *_rsImgCache = [NSCache new];
 	return [self convertToUIImageIfNeeded:img sizeIfNeeded:CGSizeMake(200, 200) forceSizing:NO];
 }
 
++(UIImage*) imageForFilename:(NSString*)filename size:(CGSize)size tintedTo:(UIColor*)tint
+{
+	return [[self imageForFilename:filename constrainedToSize:size] _flatImageWithColor:tint];
+}
+
 +(UIImage*) imageForFilename:(NSString*)filename constrainedToSize:(CGSize)size
 {
 	NSString *strippedPath = [[filename lastPathComponent] stringByDeletingPathExtension];

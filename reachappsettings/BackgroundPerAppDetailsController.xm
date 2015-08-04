@@ -121,10 +121,10 @@ extern void RA_BGAppsControllerNeedsToReload();
             },
             @{
                 @"cell": @"PSSwitchCell",
-                @"label": @"VOiP",
-                @"key": kBGModeVOiP,
+                @"label": @"VoIP",
+                @"key": kBGModeVoIP,
                 @"prefix": @"backgroundmodes",
-                @"default": [self isBackgroundModeActive:kBGModeVOiP withAppInfo:bgModes],
+                @"default": [self isBackgroundModeActive:kBGModeVoIP withAppInfo:bgModes],
             },
             @{
                 @"cell": @"PSSwitchCell",

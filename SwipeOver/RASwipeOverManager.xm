@@ -5,7 +5,8 @@
 #import "RADesktopManager.h"
 #import "RADesktopWindow.h"
 
-#define SCREEN_WIDTH (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation) ? UIScreen.mainScreen.bounds.size.height : UIScreen.mainScreen.bounds.size.width)
+//#define SCREEN_WIDTH (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation) ? UIScreen.mainScreen.bounds.size.height : UIScreen.mainScreen.bounds.size.width)
+#define SCREEN_WIDTH (UIScreen.mainScreen._interfaceOrientedBounds.size.width)
 #define VIEW_WIDTH(x) (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation) ? x.frame.size.height : x.frame.size.width)
 
 @interface RASwipeOverManager () {
@@ -58,9 +59,11 @@
 
 -(void) createEdgeView
 {
-	overlayWindow = [[RASwipeOverOverlay alloc] initWithFrame:UIScreen.mainScreen.bounds];
+	overlayWindow = [[RASwipeOverOverlay alloc] initWithFrame:UIScreen.mainScreen._interfaceOrientedBounds];
+	[overlayWindow _rotateWindowToOrientation:UIApplication.sharedApplication.statusBarOrientation updateStatusBar:YES duration:0.001 skipCallbacks:NO];
 	[overlayWindow makeKeyAndVisible];
-
+	[overlayWindow updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
+	
 	[overlayWindow showEnoughToDarkenUnderlyingApp];
 	[self showApp:nil];
 }
@@ -216,7 +219,7 @@
 			//NSLog(@"[ReachApp] %f %f", newScale, scale);
 
 			targetView.transform = CGAffineTransformMakeScale(scale, scale);
-			targetView.center = (CGPoint) { SCREEN_WIDTH - (targetView.frame.size.width / 2), targetView.center.y };
+			targetView.center = (CGPoint) { SCREEN_WIDTH - (targetView.frame.size.width / 2), overlayWindow.center.y };
 
 			//CGFloat scale = (SCREEN_WIDTH - (start + translation.x)) / [overlayWindow currentView].bounds.size.width;
 			//scale = MIN(MAX(scale, 0.1), 0.98);

@@ -66,7 +66,7 @@
 -(void) storeSnapshotOfMissionControl:(UIWindow*)window
 {
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-		UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].bounds.size, YES, [UIScreen mainScreen].scale);
+		UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen]._interfaceOrientedBounds.size, YES, [UIScreen mainScreen].scale);
 		CGContextRef c = UIGraphicsGetCurrentContext();
 		//CGContextSetAllowsAntialiasing(c, YES);
 		[window.layer renderInContext:c];
@@ -102,7 +102,7 @@
 
 -(UIImage*) renderPreviewForDesktop:(RADesktopWindow*)desktop
 {
-	UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].bounds.size, YES, [UIScreen mainScreen].scale);
+	UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen]._interfaceOrientedBounds.size, YES, [UIScreen mainScreen].scale);
 	CGContextRef c = UIGraphicsGetCurrentContext();
 	[MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer renderInContext:c]; // Wallpaper
 	[[[[%c(SBUIController) sharedInstance] window] layer] renderInContext:c]; // Icons
@@ -114,7 +114,7 @@
 			RAHostedAppView *hostedView = [((RAWindowBar*)view) attachedView];
 
 			UIImage *image = [RASnapshotProvider.sharedInstance snapshotForIdentifier:hostedView.bundleIdentifier];
-			[image drawInRect:CGRectMake(view.frame.origin.x, [hostedView convertPoint:hostedView.frame.origin toView:nil].y, view.frame.size.width, view.frame.size.height)];
+			[image drawInRect:CGRectMake([hostedView convertPoint:hostedView.frame.origin toView:nil].x, [hostedView convertPoint:hostedView.frame.origin toView:nil].y, view.frame.size.width, view.frame.size.height)];
 
 			/*SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:hostedView.bundleIdentifier];
 			FBScene *scene = [app mainScene];
@@ -136,7 +136,6 @@
 			*/
 		}
 	}
-
 	UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
 	UIGraphicsEndImageContext();
 	return image;

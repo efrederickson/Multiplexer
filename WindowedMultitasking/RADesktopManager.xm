@@ -36,6 +36,14 @@ BOOL overrideUIWindow = NO;
 	[windows removeObjectAtIndex:index]; 
 }
 
+-(BOOL) isAppOpened:(NSString*)identifier
+{
+	for (RADesktopWindow *desktop in windows)
+		if ([desktop isAppOpened:identifier])
+			return YES;
+	return NO;
+}
+
 -(NSUInteger) numberOfDesktops
 {
 	return windows.count;

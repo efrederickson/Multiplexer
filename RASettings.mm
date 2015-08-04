@@ -228,7 +228,7 @@ NSDictionary *_settings = nil;
 	ret[@"backgroundModes"][kBGModeFetch] = _settings[[NSString stringWithFormat:@"backgrounder-%@-backgroundmodes-%@",identifier,kBGModeFetch]] ?: @NO;
 	ret[@"backgroundModes"][kBGModeRemoteNotification] = _settings[[NSString stringWithFormat:@"backgrounder-%@-backgroundmodes-%@",identifier,kBGModeRemoteNotification]] ?: @NO;
 	ret[@"backgroundModes"][kBGModeExternalAccessory] = _settings[[NSString stringWithFormat:@"backgrounder-%@-backgroundmodes-%@",identifier,kBGModeExternalAccessory]] ?: @NO;
-	ret[@"backgroundModes"][kBGModeVOiP] = _settings[[NSString stringWithFormat:@"backgrounder-%@-backgroundmodes-%@",identifier,kBGModeVOiP]] ?: @NO;
+	ret[@"backgroundModes"][kBGModeVoIP] = _settings[[NSString stringWithFormat:@"backgrounder-%@-backgroundmodes-%@",identifier,kBGModeVoIP]] ?: @NO;
 	ret[@"backgroundModes"][kBGModeLocation] = _settings[[NSString stringWithFormat:@"backgrounder-%@-backgroundmodes-%@",identifier,kBGModeLocation]] ?: @NO;
 	ret[@"backgroundModes"][kBGModeAudio] = _settings[[NSString stringWithFormat:@"backgrounder-%@-backgroundmodes-%@",identifier,kBGModeAudio]] ?: @NO;
 	ret[@"backgroundModes"][kBGModeBluetoothCentral] = _settings[[NSString stringWithFormat:@"backgrounder-%@-backgroundmodes-%@",identifier,kBGModeBluetoothCentral]] ?: @NO;
@@ -255,6 +255,7 @@ NSDictionary *_settings = nil;
 -(BOOL) swipeOverEnabled { return BOOL(@"swipeOverEnabled", YES); }
 -(BOOL) windowedMultitaskingEnabled { return BOOL(@"windowedMultitaskingEnabled", YES); }
 -(BOOL) exitAppAfterUsingActivatorAction { return BOOL(@"exitAppAfterUsingActivatorAction", YES); }
+-(BOOL) windowedMultitaskingCompleteAnimations { return BOOL(@"windowedMultitaskingCompleteAnimations", NO); }
 
 -(RAGrabArea) windowedMultitaskingGrabArea
 {

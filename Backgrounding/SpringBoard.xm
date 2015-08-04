@@ -90,4 +90,17 @@ NSMutableDictionary *suspendImmediatelyVerifierDict = [NSMutableDictionary dicti
     }
     %orig;
 }
+
+-(BOOL) _queue_supportsBackgroundTaskAssertions
+{
+    if ([RABackgrounder.sharedInstance shouldSuspendImmediately:self.bundleIdentifier])
+        return NO;
+    return %orig;
+}
+-(BOOL) _queue_supportsContinuousBackgroundMode
+{
+    if ([RABackgrounder.sharedInstance shouldSuspendImmediately:self.bundleIdentifier])
+        return NO;
+    return %orig;   
+}
 %end

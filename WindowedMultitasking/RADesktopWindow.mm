@@ -44,8 +44,11 @@
 	if ([RAWindowStatePreservationSystemManager.sharedInstance hasWindowInformationForIdentifier:view.app.bundleIdentifier])
 	{
 		RAPreservedWindowInformation info = [RAWindowStatePreservationSystemManager.sharedInstance windowInformationForAppIdentifier:view.app.bundleIdentifier];
-		windowBar.center = info.center;
-		windowBar.transform = info.transform;
+
+		[UIView animateWithDuration:0.3 animations:^{
+			windowBar.center = info.center;
+			windowBar.transform = info.transform;
+		}];
 	}
 
 	//[self saveInfo];
@@ -126,6 +129,14 @@
 	{
 		[self removeAppWithIdentifier:((RAHostedAppView*)appViews[i]).bundleIdentifier animated:YES];
 	}	
+}
+
+-(BOOL) isAppOpened:(NSString*)identifier
+{
+	for (RAHostedAppView *app in appViews)
+		if ([app.app.bundleIdentifier isEqual:identifier])
+			return YES;
+	return NO;
 }
 
 -(void) saveInfo
