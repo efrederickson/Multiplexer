@@ -98,7 +98,8 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 
     if (self.isRunning == NO)
     	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:RAIconIndicatorViewInfoNone];
-
+    else 
+    	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:(RAIconIndicatorViewInfo)GET_INFO_(self.bundleIdentifier)];
     //for (SBIconView *view in [managedIconViews copy])
     //	[view RA_updateIndicatorViewWithExistingInfo];
 }

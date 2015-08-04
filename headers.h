@@ -75,6 +75,7 @@ extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 @end
 
 @interface UIAutoRotatingWindow : UIWindow
+- (instancetype)_initWithFrame:(CGRect)arg1 attached:(BOOL)arg2;
 - (void)updateForOrientation:(UIInterfaceOrientation)arg1;
 @end
 

@@ -5,9 +5,10 @@
 #import "RADesktopManager.h"
 #import "RADesktopWindow.h"
 
+extern int rotationDegsForOrientation(int o);
+
 //#define SCREEN_WIDTH (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation) ? UIScreen.mainScreen.bounds.size.height : UIScreen.mainScreen.bounds.size.width)
 #define SCREEN_WIDTH (UIScreen.mainScreen._interfaceOrientedBounds.size.width)
-#define VIEW_WIDTH(x) (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation) ? x.frame.size.height : x.frame.size.width)
 
 @interface RASwipeOverManager () {
 	RASwipeOverOverlay *overlayWindow;
@@ -61,10 +62,10 @@
 {
 	overlayWindow = [[RASwipeOverOverlay alloc] initWithFrame:UIScreen.mainScreen._interfaceOrientedBounds];
 	[overlayWindow _rotateWindowToOrientation:UIApplication.sharedApplication.statusBarOrientation updateStatusBar:YES duration:0.001 skipCallbacks:NO];
+	[overlayWindow showEnoughToDarkenUnderlyingApp];
 	[overlayWindow makeKeyAndVisible];
 	[overlayWindow updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
 	
-	[overlayWindow showEnoughToDarkenUnderlyingApp];
 	[self showApp:nil];
 }
 

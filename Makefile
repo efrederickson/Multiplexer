@@ -1,6 +1,6 @@
 DEBUG = 1
 ARCHS = armv7 armv7s arm64
-CFLAGS = -I./ -Iwidgets/ -ISwipeOver/ -IReachability/ -IGestureSupport/ -IKeyboardSupport/ -IMissionControl/ -IWindowedMultitasking/ -INotificationCenterApp/ -IBackgrounding/ -IIntroTutorial/
+CFLAGS = -I./ -Iwidgets/ -Iwidgets/Core/ -Iwidgets/Reachability/ -ISwipeOver/ -IReachability/ -IGestureSupport/ -IKeyboardSupport/ -IMissionControl/ -IWindowedMultitasking/ -INotificationCenterApp/ -IBackgrounding/ -IIntroTutorial/
 CFLAGS += -fobjc-arc
 THEOS_PACKAGE_DIR_NAME = debs
 TARGET = :clang:8.0
@@ -12,6 +12,8 @@ ReachApp_FILES = $(wildcard *.xm) $(wildcard *.mm) $(wildcard *.m) \
 	$(wildcard Reachability/*.xm) $(wildcard Reachability/*.mm) $(wildcard Reachability/*.m) \
 	$(wildcard SwipeOver/*.xm) $(wildcard SwipeOver/*.mm) $(wildcard SwipeOver/*.m) \
 	$(wildcard widgets/*.xm) $(wildcard widgets/*.mm) $(wildcard widgets/*.m) \
+	$(wildcard widgets/Core/*.xm) $(wildcard widgets/Core/*.mm) $(wildcard widgets/Core/*.m) \
+	$(wildcard widgets/Reachability/*.xm) $(wildcard widgets/Reachability/*.mm) $(wildcard widgets/Reachability/*.m) \
 	$(wildcard KeyboardSupport/*.xm) $(wildcard KeyboardSupport/*.mm) $(wildcard KeyboardSupport/*.m) \
 	$(wildcard GestureSupport/*.xm) $(wildcard GestureSupport/*.mm) $(wildcard GestureSupport/*.m) \
 	$(wildcard MissionControl/*.xm) $(wildcard MissionControl/*.mm) $(wildcard MissionControl/*.m) \
