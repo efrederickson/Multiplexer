@@ -106,7 +106,7 @@
 -(BOOL) showHeartImage { return NO; }
 -(UIColor*) navigationTintColor { return [UIColor blackColor]; }
 -(UIColor*) switchOnTintColor { return self.navigationTintColor; }
--(UIColor*) iconColor { return self.navigationTintColor; }
+//-(UIColor*) iconColor { return self.navigationTintColor; }
 
 -(NSString*) customTitle { return @"Creators"; }
 
@@ -142,7 +142,7 @@ This code thanks: \n\
 ForceReach, Reference, MessageBox \n\
 Pastie 8684110 \n\
 Various tips and help: @sharedRoutine \n\
-Various concepts and help & Mirmir: Ethan Arbuckle \n\
+Various concepts and help: Ethan Arbuckle \n\
 \n\
 There was much knowledge to be gained from perusing those sources, however no copyright infringement occured. \n\
 \n\
