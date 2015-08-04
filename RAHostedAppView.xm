@@ -1,5 +1,6 @@
 #import "RAHostedAppView.h"
 #import "BioLockdown.h"
+#import "RAHostManager.h"
 
 @interface RAHostedAppView () {
     NSTimer *verifyTimer;
@@ -44,7 +45,7 @@
 {
     _orientation = UIInterfaceOrientationPortrait;
     _bundleIdentifier = value;
-    app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:value];
+    app = [[%c(SBApplicationController) sharedInstance] RA_applicationWithBundleIdentifier:value];
 }
 
 -(void) preloadApp
@@ -65,19 +66,10 @@
 
 -(void) _actualLoadApp
 {
-    FBScene *scene = [app mainScene];
-    contextHostManager = [scene contextHostManager];
-
-    FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
-    if (!settings)
-        return;
-
-    SET_BACKGROUNDED(settings, NO);
-    [scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];
-
-    [contextHostManager enableHostingForRequester:@"reachapp" orderFront:YES];
-    view = [contextHostManager hostViewForRequester:@"reachapp" enableAndOrderFront:YES];
-    //view.backgroundColorWhileNotHosting = [UIColor clearColor];
+    view = (FBWindowContextHostWrapperView*)[RAHostManager enabledHostViewForApplication:app];
+    contextHostManager = (FBWindowContextHostManager*)[RAHostManager hostManagerForApp:app];
+    view.backgroundColorWhileNotHosting = [UIColor clearColor];
+    view.backgroundColorWhileHosting = [UIColor clearColor];
 
     view.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height);
     //view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
