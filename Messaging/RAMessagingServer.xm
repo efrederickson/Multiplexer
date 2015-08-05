@@ -113,6 +113,22 @@
 
 -(void) sendData:(NSDictionary*)data withCurrentTries:(int)tries toAppWithBundleIdentifier:(NSString*)identifier completion:(RAMessageCompletionCallback)callback
 {
+	SBApplication *app = [[%c(SBApplicationController) sharedInstance] RA_applicationWithBundleIdentifier:identifier];
+	if (!app.isRunning || [app mainScene] == nil)
+	{
+		if (tries > 4)
+		{
+			[self alertUser:[NSString stringWithFormat:@"Unable to communicate with app that isn't running: %@ (%@)", app.displayName, identifier]];
+			if (callback)
+				callback(NO);
+			return;
+		}
+
+		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+			[self sendData:data withCurrentTries:tries + 1 toAppWithBundleIdentifier:identifier completion:callback];
+		});
+		return;
+	}
 
 	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge CFStringRef)[NSString stringWithFormat:@"com.efrederickson.reachapp.clientupdate-%@",identifier], nil, nil, YES);
 	
