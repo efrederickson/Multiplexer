@@ -24,8 +24,8 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 	if (info & RAIconIndicatorViewInfoForced)
 		[ret appendString:@"F"];
 
-	if (info & RAIconIndicatorViewInfoForceDeath)
-		[ret appendString:@"D"];
+	//if (info & RAIconIndicatorViewInfoForceDeath)
+	//	[ret appendString:@"D"];
 
 	if (info & RAIconIndicatorViewInfoSuspendImmediately)
 		[ret appendString:@"S"];
