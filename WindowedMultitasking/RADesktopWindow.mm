@@ -78,12 +78,17 @@
 
 -(void) removeAppWithIdentifier:(NSString*)identifier animated:(BOOL)animated
 {
+	[self removeAppWithIdentifier:identifier animated:animated forceImmediateUnload:NO];
+}
+
+-(void) removeAppWithIdentifier:(NSString*)identifier animated:(BOOL)animated forceImmediateUnload:(BOOL)force
+{
 	for (RAHostedAppView *view in appViews)
 	{
 		if ([view.bundleIdentifier isEqual:identifier])
 		{
 			void (^destructor)() = ^{
-				[view unloadApp];
+				[view unloadApp:force];
 				[view.superview removeFromSuperview];
 				[view removeFromSuperview];
 				[appViews removeObject:view];

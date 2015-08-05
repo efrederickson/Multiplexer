@@ -72,7 +72,7 @@
                  @"key": @"enabled",
                  @"label": @"Enabled",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-                 @"icon": @"ra_enabled.png"
+                 @"icon": @"ra_enabled.png",
                  },
 
              @{ @"footerText": @"Let apps run in the background." },
@@ -80,42 +80,48 @@
                  @"cell": @"PSLinkCell",
                  @"label": @"Aura",
                  @"detail": @"ReachAppBackgrounderSettingsListController",
-                 @"icon": @"aura.png"
+                 @"icon": @"aura.png",
+                 @"enabled": @([self getEnabled])
                  },
              @{ @"footerText": @"Windowed multitasking." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Empoleon",
                  @"detail": @"ReachAppWindowSettingsListController",
-                 @"icon": @"empoleon.png"
+                 @"icon": @"empoleon.png",
+                 @"enabled": @([self getEnabled])
                  },
              @{ @"footerText": @"Manage multiple desktops and their windows." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Mission Control",
                  @"detail": @"ReachAppMCSettingsListController",
-                 @"icon": @"missioncontrol.png"
+                 @"icon": @"missioncontrol.png",
+                 @"enabled": @([self getEnabled])
                  },
              @{ @"footerText": @"Have an app in Notification Center." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Quick Access",
                  @"detail": @"ReachAppNCAppSettingsListController",
-                 @"icon": @"quickaccess.png"
+                 @"icon": @"quickaccess.png",
+                 @"enabled": @([self getEnabled])
                  },
             @{ @"footerText": @"Use an app in Reachability alongside another." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Reach App",
                  @"detail": @"ReachAppReachabilitySettingsListController",
-                 @"icon": @"reachapp.png"
+                 @"icon": @"reachapp.png",
+                 @"enabled": @([self getEnabled])
                  },
              @{ @"footerText": @"Access another app simply by swiping in from the right side of the screen." },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Swipe Over",
                  @"detail": @"ReachAppSwipeOverSettingsListController",
-                 @"icon": @"swipeover.png"
+                 @"icon": @"swipeover.png",
+                 @"enabled": @([self getEnabled])
                  },
              @{ @"footerText": [NSString stringWithFormat:@"%@%@",
 #if DEBUG
@@ -170,6 +176,28 @@
         [self.rootController presentViewController:mailViewController animated:YES completion:nil];
     }
 
+}
+
+-(void)setPreferenceValue:(id)value specifier:(PSSpecifier*)specifier
+{
+    [super setPreferenceValue:value specifier:specifier];
+    [self reloadSpecifiers];
+}
+
+-(BOOL) getEnabled
+{
+    CFStringRef appID = CFSTR("com.efrederickson.reachapp.settings");
+    CFArrayRef keyList = CFPreferencesCopyKeyList(appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    if (!keyList) {
+        return YES;
+    }
+    NSDictionary *_settings = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    CFRelease(keyList);
+    if (!_settings) {
+        return YES;
+    }
+
+    return [_settings objectForKey:@"enabled"] == nil ? YES : [_settings[@"enabled"] boolValue];
 }
 
 -(void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error{

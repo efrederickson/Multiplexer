@@ -171,17 +171,22 @@
         return;
 
     if (value)
-        [RAMessagingServer.sharedInstance forceStatusBarVisibility:value forApp:self.bundleIdentifier completion:nil];
+        [RAMessagingServer.sharedInstance forceStatusBarVisibility:!value forApp:self.bundleIdentifier completion:nil];
     else
         [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:self.bundleIdentifier completion:nil];
 }
 
 -(void) unloadApp
 {
+    [self unloadApp:NO];
+}
+
+-(void) unloadApp:(BOOL)forceImmediate
+{
     if (activityView)
         [activityView stopAnimating];
     [verifyTimer invalidate];
-	FBScene *scene = [app mainScene];
+    FBScene *scene = [app mainScene];
 
     if (biolockdownDidFailLabel)
     {
@@ -195,14 +200,25 @@
     if (!scene)
         return;
 
-    [RAMessagingServer.sharedInstance endResizingApp:self.bundleIdentifier completion:^(BOOL success) {
+    RAMessageCompletionCallback block = ^(BOOL success) {
         FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
         SET_BACKGROUNDED(settings, YES);
         [scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];
         //FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
         [contextHostManager disableHostingForRequester:@"reachapp"];
         contextHostManager = nil;
-    }];
+    };
+
+    [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:self.bundleIdentifier completion:nil];
+    if (forceImmediate)
+    {
+        [RAMessagingServer.sharedInstance endResizingApp:self.bundleIdentifier completion:nil];
+        block(YES);
+    }
+    else
+    {
+        [RAMessagingServer.sharedInstance endResizingApp:self.bundleIdentifier completion:block];
+    }
 }
 
 -(void) rotateToOrientation:(UIInterfaceOrientation)o

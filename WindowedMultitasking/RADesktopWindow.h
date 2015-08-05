@@ -12,6 +12,7 @@
 
 -(void) addExistingWindow:(RAWindowBar*)window;
 -(void) removeAppWithIdentifier:(NSString*)identifier animated:(BOOL)animated;
+-(void) removeAppWithIdentifier:(NSString*)identifier animated:(BOOL)animated forceImmediateUnload:(BOOL)force;
 
 -(NSArray*) hostedWindows;
 -(BOOL) isAppOpened:(NSString*)identifier;

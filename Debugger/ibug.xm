@@ -5,8 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if IBUG
-
 void dump_info_before_crash(NSString *str)
 {
 	FILE *f = fopen("/User/Library/com.efrederickson.multiplexer.crashinfo", "w");
@@ -45,31 +43,6 @@ void dump_info_before_crash(NSString *str)
 @end
 
 %hook NSObject
-- (NSMethodSignature*)methodSignatureForSelector:(SEL)sel
-{
-	NSMethodSignature *o = %orig;
-	if (!o)
-	{
-	    NSLog(@"[ReachApp][iBug] methodSignatureForSelector: unknown selector '%@' on class '%s'", NSStringFromSelector(sel), class_getName(self.class));
-	}
-    return o;
-}
-
-- (void)forwardInvocation:(NSInvocation*)inv
-{
-    NSLog(@"[ReachApp][iBug] forwardInvocation: %@", NSStringFromSelector(inv.selector));
-}
-
--(IMP)methodForSelector:(SEL)selector
-{
-	IMP o = %orig;
-	if (!o)
-	{
-	    NSLog(@"[ReachApp][iBug] methodForSelector: unknown selector '%@' on class '%s'", NSStringFromSelector(selector), class_getName(self.class));
-	}
-    return o;
-}
-
 -(void)doesNotRecognizeSelector:(SEL)selector
 {
 	NSMutableString *info = [[NSMutableString alloc] init];
@@ -86,7 +59,7 @@ void dump_info_before_crash(NSString *str)
 	strings = backtrace_symbols (array, size);
 
 	NSLog(@"[ReachApp][iBug] Obtained %zd stack frames.\n", size);
-	[info appendString:[NSString stringWithFormat:@"\nGot %zd stack trace methods\n", size]];
+	[info appendString:[NSString stringWithFormat:@"\nGot %zd stack trace methods:\n", size]];
 
 	for (i = 0; i < size; i++)
 	{
@@ -163,7 +136,8 @@ Class hook$objc_getClass(const char *name)
 		if (buffer)
 		{
 			NSString *info = [NSString stringWithFormat:@"%s",buffer];
-			[RACompatibilitySystem showError:info];
+			if ([info rangeOfString:@"RA"].location != NSNotFound)
+				[RACompatibilitySystem showError:info];
 		}
 	}
 }
@@ -174,5 +148,5 @@ Class hook$objc_getClass(const char *name)
 	MSHookFunction((void*)objc_getClass, (void*)hook$objc_getClass, (void**)&orig$objc_getClass);
 	dummyClass = orig$objc_getClass("DummyClass_ibug");
 	NSLog(@"[ReachApp][iBug] initializing");
+	//NSLog(@"[ReachApp] %s", class_getImageName(orig$objc_getClass("RAMissionControlManager")));
 }
-#endif

@@ -17,6 +17,8 @@ enum RAGrabArea {
 -(void) reloadSettings;
 
 -(BOOL) enabled;
+
+-(BOOL) reachabilityEnabled;
 -(BOOL) disableAutoDismiss;
 -(BOOL) enableRotation;
 -(BOOL) showNCInstead;

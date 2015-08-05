@@ -70,6 +70,9 @@ NSDictionary *_settings = nil;
 	return BOOL(@"enabled", YES);
 }
 
+
+-(BOOL) reachabilityEnabled { return [self enabled] && BOOL(@"reachabilityEnabled", YES); }
+
 -(BOOL) disableAutoDismiss
 {
 	return BOOL(@"disableAutoDismiss", YES);
@@ -172,7 +175,7 @@ NSDictionary *_settings = nil;
 
 -(BOOL) backgrounderEnabled
 {
-	return BOOL(@"backgrounderEnabled", YES);
+	return [self enabled] && BOOL(@"backgrounderEnabled", YES);
 }
 
 -(BOOL) shouldShowIconIndicatorsGlobally
@@ -187,7 +190,7 @@ NSDictionary *_settings = nil;
 
 -(BOOL) missionControlEnabled
 {
-	return BOOL(@"missionControlEnabled", YES);
+	return [self enabled] && BOOL(@"missionControlEnabled", YES);
 }
 
 -(BOOL) replaceAppSwitcherWithMC
@@ -247,13 +250,10 @@ NSDictionary *_settings = nil;
 	CFPreferencesSetAppValue(CFSTR("isFirstRun"), value ? kCFBooleanTrue : kCFBooleanFalse, CFSTR("com.efrederickson.reachapp.settings"));
 }
 
--(BOOL) alwaysShowSOGrabber
-{
-	return BOOL(@"alwaysShowSOGrabber", NO);
-}
+-(BOOL) alwaysShowSOGrabber { return BOOL(@"alwaysShowSOGrabber", NO); }
 
--(BOOL) swipeOverEnabled { return BOOL(@"swipeOverEnabled", YES); }
--(BOOL) windowedMultitaskingEnabled { return BOOL(@"windowedMultitaskingEnabled", YES); }
+-(BOOL) swipeOverEnabled { return [self enabled] && BOOL(@"swipeOverEnabled", YES); }
+-(BOOL) windowedMultitaskingEnabled { return [self enabled] && BOOL(@"windowedMultitaskingEnabled", YES); }
 -(BOOL) exitAppAfterUsingActivatorAction { return BOOL(@"exitAppAfterUsingActivatorAction", YES); }
 -(BOOL) windowedMultitaskingCompleteAnimations { return BOOL(@"windowedMultitaskingCompleteAnimations", NO); }
 

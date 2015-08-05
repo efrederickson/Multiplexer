@@ -207,7 +207,7 @@ id SBWorkspace$sharedInstance;
 
     %orig;
 
-    if (![RASettings.sharedInstance enabled])
+    if (![RASettings.sharedInstance reachabilityEnabled])
     {
         return;
     }

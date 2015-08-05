@@ -37,6 +37,7 @@ const int bottomSizeViewTag =  987654320;
 	view.frame = CGRectMake(0, 40, self.frame.size.width, self.frame.size.height);
 	myFrame.size.height += 40;
 	self.frame = myFrame;
+	view.hideStatusBar = YES;
 	[self addSubview:view];
 
     panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
@@ -499,7 +500,9 @@ const int bottomSizeViewTag =  987654320;
 
 -(void) setTransform:(CGAffineTransform)trans
 {
+	CGPoint center = self.center;
 	[super setTransform:trans];
+	self.center = center;
 
 	/*if (self.frame.origin.x < 0 || self.frame.origin.x + self.frame.size.width > UIScreen.mainScreen.bounds.size.width)
 		[UIView animateWithDuration:0.1 animations:^{

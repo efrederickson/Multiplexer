@@ -25,4 +25,6 @@
 -(void) preloadApp;
 -(void) loadApp;
 -(void) unloadApp;
+-(void) unloadApp:(BOOL)forceImmediate;
+
 @end

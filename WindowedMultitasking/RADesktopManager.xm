@@ -16,6 +16,8 @@ BOOL overrideUIWindow = NO;
 -(void) addDesktop:(BOOL)switchTo
 {
 	RADesktopWindow *desktopWindow = [[RADesktopWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
+	//[desktopWindow _rotateWindowToOrientation:UIApplication.sharedApplication.statusBarOrientation updateStatusBar:YES duration:1 skipCallbacks:NO];
+
 	[windows addObject:desktopWindow];
 	if (switchTo)
 		[self switchToDesktop:windows.count - 1];
@@ -73,13 +75,19 @@ BOOL overrideUIWindow = NO;
 
 	currentDesktopIndex = index;
 	currentDesktop = newDesktop;
+	//[newDesktop updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
 }
 
 -(void) removeAppWithIdentifier:(NSString*)bundleIdentifier animated:(BOOL)animated
 {
+	[self removeAppWithIdentifier:bundleIdentifier animated:animated forceImmediateUnload:NO];
+}
+
+-(void) removeAppWithIdentifier:(NSString*)bundleIdentifier animated:(BOOL)animated forceImmediateUnload:(BOOL)force
+{
 	for (RADesktopWindow *window in windows)
 	{
-		[window removeAppWithIdentifier:bundleIdentifier animated:(BOOL)animated];
+		[window removeAppWithIdentifier:bundleIdentifier animated:animated forceImmediateUnload:force];
 	}
 }
 
@@ -124,7 +132,7 @@ BOOL overrideUIWindow = NO;
 %hook SBUIController
 - (void)activateApplicationAnimated:(SBApplication*)arg1
 {
-	[RADesktopManager.sharedInstance removeAppWithIdentifier:arg1.bundleIdentifier animated:NO];
+	[RADesktopManager.sharedInstance removeAppWithIdentifier:arg1.bundleIdentifier animated:NO forceImmediateUnload:YES];
     %orig;
 }
 %end
