@@ -29,7 +29,7 @@ const int bottomSizeViewTag =  987654320;
 @implementation RAWindowBar
 -(void) attachView:(RAHostedAppView*)view
 {
-	self.backgroundColor = UIColor.lightGrayColor;
+	self.backgroundColor = [UIColor colorWithRed:229/255.0f green:228/255.0f blue:229/255.0f alpha:1.0f]; //UIColor.lightGrayColor;
 	attachedView = view;
 
 	CGRect myFrame = view.frame;
@@ -77,39 +77,39 @@ const int bottomSizeViewTag =  987654320;
     titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, myFrame.size.width, 40)];
     titleLabel.textAlignment = NSTextAlignmentCenter;
     titleLabel.font = [UIFont systemFontOfSize:18];
-    titleLabel.textColor = [UIColor whiteColor];
+    titleLabel.textColor = [UIColor colorWithRed:115/255.0f green:114/255.0f blue:115/255.0f alpha:1.0f];
     titleLabel.text = [view displayName];
     [self addSubview:titleLabel];
 
 	closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-	closeButton.frame = CGRectMake(5, 5, 30, 30);
-	[closeButton setImage:[RAResourceImageProvider imageForFilename:@"Close" size:CGSizeMake(30, 30) tintedTo:[UIColor colorWithRed:255/255.0f green:112/255.0f blue:112/255.0f alpha:1.0f]] forState:UIControlStateNormal];
+	closeButton.frame = CGRectMake(5, 2, 36, 36);
+	[closeButton setImage:[RAResourceImageProvider imageForFilename:@"Close" size:CGSizeMake(16, 16) tintedTo:[UIColor.blackColor colorWithAlphaComponent:0.5]] forState:UIControlStateNormal];
 	closeButton.clipsToBounds = YES;
 	[closeButton addTarget:self action:@selector(closeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
-	closeButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
+	closeButton.backgroundColor = [UIColor colorWithRed:255/255.0f green:112/255.0f blue:112/255.0f alpha:1.0f];
 	closeButton.layer.cornerRadius = closeButton.frame.size.width / 2;
 	[self addSubview:closeButton];
 
 	maximizeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-	maximizeButton.frame = CGRectMake(45, 5, 30, 30);
-	[maximizeButton setBackgroundImage:[RAResourceImageProvider imageForFilename:@"Plus" size:CGSizeMake(30, 30) tintedTo:[UIColor colorWithRed:115/255.0f green:232/255.0f blue:166/255.0f alpha:1.0f]] forState:UIControlStateNormal];
+	maximizeButton.frame = CGRectMake(45, 2, 36, 36);
+	[maximizeButton setImage:[RAResourceImageProvider imageForFilename:@"Plus" size:CGSizeMake(16, 16) tintedTo:[UIColor.blackColor colorWithAlphaComponent:0.5]] forState:UIControlStateNormal];
 	maximizeButton.clipsToBounds = YES;
 	[maximizeButton addTarget:self action:@selector(maximizeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
-	maximizeButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
+	maximizeButton.backgroundColor = [UIColor colorWithRed:115/255.0f green:232/255.0f blue:166/255.0f alpha:1.0f];
 	maximizeButton.layer.cornerRadius = maximizeButton.frame.size.width / 2;
 	[self addSubview:maximizeButton];
 
 	minimizeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-	minimizeButton.frame = CGRectMake(85, 5, 30, 30);
-	[minimizeButton setBackgroundImage:[RAResourceImageProvider imageForFilename:@"Minus" size:CGSizeMake(30, 30) tintedTo:[UIColor colorWithRed:90/255.0f green:191/255.0f blue:255/255.0f alpha:1.0f]] forState:UIControlStateNormal];
+	minimizeButton.frame = CGRectMake(85, 2, 36, 36);
+	[minimizeButton setImage:[RAResourceImageProvider imageForFilename:@"Minus" size:CGSizeMake(16, 16) tintedTo:[UIColor.blackColor colorWithAlphaComponent:0.5]] forState:UIControlStateNormal];
 	minimizeButton.clipsToBounds = YES;
 	[minimizeButton addTarget:self action:@selector(minimizeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
-	minimizeButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
+	minimizeButton.backgroundColor = [UIColor colorWithRed:90/255.0f green:191/255.0f blue:255/255.0f alpha:1.0f];
 	minimizeButton.layer.cornerRadius = minimizeButton.frame.size.width / 2;
 	[self addSubview:minimizeButton];
 
 	swapOrientationButton = [UIButton buttonWithType:UIButtonTypeCustom];
-	swapOrientationButton.frame = CGRectMake(self.frame.size.width - 35, 5, 30, 30);
+	swapOrientationButton.frame = CGRectMake(self.frame.size.width - (36 + 5), 2, 36, 36);
 	swapOrientationButton.clipsToBounds = YES;
 	[swapOrientationButton setTitle:@"↺" forState:UIControlStateNormal];
 	[swapOrientationButton addTarget:self action:@selector(swapOrientationButtonTap:) forControlEvents:UIControlEventTouchUpInside];
@@ -122,12 +122,16 @@ const int bottomSizeViewTag =  987654320;
 	sizingLockButton = [UIButton buttonWithType:UIButtonTypeCustom];
 	sizingLockButton.frame = swapOrientationButton.frame;
 	sizingLockButton.titleLabel.font = [UIFont systemFontOfSize:13];
-	[sizingLockButton setImage:[RAResourceImageProvider imageForFilename:@"Unlocked" size:CGSizeMake(20, 20) tintedTo:[UIColor colorWithRed:185/255.0f green:116/255.0f blue:245/255.0f alpha:1.0f]] forState:UIControlStateNormal];
+	[sizingLockButton setImage:[RAResourceImageProvider imageForFilename:@"Unlocked" size:CGSizeMake(16, 16) tintedTo:[UIColor.blackColor colorWithAlphaComponent:0.5]] forState:UIControlStateNormal];
 	sizingLockButton.clipsToBounds = YES;
 	[sizingLockButton addTarget:self action:@selector(sizingLockButtonTap:) forControlEvents:UIControlEventTouchUpInside];
-	sizingLockButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.3];
+	sizingLockButton.backgroundColor = [UIColor colorWithRed:185/255.0f green:116/255.0f blue:245/255.0f alpha:1.0f];
 	sizingLockButton.layer.cornerRadius = sizingLockButton.frame.size.width / 2;
 	[self addSubview:sizingLockButton];
+
+	CAShapeLayer * maskLayer = [CAShapeLayer layer];
+	maskLayer.path = [UIBezierPath bezierPathWithRoundedRect:self.bounds byRoundingCorners: UIRectCornerTopLeft | UIRectCornerTopRight cornerRadii: (CGSize){6.0, 6.0}].CGPath;
+	self.layer.mask = maskLayer;
 }
 
 -(void) close
@@ -197,11 +201,11 @@ const int bottomSizeViewTag =  987654320;
 
 	if (sizingLocked || appRotationLocked)
 	{
-		[sizingLockButton setImage:[RAResourceImageProvider imageForFilename:@"Lock" size:CGSizeMake(20, 20) tintedTo:[UIColor colorWithRed:185/255.0f green:116/255.0f blue:245/255.0f alpha:1.0f]] forState:UIControlStateNormal];
+		[sizingLockButton setImage:[RAResourceImageProvider imageForFilename:@"Lock" size:CGSizeMake(16, 16) tintedTo:[UIColor.blackColor colorWithAlphaComponent:0.5]] forState:UIControlStateNormal];
 	}
 	else
 	{
-		[sizingLockButton setImage:[RAResourceImageProvider imageForFilename:@"Unlocked" size:CGSizeMake(20, 20) tintedTo:[UIColor colorWithRed:185/255.0f green:116/255.0f blue:245/255.0f alpha:1.0f]] forState:UIControlStateNormal];
+		[sizingLockButton setImage:[RAResourceImageProvider imageForFilename:@"Unlocked" size:CGSizeMake(16, 16) tintedTo:[UIColor.blackColor colorWithAlphaComponent:0.5]] forState:UIControlStateNormal];
 	}
 }
 
