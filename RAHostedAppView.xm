@@ -1,6 +1,7 @@
 #import "RAHostedAppView.h"
 #import "BioLockdown.h"
 #import "RAHostManager.h"
+#import "RAMessagingServer.h"
 
 @interface RAHostedAppView () {
     NSTimer *verifyTimer;
@@ -20,7 +21,6 @@
 	{
 		self.bundleIdentifier = bundleIdentifier;
         self.autosizesApp = NO;
-        self.isTopApp = NO;
         self.allowHidingStatusBar = YES;
 	}
 	return self;
@@ -46,6 +46,12 @@
     _orientation = UIInterfaceOrientationPortrait;
     _bundleIdentifier = value;
     app = [[%c(SBApplicationController) sharedInstance] RA_applicationWithBundleIdentifier:value];
+}
+
+-(void) setShouldUseExternalKeyboard:(BOOL)value
+{
+    _shouldUseExternalKeyboard = value;
+    [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:value forApp:self.bundleIdentifier completion:nil];
 }
 
 -(void) preloadApp
@@ -145,20 +151,15 @@
 
     if (self.autosizesApp)
     {
-        NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-        dict[@"sizeWidth"] = @(frame.size.width);
-        dict[@"sizeHeight"] = @(frame.size.height);
-        dict[@"bundleIdentifier"] = self.bundleIdentifier;
-        dict[@"isTopApp"] = @(self.isTopApp);
-        dict[@"rotationMode"] = @NO;
-        dict[@"hideStatusBarIfWanted"] = @(self.allowHidingStatusBar);
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, (__bridge CFDictionaryRef)dict, true);
+        RAMessageAppData data = [RAMessagingServer.sharedInstance getDataForIdentifier:self.bundleIdentifier];
+        data.canHideStatusBarIfWanted = self.allowHidingStatusBar;
+        [RAMessagingServer.sharedInstance setData:data forIdentifier:self.bundleIdentifier];
+        [RAMessagingServer.sharedInstance resizeApp:self.bundleIdentifier toSize:CGSizeMake(frame.size.width, frame.size.height) completion:nil];
+
     }
     else if (self.bundleIdentifier)
     {
-        NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-        dict[@"bundleIdentifier"] = self.bundleIdentifier;
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)dict, true);
+        [RAMessagingServer.sharedInstance endResizingApp:self.bundleIdentifier completion:nil];
     }
 }
 
@@ -169,10 +170,10 @@
     if (!self.bundleIdentifier)
         return;
 
-    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-    dict[@"bundleIdentifier"] = self.bundleIdentifier;
-    dict[@"hideStatusBar"] = @(value);
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.updateStatusBar"), NULL, (__bridge CFDictionaryRef)dict, true);
+    if (value)
+        [RAMessagingServer.sharedInstance forceStatusBarVisibility:value forApp:self.bundleIdentifier completion:nil];
+    else
+        [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:self.bundleIdentifier completion:nil];
 }
 
 -(void) unloadApp
@@ -191,35 +192,24 @@
         self.userInteractionEnabled = NO;
     }
 
-    if (!scene) return;
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": app.bundleIdentifier }, NO);   
+    if (!scene)
+        return;
 
-    FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
-    SET_BACKGROUNDED(settings, YES);
-    [scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];
-    //FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
-    [contextHostManager disableHostingForRequester:@"reachapp"];
-    contextHostManager = nil;
+    [RAMessagingServer.sharedInstance endResizingApp:self.bundleIdentifier completion:^(BOOL success) {
+        FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
+        SET_BACKGROUNDED(settings, YES);
+        [scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];
+        //FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
+        [contextHostManager disableHostingForRequester:@"reachapp"];
+        contextHostManager = nil;
+    }];
 }
 
 -(void) rotateToOrientation:(UIInterfaceOrientation)o
 {
     _orientation = o;
-    NSString *event = @"";
-    // force the last app to orient to the current apps orientation
-    if (o == UIInterfaceOrientationLandscapeRight)
-        event = @"com.efrederickson.reachapp.forcerotation-right";
-    else if (o == UIInterfaceOrientationLandscapeLeft)
-        event = @"com.efrederickson.reachapp.forcerotation-left";
-    else if (o == UIInterfaceOrientationPortrait)
-        event = @"com.efrederickson.reachapp.forcerotation-portrait";
-    else if (o == UIInterfaceOrientationPortraitUpsideDown)
-        event = @"com.efrederickson.reachapp.forcerotation-upsidedown";
 
-    CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-    CFDictionaryAddValue(dictionary,  (__bridge const void*)@"bundleIdentifier",  (__bridge const void*)app.bundleIdentifier);
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), (__bridge CFStringRef)event, NULL, dictionary, true);
-    CFRelease(dictionary);
+    [RAMessagingServer.sharedInstance rotateApp:self.bundleIdentifier toOrientation:o completion:nil];
 }
 
 // This allows for any subviews with gestures (e.g. the SwipeOver bar with a negative y origin) to recieve touch events.

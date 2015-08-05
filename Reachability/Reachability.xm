@@ -13,6 +13,7 @@
 #import "RAAppSliderProviderView.h"
 #import "RADesktopManager.h"
 #import "RADesktopWindow.h"
+#import "RAMessagingServer.h"
 
 #define SPRINGBOARD ([NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"])
 
@@ -129,16 +130,20 @@ id SBWorkspace$sharedInstance;
 {
     // Notify both top and bottom apps Reachability is closing
     if (lastBundleIdentifier && lastBundleIdentifier.length > 0)
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": lastBundleIdentifier}, NO);
+    {
+        [RAMessagingServer.sharedInstance endResizingApp:lastBundleIdentifier completion:nil];
+        [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:NO forApp:lastBundleIdentifier completion:nil];
+    }
     if (currentBundleIdentifier)
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentBundleIdentifier}, NO);
+        [RAMessagingServer.sharedInstance endResizingApp:currentBundleIdentifier completion:nil];
     if ([view isKindOfClass:[RAAppSliderProviderView class]])
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": [((RAAppSliderProviderView*)view) currentBundleIdentifier]}, NO);
+    {
+        [RAMessagingServer.sharedInstance endResizingApp:[((RAAppSliderProviderView*)view) currentBundleIdentifier] completion:nil];
+        [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:NO forApp:[((RAAppSliderProviderView*)view) currentBundleIdentifier] completion:nil];
+    }
 
-    if (lastBundleIdentifier)
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.updateKeyboardWindow"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": lastBundleIdentifier, @"wantsKeyboard": @NO}, NO);
-    else if ([view isKindOfClass:[RAAppSliderProviderView class]])
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.updateKeyboardWindow"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": [((RAAppSliderProviderView*)view) currentBundleIdentifier], @"wantsKeyboard": @NO}, NO);
+    [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:currentBundleIdentifier completion:nil];
+    [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:NO forApp:currentBundleIdentifier completion:nil];
         
     if ([RASettings.sharedInstance showNCInstead])
     {
@@ -200,9 +205,10 @@ id SBWorkspace$sharedInstance;
     if (overrideDisableForStatusBar)
         return;
 
+    %orig;
+
     if (![RASettings.sharedInstance enabled])
     {
-        %orig;
         return;
     }
 
@@ -215,7 +221,6 @@ id SBWorkspace$sharedInstance;
 
     }
 
-    %orig;
 }
 
 - (void) handleReachabilityModeActivated
@@ -507,63 +512,68 @@ CGFloat startingY = -1;
     else if (lastBundleIdentifier != nil || [view isKindOfClass:[RAAppSliderProviderView class]])
     {
         // Notify clients
-        NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+
+        CGFloat width = - 1, height = -1;
+
         if ([view isKindOfClass:[RAAppSliderProviderView class]])
         {
             RAAppSliderProviderView *sliderView = (RAAppSliderProviderView*)view;
-            dict[@"sizeWidth"] = @(sliderView.clientFrame.size.width);
-            dict[@"sizeHeight"] = @(sliderView.clientFrame.size.height);
+            width = sliderView.clientFrame.size.width;
+            height = sliderView.clientFrame.size.height;
         }
         else
         {
             if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
             {
-                dict[@"sizeWidth"] = @(topWindow.frame.size.height);
-                dict[@"sizeHeight"] = @(topWindow.frame.size.width);
+                width = topWindow.frame.size.height;
+                height = topWindow.frame.size.width;
             }
             else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
             {
-                dict[@"sizeWidth"] = @(topWindow.frame.size.height);
-                dict[@"sizeHeight"] = @(topWindow.frame.size.width);
+                width = topWindow.frame.size.height;
+                height = topWindow.frame.size.width;
             }
             else
             {
-                dict[@"sizeWidth"] = @(topWindow.frame.size.width);
-                dict[@"sizeHeight"] = @(topWindow.frame.size.height);
+                width = topWindow.frame.size.width;
+                height = topWindow.frame.size.height;
             }
         }
-        if (lastBundleIdentifier)
-            dict[@"bundleIdentifier"] = lastBundleIdentifier;
+
+        NSString *targetIdentifier = lastBundleIdentifier;
         if ([view isKindOfClass:[RAAppSliderProviderView class]])
-            dict[@"bundleIdentifier"] = [((RAAppSliderProviderView*)view) currentBundleIdentifier];
-        dict[@"isTopApp"] = @YES;
-        dict[@"rotationMode"] = @([RASettings.sharedInstance scalingRotationMode]);
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, (__bridge CFDictionaryRef)dict, true);
+            targetIdentifier = [((RAAppSliderProviderView*)view) currentBundleIdentifier];
+
+        [RAMessagingServer.sharedInstance resizeApp:targetIdentifier toSize:CGSizeMake(width, height) completion:nil];
+        [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:YES forApp:targetIdentifier completion:nil];
     }
 
     if ([view isKindOfClass:[%c(FBWindowContextHostWrapperView) class]] == NO && [view isKindOfClass:[RAAppSliderProviderView class]] == NO)
         return; // only resize when the app is being shown. That way it's more like native Reachability
 
-    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+
+    CGFloat width = -1, height = -1;
+
     if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
     {
-        dict[@"sizeWidth"] = @(bottomWindow.frame.size.height);
-        dict[@"sizeHeight"] = @(bottomWindow.frame.size.width);
+        width = bottomWindow.frame.size.height;
+        height = bottomWindow.frame.size.width;
     }
     else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
     {
-        dict[@"sizeWidth"] = @(bottomWindow.frame.size.height);
-        dict[@"sizeHeight"] = @(bottomWindow.frame.size.width);
+        width = bottomWindow.frame.size.height;
+        height = bottomWindow.frame.size.width;
     }
     else
     {
-        dict[@"sizeWidth"] = @(bottomWindow.frame.size.width);
-        dict[@"sizeHeight"] = @(bottomWindow.frame.size.height);
+        width = bottomWindow.frame.size.width;
+        height = bottomWindow.frame.size.height;
     }
-    dict[@"bundleIdentifier"] = currentBundleIdentifier;
-    dict[@"isTopApp"] = @NO;
-    dict[@"rotationMode"] = @([RASettings.sharedInstance scalingRotationMode]);
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, (__bridge CFDictionaryRef)dict, true);
+    [RAMessagingServer.sharedInstance resizeApp:currentBundleIdentifier toSize:CGSizeMake(width, height) completion:nil];
+    [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:YES forApp:currentBundleIdentifier completion:nil];
+
+    if ([RASettings.sharedInstance unifyStatusBar])
+        [RAMessagingServer.sharedInstance forceStatusBarVisibility:NO forApp:currentBundleIdentifier completion:nil];
 }
 
 %new -(void) RA_launchTopAppWithIdentifier:(NSString*) bundleIdentifier
@@ -605,30 +615,15 @@ CGFloat startingY = -1;
 
     if ([RASettings.sharedInstance enableRotation] && ![RASettings.sharedInstance scalingRotationMode])
     {
-        NSString *event = @"";
-        // force the last app to orient to the current apps orientation
-        if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
-            event = @"com.efrederickson.reachapp.forcerotation-right";
-        else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
-            event = @"com.efrederickson.reachapp.forcerotation-left";
-        else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortrait)
-            event = @"com.efrederickson.reachapp.forcerotation-portrait";
-        else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationPortraitUpsideDown)
-            event = @"com.efrederickson.reachapp.forcerotation-upsidedown";
-
-        CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-        CFDictionaryAddValue(dictionary,  (__bridge const void*)@"bundleIdentifier",  (__bridge const void*)lastBundleIdentifier); // Top app
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), (__bridge CFStringRef)event, NULL, dictionary, true);
-        CFRelease(dictionary);
+        [RAMessagingServer.sharedInstance rotateApp:lastBundleIdentifier toOrientation:[UIApplication sharedApplication].statusBarOrientation completion:nil];
     }
     else if ([RASettings.sharedInstance scalingRotationMode] && [UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
     {
         overrideDisableForStatusBar = YES;
 
         // Force portrait
-        NSString *event = @"com.efrederickson.reachapp.forcerotation-portrait";
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), (__bridge CFStringRef)event, NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": lastBundleIdentifier }, true);
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), (__bridge CFStringRef)event, NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentBundleIdentifier }, true);
+        [RAMessagingServer.sharedInstance rotateApp:lastBundleIdentifier toOrientation:UIInterfaceOrientationPortrait completion:nil];
+        [RAMessagingServer.sharedInstance rotateApp:currentBundleIdentifier toOrientation:UIInterfaceOrientationPortrait completion:nil];
 
         // Scale app
         CGFloat scale = view.frame.size.width / UIScreen.mainScreen.bounds.size.height;

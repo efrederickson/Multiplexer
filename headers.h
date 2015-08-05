@@ -642,7 +642,11 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 -(SBApplication*) _accessibilityFrontMostApplication;
 
 - (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(id)arg2 changeApplicationFlag:(BOOL)arg3;
-- (void)RA_forceRotationToInterfaceOrientation:(UIInterfaceOrientation)orientation isReverting:(BOOL)reverting;
+
+-(void) RA_forceRotationToInterfaceOrientation:(UIInterfaceOrientation)orientation isReverting:(BOOL)reverting;
+-(void) RA_forceStatusBarVisibility:(BOOL)visible orRevert:(BOOL)revert;
+-(void) RA_updateWindowsForSizeChange:(CGSize)size isReverting:(BOOL)revert;
+
 - (void)applicationDidResume;
 - (void)_sendWillEnterForegroundCallbacks;
 - (void)suspend;

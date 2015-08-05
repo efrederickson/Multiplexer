@@ -141,7 +141,7 @@ CGRect swappedForOrientation(CGRect in)
 	[RAGestureManager.sharedInstance removeGestureWithIdentifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture"];
 	overrideCC = NO;
 
-	if (lastOpenedApp)
+	if (lastOpenedApp && lastOpenedApp.isRunning)
 	{
 		if ([RADesktopManager.sharedInstance isAppOpened:lastOpenedApp.bundleIdentifier] == NO)
 		{

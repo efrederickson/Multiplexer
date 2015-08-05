@@ -2,10 +2,14 @@
 #import "headers.h"
 #import <execinfo.h>
 #import <AppSupport/CPDistributedMessagingCenter.h>
+#import "RAMessaging.h"
+#import "RAMessagingClient.h"
+#import "RAKeyboardWindow.h"
+#import "RARemoteKeyboardView.h"
+#import "RADesktopManager.h"
 
-extern BOOL overrideDisplay;
+extern BOOL overrideDisableForStatusBar;
 BOOL isShowing = NO;
-extern CPDistributedMessagingCenter *messagingCenter;
 
 @implementation RAKeyboardStateListener
 + (instancetype)sharedInstance
@@ -20,21 +24,9 @@ extern CPDistributedMessagingCenter *messagingCenter;
     _size = [[notif.userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
     CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.keyboard.didShow"), NULL, (__bridge CFDictionaryRef)@{ @"size": NSStringFromCGSize(_size) }, true);
 
-    if (overrideDisplay)
+    if ([RAMessagingClient.sharedInstance shouldUseExternalKeyboard])
     {
-        if (!messagingCenter)
-        {
-            messagingCenter = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.efrederickson.reachapp.keyboardMessaging"];
-            void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);
-            if(handle)
-            {
-                void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*);
-                rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
-                rocketbootstrap_distributedmessagingcenter_apply(messagingCenter);
-            }
-        }
-
-        [messagingCenter sendMessageName:@"showKeyboardForAppWithIdentifier" userInfo:@{ @"bundleIdentifier": NSBundle.mainBundle.bundleIdentifier }];
+        [RAMessagingClient.sharedInstance notifyServerToShowKeyboard];
         isShowing = YES;
     }
 }
@@ -45,22 +37,10 @@ extern CPDistributedMessagingCenter *messagingCenter;
     _visible = NO;
     CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.keyboard.didHide"), NULL, NULL, true);
 
-    if (overrideDisplay || isShowing)
+    if ([RAMessagingClient.sharedInstance shouldUseExternalKeyboard] || isShowing)
     {
         isShowing = NO;
-        if (!messagingCenter)
-        {
-            messagingCenter = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.efrederickson.reachapp.keyboardMessaging"];
-            void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);
-            if(handle)
-            {
-                void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*);
-                rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
-                rocketbootstrap_distributedmessagingcenter_apply(messagingCenter);
-            }
-        }
-
-        [messagingCenter sendMessageName:@"hideKeyboardForAppWithIdentifier" userInfo:@{ @"bundleIdentifier": NSBundle.mainBundle.bundleIdentifier }];
+        [RAMessagingClient.sharedInstance notifyServerToHideKeyboard];
     }
 }
 
@@ -93,6 +73,17 @@ void externalKeyboardDidHide(CFNotificationCenterRef center, void *observer, CFS
     //NSLog(@"[ReachApp] externalKeyboardDidHide");
     [RAKeyboardStateListener.sharedInstance _setVisible:NO];
 }
+
+%hook UIKeyboard
+-(void) activate
+{
+    %orig;
+
+    unsigned int contextID = UITextEffectsWindow.sharedTextEffectsWindow._contextId;
+
+    [RAMessagingClient.sharedInstance notifyServerWithKeyboardContextId:contextID];
+}
+%end
 
 %ctor
 {

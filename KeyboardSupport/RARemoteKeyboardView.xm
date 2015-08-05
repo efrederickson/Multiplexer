@@ -2,6 +2,7 @@
 #import "headers.h"
 #import <AppSupport/CPDistributedMessagingCenter.h>
 #import <Foundation/Foundation.h>
+#import "RAMessagingServer.h"
 
 CPDistributedMessagingCenter *messagingCenter;
 
@@ -17,21 +18,10 @@ CPDistributedMessagingCenter *messagingCenter;
     }
     _identifier = identifier;
 
-    messagingCenter = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.efrederickson.reachapp.keyboardMessaging"];        
-    void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);
-    if(handle)
-    {
-        void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*);
-        rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
-        rocketbootstrap_distributedmessagingcenter_apply(messagingCenter);
-    }
-
-    NSDictionary *reply = [messagingCenter sendMessageAndReceiveReplyName:@"getContextIdForIdentifier" userInfo:@{ @"bundleIdentifier": identifier }];
+    unsigned int value = [RAMessagingServer.sharedInstance getStoredKeyboardContextIdForApp:identifier];
+    self.layerHost.contextId = value;
     
-    NSNumber *number = [reply objectForKey:@"contextId"];
-    self.layerHost.contextId = [number unsignedIntValue];
-    
-    NSLog(@"[ReachApp] loaded keyboard view with %@", number);
+    NSLog(@"[ReachApp] loaded keyboard view with %d", value);
 }
 
 -(id)initWithFrame:(CGRect)frame
@@ -55,32 +45,3 @@ CPDistributedMessagingCenter *messagingCenter;
     self.layerHost = nil;
 }
 @end
-
-%hook UIKeyboard
--(void) activate
-{
-    %orig;
-
-    unsigned int contextID = UITextEffectsWindow.sharedTextEffectsWindow._contextId;
-
-    NSNumber *number = [NSNumber numberWithUnsignedInt:contextID];
-    NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-    dictionary[@"contextId"] = number;
-    dictionary[@"bundleIdentifier"] = NSBundle.mainBundle.bundleIdentifier;
-
-    if (!messagingCenter)
-    {
-        messagingCenter = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.efrederickson.reachapp.keyboardMessaging"];
-        void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);
-        if(handle)
-        {
-            void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*);
-            rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
-            rocketbootstrap_distributedmessagingcenter_apply(messagingCenter);
-        }
-    }
-
-    [messagingCenter sendMessageName:@"setContextId:forIdentifier:" userInfo:dictionary];
-}
-%end
-

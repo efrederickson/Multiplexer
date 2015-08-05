@@ -1,4 +1,4 @@
 #!/bin/bash
 
 launchctl unload -w /Library/LaunchDaemons/com.efrederickson.reachapp.fsdaemon.plist
-launchctl unload -w /Library/LaunchDaemons/com.efrederickson.reachapp.keyboarddaemon.plist
+

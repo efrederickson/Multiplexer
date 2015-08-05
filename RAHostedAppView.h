@@ -11,9 +11,10 @@
 @property (nonatomic, retain) NSString *bundleIdentifier;
 @property (nonatomic) BOOL autosizesApp;
 
-@property (nonatomic) BOOL isTopApp;
 @property (nonatomic) BOOL allowHidingStatusBar;
 @property (nonatomic) BOOL hideStatusBar;
+
+@property (nonatomic) BOOL shouldUseExternalKeyboard;
 
 -(SBApplication*) app;
 -(NSString*) displayName;

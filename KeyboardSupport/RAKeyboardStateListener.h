@@ -5,3 +5,4 @@
 @property (nonatomic, readonly) BOOL visible;
 @property (nonatomic, readonly) CGSize size;
 @end
+

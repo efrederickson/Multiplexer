@@ -1,6 +1,6 @@
 DEBUG = 1
 ARCHS = armv7 armv7s arm64
-CFLAGS = -I./ -Iwidgets/ -Iwidgets/Core/ -Iwidgets/Reachability/ -ISwipeOver/ -IReachability/ -IGestureSupport/ -IKeyboardSupport/ -IMissionControl/ -IWindowedMultitasking/ -INotificationCenterApp/ -IBackgrounding/ -IIntroTutorial/
+CFLAGS = -I./ -Iwidgets/ -Iwidgets/Core/ -Iwidgets/Reachability/ -ISwipeOver/ -IReachability/ -IGestureSupport/ -IKeyboardSupport/ -IMissionControl/ -IWindowedMultitasking/ -INotificationCenterApp/ -IBackgrounding/ -IIntroTutorial/ -IMessaging/
 CFLAGS += -fobjc-arc
 THEOS_PACKAGE_DIR_NAME = debs
 TARGET = :clang:8.0
@@ -20,7 +20,8 @@ ReachApp_FILES = $(wildcard *.xm) $(wildcard *.mm) $(wildcard *.m) \
 	$(wildcard WindowedMultitasking/*.xm) $(wildcard WindowedMultitasking/*.mm) $(wildcard WindowedMultitasking/*.m) \
 	$(wildcard NotificationCenterApp/*.xm) $(wildcard NotificationCenterApp/*.mm) $(wildcard NotificationCenterApp/*.m) \
 	$(wildcard Backgrounding/*.xm) $(wildcard Backgrounding/*.mm) $(wildcard Backgrounding/*.m) \
-	$(wildcard IntroTutorial/*.xm) $(wildcard IntroTutorial/*.mm) $(wildcard IntroTutorial/*.m)
+	$(wildcard IntroTutorial/*.xm) $(wildcard IntroTutorial/*.mm) $(wildcard IntroTutorial/*.m) \
+	$(wildcard Messaging/*.xm) $(wildcard Messaging/*.mm) $(wildcard Messaging/*.m)
 	
 ReachApp_FRAMEWORKS = UIKit QuartzCore CoreGraphics 
 ReachApp_PRIVATE_FRAMEWORKS = GraphicsServices BackBoardServices
@@ -34,5 +35,5 @@ after-install::
 SUBPROJECTS += reachappsettings
 SUBPROJECTS += reachappflipswitch
 SUBPROJECTS += reachappfsdaemon
-SUBPROJECTS += reachappkeyboarddaemon
+
 include $(THEOS_MAKE_PATH)/aggregate.mk

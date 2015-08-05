@@ -4,6 +4,7 @@
 #import "RAHostedAppView.h"
 #import "RADesktopManager.h"
 #import "RADesktopWindow.h"
+#import "RAMessagingServer.h"
 
 extern int rotationDegsForOrientation(int o);
 
@@ -38,9 +39,8 @@ extern int rotationDegsForOrientation(int o);
 
 -(void) stopUsingSwipeOver
 {
-	if (currentAppIdentifier)
-	    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.endresizing"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": currentAppIdentifier }, NO);   
 	[overlayWindow removeOverlayFromUnderlyingAppImmediately];
+	[RAMessagingServer.sharedInstance endResizingApp:currentAppIdentifier completion:nil];
 
 	isUsingSwipeOver = NO;
 	currentAppIdentifier = nil;
@@ -101,7 +101,7 @@ extern int rotationDegsForOrientation(int o);
 
     RAHostedAppView *view = [[RAHostedAppView alloc] initWithBundleIdentifier:identifier];
     view.autosizesApp = YES;
-    view.isTopApp = YES;
+    view.shouldUseExternalKeyboard = YES;
     view.allowHidingStatusBar = NO;
     view.frame = UIScreen.mainScreen.bounds;
     [view loadApp];
@@ -137,6 +137,7 @@ extern int rotationDegsForOrientation(int o);
 {
 	if ([[overlayWindow currentView] isKindOfClass:[RAHostedAppView class]])
 	{
+		((RAHostedAppView*)overlayWindow.currentView).shouldUseExternalKeyboard = NO;
 		[((RAHostedAppView*)overlayWindow.currentView) unloadApp];
 	}
 	[[overlayWindow currentView] removeFromSuperview];
@@ -171,7 +172,7 @@ extern int rotationDegsForOrientation(int o);
 	if (currentAppIdentifier)
 	{
 		CGFloat underWidth = [overlayWindow isHidingUnderlyingApp] ? -1 : overlayWindow.frame.origin.x;
-		SEND_RESIZE_TO_UNDERLYING_APP(CGSizeMake(underWidth, -1));
+		[RAMessagingServer.sharedInstance resizeApp:currentAppIdentifier toSize:CGSizeMake(underWidth, -1) completion:nil];
 	}
 	
 	if (overlayWindow.isShowingAppSelector && reloadAppSelectorSizeNow)

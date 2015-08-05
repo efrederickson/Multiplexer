@@ -23,23 +23,3 @@
 @end
 
 #define RASWIPEOVER_VIEW_TAG 996
-
-#define SEND_RESIZE_TO_UNDERLYING_APP(frm) \
-	NSMutableDictionary *dict = [NSMutableDictionary dictionary]; \
-	dict[@"sizeWidth"] = @(frm.width); \
-	dict[@"sizeHeight"] = @(frm.height); \
-	dict[@"bundleIdentifier"] = currentAppIdentifier; \
-	dict[@"isTopApp"] = @NO; \
-    dict[@"rotationMode"] = @NO; \
-    dict[@"hideStatusBarIfWanted"] = @NO; \
-	CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, (__bridge CFDictionaryRef)dict, true);
-
-#define SEND_RESIZE_TO_OVERLYING_APP(frm) \
-	NSMutableDictionary *dict__overlying = [NSMutableDictionary dictionary]; \
-	dict__overlying[@"sizeWidth"] = @(frm.width); \
-	dict__overlying[@"sizeHeight"] = @(frm.height); \
-	dict__overlying[@"bundleIdentifier"] = currentHostingIdentifier; \
-	dict__overlying[@"isTopApp"] = @NO; \
-    dict__overlying[@"rotationMode"] = @NO; \
-    dict__overlying[@"hideStatusBarIfWanted"] = @YES; \
-	CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.beginresizing"), NULL, (__bridge CFDictionaryRef)dict__overlying, true);
