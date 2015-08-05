@@ -1,0 +1,21 @@
+The messaging system may seem complex and confusing at first. It sort of is. Below is an outline of how it works.
+
+
+
+1. Some component in SpringBoard sends some form of an update to RAMessagingServer
+	RAMessagingServer -> send CFNotification to app to retrieve updated info[1]
+	|       |
+	|       |
+	|	    |
+	|       |-------------------> app receives CFNotification
+	|                             - app send CPDistributedMessagingCenter message to sendMessageAndReceiveReplyName:
+	|                               |-------> SpringBoard sends data, callback is called with a success
+	|-----> timeout (2s)
+			- callback, failed
+			- notify user
+
+
+
+
+
+[1] - tries to send immediately, unless the app isn't running
