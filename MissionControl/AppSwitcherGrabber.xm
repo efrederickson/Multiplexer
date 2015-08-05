@@ -18,6 +18,8 @@
 	%orig;
 	[UIView animateWithDuration:0.3 animations:^{
 		[[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999].alpha = 0;
+	} completion:^(BOOL _) {
+		[[[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999] removeFromSuperview];
 	}];
 }
 %end
@@ -43,7 +45,7 @@
 	}
 
 	BOOL s = %orig;
-	if (s && [RASettings.sharedInstance missionControlEnabled])
+	if (s && [RASettings.sharedInstance missionControlEnabled] && [[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999] != nil)
 	{
 		[UIView animateWithDuration:0.3 animations:^{
 			[[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999].alpha = 1;
@@ -61,6 +63,33 @@
 //%hook SBAppSwitcherWindow
 %hook SBAppSwitcherController
 //-(void) addSubview:(UIView*)view
+
+- (void)_layoutInOrientation:(long long)arg1
+{
+	%orig;
+	
+	UIView *view = MSHookIvar<UIView*>(self, "_contentView");
+
+	if ([view viewWithTag:999] == nil && ([RASettings.sharedInstance missionControlEnabled] && ![RASettings.sharedInstance replaceAppSwitcherWithMC]))
+	{
+		SBControlCenterGrabberView *grabber = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:CGRectMake(0, 0, 50, 30)];
+		grabber.center = CGPointMake(view.frame.size.width / 2, 20/2);
+		
+		[grabber.chevronView setState:1 animated:NO];
+
+		grabber.backgroundColor = [UIColor whiteColor];
+		grabber.layer.cornerRadius = 5;
+
+		//[grabber.chevronView setState:1 animated:YES];
+		grabber.tag = 999;
+		[view addSubview:grabber];
+
+		[RAGestureManager.sharedInstance addGestureRecognizerWithTarget:(NSObject<RAGestureCallbackProtocol> *)self forEdge:UIRectEdgeTop identifier:@"com.efrederickson.reachapp.appswitchergrabber"];
+	}
+	else
+		((UIView*)[view viewWithTag:999]).center = CGPointMake(view.frame.size.width / 2, 20/2);
+}
+
 -(void)viewDidAppear:(BOOL)a
 {
 	%orig;
@@ -72,7 +101,7 @@
 		SBControlCenterGrabberView *grabber = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:CGRectMake(0, 0, 50, 30)];
 		grabber.center = CGPointMake(view.frame.size.width / 2, 20/2);
 		
-		[grabber.chevronView setState:1 animated:YES];
+		[grabber.chevronView setState:1 animated:NO];
 
 		grabber.backgroundColor = [UIColor whiteColor];
 		grabber.layer.cornerRadius = 5;
