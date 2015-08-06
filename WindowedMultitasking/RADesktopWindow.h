@@ -3,6 +3,7 @@
 @class RAWindowBar;
 
 @interface RADesktopWindow : UIWindow {
+	UIInterfaceOrientation lastKnownOrientation;
 	NSMutableArray *appViews;
 }
 

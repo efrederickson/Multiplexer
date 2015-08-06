@@ -43,6 +43,8 @@
 	windowBar.transform = CGAffineTransformRotate(windowBar.transform, DEGREES_TO_RADIANS([self baseRotationForOrientation]));
 	windowBar.hidden = NO;
 
+	lastKnownOrientation = -1;
+
 	if ([RAWindowStatePreservationSystemManager.sharedInstance hasWindowInformationForIdentifier:view.app.bundleIdentifier])
 	{
 		RAPreservedWindowInformation info = [RAWindowStatePreservationSystemManager.sharedInstance windowInformationForAppIdentifier:view.app.bundleIdentifier];
@@ -141,6 +143,8 @@
 
 -(void) updateRotationOnClients:(UIInterfaceOrientation)orientation
 {
+	lastKnownOrientation = orientation;
+
 	for (RAWindowBar *app in self.subviews)
 		if ([app isKindOfClass:[RAWindowBar class]]) // could be a diferent kind of UIView actually
 			[app updateClientRotation:orientation];	
@@ -172,6 +176,8 @@
 
 -(UIInterfaceOrientation) currentOrientation
 {
+	if (lastKnownOrientation >= 0)
+		return lastKnownOrientation;
 	return UIApplication.sharedApplication.statusBarOrientation;
 }
 
@@ -195,57 +201,33 @@
 	{
 		case UIInterfaceOrientationLandscapeLeft:
 	    	if (currentRotation >= 315 || currentRotation <= 45)
-	    	{
 	    		return UIInterfaceOrientationLandscapeLeft;
-	    	}
 	    	else if (currentRotation > 45 && currentRotation <= 135)
-	    	{
-	    		return UIInterfaceOrientationPortrait;
-	    	}
-	    	else if (currentRotation > 135 && currentRotation <= 215)
-	    	{
-	    		return UIInterfaceOrientationLandscapeRight;
-	    	}
-	    	else
-	    	{
 	    		return UIInterfaceOrientationPortraitUpsideDown;
-	    	}
+	    	else if (currentRotation > 135 && currentRotation <= 215)
+	    		return UIInterfaceOrientationLandscapeRight;
+	    	else
+	    		return UIInterfaceOrientationPortrait;
 
 		case UIInterfaceOrientationLandscapeRight:
 	    	if (currentRotation >= 315 || currentRotation <= 45)
-	    	{
 	    		return UIInterfaceOrientationLandscapeRight;
-	    	}
 	    	else if (currentRotation > 45 && currentRotation <= 135)
-	    	{
 	    		return UIInterfaceOrientationPortrait;
-	    	}
 	    	else if (currentRotation > 135 && currentRotation <= 215)
-	    	{
 	    		return UIInterfaceOrientationLandscapeLeft;
-	    	}
 	    	else
-	    	{
 	    		return UIInterfaceOrientationPortraitUpsideDown;
-	    	}
 
 		case UIInterfaceOrientationPortraitUpsideDown:
 			if (currentRotation >= 315 || currentRotation <= 45)
-			{
 				return UIInterfaceOrientationPortraitUpsideDown;
-			}
 			else if (currentRotation > 45 && currentRotation <= 135)
-			{
-				return UIInterfaceOrientationLandscapeLeft;
-			}
-			else if (currentRotation > 135 && currentRotation <= 215)
-			{
-				return UIInterfaceOrientationPortrait;
-			}
-			else
-			{
 				return UIInterfaceOrientationLandscapeRight;
-			}
+			else if (currentRotation > 135 && currentRotation <= 215)
+				return UIInterfaceOrientationPortrait;
+			else
+				return UIInterfaceOrientationLandscapeLeft;
 
 		case UIInterfaceOrientationPortrait:
 		default:
