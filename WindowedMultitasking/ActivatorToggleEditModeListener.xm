@@ -14,7 +14,7 @@ static RAActivatorToggleEditModeListener *sharedInstance;
 {
     RADesktopWindow *desktop = RADesktopManager.sharedInstance.currentDesktop;
 
-    for (RAWindowBar *view in desktop.sbuviews)
+    for (RAWindowBar *view in desktop.subviews)
     {
     	if ([view isKindOfClass:[RAWindowBar class]])
     	{
