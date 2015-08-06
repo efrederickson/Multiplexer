@@ -59,7 +59,7 @@
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
-                 @"key": @"enabled",
+                 @"key": @"reachabilityEnabled",
                  @"label": @"Enabled",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
