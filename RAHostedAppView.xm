@@ -236,6 +236,7 @@
     };
 
     [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:self.bundleIdentifier completion:nil];
+    [RAMessagingServer.sharedInstance unRotateApp:self.bundleIdentifier completion:nil];
     if (forceImmediate)
     {
         [RAMessagingServer.sharedInstance endResizingApp:self.bundleIdentifier completion:nil];
