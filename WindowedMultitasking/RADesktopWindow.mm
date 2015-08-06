@@ -194,9 +194,24 @@
 	switch (base)
 	{
 		case UIInterfaceOrientationLandscapeLeft:
-			NSLog(@"[ReachApp] left");
+	    	if (currentRotation >= 315 || currentRotation <= 45)
+	    	{
+	    		return UIInterfaceOrientationLandscapeLeft;
+	    	}
+	    	else if (currentRotation > 45 && currentRotation <= 135)
+	    	{
+	    		return UIInterfaceOrientationPortrait;
+	    	}
+	    	else if (currentRotation > 135 && currentRotation <= 215)
+	    	{
+	    		return UIInterfaceOrientationLandscapeRight;
+	    	}
+	    	else
+	    	{
+	    		return UIInterfaceOrientationPortraitUpsideDown;
+	    	}
+
 		case UIInterfaceOrientationLandscapeRight:
-			NSLog(@"[ReachApp] right");
 	    	if (currentRotation >= 315 || currentRotation <= 45)
 	    	{
 	    		return UIInterfaceOrientationLandscapeRight;
@@ -215,7 +230,22 @@
 	    	}
 
 		case UIInterfaceOrientationPortraitUpsideDown:
-
+			if (currentRotation >= 315 || currentRotation <= 45)
+			{
+				return UIInterfaceOrientationPortraitUpsideDown;
+			}
+			else if (currentRotation > 45 && currentRotation <= 135)
+			{
+				return UIInterfaceOrientationLandscapeLeft;
+			}
+			else if (currentRotation > 135 && currentRotation <= 215)
+			{
+				return UIInterfaceOrientationPortrait;
+			}
+			else
+			{
+				return UIInterfaceOrientationLandscapeRight;
+			}
 
 		case UIInterfaceOrientationPortrait:
 		default:
