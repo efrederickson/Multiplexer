@@ -303,9 +303,11 @@ const int bottomSizeViewTag =  987654320;
 
 -(void) updateClientRotation:(UIInterfaceOrientation)orientation
 {
-    	CGFloat currentRotation = RADIANS_TO_DEGREES(atan2(self.transform.b, self.transform.a));
 	if (!appRotationLocked)
+	{
+    	CGFloat currentRotation = RADIANS_TO_DEGREES(atan2(self.transform.b, self.transform.a));
 	    [attachedView rotateToOrientation:[self.desktop appOrientationRelativeToThisOrientation:currentRotation]];
+	}
 }
 
 -(void) disableLongPress
