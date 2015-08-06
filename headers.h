@@ -489,7 +489,6 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 - (void)dealloc;
 - (id)init;
 - (id)initWithSettings:(id)arg1;
-
 @end
 
 @interface FBSMutableSceneSettings : FBSSceneSettings
@@ -510,6 +509,10 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @property(nonatomic) struct CGRect frame;
 
 @end
+
+@interface UIMutableApplicationSceneSettings : FBSMutableSceneSettings
+@end
+
 
 @interface FBProcess : NSObject
 @end

@@ -32,9 +32,19 @@ NSMutableDictionary *suspendImmediatelyVerifierDict = [NSMutableDictionary dicti
 }
 %end
 
-%hook SBAppSwitcherModel
-- (void)remove:(id)arg1 { NSLog(@"[ReachApp] remove:%@", arg1); %orig; }
-- (void)removeDisplayItem:(id)arg1 { NSLog(@"[ReachApp] removeDisplayItem:%@",arg1); %orig; }
+%hook FBSSceneImpl
+- (id)_initWithQueue:(unsafe_id)arg1 callOutQueue:(unsafe_id)arg2 identifier:(unsafe_id)arg3 display:(unsafe_id)arg4 settings:(UIMutableApplicationSceneSettings*)arg5 clientSettings:(unsafe_id)arg6
+{
+    if ([RABackgrounder.sharedInstance shouldKeepInForeground:arg3])
+    {
+        if (!arg5)
+        {
+            arg5 = [[%c(UIMutableApplicationSceneSettings) alloc] init];
+        }
+        SET_BACKGROUNDED(arg5, NO);
+    }
+    return %orig(arg1, arg2, arg3, arg4, arg5, arg6);
+}
 %end
 
 %hook FBUIApplicationWorkspaceScene
