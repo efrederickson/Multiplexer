@@ -3,6 +3,10 @@
 #import "RAMessagingServer.h"
 #import "RASpringBoardKeyboardActivation.h"
 
+#if DEBUG
+#import "RASettings.h"
+#endif
+
 @implementation RAMessagingServer
 +(instancetype) sharedInstance
 {
@@ -67,8 +71,13 @@
 
 -(void) alertUser:(NSString*)description
 {
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:LOCALIZE(@"MULTIPLEXER") message:description delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [alert show];
+#if DEBUG
+	if ([RASettings.sharedInstance debug_showIPCMessages])
+	{
+	    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:LOCALIZE(@"MULTIPLEXER") message:description delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    	[alert show];
+    }
+#endif
 }
 
 -(RAMessageAppData) getDataForIdentifier:(NSString*)identifier
@@ -136,7 +145,7 @@
 		callback = ^(BOOL _) { };
 
 	waitingCompletions[identifier] = [callback copy];
-	[self performSelector:@selector(checkIfCompletionStillExitsForIdentifierAndFailIt:) withObject:identifier afterDelay:2];
+	[self performSelector:@selector(checkIfCompletionStillExitsForIdentifierAndFailIt:) withObject:identifier afterDelay:4];
 	
 
 /*
@@ -225,6 +234,7 @@
 -(void) unRotateApp:(NSString*)identifier completion:(RAMessageCompletionCallback)callback
 {
 	RAMessageAppData data = [self getDataForIdentifier:identifier];
+	data.forcedOrientation = UIApplication.sharedApplication.statusBarOrientation;
 	data.shouldForceOrientation = NO;
 	[self setData:data forIdentifier:identifier];
 	[self sendStoredDataToApp:identifier completion:callback];

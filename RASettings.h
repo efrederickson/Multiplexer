@@ -34,6 +34,7 @@ enum RAGrabArea {
 -(BOOL) unifyStatusBar;
 -(BOOL) flipTopAndBottom;
 
+-(BOOL) NCAppEnabled;
 -(NSString*) NCApp;
 
 -(BOOL) alwaysEnableGestures;
@@ -58,6 +59,10 @@ enum RAGrabArea {
 -(BOOL) alwaysShowSOGrabber;
 
 -(BOOL) exitAppAfterUsingActivatorAction;
+
+#if DEBUG
+-(BOOL) debug_showIPCMessages;
+#endif
 
 -(BOOL) windowedMultitaskingEnabled;
 -(NSInteger) windowRotationLockMode;

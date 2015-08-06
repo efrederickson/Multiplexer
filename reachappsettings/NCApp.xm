@@ -54,7 +54,16 @@
 -(NSArray*) customSpecifiers
 {
     return @[
-             @{ @"footerText": @"Respring to apply changes (to the NotificationCenter)." },
+             @{ @"footerText": @"Respring to apply changes." },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @YES,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"ncAppEnabled",
+                 @"label": @"Enabled",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+
             @{
                  @"cell": @"PSLinkListCell",
                  @"detail": @"RANCAppSelectorView",

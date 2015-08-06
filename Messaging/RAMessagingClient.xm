@@ -20,7 +20,6 @@
 
 	_currentData = data; // Initialize data
 
-	messagingCenter = [objc_getClass("CPDistributedMessagingCenter") centerNamed:[NSString stringWithFormat:@"com.efrederickson.reachapp.messaging.client-%@",NSBundle.mainBundle.bundleIdentifier]];
 	serverCenter = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.efrederickson.reachapp.messaging.server"];
 
     void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);
@@ -28,13 +27,8 @@
     {
         void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*);
         rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
-        rocketbootstrap_distributedmessagingcenter_apply(messagingCenter);
         rocketbootstrap_distributedmessagingcenter_apply(serverCenter);
     }
-
-    [messagingCenter runServerOnCurrentThread];
-
-    [messagingCenter registerForMessageName:RAMessagingUpdateAppInfoMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
 }
 
 -(NSDictionary*) handleMessageNamed:(NSString*)identifier userInfo:(NSDictionary*)info
@@ -152,6 +146,6 @@ void reloadClientData(CFNotificationCenterRef center,
 	else 
 	{
 		[RAMessagingClient sharedInstance];
-    	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &reloadClientData, (__bridge CFStringRef)[NSString stringWithFormat:@"com.efrederickson.reachapp.clientupdate-%@",NSBundle.mainBundle.bundleIdentifier], NULL, 0);
+    	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &reloadClientData, (__bridge CFStringRef)[NSString stringWithFormat:@"com.efrederickson.reachapp.clientupdate-%@",NSBundle.mainBundle.bundleIdentifier], NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
 	}
 }

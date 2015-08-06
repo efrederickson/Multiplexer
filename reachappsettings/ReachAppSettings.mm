@@ -74,7 +74,18 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  @"icon": @"ra_enabled.png",
                  },
-
+#if DEBUG
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @YES,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"debug_showIPCMessages",
+                 @"label": @"Show IPC communication messages",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 @"icon": @"ra_enabled.png",
+                 },
+#endif
+                 
              @{ @"footerText": @"Let apps run in the background." },
              @{
                  @"cell": @"PSLinkCell",

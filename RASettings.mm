@@ -70,6 +70,9 @@ NSDictionary *_settings = nil;
 	return BOOL(@"enabled", YES);
 }
 
+#if DEBUG
+-(BOOL) debug_showIPCMessages { return BOOL(@"debug_showIPCMessages", YES); }
+#endif
 
 -(BOOL) reachabilityEnabled { return [self enabled] && BOOL(@"reachabilityEnabled", YES); }
 
@@ -126,6 +129,11 @@ NSDictionary *_settings = nil;
 -(BOOL) pagingEnabled
 {
 	return BOOL(@"pagingEnabled", YES);
+}
+
+-(BOOL) NCAppEnabled
+{
+	return [self enabled] && BOOL(@"ncAppEnabled", YES);
 }
 
 -(NSMutableArray*) favoriteApps

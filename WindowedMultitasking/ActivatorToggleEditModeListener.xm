@@ -23,7 +23,6 @@ static RAActivatorToggleEditModeListener *sharedInstance;
 	    	else
 	    		[view showOverlay];
     	}
-
     }
 }
 @end

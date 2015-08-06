@@ -169,6 +169,7 @@ typedef enum
 - (void)restoreContentUpdatingStatusBar:(_Bool)arg1;
 -(void) restoreContentAndUnscatterIconsAnimated:(BOOL)arg1;
 - (_Bool)shouldShowControlCenterTabControlOnFirstSwipe;- (_Bool)isAppSwitcherShowing;
+-(BOOL) _activateAppSwitcher;
 @end
 
 @interface SBDisplayItem : NSObject <NSCopying>

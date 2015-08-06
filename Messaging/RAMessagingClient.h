@@ -3,7 +3,6 @@
 #import "RAMessaging.h"
 
 @interface RAMessagingClient : NSObject {
-	CPDistributedMessagingCenter *messagingCenter;
 	CPDistributedMessagingCenter *serverCenter;
 }
 +(id) sharedInstance;

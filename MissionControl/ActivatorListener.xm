@@ -1,7 +1,6 @@
 #import <libactivator/libactivator.h>
 #import "RAMissionControlManager.h"
-
-// Haven't tested this, i don't even have activator
+#import "RASettings.h"
 
 @interface RAActivatorListener : NSObject <LAListener>
 @end
@@ -11,15 +10,15 @@ static RAActivatorListener *sharedInstance;
 @implementation RAActivatorListener
 - (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event
 {
-	if (RAMissionControlManager.sharedInstance.isShowingMissionControl == NO)
+	if ([RASettings.sharedInstance replaceAppSwitcherWithMC])
 	{
-		FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
-			SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
-			[transaction begin];
-		}];
-		[(FBWorkspaceEventQueue*)[%c(FBWorkspaceEventQueue) sharedInstance] executeOrAppendEvent:event];
+		if (RAMissionControlManager.sharedInstance.isShowingMissionControl == NO)
+			[[%c(SBUIController) sharedInstance] _activateAppSwitcher];
+		else
+			[RAMissionControlManager.sharedInstance hideMissionControl:YES];
 	}
-    [RAMissionControlManager.sharedInstance toggleMissionControl:YES];
+	else
+	    [RAMissionControlManager.sharedInstance toggleMissionControl:YES];
     [event setHandled:YES];
 }
 @end

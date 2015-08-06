@@ -21,10 +21,13 @@ RANCViewController *ncAppViewController;
 {
    	%orig;
 
-	SBNotificationCenterViewController* modeVC = MSHookIvar<id>(self, "_modeController");
-	if (ncAppViewController == nil) 
-		ncAppViewController = [self _newBulletinObserverViewControllerOfClass:[RANCViewController class]];
-	[modeVC _addBulletinObserverViewController:ncAppViewController];
+   	if ([RASettings.sharedInstance NCAppEnabled])
+   	{
+		SBNotificationCenterViewController* modeVC = MSHookIvar<id>(self, "_modeController");
+		if (ncAppViewController == nil) 
+			ncAppViewController = [self _newBulletinObserverViewControllerOfClass:[RANCViewController class]];
+		[modeVC _addBulletinObserverViewController:ncAppViewController];
+	}
 }
 
 + (NSString *)_localizableTitleForBulletinViewControllerOfClass:(Class)aClass
