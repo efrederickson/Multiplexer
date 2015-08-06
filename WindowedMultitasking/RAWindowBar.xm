@@ -14,6 +14,9 @@ const int bottomSizeViewTag =  987654320;
 	BOOL enableDrag, enableLongPress;
 	BOOL sizingLocked, appRotationLocked;
 	BOOL isSnapped;
+	BOOL isBeingTouched;
+
+	CGFloat height, buttonSize, spacing;
 
 	UIPanGestureRecognizer *panGesture;
 	UIPinchGestureRecognizer *scaleGesture;
@@ -29,13 +32,19 @@ const int bottomSizeViewTag =  987654320;
 @implementation RAWindowBar
 -(void) attachView:(RAHostedAppView*)view
 {
+	height = 40;
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+	{
+	    height = 50;
+	}
+
 	self.backgroundColor = [UIColor colorWithRed:229/255.0f green:228/255.0f blue:229/255.0f alpha:1.0f]; //UIColor.lightGrayColor;
 	attachedView = view;
 
 	CGRect myFrame = view.frame;
 	self.frame = myFrame;
-	view.frame = CGRectMake(0, 40, self.frame.size.width, self.frame.size.height);
-	myFrame.size.height += 40;
+	view.frame = CGRectMake(0, height, self.frame.size.width, self.frame.size.height);
+	myFrame.size.height += height;
 	self.frame = myFrame;
 	view.hideStatusBar = YES;
 	[self addSubview:view];
@@ -70,20 +79,27 @@ const int bottomSizeViewTag =  987654320;
 	[tapGesture requireGestureRecognizerToFail:doubleTapGesture];
 	[tapGesture requireGestureRecognizerToFail:scaleGesture];
 	[tapGesture requireGestureRecognizerToFail:rotateGesture];
+	[tapGesture requireGestureRecognizerToFail:panGesture];
 
     self.userInteractionEnabled = YES;
     enableDrag = YES;
     enableLongPress = YES;
 
-    titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, myFrame.size.width, 40)];
+    titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, myFrame.size.width, height)];
     titleLabel.textAlignment = NSTextAlignmentCenter;
     titleLabel.font = [UIFont systemFontOfSize:18];
     titleLabel.textColor = [UIColor colorWithRed:115/255.0f green:114/255.0f blue:115/255.0f alpha:1.0f];
     titleLabel.text = [view displayName];
     [self addSubview:titleLabel];
 
+    CGFloat tmp = 16;
+    while (tmp + 16 < height)
+    	tmp += 16;
+    buttonSize = tmp;
+    spacing = (height - buttonSize) / 2.0;
+
 	closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-	closeButton.frame = CGRectMake(5, 2, 36, 36);
+	closeButton.frame = CGRectMake(5, spacing, buttonSize, buttonSize);
 	[closeButton setImage:[RAResourceImageProvider imageForFilename:@"Close" size:CGSizeMake(16, 16) tintedTo:[UIColor.blackColor colorWithAlphaComponent:0.5]] forState:UIControlStateNormal];
 	closeButton.clipsToBounds = YES;
 	[closeButton addTarget:self action:@selector(closeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
@@ -92,7 +108,7 @@ const int bottomSizeViewTag =  987654320;
 	[self addSubview:closeButton];
 
 	maximizeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-	maximizeButton.frame = CGRectMake(45, 2, 36, 36);
+	maximizeButton.frame = CGRectMake(closeButton.frame.origin.x + closeButton.frame.size.width + 5, spacing, buttonSize, buttonSize);
 	[maximizeButton setImage:[RAResourceImageProvider imageForFilename:@"Plus" size:CGSizeMake(16, 16) tintedTo:[UIColor.blackColor colorWithAlphaComponent:0.5]] forState:UIControlStateNormal];
 	maximizeButton.clipsToBounds = YES;
 	[maximizeButton addTarget:self action:@selector(maximizeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
@@ -101,7 +117,7 @@ const int bottomSizeViewTag =  987654320;
 	[self addSubview:maximizeButton];
 
 	minimizeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-	minimizeButton.frame = CGRectMake(85, 2, 36, 36);
+	minimizeButton.frame = CGRectMake(maximizeButton.frame.origin.x + maximizeButton.frame.size.width + 5, spacing, buttonSize, buttonSize);
 	[minimizeButton setImage:[RAResourceImageProvider imageForFilename:@"Minus" size:CGSizeMake(16, 16) tintedTo:[UIColor.blackColor colorWithAlphaComponent:0.5]] forState:UIControlStateNormal];
 	minimizeButton.clipsToBounds = YES;
 	[minimizeButton addTarget:self action:@selector(minimizeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
@@ -110,7 +126,7 @@ const int bottomSizeViewTag =  987654320;
 	[self addSubview:minimizeButton];
 
 	swapOrientationButton = [UIButton buttonWithType:UIButtonTypeCustom];
-	swapOrientationButton.frame = CGRectMake(self.frame.size.width - (36 + 5), 2, 36, 36);
+	swapOrientationButton.frame = CGRectMake(self.frame.size.width - (buttonSize + 5), spacing, buttonSize, buttonSize);
 	swapOrientationButton.clipsToBounds = YES;
 	[swapOrientationButton setTitle:@"↺" forState:UIControlStateNormal];
 	[swapOrientationButton addTarget:self action:@selector(swapOrientationButtonTap:) forControlEvents:UIControlEventTouchUpInside];
@@ -266,7 +282,7 @@ const int bottomSizeViewTag =  987654320;
 		    }];
 
 		if (!appRotationLocked)
-	    	[attachedView rotateToOrientation:o];
+	    	[attachedView rotateToOrientation:[self.desktop appOrientationRelativeToThisOrientation:currentRotation]];
 
 		if ([RASettings.sharedInstance snapWindows] && [RAWindowSnapDataProvider shouldSnapWindowAtLocation:self.frame])
 		{
@@ -274,6 +290,21 @@ const int bottomSizeViewTag =  987654320;
 			isSnapped = YES;
 		}
     }
+}
+
+-(void) updateClientRotation
+{
+	if (!appRotationLocked)
+	{
+    	CGFloat currentRotation = RADIANS_TO_DEGREES(atan2(self.transform.b, self.transform.a));
+    	[self updateClientRotation:[self.desktop appOrientationRelativeToThisOrientation:currentRotation]];
+	}
+}
+
+-(void) updateClientRotation:(UIInterfaceOrientation)orientation
+{
+	if (!appRotationLocked)
+	    [attachedView rotateToOrientation:orientation];
 }
 
 -(void) disableLongPress
@@ -323,7 +354,7 @@ const int bottomSizeViewTag =  987654320;
 
 -(void) showOverlay
 {
-	RAWindowOverlayView *overlay = [[RAWindowOverlayView alloc] initWithFrame:CGRectMake(0, 40, self.bounds.size.width, self.bounds.size.height - 40)];
+	RAWindowOverlayView *overlay = [[RAWindowOverlayView alloc] initWithFrame:CGRectMake(0, height, self.bounds.size.width, self.bounds.size.height - height)];
 	overlay.alpha = 0;
 	overlay.tag = 465982;
 	overlay.appWindow = self;
@@ -451,30 +482,12 @@ const int bottomSizeViewTag =  987654320;
 	if ([RASettings.sharedInstance alwaysEnableGestures] == NO && self.isOverlayShowing == NO)
 		return;
 
-	//CGFloat oldScale = sqrt(self.transform.a * self.transform.a + self.transform.c * self.transform.c);
-	//CGFloat newScale = (oldScale + gesture.scale);
-	//newScale = MIN(MAX(newScale, 0.1), 0.98);
-	//newScale -= oldScale;
-
-	CGFloat scale;
-	CGFloat rotation = atan2(self.transform.b, self.transform.a);
-
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan:
         	enableDrag = NO; enableLongPress = NO;
             break;
         case UIGestureRecognizerStateChanged:
             [self setTransform:CGAffineTransformScale(self.transform, gesture.scale, gesture.scale)];
-            
-            scale = sqrt(self.transform.a * self.transform.a + self.transform.c * self.transform.c);
-            if (scale > 1.0)
-            {
-            	[self setTransform:CGAffineTransformRotate(CGAffineTransformMakeScale(1, 1), rotation)];
-            }
-            else if (scale < 0.15)
-            {
-            	[self setTransform:CGAffineTransformRotate(CGAffineTransformMakeScale(0.15, 0.15), rotation)];
-            }
 
             gesture.scale = 1.0;
             break;
@@ -501,15 +514,30 @@ const int bottomSizeViewTag =  987654320;
 -(void) setTransform:(CGAffineTransform)trans
 {
 	CGPoint center = self.center;
+
+	CGFloat scale = sqrt(trans.a * trans.a + trans.c * trans.c);
+	scale = MIN(1.0, MAX(0.15, scale));
+
+	trans = CGAffineTransformRotate(CGAffineTransformMakeScale(scale, scale), atan2(trans.b, trans.a));
+
 	[super setTransform:trans];
 	self.center = center;
 
-	/*if (self.frame.origin.x < 0 || self.frame.origin.x + self.frame.size.width > UIScreen.mainScreen.bounds.size.width)
-		[UIView animateWithDuration:0.1 animations:^{
-			CGFloat oldScale = sqrt(self.transform.a * self.transform.a + self.transform.c * self.transform.c);
-			CGFloat scale = UIScreen.mainScreen.bounds.size.width / (self.frame.origin.x + self.frame.size.width);
-			self.transform = CGAffineTransformScale(self.transform, fabs(oldScale - scale), fabs(oldScale - scale));
-		}];*/
+	if (isBeingTouched == NO)
+	{
+		if ([RAWindowSnapDataProvider shouldSnapWindowAtLocation:self.frame])
+			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindowLocation:self.frame] animated:YES];
+	}
+}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	isBeingTouched = YES;
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	isBeingTouched = NO;
 }
 
 -(UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event

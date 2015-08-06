@@ -21,6 +21,8 @@
 -(NSArray*) availableDesktops;
 -(RADesktopWindow*) desktopAtIndex:(NSUInteger)index;
 
+-(void) updateRotationOnClients:(UIInterfaceOrientation)orientation;
+
 -(void) hideDesktop;
 -(void) reshowDesktop;
 @end

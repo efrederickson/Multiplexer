@@ -40,6 +40,8 @@
 	[view loadApp];
 	view.hideStatusBar = YES;
 	windowBar.transform = CGAffineTransformMakeScale(0.5, 0.5);
+	windowBar.transform = CGAffineTransformRotate(windowBar.transform, DEGREES_TO_RADIANS([self baseRotationForOrientation]));
+	windowBar.hidden = NO;
 
 	if ([RAWindowStatePreservationSystemManager.sharedInstance hasWindowInformationForIdentifier:view.app.bundleIdentifier])
 	{
@@ -52,6 +54,7 @@
 	}
 
 	//[self saveInfo];
+	[windowBar updateClientRotation];
 
 	return windowBar;
 }
@@ -136,6 +139,13 @@
 	}	
 }
 
+-(void) updateRotationOnClients:(UIInterfaceOrientation)orientation
+{
+	for (RAWindowBar *app in self.subviews)
+		if ([app isKindOfClass:[RAWindowBar class]]) // could be a diferent kind of UIView actually
+			[app updateClientRotation:orientation];	
+}
+
 -(BOOL) isAppOpened:(NSString*)identifier
 {
 	for (RAHostedAppView *app in appViews)
@@ -160,6 +170,76 @@
 		[self createAppWindowWithIdentifier:bundleIdentifier animated:YES];
 }
 
+-(UIInterfaceOrientation) currentOrientation
+{
+	return UIApplication.sharedApplication.statusBarOrientation;
+}
+
+-(CGFloat) baseRotationForOrientation
+{
+	UIInterfaceOrientation o = [self currentOrientation];
+	if (o == UIInterfaceOrientationLandscapeRight)
+		return 90;
+	else if (o == UIInterfaceOrientationLandscapeLeft)
+		return 270;
+	else if (o == UIInterfaceOrientationPortraitUpsideDown)
+		return 180;
+	return 0;
+}
+
+-(UIInterfaceOrientation) appOrientationRelativeToThisOrientation:(CGFloat)currentRotation
+{
+	UIInterfaceOrientation base = [self currentOrientation];
+
+	switch (base)
+	{
+		case UIInterfaceOrientationLandscapeLeft:
+			NSLog(@"[ReachApp] left");
+		case UIInterfaceOrientationLandscapeRight:
+			NSLog(@"[ReachApp] right");
+	    	if (currentRotation >= 315 || currentRotation <= 45)
+	    	{
+	    		return UIInterfaceOrientationLandscapeRight;
+	    	}
+	    	else if (currentRotation > 45 && currentRotation <= 135)
+	    	{
+	    		return UIInterfaceOrientationPortrait;
+	    	}
+	    	else if (currentRotation > 135 && currentRotation <= 215)
+	    	{
+	    		return UIInterfaceOrientationLandscapeLeft;
+	    	}
+	    	else
+	    	{
+	    		return UIInterfaceOrientationPortraitUpsideDown;
+	    	}
+
+		case UIInterfaceOrientationPortraitUpsideDown:
+
+
+		case UIInterfaceOrientationPortrait:
+		default:
+			break;
+	}
+
+	if (currentRotation >= 315 || currentRotation <= 45)
+	{
+		return UIInterfaceOrientationPortrait;
+	}
+	else if (currentRotation > 45 && currentRotation <= 135)
+	{
+		return UIInterfaceOrientationLandscapeLeft;
+	}
+	else if (currentRotation > 135 && currentRotation <= 215)
+	{
+		return UIInterfaceOrientationPortraitUpsideDown;
+	}
+	else
+	{
+		return UIInterfaceOrientationLandscapeRight;
+	}
+}
+
 -(void) loadInfo:(NSInteger)index
 {
 	if ([RAWindowStatePreservationSystemManager.sharedInstance hasDesktopInformationAtIndex:index] == NO)
@@ -175,6 +255,8 @@
     UIView *subview;
     while ((subview = [objects nextObject])) 
     {
+    	if (self.rootViewController && [self.rootViewController.view isEqual:subview])
+    		continue;
         UIView *success = [subview hitTest:[self convertPoint:point toView:subview] withEvent:event];
         if (success)
             return success;
@@ -187,6 +269,8 @@
 	BOOL isContained = NO;
 	for (UIView *view in self.subviews)
 	{
+    	if (self.rootViewController && [self.rootViewController.view isEqual:view])
+    		continue;
 		if (CGRectContainsPoint(view.frame, point) || CGRectContainsPoint(view.frame, [view convertPoint:point fromView:self])) // [self convertPoint:point toView:view]))
 			isContained = YES;
 	}

@@ -9,6 +9,8 @@
     FBWindowContextHostManager *contextHostManager;
     UIActivityIndicatorView *activityView;
 
+    UILabel *isForemostAppLabel;
+
     UILabel *biolockdownDidFailLabel;
     UITapGestureRecognizer *biolockdownFailedRetryTapGesture;
 }
@@ -94,6 +96,17 @@
 	[self preloadApp];
     if (!app)
         return;
+
+    if ([UIApplication.sharedApplication._accessibilityFrontMostApplication isEqual:app])
+    {
+        isForemostAppLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, (self.frame.size.height - 40) / 2, self.frame.size.width, 40)];
+        isForemostAppLabel.textColor = [UIColor whiteColor];
+        isForemostAppLabel.textAlignment = NSTextAlignmentCenter;
+        isForemostAppLabel.font = [UIFont systemFontOfSize:36];
+        isForemostAppLabel.text = [NSString stringWithFormat:LOCALIZE(@"ACTIVE_APP_WARNING"),self.app.displayName];
+        [self addSubview:isForemostAppLabel];
+        return;
+    }
 
     IF_BIOLOCKDOWN {
 
@@ -183,6 +196,8 @@
 
 -(void) unloadApp:(BOOL)forceImmediate
 {
+
+
     if (activityView)
         [activityView stopAnimating];
     [verifyTimer invalidate];
@@ -197,8 +212,19 @@
         self.userInteractionEnabled = NO;
     }
 
+    if (isForemostAppLabel)
+    {
+        [isForemostAppLabel removeFromSuperview];
+        isForemostAppLabel = nil;
+    }
+
     if (!scene)
         return;
+
+    if ([UIApplication.sharedApplication._accessibilityFrontMostApplication isEqual:app])
+    {
+        return;
+    }
 
     RAMessageCompletionCallback block = ^(BOOL success) {
         FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];

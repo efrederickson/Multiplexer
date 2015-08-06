@@ -17,6 +17,11 @@
 -(NSArray*) hostedWindows;
 -(BOOL) isAppOpened:(NSString*)identifier;
 
+-(UIInterfaceOrientation) currentOrientation;
+-(CGFloat) baseRotationForOrientation;
+-(UIInterfaceOrientation) appOrientationRelativeToThisOrientation:(CGFloat)currentRotation;
+-(void) updateRotationOnClients:(UIInterfaceOrientation)orientation;
+
 -(void) unloadApps;
 -(void) loadApps;
 -(void) closeAllApps;

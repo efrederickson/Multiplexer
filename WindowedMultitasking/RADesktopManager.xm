@@ -16,7 +16,6 @@ BOOL overrideUIWindow = NO;
 -(void) addDesktop:(BOOL)switchTo
 {
 	RADesktopWindow *desktopWindow = [[RADesktopWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
-	//[desktopWindow _rotateWindowToOrientation:UIApplication.sharedApplication.statusBarOrientation updateStatusBar:YES duration:1 skipCallbacks:NO];
 
 	[windows addObject:desktopWindow];
 	if (switchTo)
@@ -101,6 +100,12 @@ BOOL overrideUIWindow = NO;
 	currentDesktop.hidden = NO;
 }
 
+-(void) updateRotationOnClients:(UIInterfaceOrientation)orientation
+{
+	for (RADesktopWindow *w in windows)
+		[w updateRotationOnClients:orientation];
+}
+
 -(RADesktopWindow*) desktopAtIndex:(NSUInteger)index { return windows[index]; }
 -(NSArray*) availableDesktops { return windows; }
 -(NSUInteger) currentDesktopIndex { return currentDesktopIndex; }
@@ -134,6 +139,14 @@ BOOL overrideUIWindow = NO;
 {
 	[RADesktopManager.sharedInstance removeAppWithIdentifier:arg1.bundleIdentifier animated:NO forceImmediateUnload:YES];
     %orig;
+}
+%end
+
+%hook SpringBoard
+-(void)noteInterfaceOrientationChanged:(UIInterfaceOrientation)arg1 duration:(CGFloat)arg2
+{
+	%orig;
+	[RADesktopManager.sharedInstance updateRotationOnClients:arg1];
 }
 %end
 

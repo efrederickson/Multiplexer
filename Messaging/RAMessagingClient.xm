@@ -91,6 +91,8 @@
 	/* THE REAL IMPORTANT BIT */
 	_currentData = data;
 
+	NSLog(@"[ReachApp] got orientation %ld", (long)_currentData.forcedOrientation);
+
 	if (didStatusBarVisibilityChange && data.shouldForceStatusBar == NO)
    		[UIApplication.sharedApplication RA_forceStatusBarVisibility:_currentData.statusBarVisibility orRevert:YES];
    	else if (data.shouldForceStatusBar)

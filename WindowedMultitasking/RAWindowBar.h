@@ -22,6 +22,9 @@
 -(RAHostedAppView*) attachedView;
 -(void) attachView:(RAHostedAppView*)view;
 
+-(void) updateClientRotation;
+-(void) updateClientRotation:(UIInterfaceOrientation)orientation;
+
 -(void) scaleTo:(CGFloat)scale animated:(BOOL)animate;
 
 -(void) saveWindowInfo;

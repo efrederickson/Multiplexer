@@ -41,23 +41,23 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
     %orig(frame);
 }
 
-- (void)_rotateWindowToOrientation:(int)arg1 updateStatusBar:(BOOL)arg2 duration:(double)arg3 skipCallbacks:(BOOL)arg4
+- (void)_rotateWindowToOrientation:(UIInterfaceOrientation)arg1 updateStatusBar:(BOOL)arg2 duration:(double)arg3 skipCallbacks:(BOOL)arg4
 {
-    if ([RAMessagingClient.sharedInstance shouldForceOrientation])
+    if ([RAMessagingClient.sharedInstance shouldForceOrientation] && arg1 != [RAMessagingClient.sharedInstance forcedOrientation])
         return;
     %orig;
 }
 
 - (BOOL)_shouldAutorotateToInterfaceOrientation:(int)arg1 checkForDismissal:(BOOL)arg2 isRotationDisabled:(BOOL*)arg3
 {
-    if ([RAMessagingClient.sharedInstance shouldForceOrientation])
+    if ([RAMessagingClient.sharedInstance shouldForceOrientation] && arg1 != [RAMessagingClient.sharedInstance forcedOrientation])
         return NO;
     return %orig;
 }
 
 - (void)_setWindowInterfaceOrientation:(int)arg1
 {
-    if ([RAMessagingClient.sharedInstance shouldForceOrientation])
+    if ([RAMessagingClient.sharedInstance shouldForceOrientation] && arg1 != [RAMessagingClient.sharedInstance forcedOrientation])
         return;
     %orig([RAMessagingClient.sharedInstance shouldForceOrientation] ? [RAMessagingClient.sharedInstance forcedOrientation] : arg1);
 }

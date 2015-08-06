@@ -147,6 +147,7 @@ CGRect swappedForOrientation(CGRect in)
 		{
 			[[%c(SBUIController) sharedInstance] activateApplicationAnimated:lastOpenedApp];
 		}
+		lastOpenedApp = nil; // Fix it opening the same app later if on the Homescreen
 	}
 }
 
