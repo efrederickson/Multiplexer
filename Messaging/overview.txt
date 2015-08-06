@@ -10,7 +10,7 @@ The messaging system may seem complex and confusing at first. It sort of is. Bel
 	|       |-------------------> app receives CFNotification
 	|                             - app send CPDistributedMessagingCenter message to sendMessageAndReceiveReplyName:
 	|                               |-------> SpringBoard sends data, callback is called with a success
-	|-----> timeout (2s)
+	|-----> timeout (4s)
 			- callback, failed
 			- notify user
 

@@ -32,6 +32,11 @@ NSMutableDictionary *suspendImmediatelyVerifierDict = [NSMutableDictionary dicti
 }
 %end
 
+%hook SBAppSwitcherModel
+- (void)remove:(id)arg1 { NSLog(@"[ReachApp] remove:%@", arg1); %orig; }
+- (void)removeDisplayItem:(id)arg1 { NSLog(@"[ReachApp] removeDisplayItem:%@",arg1); %orig; }
+%end
+
 %hook FBUIApplicationWorkspaceScene
 -(void) host:(__unsafe_unretained FBScene*)arg1 didUpdateSettings:(__unsafe_unretained FBSSceneSettings*)arg2 withDiff:(unsafe_id)arg3 transitionContext:(unsafe_id)arg4 completion:(unsafe_id)arg5
 {
@@ -45,7 +50,11 @@ NSMutableDictionary *suspendImmediatelyVerifierDict = [NSMutableDictionary dicti
             {
                 FBApplicationProcess *proc2 = (FBApplicationProcess*)proc;
                 [proc2 killForReason:1 andReport:NO withDescription:@"ReachApp.Backgrounder.killOnExit" completion:nil];
-            [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:RAIconIndicatorViewInfoForceDeath];
+                [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:RAIconIndicatorViewInfoForceDeath];
+                if ([RABackgrounder.sharedInstance shouldRemoveFromSwitcherWhenKilledOnExit:arg1.identifier])
+                {
+                    [[%c(SBAppSwitcherModel) sharedInstance] removeDisplayItem:[%c(SBDisplayItem) displayItemWithType:@"App" displayIdentifier:arg1.identifier]];
+                }
             }
         }
 
@@ -60,7 +69,7 @@ NSMutableDictionary *suspendImmediatelyVerifierDict = [NSMutableDictionary dicti
         {
             [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
 
-            //SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:arg1.identifier];
+            //SBApplication *app = [[%c(SBApplicationController) sharedInstance] RA_applicationWithBundleIdentifier:arg1.identifier];
             //if ([suspendImmediatelyVerifierDict objectForKey:arg1.identifier] == nil)
             //{
                 //suspendImmediatelyVerifierDict[arg1.identifier] = [[%c(BKSProcessAssertion) alloc] initWithPID:app.pid flags:ProcessAssertionFlagAllowIdleSleep reason:kProcessAssertionReasonSuspend name:@"ReachApp.Backgrounder.susepndImmediately" withHandler:nil];

@@ -232,6 +232,7 @@ NSDictionary *_settings = nil;
 	ret[@"showIndicatorOnIcon"] = _settings[[NSString stringWithFormat:@"backgrounder-%@-showIndicatorOnIcon",identifier]] ?: @NO;
 	ret[@"preventDeath"] = _settings[[NSString stringWithFormat:@"backgrounder-%@-preventDeath",identifier]] ?: @NO;
 	ret[@"unlimitedBackgrounding"] = _settings[[NSString stringWithFormat:@"backgrounder-%@-unlimitedBackgrounding",identifier]] ?: @NO;
+	ret[@"removeFromSwitcher"] = _settings[[NSString stringWithFormat:@"backgrounder-%@-removeFromSwitcher",identifier]] ?: @NO;
 
 	ret[@"backgroundModes"] = [NSMutableDictionary dictionary];
 	ret[@"backgroundModes"][kBGModeUnboundedTaskCompletion] = _settings[[NSString stringWithFormat:@"backgrounder-%@-backgroundmodes-%@",identifier,kBGModeUnboundedTaskCompletion]] ?: @NO;

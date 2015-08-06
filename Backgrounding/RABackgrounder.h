@@ -31,6 +31,7 @@ enum RAIconIndicatorViewInfo {
 -(BOOL) shouldSuspendImmediately:(NSString*)identifier;
 
 -(BOOL) killProcessOnExit:(NSString*)identifier;
+-(BOOL) shouldRemoveFromSwitcherWhenKilledOnExit:(NSString*)identifier;
 -(BOOL) preventKillingOfIdentifier:(NSString*)identifier;
 -(NSInteger) backgroundModeForIdentifier:(NSString*)identifier;
 -(BOOL) hasUnlimitedBackgroundTime:(NSString*)identifier;

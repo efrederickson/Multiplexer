@@ -96,6 +96,8 @@ extern int rotationDegsForOrientation(int o);
 	    }
     }
 
+    [[%c(SBAppSwitcherModel) sharedInstance] addToFront:[%c(SBDisplayLayout) fullScreenDisplayLayoutForApplication:app]];
+
     if (identifier == nil || identifier.length == 0)
         return;
 

@@ -61,6 +61,15 @@ extern void RA_BGAppsControllerNeedsToReload();
          	 	@"key": @"autoRelaunch",
                  @"default": @NO,
          		},
+                
+             @{ @"footerText": @"If the app's background mode is Disabled, this will remove the app from the switcher in addition to killing it." },
+             @{
+                @"cell": @"PSSwitchCell",
+                @"label": @"Remove from Switcher",
+                @"key": @"removeFromSwitcher",
+                 @"default": @NO,
+                },
+
             @{ @"footerText": @"This will prevent most cases of the app being terminated (app switcher, low memory, etc). Please note that if you enable this option, and your system runs low on memory or some other situation, it may yield unpredictable results. Enabling both this and \"Exit on Suspend\" (see below) will cause this switch to have no effect." },
             @{
                 @"cell": @"PSSwitchCell",

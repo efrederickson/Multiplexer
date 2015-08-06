@@ -66,6 +66,15 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	return [RASettings.sharedInstance backgrounderEnabled] && enabled && ([dict objectForKey:@"preventDeath"] == nil ? NO : [dict[@"preventDeath"] boolValue]);
 }
 
+-(BOOL) shouldRemoveFromSwitcherWhenKilledOnExit:(NSString*)identifier
+{
+	if (!identifier || ![RASettings.sharedInstance backgrounderEnabled]) return NO;
+	
+	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
+	BOOL enabled = [dict objectForKey:@"removeFromSwitcher"] ? [dict[@"removeFromSwitcher"] boolValue] : NO;
+	return [RASettings.sharedInstance backgrounderEnabled] && enabled && ([dict objectForKey:@"removeFromSwitcher"] == nil ? NO : [dict[@"removeFromSwitcher"] boolValue]);
+}
+
 -(NSInteger) backgroundModeForIdentifier:(NSString*)identifier
 {
 	if (!identifier || [RASettings.sharedInstance backgrounderEnabled] == NO)
