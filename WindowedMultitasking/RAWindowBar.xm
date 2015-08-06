@@ -14,7 +14,7 @@ const int bottomSizeViewTag =  987654320;
 	BOOL enableDrag, enableLongPress;
 	BOOL sizingLocked, appRotationLocked;
 	BOOL isSnapped;
-	BOOL isBeingTouched;
+	BOOL isBeingTouched; // this name sounds... really inappropriate. but be assured it's not.
 
 	CGFloat height, buttonSize, spacing;
 
@@ -252,29 +252,17 @@ const int bottomSizeViewTag =  987654320;
     	CGFloat currentRotation = RADIANS_TO_DEGREES(atan2(self.transform.b, self.transform.a));
     	CGFloat rotateSnapDegrees = 0;
 
-    	if (currentRotation < 0) currentRotation = 360 + currentRotation;
+    	if (currentRotation < 0) 
+    		currentRotation = 360 + currentRotation;
 
-    	UIInterfaceOrientation o = UIInterfaceOrientationPortrait;
     	if (currentRotation >= 315 || currentRotation <= 45)
-    	{
-    		o = UIInterfaceOrientationPortrait;
     		rotateSnapDegrees = 360 - currentRotation;
-    	}
     	else if (currentRotation > 45 && currentRotation <= 135)
-    	{
-    		o = UIInterfaceOrientationLandscapeLeft;
     		rotateSnapDegrees = 90 - currentRotation;
-    	}
     	else if (currentRotation > 135 && currentRotation <= 215)
-    	{
-    		o = UIInterfaceOrientationPortraitUpsideDown;
     		rotateSnapDegrees = 180 - currentRotation;
-    	}
     	else
-    	{
-    		o = UIInterfaceOrientationLandscapeRight;
     		rotateSnapDegrees = 270 - currentRotation;
-    	}
 
     	if ([RASettings.sharedInstance snapRotation])
 	    	[UIView animateWithDuration:0.2 animations:^{
@@ -474,7 +462,7 @@ const int bottomSizeViewTag =  987654320;
 
 	isSnapped = NO;
     UIView *view = sender.view;
-    CGPoint point = [sender translationInView:self.superview];
+    CGPoint point = [sender translationInView:view.superview];
 
     CGPoint translatedPoint = CGPointMake(initialPoint.x + point.x, initialPoint.y + point.y);
     view.center = translatedPoint;
@@ -491,6 +479,7 @@ const int bottomSizeViewTag =  987654320;
             break;
         case UIGestureRecognizerStateChanged:
             [self setTransform:CGAffineTransformScale(self.transform, gesture.scale, gesture.scale)];
+            //self.bounds = (CGRect){ self.bounds.origin, {self.bounds.size.width * gesture.scale, self.bounds.size.height * gesture.scale} };
 
             gesture.scale = 1.0;
             break;
