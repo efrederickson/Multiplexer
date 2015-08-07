@@ -793,7 +793,8 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 
 -(void) RA_updateIndicatorView:(NSInteger)info;
 -(void) RA_updateIndicatorViewWithExistingInfo;
-
+-(BOOL) RA_isIconIndicatorInhibited;
+-(void) RA_setIsIconIndicatorInhibited:(BOOL)value;
 
 + (CGSize)defaultIconSize;
 + (CGSize)defaultIconImageSize;

@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-NSMutableDictionary *suspendImmediatelyVerifierDict = [NSMutableDictionary dictionary];
+//NSMutableDictionary *suspendImmediatelyVerifierDict = [NSMutableDictionary dictionary];
 
 %hook SBApplication
 - (BOOL)shouldAutoRelaunchAfterExit
@@ -86,11 +86,12 @@ NSMutableDictionary *suspendImmediatelyVerifierDict = [NSMutableDictionary dicti
                 //NSLog(@"[ReachApp] creating BKSProcessAssertion to suspend %@:%d", app.bundleIdentifier, app.pid);
             //}
         }
-        else if ([RABackgrounder.sharedInstance shouldSuspendImmediately:arg1.identifier] && arg2.backgrounded == NO && [suspendImmediatelyVerifierDict objectForKey:arg1.identifier] != nil)
+        else if ([RABackgrounder.sharedInstance shouldSuspendImmediately:arg1.identifier] && arg2.backgrounded == NO)// && [suspendImmediatelyVerifierDict objectForKey:arg1.identifier] != nil)
         {
-            BKSProcessAssertion *assertion = suspendImmediatelyVerifierDict[arg1.identifier];
-            [assertion invalidate];
-            [suspendImmediatelyVerifierDict removeObjectForKey:arg1.identifier];
+            [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
+            //BKSProcessAssertion *assertion = suspendImmediatelyVerifierDict[arg1.identifier];
+            //[assertion invalidate];
+            //[suspendImmediatelyVerifierDict removeObjectForKey:arg1.identifier];
         }
     }
 

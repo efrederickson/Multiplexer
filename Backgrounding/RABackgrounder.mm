@@ -24,7 +24,7 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	
 	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
 	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
-	return [RASettings.sharedInstance backgrounderEnabled] && enabled && ([dict objectForKey:@"autoRelaunch"] == nil ? NO : [dict[@"autoRelaunch"] boolValue]);
+	return [self killProcessOnExit:identifier] == NO && [RASettings.sharedInstance backgrounderEnabled] && enabled && ([dict objectForKey:@"autoRelaunch"] == nil ? NO : [dict[@"autoRelaunch"] boolValue]);
 }
 
 -(NSInteger) popTemporaryOverrideForApplication:(NSString*)identifier
@@ -133,16 +133,14 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 		info |= RAIconIndicatorViewInfoForced;
 	else if ([self shouldSuspendImmediately:identifier])
 		info |= RAIconIndicatorViewInfoSuspendImmediately;
+	else if ([self hasUnlimitedBackgroundTime:identifier])
+		info |= RAIconIndicatorViewInfoUnlimitedBackgroundTime;
 
 	if ([self killProcessOnExit:identifier])
 		info |= RAIconIndicatorViewInfoForceDeath;
 
 	if ([self preventKillingOfIdentifier:identifier])
 		info |= RAIconIndicatorViewInfoUnkillable;
-
-	if ([self hasUnlimitedBackgroundTime:identifier])
-		info |= RAIconIndicatorViewInfoUnlimitedBackgroundTime;
-
 
 	return (RAIconIndicatorViewInfo)info;
 }

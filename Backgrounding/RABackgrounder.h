@@ -19,6 +19,9 @@ enum RAIconIndicatorViewInfo {
 	RAIconIndicatorViewInfoForceDeath = 16,
 
 	RAIconIndicatorViewInfoUnlimitedBackgroundTime = 32,
+
+
+	RAIconIndicatorViewInfoTemporarilyInhibit = 1024,
 };
 
 @interface RABackgrounder : NSObject

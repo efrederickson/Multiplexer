@@ -2,14 +2,14 @@
 #import "RASettings.h"
 #import "RAIconBadgeView.h"
 
-NSMutableArray *managedIconViews = [NSMutableArray array];
-
 NSMutableDictionary *indicatorStateDict = [NSMutableDictionary dictionary];
 #define SET_INFO_(x, y)    indicatorStateDict[x] = [NSNumber numberWithInt:y]
 #define GET_INFO_(x)       [indicatorStateDict[x] intValue]
 #define SET_INFO(y)        if (self.icon && self.icon.application) SET_INFO_(self.icon.application.bundleIdentifier, y);
 #define GET_INFO           (self.icon && self.icon.application ? GET_INFO_(self.icon.application.bundleIdentifier) : RAIconIndicatorViewInfoNone)
 
+
+const char *associated_object_key = "bruh";
 
 NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 {
@@ -44,11 +44,22 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 {
 	[[self viewWithTag:9962] removeFromSuperview];
 
-	NSString *text = stringFromIndicatorInfo(info);
-	if ((text == nil || text.length == 0) || (self.icon == nil || self.icon.application == nil || self.icon.application.isRunning == NO || ![RABackgrounder.sharedInstance shouldShowIndicatorForIdentifier:self.icon.application.bundleIdentifier]) || [RASettings.sharedInstance backgrounderEnabled] == NO)
+	if (info == RAIconIndicatorViewInfoTemporarilyInhibit)
 	{
-		[managedIconViews removeObject:self];
-		SET_INFO(0);
+		[self RA_setIsIconIndicatorInhibited:YES];
+		[self performSelector:@selector(RA_setIsIconIndicatorInhibited:) withObject:@NO afterDelay:1];
+		return;
+	}
+
+	NSString *text = stringFromIndicatorInfo(info);
+	if (
+		[self RA_isIconIndicatorInhibited] || 
+		(text == nil || text.length == 0) || // OR info == RAIconIndicatorViewInfoNone
+		(self.icon == nil || self.icon.application == nil || self.icon.application.isRunning == NO || ![RABackgrounder.sharedInstance shouldShowIndicatorForIdentifier:self.icon.application.bundleIdentifier]) || 
+		self.icon == MSHookIvar<SBIcon*>([%c(SBIconController) sharedInstance], "_launchingIcon") ||
+		[RASettings.sharedInstance backgrounderEnabled] == NO)
+	{
+		//SET_INFO(RAIconIndicatorViewInfoNone);
 		return;
 	}
 
@@ -72,8 +83,6 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 
 	CGPoint overhang = [%c(SBIconBadgeView) _overhang];
 	badge.frame = CGRectMake(-overhang.x, -overhang.y, badge.frame.size.width, badge.frame.size.height);
-	if ([managedIconViews containsObject:self] == NO)
-		[managedIconViews addObject:self];
 	SET_INFO(info);
 }
 
@@ -83,11 +92,37 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 		[self RA_updateIndicatorView:GET_INFO];
 }
 
+%new -(void) RA_setIsIconIndicatorInhibited:(BOOL)value
+{
+    objc_setAssociatedObject(self, @selector(RA_isIconIndicatorInhibited), @(value), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    [self RA_updateIndicatorViewWithExistingInfo];
+}
+
+%new -(BOOL) RA_isIconIndicatorInhibited
+{
+    return [objc_getAssociatedObject(self, @selector(RA_isIconIndicatorInhibited)) boolValue];
+}
+
 -(void) layoutSubviews
 {
     %orig;
 
     [self RA_updateIndicatorView:GET_INFO];
+}
+
+- (void)setIsEditing:(_Bool)arg1 animated:(_Bool)arg2
+{
+	%orig;
+
+	if (arg1)
+	{
+		// inhibit icon indicator
+		[self RA_setIsIconIndicatorInhibited:YES];
+	}
+	else
+	{
+		[self RA_setIsIconIndicatorInhibited:NO];
+	}
 }
 %end
 
@@ -99,16 +134,19 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
     if (self.isRunning == NO)
     	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:RAIconIndicatorViewInfoNone];
     else 
-    	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:(RAIconIndicatorViewInfo)GET_INFO_(self.bundleIdentifier)];
-    //for (SBIconView *view in [managedIconViews copy])
-    //	[view RA_updateIndicatorViewWithExistingInfo];
+    {
+    	//if ([indicatorStateDict objectForKey:self.bundleIdentifier] == nil)
+    		[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:self.bundleIdentifier]];
+    	//else
+	    //	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:(RAIconIndicatorViewInfo)GET_INFO_(self.bundleIdentifier)];
+    }
 }
 %end
 
 %hook SBIconController
 -(void)iconWasTapped:(SBApplicationIcon*)arg1 
 {
-	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.application.bundleIdentifier withInfo:RAIconIndicatorViewInfoNone];
+	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.application.bundleIdentifier withInfo:RAIconIndicatorViewInfoTemporarilyInhibit];
 	%orig;
 }
 %end
