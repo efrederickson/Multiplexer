@@ -1,12 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <substrate.h>
 #import <SpringBoard/SBApplication.h>
-#include <mach/mach.h>
-#include <libkern/OSCacheControl.h>
-#include <stdbool.h>
-#include <dlfcn.h>
-#include <sys/sysctl.h>
-#import <notify.h>
 #import "headers.h"
 #import "RAWidgetSectionManager.h"
 #import "RASettings.h"
