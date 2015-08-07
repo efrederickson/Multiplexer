@@ -106,6 +106,7 @@ extern int rotationDegsForOrientation(int o);
     view.shouldUseExternalKeyboard = YES;
     view.allowHidingStatusBar = NO;
     view.frame = UIScreen.mainScreen.bounds;
+    view.showSplashscreenInsteadOfSpinner = YES;
     [view loadApp];
 
     UIView *detachView = [[UIView alloc] initWithFrame:CGRectMake(0, -20, view.frame.size.width, 20)];

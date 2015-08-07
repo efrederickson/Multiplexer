@@ -2,12 +2,15 @@
 #import "BioLockdown.h"
 #import "RAHostManager.h"
 #import "RAMessagingServer.h"
+#import "RASnapshotProvider.h"
 
 @interface RAHostedAppView () {
     NSTimer *verifyTimer;
     BOOL isPreloading;
     FBWindowContextHostManager *contextHostManager;
+
     UIActivityIndicatorView *activityView;
+    UIImageView *splashScreenImageView;
 
     UILabel *isForemostAppLabel;
 
@@ -24,6 +27,7 @@
 		self.bundleIdentifier = bundleIdentifier;
         self.autosizesApp = NO;
         self.allowHidingStatusBar = YES;
+        self.showSplashscreenInsteadOfSpinner = NO;
 	}
 	return self;
 }
@@ -133,16 +137,31 @@
     else
         [self _actualLoadApp];
 
-    if (!activityView)
+    if (self.showSplashscreenInsteadOfSpinner)
     {
-        activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
-        [self addSubview:activityView];
+        if (splashScreenImageView)
+        {
+            [splashScreenImageView removeFromSuperview];
+            splashScreenImageView = nil;
+        }
+        UIImage *img = [RASnapshotProvider.sharedInstance snapshotForIdentifier:self.bundleIdentifier];
+        splashScreenImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height)];
+        splashScreenImageView.image = img;
+        [self insertSubview:splashScreenImageView atIndex:0];
     }
+    else
+    {
+        if (!activityView)
+        {
+            activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+            [self addSubview:activityView];
+        }
 
-    CGFloat size = 50;
-    activityView.frame = CGRectMake((self.frame.size.width - size) / 2, (self.frame.size.height - size) / 2, size, size);
+        CGFloat size = 50;
+        activityView.frame = CGRectMake((self.frame.size.width - size) / 2, (self.frame.size.height - size) / 2, size, size);
 
-    [activityView startAnimating];
+        [activityView startAnimating];
+    }
 }
 
 -(void) verifyHostingAndRehostIfNecessary
@@ -154,7 +173,15 @@
         [self loadApp];
     }
     else
-        [activityView stopAnimating];
+    {
+        if (self.showSplashscreenInsteadOfSpinner)
+        {
+            [splashScreenImageView removeFromSuperview];
+            splashScreenImageView = nil;
+        }
+        else
+            [activityView stopAnimating];
+    }
 }
 
 -(void) setFrame:(CGRect)frame
@@ -225,6 +252,8 @@
     }
 
     RAMessageCompletionCallback block = ^(BOOL success) {
+        if ([UIApplication.sharedApplication._accessibilityFrontMostApplication isEqual:app])
+            return;
         FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
         SET_BACKGROUNDED(settings, YES);
         [scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];

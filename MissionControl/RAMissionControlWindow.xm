@@ -47,6 +47,11 @@
 {
 	width = UIScreen.mainScreen._interfaceOrientedBounds.size.width / 4.5714;
 	height = UIScreen.mainScreen._interfaceOrientedBounds.size.height / 4.36;
+	/*if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+	{
+		width = (UIScreen.mainScreen.bounds.size.width / 3) * 0.9;
+	    height = (UIScreen.mainScreen.bounds.size.height / 4) * 0.9;
+	}*/
 
 	// DESKTOP
 	CGFloat y = 25;

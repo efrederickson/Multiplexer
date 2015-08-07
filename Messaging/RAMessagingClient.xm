@@ -28,20 +28,8 @@
         void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*);
         rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
         rocketbootstrap_distributedmessagingcenter_apply(serverCenter);
+        dlclose(handle);
     }
-}
-
--(NSDictionary*) handleMessageNamed:(NSString*)identifier userInfo:(NSDictionary*)info
-{
-	NSLog(@"[ReachApp] %@ %@", identifier, info);
-	if ([identifier isEqual:RAMessagingUpdateAppInfoMessageName])
-	{
-		RAMessageAppData data;
-		[info[@"data"] getBytes:&data length:sizeof(data)];
-		[self updateWithData:data];
-		return @{ @"success": @YES };
-	}
-	return nil;
 }
 
 -(void) alertUser:(NSString*)description
@@ -84,8 +72,6 @@
 
 	/* THE REAL IMPORTANT BIT */
 	_currentData = data;
-
-	NSLog(@"[ReachApp] got orientation %ld", (long)_currentData.forcedOrientation);
 
 	if (didStatusBarVisibilityChange && data.shouldForceStatusBar == NO)
    		[UIApplication.sharedApplication RA_forceStatusBarVisibility:_currentData.statusBarVisibility orRevert:YES];

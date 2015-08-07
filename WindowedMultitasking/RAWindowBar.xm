@@ -223,6 +223,7 @@ const int bottomSizeViewTag =  987654320;
 	else
 	{
 		[sizingLockButton setImage:[RAResourceImageProvider imageForFilename:@"Unlocked" size:CGSizeMake(16, 16) tintedTo:[UIColor.blackColor colorWithAlphaComponent:0.5]] forState:UIControlStateNormal];
+		[self updateClientRotation];
 	}
 }
 

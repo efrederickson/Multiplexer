@@ -2,10 +2,16 @@
 #import <AppSupport/CPDistributedMessagingCenter.h>
 #import "RAMessagingServer.h"
 #import "RASpringBoardKeyboardActivation.h"
+#import "dispatch_after_cancel.h"
 
 #if DEBUG
 #import "RASettings.h"
 #endif
+
+@interface RAMessagingServer () {
+	NSMutableDictionary *asyncHandles;
+}
+@end
 
 @implementation RAMessagingServer
 +(instancetype) sharedInstance
@@ -15,6 +21,7 @@
 		sharedInstance->dataForApps = [NSMutableDictionary dictionary];
 		sharedInstance->contextIds = [NSMutableDictionary dictionary];
 		sharedInstance->waitingCompletions = [NSMutableDictionary dictionary];
+		sharedInstance->asyncHandles = [NSMutableDictionary dictionary];
 	);
 }
 
@@ -28,6 +35,7 @@
         void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*);
         rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
         rocketbootstrap_distributedmessagingcenter_apply(messagingCenter);
+        dlclose(handle);
     }
 
     [messagingCenter runServerOnCurrentThread];
@@ -59,6 +67,13 @@
 			RAMessageCompletionCallback callback = (RAMessageCompletionCallback)waitingCompletions[identifier];
 			[waitingCompletions removeObjectForKey:identifier];
 			callback(YES);
+		}
+		// Got the message, cancel the re-sender	
+		if ([asyncHandles objectForKey:identifier] != nil)
+		{
+			struct dispatch_async_handle *handle = (struct dispatch_async_handle *)[asyncHandles[identifier] pointerValue];
+			dispatch_after_cancel(handle);
+			[asyncHandles removeObjectForKey:identifier];
 		}
 
 		return @{
@@ -111,6 +126,14 @@
 {
 	if ([waitingCompletions objectForKey:identifier] != nil)
 	{
+		// We timed out, remove the re-sender
+		if ([asyncHandles objectForKey:identifier] != nil)
+		{
+			struct dispatch_async_handle *handle = (struct dispatch_async_handle *)[asyncHandles[identifier] pointerValue];
+			dispatch_after_cancel(handle);
+			[asyncHandles removeObjectForKey:identifier];
+		}
+
 		RAMessageCompletionCallback callback = (RAMessageCompletionCallback)waitingCompletions[identifier];
 		[waitingCompletions removeObjectForKey:identifier];
 
@@ -120,7 +143,7 @@
 	}
 }
 
--(void) sendData:(NSDictionary*)data withCurrentTries:(int)tries toAppWithBundleIdentifier:(NSString*)identifier completion:(RAMessageCompletionCallback)callback
+-(void) sendDataWithCurrentTries:(int)tries toAppWithBundleIdentifier:(NSString*)identifier completion:(RAMessageCompletionCallback)callback
 {
 	SBApplication *app = [[%c(SBApplicationController) sharedInstance] RA_applicationWithBundleIdentifier:identifier];
 	if (!app.isRunning || [app mainScene] == nil)
@@ -133,19 +156,45 @@
 			return;
 		}
 
-		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-			[self sendData:data withCurrentTries:tries + 1 toAppWithBundleIdentifier:identifier completion:callback];
+		if ([asyncHandles objectForKey:identifier] != nil)
+		{
+			struct dispatch_async_handle *handle = (struct dispatch_async_handle *)[asyncHandles[identifier] pointerValue];
+			dispatch_after_cancel(handle);
+			[asyncHandles removeObjectForKey:identifier];
+		}
+
+		struct dispatch_async_handle *handle = dispatch_after_cancellable(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+			[self sendDataWithCurrentTries:tries + 1 toAppWithBundleIdentifier:identifier completion:callback];
 		});
+		asyncHandles[identifier] = [NSValue valueWithPointer:handle];
 		return;
 	}
 
 	CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge CFStringRef)[NSString stringWithFormat:@"com.efrederickson.reachapp.clientupdate-%@",identifier], nil, nil, YES);
 	
-	if (callback == nil)
-		callback = ^(BOOL _) { };
+	if (tries <= 4)
+	{
+		if ([asyncHandles objectForKey:identifier] != nil)
+		{
+			struct dispatch_async_handle *handle = (struct dispatch_async_handle *)[asyncHandles[identifier] pointerValue];
+			dispatch_after_cancel(handle);
+			[asyncHandles removeObjectForKey:identifier];
+		}
 
-	waitingCompletions[identifier] = [callback copy];
-	[self performSelector:@selector(checkIfCompletionStillExitsForIdentifierAndFailIt:) withObject:identifier afterDelay:4];
+		struct dispatch_async_handle *handle = dispatch_after_cancellable(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+			[self sendDataWithCurrentTries:tries + 1 toAppWithBundleIdentifier:identifier completion:callback];
+		});
+		asyncHandles[identifier] = [NSValue valueWithPointer:handle];
+
+		if ([waitingCompletions objectForKey:identifier] == nil)
+		{
+			if (callback == nil)
+				callback = ^(BOOL _) { };
+
+			waitingCompletions[identifier] = [callback copy];
+			[self performSelector:@selector(checkIfCompletionStillExitsForIdentifierAndFailIt:) withObject:identifier afterDelay:4];
+		}
+	}
 	
 
 /*
@@ -195,13 +244,7 @@
 	if (!identifier || identifier.length == 0)
 		return;
 
-	RAMessageAppData data = [self getDataForIdentifier:identifier];
-
-	NSDictionary *dict = @{
-		@"data": [NSData dataWithBytes:&data length:sizeof(data)],
-	};
-
-	[self sendData:dict withCurrentTries:0 toAppWithBundleIdentifier:identifier completion:callback];
+	[self sendDataWithCurrentTries:0 toAppWithBundleIdentifier:identifier completion:callback];
 }
 
 -(void) resizeApp:(NSString*)identifier toSize:(CGSize)size completion:(RAMessageCompletionCallback)callback
