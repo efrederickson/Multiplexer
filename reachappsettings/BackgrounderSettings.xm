@@ -83,12 +83,20 @@
                 //@"enabled": objc_getClass("LAEventSettingsController") != nil,
              },
 
-             @{ @"label": @"Global Settings" },
+             @{ @"label": @"Global Settings", @"footerText": @"Show in StatusBar will not show for apps with the \"Native\" mode." },
              @{
                 @"cell": @"PSSwitchCell",
                 @"label": @"Show Icon Indicators",
                 @"default": @YES,
                 @"key": @"showIconIndicators",
+                @"defaults": @"com.efrederickson.reachapp.settings",
+                @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+             },
+             @{
+                @"cell": @"PSSwitchCell",
+                @"label": @"Show in StatusBar",
+                @"default": @YES,
+                @"key": @"shouldShowStatusBarIcons",
                 @"defaults": @"com.efrederickson.reachapp.settings",
                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
              },                          

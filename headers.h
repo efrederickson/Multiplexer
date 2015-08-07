@@ -68,7 +68,9 @@ return sharedInstance;
 
 extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 
-
+@interface UIStatusBarItem : NSObject
+-(NSString*)indicatorName;
+@end
 
 @interface UIScreen (ohBoy)
 -(CGRect) _interfaceOrientedBounds;
@@ -701,6 +703,12 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @interface SBDarkeningImageView : UIImageView
 - (void)setImage:(id)arg1 brightness:(double)arg2;
 - (void)setImage:(id)arg1;
+@end
+
+@interface _UILegibilityImageSet : NSObject
++ (_UILegibilityImageSet*) imageFromImage: (UIImage*) image withShadowImage: (UIImage*) imag_sh;
+@property(retain) UIImage * image;
+@property(retain) UIImage * shadowImage;
 @end
 
 @interface SBIconBadgeView : UIView

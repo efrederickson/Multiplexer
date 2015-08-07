@@ -171,4 +171,11 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	BOOL globalSetting = [RASettings.sharedInstance shouldShowIconIndicatorsGlobally];
 	return globalSetting ?: ([dct objectForKey:@"showIndicatorOnIcon"] == nil ? YES : [dct[@"showIndicatorOnIcon"] boolValue]);
 }
+
+-(BOOL) shouldShowStatusBarIconForIdentifier:(NSString*)identifier
+{
+	NSDictionary *dct = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
+	BOOL globalSetting = [RASettings.sharedInstance shouldShowStatusBarIcons];
+	return globalSetting ?: ([dct objectForKey:@"showStatusBarIcon"] == nil ? YES : [dct[@"showStatusBarIcon"] boolValue]);
+}
 @end

@@ -44,6 +44,7 @@ enum RAGrabArea {
 -(BOOL) windowedMultitaskingCompleteAnimations;
 
 -(NSInteger) globalBackgroundMode;
+-(BOOL) shouldShowStatusBarIcons;
 -(BOOL) backgrounderEnabled;
 -(BOOL) shouldShowIconIndicatorsGlobally;
 -(BOOL) showNativeStateIconIndicators;

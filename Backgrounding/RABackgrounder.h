@@ -46,4 +46,5 @@ enum RAIconIndicatorViewInfo {
 -(RAIconIndicatorViewInfo) allAggregatedIndicatorInfoForIdentifier:(NSString*)identifier;
 -(void) updateIconIndicatorForIdentifier:(NSString*)identifier withInfo:(RAIconIndicatorViewInfo)info;
 -(BOOL) shouldShowIndicatorForIdentifier:(NSString*)identifier;
+-(BOOL) shouldShowStatusBarIconForIdentifier:(NSString*)identifier;
 @end

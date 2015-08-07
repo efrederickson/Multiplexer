@@ -170,11 +170,19 @@ F - forced foreground \n\
 D - forced kill on exit \n\
 S - suspend immediately \n\
 U - unkillable \n\
-B - unlimited backgrounding time", },
+B - unlimited backgrounding time\n\
+\n\
+The status bar icon is simply the app icon.", },
          	@{
          		@"cell": @"PSSwitchCell",
          		@"label": @"Show Indicator on icon",
          		@"key": @"showIndicatorOnIcon",
+                 @"default": @YES,
+             },
+            @{
+                @"cell": @"PSSwitchCell",
+                @"label": @"Show in StatusBar",
+                @"key": @"showStatusBarIcon",
                  @"default": @YES,
              },
              ];

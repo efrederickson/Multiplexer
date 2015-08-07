@@ -1,6 +1,8 @@
 #import "RABackgrounder.h"
 #import "RASettings.h"
 #import "RAIconBadgeView.h"
+#import <libstatusbar/LSStatusBarItem.h>
+#import <applist/ALApplicationList.h>
 
 NSMutableDictionary *indicatorStateDict = [NSMutableDictionary dictionary];
 #define SET_INFO_(x, y)    indicatorStateDict[x] = [NSNumber numberWithInt:y]
@@ -126,20 +128,45 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 }
 %end
 
+NSMutableDictionary *lsbitems = [NSMutableDictionary dictionary];
+
 %hook SBApplication
 - (void)setApplicationState:(unsigned int)arg1
 {
     %orig;
 
     if (self.isRunning == NO)
+    {
     	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:RAIconIndicatorViewInfoNone];
+    	[lsbitems removeObjectForKey:self.bundleIdentifier];
+    }
     else 
     {
+    	if (objc_getClass("LSStatusBarItem") && [lsbitems objectForKey:self.bundleIdentifier] == nil && [RABackgrounder.sharedInstance shouldShowStatusBarIconForIdentifier:self.bundleIdentifier])
+    	{
+    		if ([[[[%c(SBIconViewMap) homescreenMap] iconModel] visibleIconIdentifiers] containsObject:self.bundleIdentifier])
+    		{
+    			RAIconIndicatorViewInfo info = [RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:self.bundleIdentifier];
+    			if ((info & RAIconIndicatorViewInfoNone) == 0 && (info & RAIconIndicatorViewInfoNative) == 0)
+    			{
+			    	LSStatusBarItem *item = [[%c(LSStatusBarItem) alloc] initWithIdentifier:self.bundleIdentifier alignment:StatusBarAlignmentLeft];
+		    		item.customViewClass = @"RAAppIconStatusBarIconView";
+		        	item.imageName = self.bundleIdentifier;
+		    		lsbitems[self.bundleIdentifier] = item;
+		    	}
+	    	}
+    	}
+
     	//if ([indicatorStateDict objectForKey:self.bundleIdentifier] == nil)
     		[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:self.bundleIdentifier]];
     	//else
 	    //	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:(RAIconIndicatorViewInfo)GET_INFO_(self.bundleIdentifier)];
     }
+}
+
+%new +(void) RA_clearAllStatusBarIcons
+{
+	lsbitems = [NSMutableDictionary dictionary];
 }
 %end
 
@@ -161,4 +188,28 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 }
 %end
 
+%group libstatusbar
+@interface RAAppIconStatusBarIconView : UIView
+@property (nonatomic, retain) UIStatusBarItem *item;
+@end
 
+%subclass RAAppIconStatusBarIconView : UIStatusBarCustomItemView
+-(id) contentsImage
+{
+	UIImage *img = [ALApplicationList.sharedApplicationList iconOfSize:15 forDisplayIdentifier:self.item.indicatorName];
+
+    return [_UILegibilityImageSet imageFromImage:img withShadowImage:nil];
+}
+- (CGFloat)standardPadding { return 4; }
+%end
+%end
+
+%ctor
+{
+	if ([NSFileManager.defaultManager fileExistsAtPath:@"/Library/MobileSubstrate/DynamicLibraries/libstatusbar.dylib"])
+	{
+        dlopen("/Library/MobileSubstrate/DynamicLibraries/libstatusbar.dylib", RTLD_NOW | RTLD_GLOBAL);
+		%init(libstatusbar);
+	}
+	%init;
+}

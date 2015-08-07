@@ -63,6 +63,9 @@ NSDictionary *_settings = nil;
 
 	if ([previousNCAppSetting isEqual:self.NCApp] == NO)
 		[ncAppViewController performSelector:@selector(forceReloadAppLikelyBecauseTheSettingChanged)];
+
+	if ([self shouldShowStatusBarIcons] == NO)
+		[objc_getClass("SBApplication") performSelector:@selector(RA_clearAllStatusBarIcons)];
 }
 
 -(BOOL) enabled
@@ -221,6 +224,8 @@ NSDictionary *_settings = nil;
 	return [_settings objectForKey:@"windowRotationLockMode"] == nil ? 0 : [_settings[@"windowRotationLockMode"] intValue];
 }
 
+-(BOOL) shouldShowStatusBarIcons { return BOOL(@"shouldShowStatusBarIcons", YES); }
+
 -(NSDictionary*) rawCompiledBackgrounderSettingsForIdentifier:(NSString*)identifier
 {
 	NSMutableDictionary *ret = [NSMutableDictionary dictionary];
@@ -229,10 +234,11 @@ NSDictionary *_settings = nil;
 	ret[@"backgroundMode"] = _settings[[NSString stringWithFormat:@"backgrounder-%@-backgroundMode",identifier]] ?: @1;
 	ret[@"autoLaunch"] = _settings[[NSString stringWithFormat:@"backgrounder-%@-autoLaunch",identifier]] ?: @NO;
 	ret[@"autoRelaunch"] = _settings[[NSString stringWithFormat:@"backgrounder-%@-autoRelaunch",identifier]] ?: @NO;
-	ret[@"showIndicatorOnIcon"] = _settings[[NSString stringWithFormat:@"backgrounder-%@-showIndicatorOnIcon",identifier]] ?: @NO;
+	ret[@"showIndicatorOnIcon"] = _settings[[NSString stringWithFormat:@"backgrounder-%@-showIndicatorOnIcon",identifier]] ?: @YES;
 	ret[@"preventDeath"] = _settings[[NSString stringWithFormat:@"backgrounder-%@-preventDeath",identifier]] ?: @NO;
 	ret[@"unlimitedBackgrounding"] = _settings[[NSString stringWithFormat:@"backgrounder-%@-unlimitedBackgrounding",identifier]] ?: @NO;
 	ret[@"removeFromSwitcher"] = _settings[[NSString stringWithFormat:@"backgrounder-%@-removeFromSwitcher",identifier]] ?: @NO;
+	ret[@"showStatusBarIcon"] = _settings[[NSString stringWithFormat:@"backgrounder-%@-showStatusBarIcon",identifier]] ?: @YES;
 
 	ret[@"backgroundModes"] = [NSMutableDictionary dictionary];
 	ret[@"backgroundModes"][kBGModeUnboundedTaskCompletion] = _settings[[NSString stringWithFormat:@"backgrounder-%@-backgroundmodes-%@",identifier,kBGModeUnboundedTaskCompletion]] ?: @NO;
