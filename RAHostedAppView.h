@@ -18,6 +18,8 @@
 
 @property (nonatomic) BOOL shouldUseExternalKeyboard;
 
+@property (nonatomic) BOOL isCurrentlyHosting;
+
 -(SBApplication*) app;
 -(NSString*) displayName;
 

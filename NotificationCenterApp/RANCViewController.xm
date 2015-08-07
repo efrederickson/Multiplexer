@@ -5,8 +5,6 @@
 @interface RANCViewController () {
 	RAHostedAppView *appView;
 	UILabel *isLockedLabel;
-
-	NSTimer *activityViewCheckTimer;
 }
 @end
 
@@ -112,31 +110,23 @@ int rotationDegsForOrientation(int o)
 		appView.frame = f;
 	}
 	//[appView rotateToOrientation:UIApplication.sharedApplication.statusBarOrientation];
+}
 
-	activityViewCheckTimer = [NSTimer timerWithTimeInterval:1 target:self selector:@selector(checkIfAppIsRunningAtAllAndStopTimerIfSo) userInfo:nil repeats:YES];
-	[[NSRunLoop currentRunLoop] addTimer:activityViewCheckTimer forMode:NSRunLoopCommonModes];
+- (void)hostDidDismiss
+{
+	//if ([super respondsToSelector:@selector(hostDidDismiss)])
+	//	[super performSelector:@selector(hostDidDismiss)];
+
+	appView.hideStatusBar = NO;
+	[appView unloadApp:YES];
 }
 
 -(void) viewDidDisappear:(BOOL)animated
 {
 	[super viewDidDisappear:animated];
 
-	[activityViewCheckTimer invalidate];
-
 	appView.hideStatusBar = NO;
-	[appView unloadApp];
-}
-
--(void) checkIfAppIsRunningAtAllAndStopTimerIfSo
-{
-	// Whether started or (hopefully) showing
-	if (appView.app.isRunning)
-	{
-		appView.hideStatusBar = YES; // verify status bar is hidden (doesn't happen the first load)
-		//[appView rotateToOrientation:patchOrientation(UIApplication.sharedApplication.statusBarOrientation)];
-
-		[activityViewCheckTimer invalidate];
-	}
+	[appView unloadApp:YES];
 }
 
 -(RAHostedAppView*) hostedApp { return appView; }

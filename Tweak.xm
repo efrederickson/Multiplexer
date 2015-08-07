@@ -27,3 +27,13 @@ void SET_BACKGROUNDED(id settings, BOOL value)
 		object_setInstanceVariable(settings, "_backgrounded", (void*)NO);
 #endif
 }
+
+/*
+#if DEBUG
+extern "C" void _CFEnableZombies(void);
+%ctor
+{
+	_CFEnableZombies();	
+}
+#endif
+*/

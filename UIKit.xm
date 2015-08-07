@@ -64,6 +64,12 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
 %end
 
 %hook UIApplication
+- (void)applicationDidResume
+{
+    %orig;
+    [RAMessagingClient.sharedInstance requestUpdateFromServer];
+}
+
 - (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(id)arg2 changeApplicationFlag:(BOOL)arg3
 {
 	//if ([RASettings.sharedInstance unifyStatusBar])
@@ -102,6 +108,12 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
             if (wasStatusBarHidden == -1)
                 wasStatusBarHidden = UIApplication.sharedApplication.statusBarHidden;
         }
+    }
+    else if (setPreviousOrientation)
+    {
+        orientation = prevousOrientation;
+
+        setPreviousOrientation = NO;
     }
 
     for (UIWindow *window in [[UIApplication sharedApplication] windows]) {

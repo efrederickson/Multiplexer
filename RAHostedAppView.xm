@@ -78,6 +78,9 @@
 
 -(void) _actualLoadApp
 {
+    if (_isCurrentlyHosting)
+        return;
+
     view = (FBWindowContextHostWrapperView*)[RAHostManager enabledHostViewForApplication:app];
     contextHostManager = (FBWindowContextHostManager*)[RAHostManager hostManagerForApp:app];
     view.backgroundColorWhileNotHosting = [UIColor clearColor];
@@ -87,6 +90,7 @@
     //view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
     [self addSubview:view];
+    _isCurrentlyHosting = YES;
 
     if (verifyTimer)
         [verifyTimer invalidate];
@@ -225,7 +229,15 @@
 {
     if (activityView)
         [activityView stopAnimating];
+
     [verifyTimer invalidate];
+    verifyTimer = nil;
+
+    if (_isCurrentlyHosting == NO)
+        return;
+    
+    _isCurrentlyHosting = NO;
+
     FBScene *scene = [app mainScene];
 
     if (biolockdownDidFailLabel)
@@ -246,10 +258,12 @@
     if (!scene)
         return;
 
-    if ([UIApplication.sharedApplication._accessibilityFrontMostApplication isEqual:app])
-    {
-        return;
-    }
+
+    [contextHostManager disableHostingForRequester:@"reachapp"];
+    contextHostManager = nil;    
+
+    //if ([UIApplication.sharedApplication._accessibilityFrontMostApplication isEqual:app])
+    //    return;
 
     RAMessageCompletionCallback block = ^(BOOL success) {
         if ([UIApplication.sharedApplication._accessibilityFrontMostApplication isEqual:app])
@@ -258,8 +272,6 @@
         SET_BACKGROUNDED(settings, YES);
         [scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];
         //FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
-        [contextHostManager disableHostingForRequester:@"reachapp"];
-        contextHostManager = nil;
     };
 
     [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:self.bundleIdentifier completion:nil];
