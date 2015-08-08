@@ -209,6 +209,8 @@ NSDictionary *_settings = nil;
 	return BOOL(@"replaceAppSwitcherWithMC", NO);
 }
 
+-(BOOL) missionControlKillApps { return BOOL(@"mcKillApps", YES); }
+
 -(BOOL) snapRotation
 {
 	return BOOL(@"snapRotation", YES);

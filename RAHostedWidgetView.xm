@@ -26,7 +26,7 @@
 
 -(void) loadApp
 {
-	widget.frame = self.frame;
+	widget.frame = CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height);
 	[self addSubview:widget];
 	[widget didAppear];
 }

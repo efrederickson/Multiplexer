@@ -73,6 +73,15 @@
                  },
                  @{ },
              @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @YES,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"mcKillApps",
+                 @"label": @"Kill App",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+                 @{ },
+             @{
                     @"cell": @"PSLinkCell",
                     @"action": @"showActivatorAction",
                     @"label": @"Secondary Activation Method",

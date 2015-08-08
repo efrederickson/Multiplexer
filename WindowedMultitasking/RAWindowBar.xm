@@ -273,9 +273,9 @@ const int bottomSizeViewTag =  987654320;
 		if (!appRotationLocked)
 	    	[attachedView rotateToOrientation:[self.desktop appOrientationRelativeToThisOrientation:currentRotation]];
 
-		if ([RASettings.sharedInstance snapWindows] && [RAWindowSnapDataProvider shouldSnapWindowAtLocation:self.frame])
+		if ([RASettings.sharedInstance snapWindows] && [RAWindowSnapDataProvider shouldSnapWindow:self])
 		{
-			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindowLocation:self.frame] animated:YES];
+			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindow:self] animated:YES];
 			isSnapped = YES;
 		}
     }
@@ -450,9 +450,9 @@ const int bottomSizeViewTag =  987654320;
 		enableLongPress = YES;
 		[self saveWindowInfo];
 
-		if ([RASettings.sharedInstance snapWindows] && [RAWindowSnapDataProvider shouldSnapWindowAtLocation:self.frame])
+		if ([RASettings.sharedInstance snapWindows] && [RAWindowSnapDataProvider shouldSnapWindow:self])
 		{
-			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindowLocation:self.frame] animated:YES];
+			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindow:self] animated:YES];
 			isSnapped = YES;
 			// Force tap to fail
 			tapGesture.enabled = NO;
@@ -487,9 +487,9 @@ const int bottomSizeViewTag =  987654320;
         case UIGestureRecognizerStateEnded:
         	enableDrag = YES; enableLongPress = YES;
 			
-			if (isSnapped && [RAWindowSnapDataProvider shouldSnapWindowAtLocation:self.frame])
+			if ([RAWindowSnapDataProvider shouldSnapWindow:self])
 			{
-				[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindowLocation:self.frame] animated:YES];
+				[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindow:self] animated:YES];
 				isSnapped = YES;
 				// Force tap to fail
 				tapGesture.enabled = NO;
@@ -506,20 +506,35 @@ const int bottomSizeViewTag =  987654320;
 
 -(void) setTransform:(CGAffineTransform)trans
 {
-	CGPoint center = self.center;
-
 	CGFloat scale = sqrt(trans.a * trans.a + trans.c * trans.c);
-	scale = MIN(1.0, MAX(0.15, scale));
+	CGFloat max = 1.0;
+	scale = MIN(max, MAX(0.15, scale));
 
 	trans = CGAffineTransformRotate(CGAffineTransformMakeScale(scale, scale), atan2(trans.b, trans.a));
 
 	[super setTransform:trans];
-	self.center = center;
 
 	if (isBeingTouched == NO)
 	{
-		if ([RAWindowSnapDataProvider shouldSnapWindowAtLocation:self.frame])
-			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindowLocation:self.frame] animated:YES];
+		if ([RAWindowSnapDataProvider shouldSnapWindow:self])
+			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindow:self] animated:YES];
+
+		/*CGPoint origin = self.frame.origin;
+		CGPoint endPoint = CGPointMake(origin.x + self.frame.size.width, origin.y + self.frame.size.height);
+
+		if (endPoint.x > self.desktop.frame.size.width)
+			origin.x -= (endPoint.x - self.desktop.frame.size.width);
+		if (endPoint.y > self.desktop.frame.size.height)
+			origin.y -= (endPoint.y - self.desktop.frame.size.height);
+
+		if (origin.x < 0)
+			origin.x = 0;
+		if (origin.y < 0)
+			origin.y = 0;
+
+		CGRect adjustedFrame = CGRectMake(origin.x, origin.y, self.frame.size.width, self.frame.size.height);
+		self.frame = adjustedFrame;*/
+
 	}
 }
 

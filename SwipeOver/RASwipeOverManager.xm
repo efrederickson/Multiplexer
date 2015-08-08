@@ -172,7 +172,7 @@ extern int rotationDegsForOrientation(int o);
 
 -(void) updateClientSizes:(BOOL)reloadAppSelectorSizeNow
 {
-	if (currentAppIdentifier)
+	if (currentAppIdentifier && overlayWindow.isHidingUnderlyingApp == NO)
 	{
 		CGFloat underWidth = [overlayWindow isHidingUnderlyingApp] ? -1 : overlayWindow.frame.origin.x;
 		[RAMessagingServer.sharedInstance resizeApp:currentAppIdentifier toSize:CGSizeMake(underWidth, -1) completion:nil];

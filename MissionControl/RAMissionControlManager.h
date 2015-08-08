@@ -4,7 +4,6 @@
 
 @interface RAMissionControlManager : NSObject<RAGestureCallbackProtocol> {
 	RAMissionControlWindow *window;
-	NSMutableArray *runningApplications;
 }
 +(instancetype) sharedInstance;
 

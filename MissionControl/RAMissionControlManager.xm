@@ -11,6 +11,7 @@
 #import "RAGestureManager.h"
 #import "RAWindowStatePreservationSystemManager.h"
 #import "RALockStateUpdater.h"
+#import "RARunningAppsProvider.h"
 
 extern BOOL overrideCC;
 
@@ -42,7 +43,6 @@ CGRect swappedForOrientation(CGRect in)
 +(instancetype) sharedInstance
 {
 	SHARED_INSTANCE2(RAMissionControlManager, 
-		sharedInstance->runningApplications = [NSMutableArray array];
 	);
 }
 
@@ -112,7 +112,7 @@ CGRect swappedForOrientation(CGRect in)
 
 -(void) reloadWindowedAppsSection
 {
-	[window reloadWindowedAppsSection:runningApplications];
+	[window reloadWindowedAppsSection:RARunningAppsProvider.sharedInstance.runningApplications];
 }
 
 -(void) reloadOtherAppsSection
@@ -204,21 +204,7 @@ CGRect swappedForOrientation(CGRect in)
 }
 
 -(RAMissionControlWindow*) missionControlWindow { if (!window) [self createWindow]; return window; }
--(NSMutableArray*) runningApplications { return runningApplications; }
 @end
-
-
-%hook SBApplication
-- (void)updateProcessState:(id)arg1
-{
-	%orig;
-
-	if (self.isRunning && [RAMissionControlManager.sharedInstance.runningApplications containsObject:self] == NO)
-		[RAMissionControlManager.sharedInstance.runningApplications addObject:self];
-	else if (!self.isRunning && [RAMissionControlManager.sharedInstance.runningApplications containsObject:self])
-		[RAMissionControlManager.sharedInstance.runningApplications removeObject:self];
-}
-%end
 
 %hook SBLockStateAggregator
 -(void) _updateLockState

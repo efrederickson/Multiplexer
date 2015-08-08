@@ -7,6 +7,7 @@
 #import "RADesktopManager.h"
 #import "RADesktopWindow.h"
 #import "RAMissionControlManager.h"
+#import "RASettings.h"
 
 @interface RAMissionControlWindow ()  {
 	UIScrollView *desktopScrollView, *windowedAppScrollView, *otherRunningAppsScrollView;
@@ -54,7 +55,7 @@
 	}*/
 
 	// DESKTOP
-	CGFloat y = 25;
+	CGFloat y = 20;
 
 	if (desktopScrollView)
 	{
@@ -62,13 +63,13 @@
 	}
 	else
 	{
-		desktopLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, y, self.frame.size.width - 20, 20)];
+		desktopLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, y, self.frame.size.width - 20, 25)];
 		desktopLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
 		desktopLabel.textColor = UIColor.whiteColor;
 		desktopLabel.text = LOCALIZE(@"DESKTOPS");
 		[self addSubview:desktopLabel];
 
-		y = y + desktopLabel.frame.size.height + 3;
+		y = y + desktopLabel.frame.size.height;
 
 		desktopScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y, self.frame.size.width, height * 1.2)];
 		desktopScrollView.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.3];
@@ -142,7 +143,7 @@
 			[appsWithoutWindows removeObject:app];
 
 	CGFloat x = 15;
-	CGFloat y = desktopScrollView.frame.origin.y + desktopScrollView.frame.size.height + 5;
+	CGFloat y = desktopScrollView.frame.origin.y + desktopScrollView.frame.size.height;
 
 	if (windowedAppScrollView)
 	{
@@ -150,13 +151,13 @@
 	}
 	else
 	{
-		windowedLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, y, self.frame.size.width - 20, 20)];
+		windowedLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, y, self.frame.size.width - 20, 25)];
 		windowedLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
 		windowedLabel.textColor = UIColor.whiteColor;
 		windowedLabel.text = LOCALIZE(@"ON_THIS_DESKTOP");
 		[self addSubview:windowedLabel];
 
-		windowedAppScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + windowedLabel.frame.size.height + 3, self.frame.size.width, height * 1.2)];
+		windowedAppScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + windowedLabel.frame.size.height, self.frame.size.width, height * 1.2)];
 		windowedAppScrollView.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.3];
 
 		[self addSubview:windowedAppScrollView];
@@ -202,7 +203,7 @@
 -(void) reloadOtherAppsSection
 {
 	CGFloat x = 15;
-	CGFloat y = windowedAppScrollView.frame.origin.y + windowedAppScrollView.frame.size.height + 5;
+	CGFloat y = windowedAppScrollView.frame.origin.y + windowedAppScrollView.frame.size.height;
 
 	if (otherRunningAppsScrollView)
 	{
@@ -210,13 +211,13 @@
 	}
 	else
 	{
-		otherLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, y, self.frame.size.width - 20, 20)];
+		otherLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, y, self.frame.size.width - 20, 25)];
 		otherLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
 		otherLabel.textColor = UIColor.whiteColor;
 		otherLabel.text = LOCALIZE(@"RUNNING_ELSEWHERE");
 		[self addSubview:otherLabel];
 
-		otherRunningAppsScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + otherLabel.frame.size.height + 3, self.frame.size.width, height * 1.2)];
+		otherRunningAppsScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + otherLabel.frame.size.height, self.frame.size.width, height * 1.2)];
 		otherRunningAppsScrollView.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.3];
 
 		[self addSubview:otherRunningAppsScrollView];
@@ -330,15 +331,16 @@
 			SBApplication *app = ((RAMissionControlPreviewView*)gesture.view).application;
 			[RADesktopManager.sharedInstance removeAppWithIdentifier:app.bundleIdentifier animated:NO];
 			[RAWindowStatePreservationSystemManager.sharedInstance removeWindowInformationForIdentifier:app.bundleIdentifier];
-			[RAAppKiller killAppWithSBApplication:app completion:^{
-				[runningApplications removeObject:app];
+			if ([RASettings.sharedInstance missionControlKillApps])
+				[RAAppKiller killAppWithSBApplication:app completion:^{
+					[runningApplications removeObject:app];
 
-				//NSLog(@"[ReachApp] killer of %@, %d", app.bundleIdentifier, app.pid);
+					//NSLog(@"[ReachApp] killer of %@, %d", app.bundleIdentifier, app.pid);
 
-				[self performSelectorOnMainThread:@selector(reloadDesktopSection) withObject:nil waitUntilDone:YES];
-				[self performSelectorOnMainThread:@selector(reloadWindowedAppsSection) withObject:nil waitUntilDone:YES];
-				[self performSelectorOnMainThread:@selector(reloadOtherAppsSection) withObject:nil waitUntilDone:YES];
-			}];
+					[self performSelectorOnMainThread:@selector(reloadDesktopSection) withObject:nil waitUntilDone:YES];
+					[self performSelectorOnMainThread:@selector(reloadWindowedAppsSection) withObject:nil waitUntilDone:YES];
+					[self performSelectorOnMainThread:@selector(reloadOtherAppsSection) withObject:nil waitUntilDone:YES];
+				}];
 
 			didKill = YES;
 		}
