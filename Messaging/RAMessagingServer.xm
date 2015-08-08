@@ -66,8 +66,11 @@
 		{
 			RAMessageCompletionCallback callback = (RAMessageCompletionCallback)waitingCompletions[identifier];
 			[waitingCompletions removeObjectForKey:identifier];
+			NSLog(@"[ReachApp] calling callback");
 			callback(YES);
 		}
+		else
+			NSLog(@"[ReachApp] nil callback");
 		// Got the message, cancel the re-sender	
 		if ([asyncHandles objectForKey:identifier] != nil)
 		{
