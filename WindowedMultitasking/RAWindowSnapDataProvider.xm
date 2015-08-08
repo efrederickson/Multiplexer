@@ -40,7 +40,7 @@
 	bottomRight.y += location.size.height / 2;
 	//bottomRight = CGPointApplyAffineTransform(bottomRight, theView.transform);
 	
-//I added topLeft.x += self.mainImageView.transform.tx; and topLeft.y += self.mainImageView.transform.ty; after topLeft = CGPointApplyAffineTransform(topLeft, theView.transform); for views that translate as well as scale and rotate. –
+	// I am not proud of the below jumps, however i do believe it is the best solution to the problem apart from making weird blocks, which would be a considerable amount of work.
 
 	BOOL didLeft = NO;
 	BOOL didRight = NO;
@@ -86,7 +86,7 @@ try_bottom:
 
 	if (location.origin.y + location.size.height > bottomBuffer)
 		return RAWindowSnapLocationBottom;
-		
+
 //try_top:
 
 	if (location.origin.y < 20 + 25)
