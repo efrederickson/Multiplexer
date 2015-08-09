@@ -191,12 +191,14 @@
 
 		if ([waitingCompletions objectForKey:identifier] == nil)
 		{
-			if (callback == nil)
-				callback = ^(BOOL _) { };
-
-			waitingCompletions[identifier] = [callback copy];
-			[self performSelector:@selector(checkIfCompletionStillExitsForIdentifierAndFailIt:) withObject:identifier afterDelay:4];
+			//if (callback == nil)
+			//	callback = ^(BOOL _) { };
+			if (callback)
+				waitingCompletions[identifier] = [callback copy];
 		}
+		// Reset failure checker 
+		[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkIfCompletionStillExitsForIdentifierAndFailIt:) object:identifier];
+		[self performSelector:@selector(checkIfCompletionStillExitsForIdentifierAndFailIt:) withObject:identifier afterDelay:4];
 	}
 	
 

@@ -203,7 +203,7 @@ try_bottom:
 		default:
 			break;
 	}
-
+	
 	if (animated)
 	{
 		[UIView animateWithDuration:0.2 animations:^{

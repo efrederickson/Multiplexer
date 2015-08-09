@@ -151,7 +151,7 @@ NSMutableDictionary *lsbitems = [NSMutableDictionary dictionary];
     			{
 			    	LSStatusBarItem *item = [[%c(LSStatusBarItem) alloc] initWithIdentifier:self.bundleIdentifier alignment:StatusBarAlignmentLeft];
 		    		item.customViewClass = @"RAAppIconStatusBarIconView";
-		        	item.imageName = self.bundleIdentifier;
+		        	item.imageName = [NSString stringWithFormat:@"multiplexer-%@",self.bundleIdentifier];
 		    		lsbitems[self.bundleIdentifier] = item;
 		    	}
 	    	}
@@ -193,14 +193,33 @@ NSMutableDictionary *lsbitems = [NSMutableDictionary dictionary];
 @property (nonatomic, retain) UIStatusBarItem *item;
 @end
 
+@interface UIStatusBarCustomItem : UIStatusBarItem
+@end
+
+inline NSString *getAppNameFromIndicatorName(NSString *indicatorName)
+{
+	return [indicatorName substringFromIndex:(@"multiplexer-").length];
+}
+
 %subclass RAAppIconStatusBarIconView : UIStatusBarCustomItemView
 -(id) contentsImage
 {
-	UIImage *img = [ALApplicationList.sharedApplicationList iconOfSize:15 forDisplayIdentifier:self.item.indicatorName];
+	UIImage *img = [ALApplicationList.sharedApplicationList iconOfSize:15 forDisplayIdentifier:getAppNameFromIndicatorName(self.item.indicatorName)];
 
     return [_UILegibilityImageSet imageFromImage:img withShadowImage:nil];
 }
-- (CGFloat)standardPadding { return 4; }
+-(CGFloat) standardPadding { return 4; }
+%end
+%hook UIStatusBarCustomItem
+-(NSUInteger) leftOrder
+{
+	if ([self.indicatorName hasPrefix:@"multiplexer-"])
+	{
+		//NSString *actualName = getAppNameFromIndicatorName(self.indicatorName);
+		return 4; // Shows just after wifi, before the loading/sync indicator
+	}
+	return %orig;
+}
 %end
 %end
 

@@ -255,11 +255,11 @@
         isForemostAppLabel = nil;
     }
 
-    if (!scene)
-        return;
-
-    [contextHostManager disableHostingForRequester:@"reachapp"];
-    contextHostManager = nil;    
+    if (contextHostManager)
+    {
+        [contextHostManager disableHostingForRequester:@"reachapp"];
+        contextHostManager = nil;    
+    }
 
     //if ([UIApplication.sharedApplication._accessibilityFrontMostApplication isEqual:app])
     //    return;
@@ -268,9 +268,10 @@
     __block BOOL didRun = NO;
     RAMessageCompletionCallback block = ^(BOOL success) {
         if (didRun || [UIApplication.sharedApplication._accessibilityFrontMostApplication isEqual:weakSelf.app])
-        {
+            return;        
+        if (!scene)
             return;
-        }
+
         FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
         SET_BACKGROUNDED(settings, YES);
         [scene _applyMutableSettings:settings withTransitionContext:nil completion:nil];
@@ -278,19 +279,21 @@
         didRun = YES;
     };
 
+    [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:self.bundleIdentifier completion:nil];
+    [RAMessagingServer.sharedInstance unRotateApp:self.bundleIdentifier completion:nil];
     if (forceImmediate)
     {
-        [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:self.bundleIdentifier completion:nil];
-        [RAMessagingServer.sharedInstance unRotateApp:self.bundleIdentifier completion:nil];
         [RAMessagingServer.sharedInstance endResizingApp:self.bundleIdentifier completion:nil];
         block(YES);
     }
     else
     {
-        // Somewhere in the messaging server, the block is being removed from the waitingCompletions dictionary without being called.
-        // This is a large issue (probably to do with asynchronous code) TODO: FIXME
-        [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:self.bundleIdentifier completion:block];
-        [RAMessagingServer.sharedInstance unRotateApp:self.bundleIdentifier completion:block];
+        // >Somewhere in the messaging server, the block is being removed from the waitingCompletions dictionary without being called.
+        // >This is a large issue (probably to do with asynchronous code) TODO: FIXME
+        // lol im retarded, it's the default empty callback the messaging server made
+        //[RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:self.bundleIdentifier completion:block];
+        //[RAMessagingServer.sharedInstance unRotateApp:self.bundleIdentifier completion:block];
+
         [RAMessagingServer.sharedInstance endResizingApp:self.bundleIdentifier completion:block];
     }
 }
