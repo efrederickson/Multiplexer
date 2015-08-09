@@ -105,12 +105,12 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
     return [objc_getAssociatedObject(self, @selector(RA_isIconIndicatorInhibited)) boolValue];
 }
 
--(void) layoutSubviews
+/*-(void) layoutSubviews
 {
     %orig;
 
     [self RA_updateIndicatorView:GET_INFO];
-}
+}*/
 
 - (void)setIsEditing:(_Bool)arg1 animated:(_Bool)arg2
 {

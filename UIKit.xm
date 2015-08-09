@@ -6,8 +6,6 @@
 #import "RASettings.h"
 #import "RAMessagingClient.h"
 
-#define SPRINGBOARD ([NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"])
-
 UIInterfaceOrientation prevousOrientation;
 BOOL setPreviousOrientation = NO;
 NSInteger wasStatusBarHidden = -1;

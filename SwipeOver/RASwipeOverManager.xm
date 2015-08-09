@@ -107,6 +107,7 @@ extern int rotationDegsForOrientation(int o);
     view.allowHidingStatusBar = NO;
     view.frame = UIScreen.mainScreen.bounds;
     view.showSplashscreenInsteadOfSpinner = YES;
+    [view rotateToOrientation:UIInterfaceOrientationPortrait];
     [view loadApp];
 
     UIView *detachView = [[UIView alloc] initWithFrame:CGRectMake(0, -20, view.frame.size.width, 20)];
@@ -124,8 +125,7 @@ extern int rotationDegsForOrientation(int o);
 	{
 		view.frame = CGRectMake(SCREEN_WIDTH - 50, 0, view.frame.size.width, view.frame.size.height);
 
-		CGFloat scale = (SCREEN_WIDTH - (50)) / [overlayWindow currentView].bounds.size.width;
-		scale = 0.1; // MIN(MAX(scale, 0.1), 0.98);
+		CGFloat scale = 0.4; // MIN(MAX(scale, 0.1), 0.98);
 		view.transform = CGAffineTransformMakeScale(scale, scale);
 		view.center = (CGPoint) { SCREEN_WIDTH - (view.frame.size.width / 2), view.center.y };
 	}
