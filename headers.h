@@ -68,6 +68,11 @@ return sharedInstance;
 
 extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 
+@interface SBNotificationCenterController : NSObject
++(id) sharedInstance;
+-(BOOL) isVisible;
+@end
+
 @interface UIStatusBarItem : NSObject
 -(NSString*)indicatorName;
 @end
