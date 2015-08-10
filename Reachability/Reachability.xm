@@ -226,7 +226,7 @@ id SBWorkspace$sharedInstance;
 - (void) handleReachabilityModeActivated
 {
     %orig;
-    if (![RASettings.sharedInstance enabled])
+    if (![RASettings.sharedInstance reachabilityEnabled])
         return;
     wasEnabled = YES;
 
