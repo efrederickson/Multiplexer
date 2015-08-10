@@ -20,6 +20,7 @@
 	NSMutableArray *appsWithoutWindows;
 
 	CGFloat width, height;
+	CGFloat panePadding;
 }
 @end
 
@@ -48,6 +49,14 @@
 {
 	width = UIScreen.mainScreen._interfaceOrientedBounds.size.width / 4.5714;
 	height = UIScreen.mainScreen._interfaceOrientedBounds.size.height / 4.36;
+	panePadding = width;
+	int count = 1;
+	while (panePadding + width < UIScreen.mainScreen._interfaceOrientedBounds.size.width)
+	{
+		count += 1;
+		panePadding += width;
+	}
+	panePadding = (UIScreen.mainScreen._interfaceOrientedBounds.size.width - panePadding) / 5; 
 	/*if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
 		width = (UIScreen.mainScreen.bounds.size.width / 3) * 0.9;
@@ -77,12 +86,12 @@
 		[self addSubview:desktopScrollView];
 	}
 
-	CGFloat x = 15;
+	CGFloat x = panePadding;
 	int desktopIndex = 0;
 	for (RADesktopWindow *desktop in RADesktopManager.sharedInstance.availableDesktops)
 	{
 		RAMissionControlPreviewView *preview = [[RAMissionControlPreviewView alloc] initWithFrame:CGRectMake(x, 20, width, height)];
-		x += 7 + preview.frame.size.width;
+		x += panePadding + preview.frame.size.width;
 
 		[desktopScrollView addSubview:preview];
 		preview.image = [RASnapshotProvider.sharedInstance snapshotForDesktop:desktop];
@@ -142,7 +151,7 @@
 		if ([visibleIcons containsObject:app.bundleIdentifier] == NO)
 			[appsWithoutWindows removeObject:app];
 
-	CGFloat x = 15;
+	CGFloat x = panePadding;
 	CGFloat y = desktopScrollView.frame.origin.y + desktopScrollView.frame.size.height;
 
 	if (windowedAppScrollView)
@@ -169,7 +178,7 @@
 		SBApplication *sbapp = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:app.bundleIdentifier];
 		[appsWithoutWindows removeObject:sbapp];
 		RAMissionControlPreviewView *preview = [[RAMissionControlPreviewView alloc] initWithFrame:CGRectMake(x, (windowedAppScrollView.frame.size.height - height) / 2, width, height)];
-		x += 7 + preview.frame.size.width;
+		x += panePadding + preview.frame.size.width;
 
 		preview.application = sbapp;
 		[windowedAppScrollView addSubview:preview];
@@ -202,7 +211,7 @@
 
 -(void) reloadOtherAppsSection
 {
-	CGFloat x = 15;
+	CGFloat x = panePadding;
 	CGFloat y = windowedAppScrollView.frame.origin.y + windowedAppScrollView.frame.size.height;
 
 	if (otherRunningAppsScrollView)
@@ -229,7 +238,7 @@
 		empty = NO;
 
 		RAMissionControlPreviewView *preview = [[RAMissionControlPreviewView alloc] initWithFrame:CGRectMake(x, (otherRunningAppsScrollView.frame.size.height - height) / 2, width, height)];
-		x += 6 + preview.frame.size.width;
+		x += panePadding + preview.frame.size.width;
 
 		preview.application = app;
 		[otherRunningAppsScrollView addSubview:preview];
@@ -360,28 +369,9 @@
 						RADesktopWindow *desktop = [RADesktopManager.sharedInstance desktopAtIndex:subview.tag];
 						SBApplication *app = ((RAMissionControlPreviewView*)gesture.view).application;
 
-						BOOL useOldData = NO;
-						CGRect frame;
-						CGAffineTransform transform;
-						for (UIView *subview in RADesktopManager.sharedInstance.currentDesktop.subviews)
-							if ([subview isKindOfClass:[RAWindowBar class]])
-								if (((RAWindowBar*)subview).attachedView.app == app)
-								{
-									useOldData = YES;
-									transform = subview.transform;
-									subview.transform = CGAffineTransformIdentity;
-									frame = subview.frame;
-								}
-
 						[RADesktopManager.sharedInstance.currentDesktop removeAppWithIdentifier:app.bundleIdentifier animated:NO];
 						
-						RAWindowBar *bar = [desktop createAppWindowForSBApplication:app animated:NO];
-						if (useOldData)
-						{
-							bar.transform = CGAffineTransformIdentity;
-							bar.frame = frame;
-							bar.transform = transform;
-						}
+						[desktop createAppWindowForSBApplication:app animated:NO];
 
 						[RASnapshotProvider.sharedInstance forceReloadSnapshotOfDesktop:RADesktopManager.sharedInstance.currentDesktop];
 						[RASnapshotProvider.sharedInstance forceReloadSnapshotOfDesktop:desktop];
@@ -447,8 +437,8 @@
 -(void) activateDesktop:(UITapGestureRecognizer*)gesture
 {
 	int desktop = gesture.view.tag;
-	[self.manager hideMissionControl:YES];
 	[RADesktopManager.sharedInstance switchToDesktop:desktop];
+	[self.manager hideMissionControl:YES];
 }
 
 -(void) handleSingleDesktopTap:(UITapGestureRecognizer*)gesture
