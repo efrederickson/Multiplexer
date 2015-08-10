@@ -28,6 +28,8 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
             frame.size.width = overrideWidth;
         if (overrideHeight != -1)
             frame.size.height = overrideHeight;
+
+        NSLog(@"[ReachApp] %@", NSStringFromCGRect(frame));
     }
 
     %orig(frame);
