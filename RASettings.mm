@@ -64,7 +64,7 @@ NSDictionary *_settings = nil;
 	if ([previousNCAppSetting isEqual:self.NCApp] == NO)
 		[ncAppViewController performSelector:@selector(forceReloadAppLikelyBecauseTheSettingChanged)];
 
-	if ([self shouldShowStatusBarIcons] == NO)
+	if ([self shouldShowStatusBarIcons] == NO && [objc_getClass("SBApplication") respondsToSelector:@selector(RA_clearAllStatusBarIcons)])
 		[objc_getClass("SBApplication") performSelector:@selector(RA_clearAllStatusBarIcons)];
 }
 

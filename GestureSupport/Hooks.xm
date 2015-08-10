@@ -83,7 +83,7 @@ static char velocityDataKey;
                 {
                     [recognizer incorporateTouchSampleAtLocation:touch.unrotatedLocation timestamp:CACurrentMediaTime() modifier:touch.modifier interfaceOrientation:touch.interfaceOrientation];
 
-                    if (recognizer.targetEdges & currentEdge) // TODO: verify
+                    if (recognizer.targetEdges & currentEdge)
                         targetRecognizer = recognizer;
                 }
                 [RAGestureManager.sharedInstance handleMovementOrStateUpdate:UIGestureRecognizerStateChanged withPoint:touch.location velocity:targetRecognizer.RA_velocity forEdge:currentEdge];

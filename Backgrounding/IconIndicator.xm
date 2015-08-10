@@ -44,10 +44,9 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 %hook SBIconView
 %new -(void) RA_updateIndicatorView:(RAIconIndicatorViewInfo)info
 {
-	[[self viewWithTag:9962] removeFromSuperview];
-
 	if (info == RAIconIndicatorViewInfoTemporarilyInhibit)
 	{
+		[[self viewWithTag:9962] removeFromSuperview];
 		[self RA_setIsIconIndicatorInhibited:YES];
 		[self performSelector:@selector(RA_setIsIconIndicatorInhibited:) withObject:@NO afterDelay:1];
 		return;
@@ -57,10 +56,10 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 	if (
 		[self RA_isIconIndicatorInhibited] || 
 		(text == nil || text.length == 0) || // OR info == RAIconIndicatorViewInfoNone
-		(self.icon == nil || self.icon.application == nil || self.icon.application.isRunning == NO || ![RABackgrounder.sharedInstance shouldShowIndicatorForIdentifier:self.icon.application.bundleIdentifier]) || 
-		self.icon == MSHookIvar<SBIcon*>([%c(SBIconController) sharedInstance], "_launchingIcon") ||
+		(self.icon == nil || self.icon.application == nil || self.icon.application.isRunning == NO || ![RABackgrounder.sharedInstance shouldShowIndicatorForIdentifier:self.icon.application.bundleIdentifier]) ||
 		[RASettings.sharedInstance backgrounderEnabled] == NO)
 	{
+		[[self viewWithTag:9962] removeFromSuperview];
 		//SET_INFO(RAIconIndicatorViewInfoNone);
 		return;
 	}
@@ -76,15 +75,13 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 		badge.clipsToBounds = YES;
 		badge.layer.cornerRadius = 12;
 		badge.backgroundColor = [UIColor colorWithRed:60/255.0f green:108/255.0f blue:255/255.0f alpha:1.0f];
+		[self addSubview:badge];
+
+		CGPoint overhang = [%c(SBIconBadgeView) _overhang];
+		badge.frame = CGRectMake(-overhang.x, -overhang.y, badge.frame.size.width, badge.frame.size.height);
 	}
 
 	badge.text = text;
-
-	if (!badge.superview)
-		[self addSubview:badge];
-
-	CGPoint overhang = [%c(SBIconBadgeView) _overhang];
-	badge.frame = CGRectMake(-overhang.x, -overhang.y, badge.frame.size.width, badge.frame.size.height);
 	SET_INFO(info);
 }
 
@@ -105,12 +102,12 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
     return [objc_getAssociatedObject(self, @selector(RA_isIconIndicatorInhibited)) boolValue];
 }
 
-/*-(void) layoutSubviews
+-(void) layoutSubviews
 {
     %orig;
 
     [self RA_updateIndicatorView:GET_INFO];
-}*/
+}
 
 - (void)setIsEditing:(_Bool)arg1 animated:(_Bool)arg2
 {
