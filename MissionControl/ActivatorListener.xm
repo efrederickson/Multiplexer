@@ -10,14 +10,14 @@ static RAActivatorListener *sharedInstance;
 @implementation RAActivatorListener
 - (void)activator:(LAActivator *)activator receiveEvent:(LAEvent *)event
 {
-	if ([RASettings.sharedInstance replaceAppSwitcherWithMC])
+	if ([RASettings.sharedInstance replaceAppSwitcherWithMC] && [RASettings.sharedInstance missionControlEnabled])
 	{
 		if (RAMissionControlManager.sharedInstance.isShowingMissionControl == NO)
 			[[%c(SBUIController) sharedInstance] _activateAppSwitcher];
 		else
 			[RAMissionControlManager.sharedInstance hideMissionControl:YES];
 	}
-	else
+	else if ([RASettings.sharedInstance missionControlEnabled])
 	    [RAMissionControlManager.sharedInstance toggleMissionControl:YES];
     [event setHandled:YES];
 }
