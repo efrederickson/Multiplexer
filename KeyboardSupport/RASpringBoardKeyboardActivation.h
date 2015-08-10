@@ -1,7 +1,10 @@
 #import "headers.h"
 
 @interface RASpringBoardKeyboardActivation : NSObject
-+(id) sharedInstance;
++(instancetype) sharedInstance;
+
+@property (nonatomic, readonly, retain) NSString *currentIdentifier;
+
 -(void) showKeyboardForAppWithIdentifier:(NSString*)identifier;
 -(void) hideKeyboard;
 @end

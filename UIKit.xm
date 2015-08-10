@@ -24,9 +24,9 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
         frame.origin.y = 0;
         CGFloat overrideWidth = [RAMessagingClient.sharedInstance resizeSize].width;
         CGFloat overrideHeight = [RAMessagingClient.sharedInstance resizeSize].height;
-        if (overrideWidth != -1)
+        if (overrideWidth != -1 && overrideWidth != 0)
             frame.size.width = overrideWidth;
-        if (overrideHeight != -1)
+        if (overrideHeight != -1 && overrideHeight != 0)
             frame.size.height = overrideHeight;
 
         NSLog(@"[ReachApp] %@", NSStringFromCGRect(frame));

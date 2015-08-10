@@ -3,6 +3,7 @@
 #import "RAHostManager.h"
 #import "RAMessagingServer.h"
 #import "RASnapshotProvider.h"
+#import "RASpringBoardKeyboardActivation.h"
 
 @interface RAHostedAppView () {
     NSTimer *verifyTimer;
@@ -254,6 +255,9 @@
         [isForemostAppLabel removeFromSuperview];
         isForemostAppLabel = nil;
     }
+
+    if ([RASpringBoardKeyboardActivation.sharedInstance.currentIdentifier isEqual:self.bundleIdentifier])
+        [RASpringBoardKeyboardActivation.sharedInstance hideKeyboard];
 
     if (contextHostManager)
     {

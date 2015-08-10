@@ -27,6 +27,7 @@ RAKeyboardWindow *keyboardWindow;
     overrideDisableForStatusBar = YES;
     [keyboardWindow setupForKeyboardAndShow:identifier];
     overrideDisableForStatusBar = NO;
+    _currentIdentifier = identifier;
 }
 
 -(void) hideKeyboard
@@ -35,5 +36,6 @@ RAKeyboardWindow *keyboardWindow;
     keyboardWindow.hidden = YES;
     [keyboardWindow removeKeyboard];
     keyboardWindow = nil;
+    _currentIdentifier = nil;
 }
 @end

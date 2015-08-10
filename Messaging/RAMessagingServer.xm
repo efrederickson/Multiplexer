@@ -3,6 +3,10 @@
 #import "RAMessagingServer.h"
 #import "RASpringBoardKeyboardActivation.h"
 #import "dispatch_after_cancel.h"
+#include <execinfo.h>
+#include <stdio.h>
+#include <stdlib.h>
+#import "RAKeyboardStateListener.h"
 
 #if DEBUG
 #import "RASettings.h"
@@ -45,6 +49,7 @@
     [messagingCenter registerForMessageName:RAMessagingUpdateKeyboardContextIdMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
     [messagingCenter registerForMessageName:RAMessagingRetrieveKeyboardContextIdMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
     [messagingCenter registerForMessageName:RAMessagingUpdateAppInfoMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingUpdateKeyboardSizeMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
 }
 
 -(NSDictionary*) handleMessageNamed:(NSString*)identifier userInfo:(NSDictionary*)info
@@ -57,6 +62,11 @@
 		[self setKeyboardContextId:[info[@"contextId"] integerValue] forIdentifier:info[@"bundleIdentifier"]];
 	else if ([identifier isEqual:RAMessagingRetrieveKeyboardContextIdMessageName])
 		return @{ @"contexId": @([self keyboardContextIdForIdentifier:info[@"bundleIdentifier"]]) };
+	else if ([identifier isEqual:RAMessagingUpdateKeyboardSizeMessageName])
+	{
+		CGSize size = CGSizeFromString(info[@"size"]);
+		[RAKeyboardStateListener.sharedInstance _setSize:size];
+	}
 	else if ([identifier isEqual:RAMessagingUpdateAppInfoMessageName])
 	{
 		NSString *identifier = info[@"bundleIdentifier"];
@@ -66,11 +76,9 @@
 		{
 			RAMessageCompletionCallback callback = (RAMessageCompletionCallback)waitingCompletions[identifier];
 			[waitingCompletions removeObjectForKey:identifier];
-			NSLog(@"[ReachApp] calling callback");
 			callback(YES);
 		}
-		else
-			NSLog(@"[ReachApp] nil callback");
+
 		// Got the message, cancel the re-sender	
 		if ([asyncHandles objectForKey:identifier] != nil)
 		{

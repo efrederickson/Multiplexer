@@ -27,5 +27,6 @@ static NSString *RAMessagingShowKeyboardMessageName = @"showKeyboard";
 static NSString *RAMessagingHideKeyboardMessageName = @"hideKeyboard";
 static NSString *RAMessagingUpdateKeyboardContextIdMessageName = @"updateKBContextId";
 static NSString *RAMessagingRetrieveKeyboardContextIdMessageName = @"getKBContextId";
+static NSString *RAMessagingUpdateKeyboardSizeMessageName = @"updateKBSize";
 
 typedef void (^RAMessageCompletionCallback)(BOOL success);

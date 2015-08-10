@@ -22,7 +22,8 @@ BOOL isShowing = NO;
     NSLog(@"[ReachApp] keyboard didShow");
     _visible = YES;
     _size = [[notif.userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.keyboard.didShow"), NULL, (__bridge CFDictionaryRef)@{ @"size": NSStringFromCGSize(_size) }, true);
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.keyboard.didShow"), NULL, NULL, true);
+    [RAMessagingClient.sharedInstance notifyServerOfKeyboardSizeUpdate:_size];
 
     if ([RAMessagingClient.sharedInstance shouldUseExternalKeyboard])
     {
@@ -46,7 +47,8 @@ BOOL isShowing = NO;
 
 - (id)init
 {
-    if ((self = [super init])) {
+    if ((self = [super init])) 
+    {
         NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
         [center addObserver:self selector:@selector(didShow:) name:UIKeyboardDidShowNotification object:nil];
         [center addObserver:self selector:@selector(didHide) name:UIKeyboardWillHideNotification object:nil];
@@ -61,11 +63,7 @@ BOOL isShowing = NO;
 
 void externalKeyboardDidShow(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) 
 {
-    //NSLog(@"[ReachApp] externalKeyboardDidShow");
-    CGSize size = CGSizeFromString(((__bridge NSDictionary*)userInfo)[@"size"]);
-
     [RAKeyboardStateListener.sharedInstance _setVisible:YES];
-    [RAKeyboardStateListener.sharedInstance _setSize:size];
 }
 
 void externalKeyboardDidHide(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) 

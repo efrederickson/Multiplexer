@@ -54,7 +54,7 @@
 			[self _requestUpdateFromServerWithTries:tries + 1];
 		else
 		{
-			[self alertUser:[NSString stringWithFormat:@"App \"%@\" is unable to communicate with messaging server", [[[NSBundle mainBundle] localizedInfoDictionary] objectForKey:@"CFBundleDisplayName"]]];
+			[self alertUser:[NSString stringWithFormat:@"App \"%@\" is unable to communicate with messaging server", [[[NSBundle mainBundle] localizedInfoDictionary] objectForKey:@"CFBundleDisplayName"] ?: NSBundle.mainBundle.bundleIdentifier]];
 		}
 	}
 }
@@ -104,6 +104,12 @@
 -(void) notifyServerToHideKeyboard
 {
 	[serverCenter sendMessageName:RAMessagingHideKeyboardMessageName userInfo:nil];
+}
+
+-(void) notifyServerOfKeyboardSizeUpdate:(CGSize)size
+{
+	NSDictionary *dict = @{ @"size": NSStringFromCGSize(size) };
+	[serverCenter sendMessageName:RAMessagingUpdateKeyboardSizeMessageName userInfo:dict];
 }
 
 -(BOOL) shouldUseExternalKeyboard { return _currentData.shouldUseExternalKeyboard; }

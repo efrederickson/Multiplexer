@@ -12,6 +12,7 @@
 -(void) requestUpdateFromServer;
 
 -(void) notifyServerWithKeyboardContextId:(unsigned int)cid;
+-(void) notifyServerOfKeyboardSizeUpdate:(CGSize)size;
 -(void) notifyServerToShowKeyboard;
 -(void) notifyServerToHideKeyboard;
 
