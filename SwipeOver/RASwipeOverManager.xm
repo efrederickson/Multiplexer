@@ -96,13 +96,20 @@ extern int rotationDegsForOrientation(int o);
 	    }
     }
 
-    [[%c(SBAppSwitcherModel) sharedInstance] addToFront:[%c(SBDisplayLayout) fullScreenDisplayLayoutForApplication:app]];
+    if (app)
+    {
+    	SBDisplayLayout *layout = [%c(SBDisplayLayout) fullScreenDisplayLayoutForApplication:app];
+    	if (layout)
+ 		   	[[%c(SBAppSwitcherModel) sharedInstance] addToFront:layout];
+    }
 
     if (identifier == nil || identifier.length == 0)
         return;
 
     RAHostedAppView *view = [[RAHostedAppView alloc] initWithBundleIdentifier:identifier];
-    view.autosizesApp = YES;
+    view.autosizesApp = NO;
+	if (overlayWindow.isHidingUnderlyingApp == NO)
+		view.autosizesApp = YES;
     view.shouldUseExternalKeyboard = YES;
     view.allowHidingStatusBar = NO;
     view.frame = UIScreen.mainScreen.bounds;
@@ -153,6 +160,8 @@ extern int rotationDegsForOrientation(int o);
 		[self stopUsingSwipeOver];
 		return;
 	}
+	if ([[overlayWindow currentView] isKindOfClass:[RAHostedAppView class]])
+		((RAHostedAppView*)[overlayWindow currentView]).autosizesApp = YES;
 	[overlayWindow currentView].transform = CGAffineTransformIdentity;
 	[overlayWindow removeOverlayFromUnderlyingApp];
 	[overlayWindow currentView].frame = (CGRect) { { 10, 0 }, [overlayWindow currentView].frame.size };
@@ -181,7 +190,9 @@ extern int rotationDegsForOrientation(int o);
 	if (overlayWindow.isShowingAppSelector && reloadAppSelectorSizeNow)
 		[self showAppSelector];
 	else if (overlayWindow.isHidingUnderlyingApp == NO) // Update swiped-over app in side-by-side mode. RAHostedAppView takes care of the app sizing if we resize the RAHostedAppView. 
+	{
 		overlayWindow.currentView.frame = CGRectMake(10, 0, SCREEN_WIDTH - overlayWindow.frame.origin.x - 10, overlayWindow.currentView.frame.size.height);
+	}
 }
 
 -(void) sizeViewForTranslation:(CGPoint)translation state:(UIGestureRecognizerState)state
