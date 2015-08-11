@@ -61,14 +61,14 @@ CGFloat old_grabberCenterY = -1;
     %orig;
 }
 
-- (void)_keepAliveTimerFired:(id)arg1
+- (void)_keepAliveTimerFired:(unsafe_id)arg1
 {
     if ((view || showingNC) && [RASettings.sharedInstance disableAutoDismiss])
         return;
     %orig;
 }
 
-- (void)deactivateReachabilityModeForObserver:(id)arg1
+- (void)deactivateReachabilityModeForObserver:(unsafe_id)arg1
 {
     if (overrideDisableForStatusBar)
         return;
@@ -82,7 +82,7 @@ CGFloat old_grabberCenterY = -1;
     %orig;
 }
 
-- (void)_updateReachabilityModeActive:(_Bool)arg1 withRequestingObserver:(id)arg2
+- (void)_updateReachabilityModeActive:(_Bool)arg1 withRequestingObserver:(unsafe_id)arg2
 {
     if (overrideDisableForStatusBar)
         return;
@@ -110,7 +110,7 @@ id SBWorkspace$sharedInstance;
     return (view || showingNC);
 }
 
-- (void)_exitReachabilityModeWithCompletion:(id)arg1
+- (void)_exitReachabilityModeWithCompletion:(unsafe_id)arg1
 {
     if (overrideDisableForStatusBar)
         return;

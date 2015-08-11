@@ -16,15 +16,13 @@ static NSMutableSet *gestureRecognizers;
 BOOL shouldBeOverridingForRecognizer;
 UIRectEdge currentEdge;
 
-%hook _UIScreenEdgePanRecognizer
 struct VelocityData {
     CGPoint velocity;
     double timestamp;
     CGPoint location;
 };
 
-static char velocityDataKey;
-
+%hook _UIScreenEdgePanRecognizer
 - (void)incorporateTouchSampleAtLocation:(CGPoint)location timestamp:(double)timestamp modifier:(NSInteger)modifier interfaceOrientation:(UIInterfaceOrientation)orientation 
 {
     %orig;
@@ -32,21 +30,21 @@ static char velocityDataKey;
     VelocityData newData;
     VelocityData oldData;
 
-    [objc_getAssociatedObject(self, &velocityDataKey) getValue:&oldData];
+    [objc_getAssociatedObject(self, @selector(RA_velocityData)) getValue:&oldData];
     
     CGPoint velocity = CGPointMake((location.x - oldData.location.x) / (timestamp - oldData.timestamp), (location.y - oldData.location.y) / (timestamp - oldData.timestamp));
     newData.velocity = velocity;
     newData.location = location;
     newData.timestamp = timestamp;
 
-    objc_setAssociatedObject(self, &velocityDataKey, [NSValue valueWithBytes:&newData objCType:@encode(VelocityData)], OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, @selector(RA_velocityData), [NSValue valueWithBytes:&newData objCType:@encode(VelocityData)], OBJC_ASSOCIATION_RETAIN);
 }
 
 %new
 - (CGPoint)RA_velocity 
 {
     VelocityData data;
-    [objc_getAssociatedObject(self, &velocityDataKey) getValue:&data];
+    [objc_getAssociatedObject(self, @selector(RA_velocityData)) getValue:&data];
 
     return data.velocity;
 }

@@ -13,7 +13,7 @@
 		[[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999].alpha = 0;
 	}];
 }
-- (void)animateDismissalToDisplayLayout:(id)arg1 withCompletion:(__unsafe_unretained id)arg2
+- (void)animateDismissalToDisplayLayout:(unsafe_id)arg1 withCompletion:(unsafe_id)arg2
 {
 	%orig;
 	[UIView animateWithDuration:0.3 animations:^{

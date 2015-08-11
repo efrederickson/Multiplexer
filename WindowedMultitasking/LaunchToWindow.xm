@@ -13,7 +13,7 @@
 BOOL override = NO;
 
 %hook SBIconController
--(void)iconWasTapped:(SBApplicationIcon*)arg1 
+-(void)iconWasTapped:(__unsafe_unretained SBApplicationIcon*)arg1 
 {
 	if ([RASettings.sharedInstance launchIntoWindows] && arg1.application)
 	{
@@ -23,7 +23,7 @@ BOOL override = NO;
 	%orig;
 }
 
--(void)_launchIcon:(id)icon
+-(void)_launchIcon:(unsafe_id)icon
 { 
 	if (!override) 
 		%orig;

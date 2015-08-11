@@ -116,12 +116,14 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
     return [objc_getAssociatedObject(self, @selector(RA_isIconIndicatorInhibited)) boolValue];
 }
 
+/*
 -(void) layoutSubviews
 {
     %orig;
 
     [self RA_updateIndicatorView:GET_INFO];
 }
+*/
 
 - (void)setIsEditing:(_Bool)arg1 animated:(_Bool)arg2
 {
@@ -195,7 +197,7 @@ NSMutableDictionary *lsbitems = [NSMutableDictionary dictionary];
 %end
 
 %hook SBIconViewMap
-- (id)mappedIconViewForIcon:(id)arg1
+- (id)mappedIconViewForIcon:(unsafe_id)arg1
 {
     SBIconView *iconView = %orig;
 

@@ -21,7 +21,8 @@ ReachApp_FILES = $(wildcard *.xm) $(wildcard *.mm) $(wildcard *.m) \
 	$(wildcard NotificationCenterApp/*.xm) $(wildcard NotificationCenterApp/*.mm) $(wildcard NotificationCenterApp/*.m) \
 	$(wildcard Backgrounding/*.xm) $(wildcard Backgrounding/*.mm) $(wildcard Backgrounding/*.m) \
 	$(wildcard IntroTutorial/*.xm) $(wildcard IntroTutorial/*.mm) $(wildcard IntroTutorial/*.m) \
-	$(wildcard Messaging/*.xm) $(wildcard Messaging/*.mm) $(wildcard Messaging/*.m)
+	$(wildcard Messaging/*.xm) $(wildcard Messaging/*.mm) $(wildcard Messaging/*.m) \
+	$(wildcard DRM/*.xm) $(wildcard DRM/*.mm) $(wildcard DRM/*.m) \
 	
 ReachApp_FRAMEWORKS = UIKit QuartzCore CoreGraphics 
 ReachApp_PRIVATE_FRAMEWORKS = GraphicsServices BackBoardServices

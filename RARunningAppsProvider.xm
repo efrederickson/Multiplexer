@@ -21,7 +21,7 @@
 @end
 
 %hook SBApplication
-- (void)updateProcessState:(id)arg1
+- (void)updateProcessState:(unsafe_id)arg1
 {
 	%orig;
 

@@ -1,3 +1,5 @@
+#import "headers.h"
+
 BOOL overrideViewControllerDismissal = NO;
 
 %hook UIApplication
@@ -19,14 +21,14 @@ BOOL overrideViewControllerDismissal = NO;
 %end
 
 %hook UIViewController
-- (void)_presentViewController:(__unsafe_unretained id)viewController withAnimationController:(__unsafe_unretained id)animationController completion:(__unsafe_unretained id)completion
+- (void)_presentViewController:(unsafe_id)viewController withAnimationController:(unsafe_id)animationController completion:(unsafe_id)completion
 {
     overrideViewControllerDismissal = YES;
     %orig;
     overrideViewControllerDismissal = NO;
 }
 
-- (void)dismissViewControllerWithTransition:(__unsafe_unretained id)transition completion:(__unsafe_unretained id)completion
+- (void)dismissViewControllerWithTransition:(unsafe_id)transition completion:(unsafe_id)completion
 {
     overrideViewControllerDismissal = YES;
     %orig;
@@ -35,14 +37,14 @@ BOOL overrideViewControllerDismissal = NO;
 %end
 
 %hook UINavigationController
-- (void)pushViewController:(__unsafe_unretained id)viewController transition:(__unsafe_unretained id)transition forceImmediate:(BOOL)immediate
+- (void)pushViewController:(unsafe_id)viewController transition:(unsafe_id)transition forceImmediate:(BOOL)immediate
 {
     overrideViewControllerDismissal = YES;
     %orig;
     overrideViewControllerDismissal = NO;
 }
 
-- (id)_popViewControllerWithTransition:(__unsafe_unretained id)transition allowPoppingLast:(BOOL)last
+- (id)_popViewControllerWithTransition:(unsafe_id)transition allowPoppingLast:(BOOL)last
 {
     overrideViewControllerDismissal = YES;
     id r = %orig;
@@ -59,7 +61,7 @@ BOOL overrideViewControllerDismissal = NO;
 %end
 
 %hook UIInputWindowController 
-- (void)moveFromPlacement:(__unsafe_unretained id)arg1 toPlacement:(__unsafe_unretained id)arg2 starting:(__unsafe_unretained id)arg3 completion:(__unsafe_unretained id)arg4
+- (void)moveFromPlacement:(unsafe_id)arg1 toPlacement:(unsafe_id)arg2 starting:(unsafe_id)arg3 completion:(unsafe_id)arg4
 {
     overrideViewControllerDismissal = YES;
     %orig;

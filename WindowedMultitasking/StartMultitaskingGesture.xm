@@ -14,7 +14,7 @@ BOOL overrideCC = NO;
         %orig;
 }
 
-- (void)handleShowControlCenterSystemGesture:(id)arg1
+- (void)handleShowControlCenterSystemGesture:(unsafe_id)arg1
 {
     if (!overrideCC)
         %orig;

@@ -135,7 +135,7 @@ BOOL overrideUIWindow = NO;
 
 
 %hook SBUIController
-- (void)activateApplicationAnimated:(SBApplication*)arg1
+- (void)activateApplicationAnimated:(__unsafe_unretained SBApplication*)arg1
 {
 	[RADesktopManager.sharedInstance removeAppWithIdentifier:arg1.bundleIdentifier animated:NO forceImmediateUnload:YES];
     %orig;

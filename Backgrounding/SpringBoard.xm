@@ -33,13 +33,14 @@
 %end
 
 %hook FBSSceneImpl
-- (id)_initWithQueue:(unsafe_id)arg1 callOutQueue:(unsafe_id)arg2 identifier:(unsafe_id)arg3 display:(unsafe_id)arg4 settings:(UIMutableApplicationSceneSettings*)arg5 clientSettings:(unsafe_id)arg6
+- (id)_initWithQueue:(unsafe_id)arg1 callOutQueue:(unsafe_id)arg2 identifier:(unsafe_id)arg3 display:(unsafe_id)arg4 settings:(__unsafe_unretained UIMutableApplicationSceneSettings*)arg5 clientSettings:(unsafe_id)arg6
 {
     if ([RABackgrounder.sharedInstance shouldKeepInForeground:arg3])
     {
         if (!arg5)
         {
-            arg5 = [[%c(UIMutableApplicationSceneSettings) alloc] init];
+            UIMutableApplicationSceneSettings *fakeSettings = [[%c(UIMutableApplicationSceneSettings) alloc] init];
+            arg5 = fakeSettings;
         }
         SET_BACKGROUNDED(arg5, NO);
     }
