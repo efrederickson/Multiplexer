@@ -119,6 +119,7 @@
 -(BOOL) shouldShowStatusBar { return _currentData.shouldForceStatusBar && _currentData.statusBarVisibility == YES; }
 -(UIInterfaceOrientation) forcedOrientation { return _currentData.forcedOrientation; }
 -(BOOL) shouldForceOrientation { return _currentData.shouldForceOrientation; }
+-(BOOL) isBeingHosted { return _currentData.isBeingHosted; }
 @end
 
 void reloadClientData(CFNotificationCenterRef center,

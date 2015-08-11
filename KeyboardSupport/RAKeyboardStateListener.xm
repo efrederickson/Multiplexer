@@ -78,7 +78,6 @@ void externalKeyboardDidHide(CFNotificationCenterRef center, void *observer, CFS
     %orig;
 
     unsigned int contextID = UITextEffectsWindow.sharedTextEffectsWindow._contextId;
-
     [RAMessagingClient.sharedInstance notifyServerWithKeyboardContextId:contextID];
 }
 %end

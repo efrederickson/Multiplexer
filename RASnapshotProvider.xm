@@ -36,9 +36,10 @@
 				UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].bounds.size, YES, [UIScreen mainScreen].scale);
 				CGContextRef c = UIGraphicsGetCurrentContext();
 				//CGContextSetAllowsAntialiasing(c, YES);
-				[view.layer renderInContext:c];
+				[view.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES];
 				image = UIGraphicsGetImageFromCurrentImageContext();
 				UIGraphicsEndImageContext();
+				view.layer.contents = nil;
 			}
 		}
 		if (!image) // we can only hope it does not reach this point of desperation
@@ -69,9 +70,10 @@
 		UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen]._interfaceOrientedBounds.size, YES, [UIScreen mainScreen].scale);
 		CGContextRef c = UIGraphicsGetCurrentContext();
 		//CGContextSetAllowsAntialiasing(c, YES);
-		[window.layer renderInContext:c];
+		[window.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES];
 		UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
 		UIGraphicsEndImageContext();
+		window.layer.contents = nil;
 
 		if (image)
 			[imageCache setObject:image forKey:@"missioncontrol"];
@@ -104,9 +106,15 @@
 {
 	UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen]._interfaceOrientedBounds.size, YES, [UIScreen mainScreen].scale);
 	CGContextRef c = UIGraphicsGetCurrentContext();
-	[MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer renderInContext:c]; // Wallpaper
-	[[[[%c(SBUIController) sharedInstance] window] layer] renderInContext:c]; // Icons
-	[desktop.layer renderInContext:c]; // Desktop windows
+
+	//[MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer renderInContext:c]; // Wallpaper
+	//[[[[%c(SBUIController) sharedInstance] window] layer] renderInContext:c]; // Icons
+	//[desktop.layer renderInContext:c]; // Desktop windows
+
+	[MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Wallpaper
+	[[[[%c(SBUIController) sharedInstance] window] layer] performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Icons
+	[desktop.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Desktop windows
+	
 	for (UIView *view in desktop.subviews) // Application views
 	{
 		if ([view isKindOfClass:[RAWindowBar class]])
@@ -138,6 +146,9 @@
 	}
 	UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
 	UIGraphicsEndImageContext();
+	MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer.contents = nil;
+	[[[%c(SBUIController) sharedInstance] window] layer].contents = nil;
+	desktop.layer.contents = nil;
 	return image;
 }
 @end

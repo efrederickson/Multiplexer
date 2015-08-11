@@ -25,6 +25,8 @@
 -(void) forceStatusBarVisibility:(BOOL)visibility forApp:(NSString*)identifier completion:(RAMessageCompletionCallback)callback;
 -(void) unforceStatusBarVisibilityForApp:(NSString*)identifier completion:(RAMessageCompletionCallback)callback;
 
+-(void) setHosted:(BOOL)value forIdentifier:(NSString*)identifier completion:(RAMessageCompletionCallback)callback;
+
 -(unsigned int) getStoredKeyboardContextIdForApp:(NSString*)identifier;
 
 -(void) receiveShowKeyboardForAppWithIdentifier:(NSString*)identifier;

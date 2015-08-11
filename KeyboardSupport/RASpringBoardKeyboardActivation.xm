@@ -19,7 +19,7 @@ RAKeyboardWindow *keyboardWindow;
 {
     if (keyboardWindow)
     {
-        NSLog(@"[ReachApp] springboard cancelling");
+        NSLog(@"[ReachApp] springboard cancelling - keyboardWindow exists");
         return;
     }
 

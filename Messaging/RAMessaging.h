@@ -18,8 +18,8 @@ struct RAMessageAppData {
 	BOOL canHideStatusBarIfWanted;
 	UIInterfaceOrientation forcedOrientation;
 	BOOL shouldForceOrientation;
-
 	BOOL shouldUseExternalKeyboard;
+	BOOL isBeingHosted;
 };
 
 static NSString *RAMessagingUpdateAppInfoMessageName = @"updateAppInfo";

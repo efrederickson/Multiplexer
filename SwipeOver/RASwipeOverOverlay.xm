@@ -88,7 +88,7 @@
 
 -(BOOL) isShowingAppSelector
 {
-	return [[self currentView] isKindOfClass:[UIScrollView class]];
+	return [[self currentView] isKindOfClass:[RAAppSelectorView class]];
 }
 
 -(void) darkenerViewTap:(UITapGestureRecognizer*)gesture
@@ -105,84 +105,30 @@
 -(void) longPress:(UILongPressGestureRecognizer*)gesture
 {
 	[RASwipeOverManager.sharedInstance closeCurrentView];
-   
-    static CGSize fullSize = [%c(SBIconView) defaultIconSize];
-    fullSize.height = fullSize.width;
-    CGFloat padding = 20;
-
-    NSInteger numIconsPerLine = 0;
-    CGFloat tmpWidth = 10;
-    while (tmpWidth + fullSize.width <= self.frame.size.width)
+    if ([[self currentView] isKindOfClass:[RAAppSelectorView class]])
     {
-        numIconsPerLine++;
-        tmpWidth += fullSize.width + 20;
+    	[(RAAppSelectorView*)[self currentView] relayoutApps];
+    	[self currentView].frame = CGRectMake(isHidingUnderlyingApp ? 0 : 10, 0, self.frame.size.width - (isHidingUnderlyingApp ? 0 : 10), self.frame.size.height);
+    	return;
     }
-    padding = (self.frame.size.width - (numIconsPerLine * fullSize.width)) / (numIconsPerLine + 1);
-
-    UIScrollView *allAppsView = [[UIScrollView alloc] initWithFrame:CGRectMake(isHidingUnderlyingApp ? 0 : 10, 0, self.frame.size.width - (isHidingUnderlyingApp ? 0 : 10), self.frame.size.height)];
-    grabberView.alpha = 0;
-    allAppsView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.7];
-
-	CGSize contentSize = CGSizeMake(padding, 10);
-	SBApplication *app = nil;
-	int horizontal = 0;
-
-	//allAppsView.backgroundColor = [UIColor clearColor];
-	// TODO: doesn't work as well to having vertical paging...
-	//allAppsView.pagingEnabled = [RASettings.sharedInstance pagingEnabled];
-
-	static NSMutableArray *allApps = nil;
-	if (!allApps)
-	{
-		allApps = [[[[%c(SBIconViewMap) homescreenMap] iconModel] visibleIconIdentifiers] mutableCopy];
-	    [allApps sortUsingComparator: ^(NSString* a, NSString* b) {
-	    	NSString *a_ = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:a].displayName;
-	    	NSString *b_ = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:b].displayName;
-	        return [a_ caseInsensitiveCompare:b_];
-		}];
-		//[allApps removeObject:currentBundleIdentifier];
-	}
-	for (NSString *str in allApps)
-	{
-		app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:str];
-        SBIcon *icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:app.bundleIdentifier];
-        SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
-        if (!iconView || [icon isKindOfClass:[%c(SBApplicationIcon) class]] == NO)
-        	continue;
-        
-        iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
-        contentSize.width += iconView.frame.size.width + padding;
-
-        horizontal++;
-        if (horizontal >= numIconsPerLine)
-        {
-        	horizontal = 0;
-        	contentSize.width = padding;
-        	contentSize.height += iconView.frame.size.height + 10;
-        }
-
-        iconView.restorationIdentifier = app.bundleIdentifier;
-        UITapGestureRecognizer *iconViewTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(appViewItemTap:)];
-        [iconView addGestureRecognizer:iconViewTapGestureRecognizer];
-        [allAppsView addSubview:iconView];
-	}
-	contentSize.width = allAppsView.frame.size.width;
-	contentSize.height += fullSize.height;
-	[allAppsView setContentSize:contentSize];
-	allAppsView.tag = RASWIPEOVER_VIEW_TAG;
-	[self addSubview:allAppsView];
+    RAAppSelectorView *appSelector = [[RAAppSelectorView alloc] initWithFrame:CGRectMake(isHidingUnderlyingApp ? 0 : 10, 0, self.frame.size.width - (isHidingUnderlyingApp ? 0 : 10), self.frame.size.height)];
+	appSelector.tag = RASWIPEOVER_VIEW_TAG;
+	appSelector.target = self;
+	[appSelector relayoutApps];
+	[self addSubview:appSelector];
 }
 
--(void) appViewItemTap:(UITapGestureRecognizer*)recognizer
+-(void) appSelector:(RAAppSelectorView*)view appWasSelected:(NSString*)bundleIdentifier
 {
 	grabberView.alpha = 1;
-	[RASwipeOverManager.sharedInstance showApp:recognizer.view.restorationIdentifier];
+	[[self currentView] removeFromSuperview];
+	[RASwipeOverManager.sharedInstance showApp:bundleIdentifier];
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
 	UIView *v = [self viewWithTag:RASWIPEOVER_VIEW_TAG];
-	if ([v isKindOfClass:[UIScrollView class]])
+	if ([v isKindOfClass:[RAAppSelectorView class]])
 		return NO;
 	if ([gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UITapGestureRecognizer class]])
 		return NO;

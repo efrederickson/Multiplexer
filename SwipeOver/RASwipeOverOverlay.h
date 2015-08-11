@@ -1,6 +1,7 @@
 #import "headers.h"
+#import "RAAppSelectorView.h"
 
-@interface RASwipeOverOverlay : UIAutoRotatingWindow <UIGestureRecognizerDelegate, UILongPressGestureRecognizerDelegate> {
+@interface RASwipeOverOverlay : UIAutoRotatingWindow <UIGestureRecognizerDelegate, UILongPressGestureRecognizerDelegate, RAAppSelectorViewDelegate> {
 	BOOL isHidingUnderlyingApp;
 
 	UIView *darkenerView;

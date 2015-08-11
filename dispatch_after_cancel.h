@@ -5,7 +5,7 @@ struct dispatch_async_handle {
     char didFire;       // control block did fire
     char shouldCall;    // control block should call payload
     char shouldFree;    // control block is owner of this handle
-    char didFree;       // ?????
+    char didFree;       // fix trying to free a freed dispatch_async_handle
 };
 
 

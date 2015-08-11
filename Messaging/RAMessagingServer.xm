@@ -321,6 +321,14 @@
 	[self sendStoredDataToApp:identifier completion:callback];
 }
 
+-(void) setHosted:(BOOL)value forIdentifier:(NSString*)identifier completion:(RAMessageCompletionCallback)callback
+{
+	RAMessageAppData data = [self getDataForIdentifier:identifier];
+	data.isBeingHosted = value;
+	[self setData:data forIdentifier:identifier];
+	[self sendStoredDataToApp:identifier completion:callback];
+}
+
 -(void) receiveShowKeyboardForAppWithIdentifier:(NSString*)identifier
 {
 	[RASpringBoardKeyboardActivation.sharedInstance showKeyboardForAppWithIdentifier:identifier];

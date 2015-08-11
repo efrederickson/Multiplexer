@@ -13,7 +13,7 @@ NSInteger wasStatusBarHidden = -1;
 NSMutableDictionary *oldFrames = [NSMutableDictionary new];
 
 %hook UIWindow
--(void) setFrame:(CGRect) frame
+-(void) setFrame:(CGRect)frame
 {
     if ([self.class isEqual:UITextEffectsWindow.class] == NO && [RAMessagingClient.sharedInstance shouldResize])
     {
@@ -62,7 +62,7 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
     [RAMessagingClient.sharedInstance requestUpdateFromServer];
 }
 
-- (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(id)arg2 changeApplicationFlag:(BOOL)arg3
+- (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(unsafe_id)arg2 changeApplicationFlag:(BOOL)arg3
 {
 	//if ([RASettings.sharedInstance unifyStatusBar])
     if ([RAMessagingClient.sharedInstance shouldHideStatusBar])
@@ -173,23 +173,31 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
 
 -(BOOL) isNetworkActivityIndicatorVisible
 {
-    return [objc_getAssociatedObject(self, @selector(RA_networkActivity)) boolValue] ?: %orig;
+    if ([RAMessagingClient.sharedInstance isBeingHosted])
+        return [objc_getAssociatedObject(self, @selector(RA_networkActivity)) boolValue];
+    else
+        return %orig;
 }
 
 -(void) setNetworkActivityIndicatorVisible:(BOOL)arg1
 {
-    objc_setAssociatedObject(self, @selector(RA_networkActivity), @(arg1), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    
-    StatusBarData *data = [UIStatusBarServer getStatusBarData];
-    data->itemIsEnabled[24] = arg1;
-    [UIApplication.sharedApplication.statusBar forceUpdateToData:data animated:YES];
+    %orig(arg1);
+    if ([RAMessagingClient.sharedInstance isBeingHosted])
+    {
+        objc_setAssociatedObject(self, @selector(RA_networkActivity), @(arg1), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        
+        StatusBarData *data = [UIStatusBarServer getStatusBarData];
+        data->itemIsEnabled[24] = arg1; // 24 = activity indicator
+        [UIApplication.sharedApplication.statusBar forceUpdateToData:data animated:YES];   
+    }
 }
 %end
 
 %hook UIStatusBar
--(void) statusBarServer:(id)arg1 didReceiveStatusBarData:(StatusBarData*)arg2 withActions:(int)arg3
+-(void) statusBarServer:(unsafe_id)arg1 didReceiveStatusBarData:(StatusBarData*)arg2 withActions:(int)arg3
 {
-    arg2->itemIsEnabled[24] = [UIApplication.sharedApplication isNetworkActivityIndicatorVisible];
+    if ([RAMessagingClient.sharedInstance isBeingHosted])
+        arg2->itemIsEnabled[24] = [UIApplication.sharedApplication isNetworkActivityIndicatorVisible];
     %orig;
 }
 %end

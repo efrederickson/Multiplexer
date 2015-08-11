@@ -24,4 +24,5 @@
 -(UIInterfaceOrientation) forcedOrientation;
 -(BOOL) shouldForceOrientation;
 -(BOOL) shouldUseExternalKeyboard;
+-(BOOL) isBeingHosted;
 @end

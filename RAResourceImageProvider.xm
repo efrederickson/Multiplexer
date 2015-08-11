@@ -5,8 +5,9 @@ const NSString *resourcePath = RA_BASE_PATH;
 NSCache *_rsImgCache = [NSCache new];
 
 @implementation RAResourceImageProvider
-+ (UIImage *)imageWithImage:(UIImage *)image scaledToSize:(CGSize)newSize { // from: https://stackoverflow.com/questions/2658738/the-simplest-way-to-resize-an-uiimage
-    //UIGraphicsBeginImageContext(newSize);
++ (UIImage *)imageWithImage:(UIImage *)image scaledToSize:(CGSize)newSize 
+{ 
+    // from: https://stackoverflow.com/questions/2658738/the-simplest-way-to-resize-an-uiimage
     // In next line, pass 0.0 to use the current device's pixel scaling factor (and thus account for Retina resolution).
     // Pass 1.0 to force exact pixel size.
     UIGraphicsBeginImageContextWithOptions(newSize, NO, 0.0);

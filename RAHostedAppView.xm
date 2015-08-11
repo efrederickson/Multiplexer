@@ -100,6 +100,7 @@ RAHostedAppView *lastAppView;
     [self addSubview:view];
 
     lastAppView = self;
+    [RAMessagingServer.sharedInstance setHosted:YES forIdentifier:app.bundleIdentifier completion:nil];
 
     if (verifyTimer)
         [verifyTimer invalidate];
@@ -298,6 +299,7 @@ RAHostedAppView *lastAppView;
         didRun = YES;
     };
 
+    [RAMessagingServer.sharedInstance setHosted:NO forIdentifier:app.bundleIdentifier completion:nil];
     [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:self.bundleIdentifier completion:nil];
     [RAMessagingServer.sharedInstance unRotateApp:self.bundleIdentifier completion:nil];
     if (forceImmediate)
@@ -339,19 +341,3 @@ RAHostedAppView *lastAppView;
 -(SBApplication*) app { return app; }
 -(NSString*) displayName { return app.displayName; }
 @end
-
-%hook SpringBoard
--(id)_accessibilityFrontMostApplication
-{
-    id orig = %orig;
-    if (!orig)
-    {
-        if (lastAppView)
-        {
-            if (lastAppView.app)
-                return lastAppView.app;
-        }
-    }
-    return orig;
-}
-%end
