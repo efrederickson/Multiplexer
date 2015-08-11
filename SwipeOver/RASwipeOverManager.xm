@@ -198,6 +198,7 @@ extern int rotationDegsForOrientation(int o);
 -(void) sizeViewForTranslation:(CGPoint)translation state:(UIGestureRecognizerState)state
 {
 	static CGFloat lastX = -1;
+	static CGFloat overlayOriginX = -1;
 	UIView *targetView = [overlayWindow isHidingUnderlyingApp] ? [overlayWindow viewWithTag:RASWIPEOVER_VIEW_TAG] : overlayWindow;
 
 	if (start == 0)
@@ -207,6 +208,7 @@ extern int rotationDegsForOrientation(int o);
 	{
 		lastX = -1;
 		start = 0;
+		overlayOriginX = -1;
 
 		CGFloat scale = (SCREEN_WIDTH - targetView.frame.origin.x) / [overlayWindow currentView].bounds.size.width;
 		if (scale <= 0.12 && (!CGPointEqualToPoint(translation, CGPointZero)))
@@ -244,6 +246,9 @@ extern int rotationDegsForOrientation(int o);
 		} 
 		else
 		{
+			if (overlayOriginX == -1)
+				overlayOriginX = overlayWindow.frame.origin.x;
+			overlayWindow.frame = CGRectMake(overlayOriginX + translation.x, overlayWindow.frame.origin.y, SCREEN_WIDTH - (overlayOriginX + translation.x), overlayWindow.frame.size.height);
 			//targetView.frame = CGRectMake(SCREEN_WIDTH - (start + translation.x), 0, SCREEN_WIDTH - (SCREEN_WIDTH - start + translation.x), targetView.frame.size.height);
 			targetView.center = (CGPoint) { start + translation.x, targetView.center.y };
 		}

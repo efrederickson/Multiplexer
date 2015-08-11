@@ -22,6 +22,8 @@ enum RAIconIndicatorViewInfo {
 
 
 	RAIconIndicatorViewInfoTemporarilyInhibit = 1024,
+	RAIconIndicatorViewInfoInhibit = 2048,
+	RAIconIndicatorViewInfoUninhibit = 4096,
 };
 
 @interface RABackgrounder : NSObject

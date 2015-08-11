@@ -20,6 +20,8 @@
 #import <notify.h>
 #import <IOKit/hid/IOHIDEvent.h>
 
+#define RA_BASE_PATH @"/Library/ReachApp"
+
 #import "RALocalizer.h"
 #define LOCALIZE(x) [RALocalizer.sharedInstance localizedStringForKey:x]
 
@@ -67,6 +69,44 @@ return sharedInstance;
 #define SHARED_INSTANCE(cls) SHARED_INSTANCE2(cls, );
 
 extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
+
+typedef struct {
+    BOOL itemIsEnabled[25];
+    char timeString[64];
+    int gsmSignalStrengthRaw;
+    int gsmSignalStrengthBars;
+    char serviceString[100];
+    char serviceCrossfadeString[100];
+    char serviceImages[2][100];
+    char operatorDirectory[1024];
+    unsigned serviceContentType;
+    int wifiSignalStrengthRaw;
+    int wifiSignalStrengthBars;
+    unsigned dataNetworkType;
+    int batteryCapacity;
+    unsigned batteryState;
+    char batteryDetailString[150];
+    int bluetoothBatteryCapacity;
+    int thermalColor;
+    unsigned thermalSunlightMode : 1;
+    unsigned slowActivity : 1;
+    unsigned syncActivity : 1;
+    char activityDisplayId[256];
+    unsigned bluetoothConnected : 1;
+    unsigned displayRawGSMSignal : 1;
+    unsigned displayRawWifiSignal : 1;
+    unsigned locationIconType : 1;
+    unsigned quietModeInactive : 1;
+    unsigned tetheringConnectionCount;
+} StatusBarData;
+
+@interface UIStatusBar : UIView
+-(void) forceUpdateToData:(StatusBarData*)arg1 animated:(BOOL)arg2;
+@end
+
+@interface UIStatusBarServer
++(StatusBarData*) getStatusBarData;
+@end
 
 @interface SBNotificationCenterController : NSObject
 +(id) sharedInstance;
@@ -243,6 +283,9 @@ typedef NS_ENUM(NSInteger, UIScreenEdgePanRecognizerType) {
 @interface _UIBackdropViewSettings : NSObject
 @property (nonatomic) CGFloat grayscaleTintAlpha;
 @property (nonatomic) CGFloat grayscaleTintLevel;
+- (void)setBlurQuality:(id)arg1;
++ (id)settingsForStyle:(int)arg1;
++ (id)settingsForStyle:(int)arg1 graphicsQuality:(int)arg2;
 @end
 
 @interface _UIBackdropView : UIView
@@ -645,7 +688,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 
 @interface UIApplication ()
 - (void)_handleKeyUIEvent:(id)arg1;
--(UIView*) statusBar;
+-(UIStatusBar*) statusBar;
 - (id)_mainScene;
 
 // SpringBoard methods
@@ -808,6 +851,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 -(void) RA_updateIndicatorViewWithExistingInfo;
 -(BOOL) RA_isIconIndicatorInhibited;
 -(void) RA_setIsIconIndicatorInhibited:(BOOL)value;
+-(void) RA_setIsIconIndicatorInhibited:(BOOL)value showAgainImmediately:(BOOL)value2;
 
 + (CGSize)defaultIconSize;
 + (CGSize)defaultIconImageSize;

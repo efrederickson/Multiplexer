@@ -14,6 +14,7 @@
     iconView.layer.shadowRadius = 12; // iconView.layer.cornerRadius;
     iconView.layer.shadowOpacity = 0.8;
     iconView.layer.shadowOffset = CGSizeMake(0, 0);
+    iconView.userInteractionEnabled = NO;
 
     [self addSubview:iconView];
     [self updateIconViewFrame];

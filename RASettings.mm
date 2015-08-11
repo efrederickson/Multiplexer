@@ -139,6 +139,8 @@ NSDictionary *_settings = nil;
 	return [self enabled] && BOOL(@"ncAppEnabled", YES);
 }
 
+-(BOOL) shouldShowStatusBarNativeIcons { return BOOL(@"shouldShowStatusBarNativeIcons", NO); }
+
 -(NSMutableArray*) favoriteApps
 {
 	NSMutableArray *favorites = [[NSMutableArray alloc] init];

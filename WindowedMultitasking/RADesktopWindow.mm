@@ -37,7 +37,8 @@
 	if (animated)
 		[UIView animateWithDuration:0.5 animations:^{ windowBar.alpha = 1; }];
 
-	[view loadApp];
+	if (self.hidden == NO)
+		[view loadApp];
 	view.hideStatusBar = YES;
 	windowBar.transform = CGAffineTransformMakeScale(0.5, 0.5);
 	windowBar.transform = CGAffineTransformRotate(windowBar.transform, DEGREES_TO_RADIANS([self baseRotationForOrientation]));
@@ -72,13 +73,13 @@
 
 -(RAWindowBar*) createAppWindowForSBApplication:(SBApplication*)app animated:(BOOL)animated
 {
-	return [self createAppWindowWithIdentifier:app.bundleIdentifier animated:(BOOL)animated];
+	return [self createAppWindowWithIdentifier:app.bundleIdentifier animated:animated];
 }
 
 -(RAWindowBar*) createAppWindowWithIdentifier:(NSString*)identifier animated:(BOOL)animated
 {
 	RAHostedAppView *view = [[RAHostedAppView alloc] initWithBundleIdentifier:identifier];
-	return [self addAppWithView:view animated:(BOOL)animated];
+	return [self addAppWithView:view animated:animated];
 }
 
 -(void) removeAppWithIdentifier:(NSString*)identifier animated:(BOOL)animated

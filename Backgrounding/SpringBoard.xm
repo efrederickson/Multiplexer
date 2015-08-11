@@ -63,7 +63,8 @@
                 [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:RAIconIndicatorViewInfoForceDeath];
                 if ([RABackgrounder.sharedInstance shouldRemoveFromSwitcherWhenKilledOnExit:arg1.identifier])
                 {
-                    [[%c(SBAppSwitcherModel) sharedInstance] removeDisplayItem:[%c(SBDisplayItem) displayItemWithType:@"App" displayIdentifier:arg1.identifier]];
+                    SBDisplayItem *item = [%c(SBDisplayItem) displayItemWithType:@"App" displayIdentifier:arg1.identifier];
+                    [[%c(SBAppSwitcherModel) sharedInstance] removeDisplayItem:item];
                 }
             }
         }

@@ -63,7 +63,7 @@ static char velocityDataKey;
     return self;
 }
 
--(void) extractHandMotionForActiveTouches:(SBActiveTouch *)activeTouches count:(NSUInteger)count centroid:(CGPoint)centroid 
+-(void) extractHandMotionForActiveTouches:(SBActiveTouch*) activeTouches count:(NSUInteger)count centroid:(CGPoint)centroid 
 {
     %orig;
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -92,7 +92,7 @@ static char velocityDataKey;
     });
 }
 
-%new -(void) screenEdgePanRecognizerStateDidChange:(_UIScreenEdgePanRecognizer *)screenEdgePanRecognizer 
+%new -(void) screenEdgePanRecognizerStateDidChange:(_UIScreenEdgePanRecognizer*) screenEdgePanRecognizer 
 {
     if (screenEdgePanRecognizer.state == 1)
     {

@@ -1,7 +1,7 @@
 #import "RAResourceImageProvider.h"
 #import "PDFImage.h"
 
-const NSString *resourcePath = @"/Library/ReachApp";
+const NSString *resourcePath = RA_BASE_PATH;
 NSCache *_rsImgCache = [NSCache new];
 
 @implementation RAResourceImageProvider

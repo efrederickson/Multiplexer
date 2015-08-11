@@ -20,7 +20,7 @@
 	blurView.frame = self.frame;
 	blurView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.6];
 	[blurView setBlurRadiusSetOnce:NO];
-	[blurView setBlurRadius:12.0];
+	[blurView setBlurRadius:self.bounds.size.width / 2.0];
 
 	UITapGestureRecognizer *dismissGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismiss_)];
 	[blurView addGestureRecognizer:dismissGesture];

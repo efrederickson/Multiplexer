@@ -9,7 +9,7 @@
 
 -(BOOL) attemptLoadForLanguageCode:(NSString*)code
 {
-	NSString *expandedPath = [NSString stringWithFormat:@"/Library/ReachApp/Localizations/%@.strings",code];
+	NSString *expandedPath = [NSString stringWithFormat:@"%@/Localizations/%@.strings",RA_BASE_PATH,code];
 	NSDictionary *plist = [NSDictionary dictionaryWithContentsOfFile:expandedPath];
 	if (plist)
 	{

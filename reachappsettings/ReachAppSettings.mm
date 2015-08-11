@@ -56,8 +56,8 @@
     return notHeader;
 }
 
+-(UIColor*) navigationTintColor { return [UIColor colorWithRed:190/255.0f green:83/255.0f blue:184/255.0f alpha:1.0f]; }
 -(NSString*) customTitle { return @"Multiplexer"; }
-
 -(BOOL) showHeartImage { return YES; }
 -(NSString*) shareMessage { return @"I'm multitasking with Multiplexer, by @daementor and @drewplex"; }
 

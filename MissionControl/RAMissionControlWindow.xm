@@ -37,7 +37,7 @@
 -(UIWindowLevel) windowLevel
 {
 	//return UIWindowLevelStatusBar + 1;
-	return 99999999; 
+	return 1000; 
 }
 
 - (BOOL)_shouldAutorotateToInterfaceOrientation:(int)arg1 checkForDismissal:(BOOL)arg2 isRotationDisabled:(BOOL*)arg3

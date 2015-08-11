@@ -44,12 +44,19 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 %hook SBIconView
 %new -(void) RA_updateIndicatorView:(RAIconIndicatorViewInfo)info
 {
-	if (info == RAIconIndicatorViewInfoTemporarilyInhibit)
+	if (info == RAIconIndicatorViewInfoTemporarilyInhibit || info == RAIconIndicatorViewInfoInhibit)
 	{
 		[[self viewWithTag:9962] removeFromSuperview];
 		[self RA_setIsIconIndicatorInhibited:YES];
-		[self performSelector:@selector(RA_setIsIconIndicatorInhibited:) withObject:@NO afterDelay:1];
+		if (info == RAIconIndicatorViewInfoTemporarilyInhibit)
+			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{ 
+				[self RA_setIsIconIndicatorInhibited:NO showAgainImmediately:NO];
+			});
 		return;
+	}
+	else if (info == RAIconIndicatorViewInfoUninhibit)
+	{
+		[self RA_setIsIconIndicatorInhibited:NO showAgainImmediately:NO];
 	}
 
 	NSString *text = stringFromIndicatorInfo(info);
@@ -93,9 +100,16 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 
 %new -(void) RA_setIsIconIndicatorInhibited:(BOOL)value
 {
-    objc_setAssociatedObject(self, @selector(RA_isIconIndicatorInhibited), @(value), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    [self RA_updateIndicatorViewWithExistingInfo];
+	[self RA_setIsIconIndicatorInhibited:value showAgainImmediately:YES];
 }
+
+%new -(void) RA_setIsIconIndicatorInhibited:(BOOL)value showAgainImmediately:(BOOL)value2
+{
+    objc_setAssociatedObject(self, @selector(RA_isIconIndicatorInhibited), @(value), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    if (value2 || value == YES)
+	    [self RA_updateIndicatorViewWithExistingInfo];
+}
+
 
 %new -(BOOL) RA_isIconIndicatorInhibited
 {
@@ -144,9 +158,10 @@ NSMutableDictionary *lsbitems = [NSMutableDictionary dictionary];
     		if ([[[[%c(SBIconViewMap) homescreenMap] iconModel] visibleIconIdentifiers] containsObject:self.bundleIdentifier])
     		{
     			RAIconIndicatorViewInfo info = [RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:self.bundleIdentifier];
-    			if ((info & RAIconIndicatorViewInfoNone) == 0 && (info & RAIconIndicatorViewInfoNative) == 0)
+    			BOOL native = (info & RAIconIndicatorViewInfoNative);
+    			if ((info & RAIconIndicatorViewInfoNone) == 0 && (native == NO || [RASettings.sharedInstance shouldShowStatusBarNativeIcons]))
     			{
-			    	LSStatusBarItem *item = [[%c(LSStatusBarItem) alloc] initWithIdentifier:self.bundleIdentifier alignment:StatusBarAlignmentLeft];
+			    	LSStatusBarItem *item = [[%c(LSStatusBarItem) alloc] initWithIdentifier:[NSString stringWithFormat:@"multiplexer-%@",self.bundleIdentifier] alignment:StatusBarAlignmentLeft];
 		    		item.customViewClass = @"RAAppIconStatusBarIconView";
 		        	item.imageName = [NSString stringWithFormat:@"multiplexer-%@",self.bundleIdentifier];
 		    		lsbitems[self.bundleIdentifier] = item;
@@ -165,12 +180,16 @@ NSMutableDictionary *lsbitems = [NSMutableDictionary dictionary];
 {
 	lsbitems = [NSMutableDictionary dictionary];
 }
-%end
 
-%hook SBIconController
--(void)iconWasTapped:(SBApplicationIcon*)arg1 
+- (void)didAnimateActivation
 {
-	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.application.bundleIdentifier withInfo:RAIconIndicatorViewInfoTemporarilyInhibit];
+	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:RAIconIndicatorViewInfoUninhibit];
+	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:RAIconIndicatorViewInfoTemporarilyInhibit];
+	%orig;
+}
+- (void)willAnimateActivation
+{
+	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:RAIconIndicatorViewInfoInhibit];
 	%orig;
 }
 %end

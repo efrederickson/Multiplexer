@@ -28,8 +28,6 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
             frame.size.width = overrideWidth;
         if (overrideHeight != -1 && overrideHeight != 0)
             frame.size.height = overrideHeight;
-
-        NSLog(@"[ReachApp] %@", NSStringFromCGRect(frame));
     }
 
     %orig(frame);
@@ -171,6 +169,28 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
             [window setFrame:window.frame]; // updates with client message app data in the setFrame: hook
         }];
     }
+}
+
+-(BOOL) isNetworkActivityIndicatorVisible
+{
+    return [objc_getAssociatedObject(self, @selector(RA_networkActivity)) boolValue] ?: %orig;
+}
+
+-(void) setNetworkActivityIndicatorVisible:(BOOL)arg1
+{
+    objc_setAssociatedObject(self, @selector(RA_networkActivity), @(arg1), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    
+    StatusBarData *data = [UIStatusBarServer getStatusBarData];
+    data->itemIsEnabled[24] = arg1;
+    [UIApplication.sharedApplication.statusBar forceUpdateToData:data animated:YES];
+}
+%end
+
+%hook UIStatusBar
+-(void) statusBarServer:(id)arg1 didReceiveStatusBarData:(StatusBarData*)arg2 withActions:(int)arg3
+{
+    arg2->itemIsEnabled[24] = [UIApplication.sharedApplication isNetworkActivityIndicatorVisible];
+    %orig;
 }
 %end
 

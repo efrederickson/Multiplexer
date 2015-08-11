@@ -73,7 +73,7 @@ CGRect swappedForOrientation(CGRect in)
 		//[UIView animateWithDuration:0.5 animations:^{ window.alpha = 1; }];
 		[UIView animateWithDuration:0.5 animations:^{ window.frame = CGRectMake(0, 0, window.frame.size.width, window.frame.size.height); } completion:nil];
 
-	[window updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
+	//[window updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
 	
 	[RAGestureManager.sharedInstance addGestureRecognizerWithTarget:self forEdge:UIRectEdgeBottom identifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture"];
 	overrideCC = YES;
@@ -91,7 +91,10 @@ CGRect swappedForOrientation(CGRect in)
 	window.manager = self;
 	[window _rotateWindowToOrientation:UIApplication.sharedApplication.statusBarOrientation updateStatusBar:YES duration:1 skipCallbacks:NO];
 
-	_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:1];
+	//_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:1];
+	_UIBackdropViewSettings *blurSettings = [_UIBackdropViewSettings settingsForStyle:1];
+	[blurSettings setBlurQuality:@"low"];
+	_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithSettings:blurSettings];
 	blurView.frame = window.frame;
 	[window addSubview:blurView];
 

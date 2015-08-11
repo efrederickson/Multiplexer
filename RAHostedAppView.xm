@@ -5,6 +5,8 @@
 #import "RASnapshotProvider.h"
 #import "RASpringBoardKeyboardActivation.h"
 
+RAHostedAppView *lastAppView;
+
 @interface RAHostedAppView () {
     NSTimer *verifyTimer;
     BOOL isPreloading;
@@ -65,6 +67,10 @@
 {
     if (app == nil)
         return;
+
+    if (_isCurrentlyHosting)
+        return;
+
     isPreloading = YES;
 	FBScene *scene = [app mainScene];
     if (![app pid] || scene == nil)
@@ -81,6 +87,7 @@
 {
     if (_isCurrentlyHosting)
         return;
+    _isCurrentlyHosting = YES;
 
     view = (FBWindowContextHostWrapperView*)[RAHostManager enabledHostViewForApplication:app];
     contextHostManager = (FBWindowContextHostManager*)[RAHostManager hostManagerForApp:app];
@@ -91,7 +98,8 @@
     //view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
     [self addSubview:view];
-    _isCurrentlyHosting = YES;
+
+    lastAppView = self;
 
     if (verifyTimer)
         [verifyTimer invalidate];
@@ -104,6 +112,9 @@
 {
 	[self preloadApp];
     if (!app)
+        return;
+
+    if (_isCurrentlyHosting)
         return;
 
     if ([UIApplication.sharedApplication._accessibilityFrontMostApplication isEqual:app])
@@ -171,8 +182,9 @@
 
 -(void) verifyHostingAndRehostIfNecessary
 {
-    if (!isPreloading && (app.isRunning == NO || view.contextHosted == NO)) // && (app.pid == 0 || view == nil || view.manager == nil)) // || view._isReallyHosting == NO))
+    if (!isPreloading && _isCurrentlyHosting && (app.isRunning == NO || view.contextHosted == NO)) // && (app.pid == 0 || view == nil || view.manager == nil)) // || view._isReallyHosting == NO))
     {
+        NSLog(@"[ReachApp] lol");
         [activityView startAnimating];
         [self unloadApp];
         [self loadApp];
@@ -233,6 +245,9 @@
 
     [verifyTimer invalidate];
     verifyTimer = nil;
+
+    if (lastAppView == self)
+        lastAppView = nil;
 
     if (_isCurrentlyHosting == NO)
         return;
@@ -324,3 +339,19 @@
 -(SBApplication*) app { return app; }
 -(NSString*) displayName { return app.displayName; }
 @end
+
+%hook SpringBoard
+-(id)_accessibilityFrontMostApplication
+{
+    id orig = %orig;
+    if (!orig)
+    {
+        if (lastAppView)
+        {
+            if (lastAppView.app)
+                return lastAppView.app;
+        }
+    }
+    return orig;
+}
+%end
