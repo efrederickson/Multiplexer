@@ -12,7 +12,8 @@ enum {
 struct RAMessageAppData {
 //	NSString *bundleIdentifier;
 	BOOL shouldForceSize;
-	CGSize wantedClientSize;
+	float wantedClientWidth;
+	float wantedClientHeight;
 	BOOL statusBarVisibility;
 	BOOL shouldForceStatusBar;
 	BOOL canHideStatusBarIfWanted;

@@ -115,7 +115,8 @@
 	{
 		// Initialize with some default values
 		ret.shouldForceSize = NO;
-		ret.wantedClientSize = CGSizeMake(-1, -1);
+		ret.wantedClientWidth = -1;
+		ret.wantedClientHeight = -1;
 		ret.statusBarVisibility = YES;
 		ret.shouldForceStatusBar = NO;
 		ret.canHideStatusBarIfWanted = NO;
@@ -263,7 +264,8 @@
 -(void) resizeApp:(NSString*)identifier toSize:(CGSize)size completion:(RAMessageCompletionCallback)callback
 {
 	RAMessageAppData data = [self getDataForIdentifier:identifier];
-	data.wantedClientSize = size;
+	data.wantedClientWidth = size.width;
+	data.wantedClientHeight = size.height;
 	data.shouldForceSize = YES;
 	[self setData:data forIdentifier:identifier];
 	[self sendStoredDataToApp:identifier completion:callback];
@@ -272,7 +274,7 @@
 -(void) endResizingApp:(NSString*)identifier completion:(RAMessageCompletionCallback)callback
 {
 	RAMessageAppData data = [self getDataForIdentifier:identifier];
-	data.wantedClientSize = CGSizeMake(-1, -1);
+	//data.wantedClientSize = CGSizeMake(-1, -1);
 	data.shouldForceSize = NO;
 	[self setData:data forIdentifier:identifier];
 	[self sendStoredDataToApp:identifier completion:callback];

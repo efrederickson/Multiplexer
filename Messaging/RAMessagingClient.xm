@@ -11,7 +11,8 @@
 	RAMessageAppData data;
 
 	data.shouldForceSize = NO;
-	data.wantedClientSize = CGSizeMake(-1, -1);
+	data.wantedClientWidth = -1;
+	data.wantedClientHeight = -1;
 	data.statusBarVisibility = YES;
 	data.shouldForceStatusBar = NO;
 	data.canHideStatusBarIfWanted = NO;
@@ -79,9 +80,9 @@
    		[UIApplication.sharedApplication RA_forceStatusBarVisibility:_currentData.statusBarVisibility orRevert:NO];
 
 	if (didSizingChange && data.shouldForceSize == NO)
-	   	[UIApplication.sharedApplication RA_updateWindowsForSizeChange:data.wantedClientSize isReverting:YES];
+	   	[UIApplication.sharedApplication RA_updateWindowsForSizeChange:CGSizeMake(data.wantedClientWidth, data.wantedClientHeight) isReverting:YES];
 	else if (data.shouldForceSize)
-	   	[UIApplication.sharedApplication RA_updateWindowsForSizeChange: data.wantedClientSize isReverting:NO];
+	   	[UIApplication.sharedApplication RA_updateWindowsForSizeChange:CGSizeMake(data.wantedClientWidth, data.wantedClientHeight) isReverting:NO];
 
 	if (didOrientationChange && data.shouldForceOrientation == NO)	
 		[UIApplication.sharedApplication RA_forceRotationToInterfaceOrientation:data.forcedOrientation isReverting:YES];
@@ -114,7 +115,7 @@
 
 -(BOOL) shouldUseExternalKeyboard { return _currentData.shouldUseExternalKeyboard; }
 -(BOOL) shouldResize { return _currentData.shouldForceSize; }
--(CGSize) resizeSize { return _currentData.wantedClientSize; }
+-(CGSize) resizeSize { return CGSizeMake(_currentData.wantedClientWidth, _currentData.wantedClientHeight); }
 -(BOOL) shouldHideStatusBar { return _currentData.shouldForceStatusBar && _currentData.statusBarVisibility == NO; }
 -(BOOL) shouldShowStatusBar { return _currentData.shouldForceStatusBar && _currentData.statusBarVisibility == YES; }
 -(UIInterfaceOrientation) forcedOrientation { return _currentData.forcedOrientation; }
