@@ -11,32 +11,30 @@ NSMutableDictionary *indicatorStateDict = [NSMutableDictionary dictionary];
 #define GET_INFO           (self.icon && self.icon.application ? GET_INFO_(self.icon.application.bundleIdentifier) : RAIconIndicatorViewInfoNone)
 
 
-const char *associated_object_key = "bruh";
-
 NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 {
-	NSMutableString *ret = [[NSMutableString alloc] init];
+	NSString *ret = @"";
 
 	if (info & RAIconIndicatorViewInfoNone)
 		return nil;
 
 	if ([RASettings.sharedInstance showNativeStateIconIndicators] && (info & RAIconIndicatorViewInfoNative))
-		[ret appendString:@"N"];
+		ret = [ret stringByAppendingString:@"N"];
 	
 	if (info & RAIconIndicatorViewInfoForced)
-		[ret appendString:@"F"];
+		ret = [ret stringByAppendingString:@"F"];
 
 	//if (info & RAIconIndicatorViewInfoForceDeath)
 	//	[ret appendString:@"D"];
 
 	if (info & RAIconIndicatorViewInfoSuspendImmediately)
-		[ret appendString:@"S"];
+		ret = [ret stringByAppendingString:@"S"];
 		
 	if (info & RAIconIndicatorViewInfoUnkillable)
-		[ret appendString:@"U"];
+		ret = [ret stringByAppendingString:@"U"];
 
 	if (info & RAIconIndicatorViewInfoUnlimitedBackgroundTime)
-		[ret appendString:@"B"];
+		ret = [ret stringByAppendingString:@"B"];
 
 	return ret;
 }
@@ -60,6 +58,7 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 	}
 
 	NSString *text = stringFromIndicatorInfo(info);
+
 	if (
 		[self RA_isIconIndicatorInhibited] || 
 		(text == nil || text.length == 0) || // OR info == RAIconIndicatorViewInfoNone

@@ -8,14 +8,13 @@ extern id/*RANCViewController* */ ncAppViewController;
 #define BOOL(key, default) ([_settings objectForKey:key] != nil ? [_settings[key] boolValue] : default) 
 
 NSDictionary *_settings = nil;
+int enabled = -1;
+int disableAutoDismiss = -1;
 
 @implementation RASettings
 +(instancetype)sharedInstance
 {
-	RASettings *shared = nil;
-	if (shared == nil)
-		shared = [[RASettings alloc] init];
-	return shared;
+	SHARED_INSTANCE(RASettings);
 }
 
 -(id) init
@@ -61,11 +60,14 @@ NSDictionary *_settings = nil;
 		//NSLog(@"[ReachApp] settings sandbox load: %@", _settings == nil ? @"failed" : @"succeed");
 	}
 
+	enabled = -1;
+
 	if ([previousNCAppSetting isEqual:self.NCApp] == NO)
 		[ncAppViewController performSelector:@selector(forceReloadAppLikelyBecauseTheSettingChanged)];
 
 	if ([self shouldShowStatusBarIcons] == NO && [objc_getClass("SBApplication") respondsToSelector:@selector(RA_clearAllStatusBarIcons)])
 		[objc_getClass("SBApplication") performSelector:@selector(RA_clearAllStatusBarIcons)];
+
 }
 
 -(BOOL) enabled
