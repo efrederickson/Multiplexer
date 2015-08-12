@@ -116,14 +116,13 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
     return [objc_getAssociatedObject(self, @selector(RA_isIconIndicatorInhibited)) boolValue];
 }
 
-/*
--(void) layoutSubviews
+/*-(void) layoutSubviews
 {
     %orig;
 
-    [self RA_updateIndicatorView:GET_INFO];
-}
-*/
+    //if ([self viewWithTag:9962] == nil)
+	    [self RA_updateIndicatorView:GET_INFO];
+}*/
 
 - (void)setIsEditing:(_Bool)arg1 animated:(_Bool)arg2
 {
@@ -151,6 +150,7 @@ NSMutableDictionary *lsbitems = [NSMutableDictionary dictionary];
     if (self.isRunning == NO)
     {
     	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:RAIconIndicatorViewInfoNone];
+    	//SET_INFO_(self.bundleIdentifier, RAIconIndicatorViewInfoNone);
     	[lsbitems removeObjectForKey:self.bundleIdentifier];
     }
     else 
@@ -173,6 +173,7 @@ NSMutableDictionary *lsbitems = [NSMutableDictionary dictionary];
 
     	//if ([indicatorStateDict objectForKey:self.bundleIdentifier] == nil)
     		[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:self.bundleIdentifier]];
+    		SET_INFO_(self.bundleIdentifier, [RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:self.bundleIdentifier]);
     	//else
 	    //	[RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:(RAIconIndicatorViewInfo)GET_INFO_(self.bundleIdentifier)];
     }

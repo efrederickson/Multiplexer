@@ -18,6 +18,7 @@
 	data.canHideStatusBarIfWanted = NO;
 	data.forcedOrientation = UIInterfaceOrientationPortrait;
 	data.shouldForceOrientation = NO;
+	data.shouldUseExternalKeyboard = NO;
 
 	_currentData = data; // Initialize data
 

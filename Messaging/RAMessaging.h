@@ -12,6 +12,7 @@ enum {
 struct RAMessageAppData {
 //	NSString *bundleIdentifier;
 	BOOL shouldForceSize;
+	// Can't use CGSize because it uses CGFloats which aren't able to be transferred between 32/64bit processes
 	float wantedClientWidth;
 	float wantedClientHeight;
 	BOOL statusBarVisibility;
