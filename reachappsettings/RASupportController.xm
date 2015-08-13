@@ -149,7 +149,7 @@ There was much knowledge to be gained from perusing those sources, however no co
 \n\
 Beta Testers:\n\
 Beta382\n\
-Bindersfullofwoman\n\
+Bindersfullofwomen\n\
 Djaovx\n\
 Moshed\n\
 Nexuist\n\
