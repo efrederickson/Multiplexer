@@ -12,6 +12,8 @@
 #import "RASettings.h"
 #endif
 
+extern BOOL launchNextOpenIntoWindow;
+
 @interface RAMessagingServer () {
 	NSMutableDictionary *asyncHandles;
 }
@@ -49,7 +51,9 @@
     [messagingCenter registerForMessageName:RAMessagingUpdateKeyboardContextIdMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
     [messagingCenter registerForMessageName:RAMessagingRetrieveKeyboardContextIdMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
     [messagingCenter registerForMessageName:RAMessagingUpdateAppInfoMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
+
     [messagingCenter registerForMessageName:RAMessagingUpdateKeyboardSizeMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingOpenURLKMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
 }
 
 -(NSDictionary*) handleMessageNamed:(NSString*)identifier userInfo:(NSDictionary*)info
@@ -90,6 +94,16 @@
 		return @{
 			@"data": [NSData dataWithBytes:&data length:sizeof(data)],
 		};
+	}
+	else if ([identifier isEqual:RAMessagingOpenURLKMessageName])
+	{
+		NSURL *url = [NSURL URLWithString:info[@"url"]];
+		BOOL openInWindow = [RASettings.sharedInstance openLinksInWindows]; // [info[@"openInWindow"] boolValue];
+		if (openInWindow)
+			launchNextOpenIntoWindow = YES;
+
+		BOOL success = [UIApplication.sharedApplication openURL:url];
+		return @{ @"success": @(success) };
 	}
 
 	return nil;

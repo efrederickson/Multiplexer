@@ -15,6 +15,7 @@
 -(void) notifyServerOfKeyboardSizeUpdate:(CGSize)size;
 -(void) notifyServerToShowKeyboard;
 -(void) notifyServerToHideKeyboard;
+-(BOOL) notifyServerToOpenURL:(NSURL*)url openInWindow:(BOOL)openWindow;
 
 // Methods to ease the currentData usage
 -(BOOL) shouldResize;

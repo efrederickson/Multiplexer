@@ -24,15 +24,15 @@ ReachApp_FILES = $(wildcard *.xm) $(wildcard *.mm) $(wildcard *.m) \
 	$(wildcard Messaging/*.xm) $(wildcard Messaging/*.mm) $(wildcard Messaging/*.m) \
 	$(wildcard DRM/*.xm) $(wildcard DRM/*.mm) $(wildcard DRM/*.m) \
 	
-ReachApp_FRAMEWORKS = UIKit QuartzCore CoreGraphics 
+ReachApp_FRAMEWORKS = UIKit QuartzCore CoreGraphics CoreImage
 ReachApp_PRIVATE_FRAMEWORKS = GraphicsServices BackBoardServices
 ReachApp_LIBRARIES = applist
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 after-install::
-	install.exec "killall -9 SpringBoard"
-#	install.exec "killall -9 Preferences"
+#	install.exec "killall -9 SpringBoard"
+	install.exec "killall -9 Preferences"
 SUBPROJECTS += reachappsettings
 SUBPROJECTS += reachappflipswitch
 SUBPROJECTS += reachappfsdaemon

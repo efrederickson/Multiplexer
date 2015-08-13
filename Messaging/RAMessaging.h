@@ -30,5 +30,6 @@ static NSString *RAMessagingHideKeyboardMessageName = @"hideKeyboard";
 static NSString *RAMessagingUpdateKeyboardContextIdMessageName = @"updateKBContextId";
 static NSString *RAMessagingRetrieveKeyboardContextIdMessageName = @"getKBContextId";
 static NSString *RAMessagingUpdateKeyboardSizeMessageName = @"updateKBSize";
+static NSString *RAMessagingOpenURLKMessageName = @"openURL";
 
 typedef void (^RAMessageCompletionCallback)(BOOL success);

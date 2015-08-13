@@ -119,6 +119,8 @@ typedef struct {
 
 @interface UIScreen (ohBoy)
 -(CGRect) _interfaceOrientedBounds;
+- (CGPoint)convertPoint:(CGPoint)arg1 toCoordinateSpace:(id)arg2;
++ (CGPoint)convertPoint:(CGPoint)arg1 toView:(id)arg2;
 @end
 
 @interface UIAutoRotatingWindow : UIWindow

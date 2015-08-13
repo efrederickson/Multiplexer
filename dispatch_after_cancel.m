@@ -9,7 +9,6 @@ struct dispatch_async_handle *dispatch_after_cancellable(dispatch_time_t when, d
     handle->shouldFree = 0; // and handles belong to owner
 
     dispatch_after(when, queue, ^{
-        // this is a control block
 
         //NSLog(@"[ReachApp][%p] (control block) call=%d, free=%d, didfree=%d", handle, handle->shouldCall, handle->shouldFree, handle->didFree);
 

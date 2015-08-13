@@ -114,6 +114,15 @@
 	[serverCenter sendMessageName:RAMessagingUpdateKeyboardSizeMessageName userInfo:dict];
 }
 
+-(BOOL) notifyServerToOpenURL:(NSURL*)url openInWindow:(BOOL)openWindow
+{
+	NSDictionary *dict = @{
+		@"url": url.absoluteString,
+		@"openInWindow": @(openWindow)
+	};
+	return [[serverCenter sendMessageAndReceiveReplyName:RAMessagingOpenURLKMessageName userInfo:dict][@"success"] boolValue];
+}
+
 -(BOOL) shouldUseExternalKeyboard { return _currentData.shouldUseExternalKeyboard; }
 -(BOOL) shouldResize { return _currentData.shouldForceSize; }
 -(CGSize) resizeSize { return CGSizeMake(_currentData.wantedClientWidth, _currentData.wantedClientHeight); }

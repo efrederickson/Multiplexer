@@ -288,7 +288,6 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
         if (!scene)
             return;
 
-
         appsBeingHosted[app.bundleIdentifier] = [appsBeingHosted objectForKey:app.bundleIdentifier] ? @([appsBeingHosted[app.bundleIdentifier] intValue] - 1) : @0;
 
         if ([appsBeingHosted[app.bundleIdentifier] intValue] > 0)

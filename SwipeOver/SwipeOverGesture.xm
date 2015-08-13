@@ -30,10 +30,10 @@ CGRect adjustFrameForRotation()
             return (CGRect){ { 0, 0}, { 50, 50 } };
         case UIInterfaceOrientationLandscapeLeft:
             NSLog(@"[ReachApp] landscape left");
-            return (CGRect){ { ((width - portraitWidth) / 2), 0 - 5 }, { portraitWidth, portraitHeight } };
+            return (CGRect){ { ((height - portraitWidth) / 2), -5 }, { portraitWidth, portraitHeight } };
         case UIInterfaceOrientationLandscapeRight:
             NSLog(@"[ReachApp] landscape right");
-            return (CGRect){ { height - portraitHeight, width - portraitWidth }, { portraitHeight, portraitWidth } };
+            return (CGRect){ { (height - portraitHeight) / 2, width - portraitWidth - 5 }, { portraitWidth, portraitHeight } };
     }
     return CGRectZero;
 }
@@ -86,7 +86,7 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
 
                 grabberView = [[UIView alloc] init];
 
-                _UIBackdropView *bgView = [[%c(_UIBackdropView) alloc] initWithStyle:0];
+                _UIBackdropView *bgView = [[%c(_UIBackdropView) alloc] initWithStyle:1];
                 bgView.frame = CGRectMake(0, 0, grabberView.frame.size.width, grabberView.frame.size.height);
                 [grabberView addSubview:bgView];
 

@@ -191,6 +191,15 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
         [UIApplication.sharedApplication.statusBar forceUpdateToData:data animated:YES];   
     }
 }
+
+-(BOOL) openURL:(NSURL*)url
+{
+    if ([RAMessagingClient.sharedInstance isBeingHosted] || [RASettings.sharedInstance openLinksInWindows])
+    {
+        return [RAMessagingClient.sharedInstance notifyServerToOpenURL:url openInWindow:[RASettings.sharedInstance openLinksInWindows]];
+    }
+    return %orig;
+}
 %end
 
 %hook UIStatusBar

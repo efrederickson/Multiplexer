@@ -188,6 +188,8 @@ int disableAutoDismiss = -1;
 	return BOOL(@"launchIntoWindows", NO);
 }
 
+-(BOOL) openLinksInWindows { return BOOL(@"openLinksInWindows", NO); }
+
 -(BOOL) backgrounderEnabled
 {
 	return [self enabled] && BOOL(@"backgrounderEnabled", YES);

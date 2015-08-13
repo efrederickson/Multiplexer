@@ -9,7 +9,7 @@
 #define SYSTEM_VERSION_LESS_THAN(v)                 ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 #define SYSTEM_VERSION_LESS_THAN_OR_EQUAL_TO(v)     ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedDescending)
 
-
+BOOL launchNextOpenIntoWindow = NO;
 BOOL override = NO;
 
 %hook SBIconController
@@ -24,10 +24,23 @@ BOOL override = NO;
 }
 
 -(void)_launchIcon:(unsafe_id)icon
-{ 
+{
 	if (!override) 
 		%orig;
 	else 
 		override = NO;
+}
+%end
+
+%hook SBUIController
+- (void)activateApplicationAnimated:(__unsafe_unretained SBApplication*)arg1
+{
+	if (launchNextOpenIntoWindow)
+	{
+		[RADesktopManager.sharedInstance.currentDesktop createAppWindowForSBApplication:arg1 animated:YES];
+		launchNextOpenIntoWindow = NO;
+		return;
+	}
+	%orig;
 }
 %end
