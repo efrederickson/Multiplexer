@@ -5,7 +5,7 @@
 #import "RASnapshotProvider.h"
 #import "RASpringBoardKeyboardActivation.h"
 
-RAHostedAppView *lastAppView;
+NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
 @interface RAHostedAppView () {
     NSTimer *verifyTimer;
@@ -89,6 +89,7 @@ RAHostedAppView *lastAppView;
         return;
     _isCurrentlyHosting = YES;
 
+    appsBeingHosted[app.bundleIdentifier] = [appsBeingHosted objectForKey:app.bundleIdentifier] ? @([appsBeingHosted[app.bundleIdentifier] intValue] + 1) : @1;
     view = (FBWindowContextHostWrapperView*)[RAHostManager enabledHostViewForApplication:app];
     contextHostManager = (FBWindowContextHostManager*)[RAHostManager hostManagerForApp:app];
     view.backgroundColorWhileNotHosting = [UIColor clearColor];
@@ -99,7 +100,6 @@ RAHostedAppView *lastAppView;
 
     [self addSubview:view];
 
-    lastAppView = self;
     [RAMessagingServer.sharedInstance setHosted:YES forIdentifier:app.bundleIdentifier completion:nil];
 
     if (verifyTimer)
@@ -185,7 +185,6 @@ RAHostedAppView *lastAppView;
 {
     if (!isPreloading && _isCurrentlyHosting && (app.isRunning == NO || view.contextHosted == NO)) // && (app.pid == 0 || view == nil || view.manager == nil)) // || view._isReallyHosting == NO))
     {
-        NSLog(@"[ReachApp] lol");
         [activityView startAnimating];
         [self unloadApp];
         [self loadApp];
@@ -247,9 +246,6 @@ RAHostedAppView *lastAppView;
     [verifyTimer invalidate];
     verifyTimer = nil;
 
-    if (lastAppView == self)
-        lastAppView = nil;
-
     if (_isCurrentlyHosting == NO)
         return;
     
@@ -287,9 +283,15 @@ RAHostedAppView *lastAppView;
     __weak RAHostedAppView *weakSelf = self;
     __block BOOL didRun = NO;
     RAMessageCompletionCallback block = ^(BOOL success) {
-        if (didRun || [UIApplication.sharedApplication._accessibilityFrontMostApplication isEqual:weakSelf.app])
+        if (didRun || (weakSelf && [UIApplication.sharedApplication._accessibilityFrontMostApplication isEqual:weakSelf.app]))
             return;        
         if (!scene)
+            return;
+
+
+        appsBeingHosted[app.bundleIdentifier] = [appsBeingHosted objectForKey:app.bundleIdentifier] ? @([appsBeingHosted[app.bundleIdentifier] intValue] - 1) : @0;
+
+        if ([appsBeingHosted[app.bundleIdentifier] intValue] > 0)
             return;
 
         FBSMutableSceneSettings *settings = [[scene mutableSettings] mutableCopy];
