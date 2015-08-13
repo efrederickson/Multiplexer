@@ -5,6 +5,7 @@
 #import "PDFImage.h"
 #import "PDFImageOptions.h"
 #import "RASettings.h"
+#import "RAHostManager.h"
 
 UIView *grabberView;
 BOOL isShowingGrabber = NO;
@@ -30,7 +31,7 @@ CGRect adjustFrameForRotation()
             return (CGRect){ { 0, 0}, { 50, 50 } };
         case UIInterfaceOrientationLandscapeLeft:
             NSLog(@"[ReachApp] landscape left");
-            return (CGRect){ { ((height - portraitWidth) / 2), -5 }, { portraitWidth, portraitHeight } };
+            return (CGRect){ { ((height - portraitWidth) / 2), -(portraitWidth / 2) }, { portraitWidth, portraitHeight } };
         case UIInterfaceOrientationLandscapeRight:
             NSLog(@"[ReachApp] landscape right");
             return (CGRect){ { (height - portraitHeight) / 2, width - portraitWidth - 5 }, { portraitWidth, portraitHeight } };
@@ -80,6 +81,7 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
 
         if ([[%c(SBUIController) sharedInstance] shouldShowControlCenterTabControlOnFirstSwipe] || [RASettings.sharedInstance alwaysShowSOGrabber])
         {
+            NSLog(@"[ReachApp] %d %d", isShowingGrabber, isPastGrabber);
             if (isShowingGrabber == NO && isPastGrabber == NO)
             {
                 isShowingGrabber = YES;
@@ -100,7 +102,8 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
                 grabberView.clipsToBounds = YES;
 
                 grabberView.transform = adjustTransformRotation();
-                [UIWindow.keyWindow addSubview:grabberView]; // The desktop view most likely
+                //[UIWindow.keyWindow addSubview:grabberView]; // The desktop view most likely
+                [[[RAHostManager systemHostViewForApplication:UIApplication.sharedApplication._accessibilityFrontMostApplication] superview] addSubview:grabberView];
 
                 static void (^dismisser)() = ^{ // top kek, needs "static" so it's not a local, self-retaining block
                     if ([[NSDate date] timeIntervalSinceDate:lastTouch] > 2)

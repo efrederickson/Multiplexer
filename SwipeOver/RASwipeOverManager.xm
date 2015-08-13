@@ -160,6 +160,14 @@ extern int rotationDegsForOrientation(int o);
 		[self stopUsingSwipeOver];
 		return;
 	}
+
+	if (UIApplication.sharedApplication.statusBarOrientation != UIInterfaceOrientationPortrait)
+	{
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:LOCALIZE(@"MULTIPLEXER") message:@"Sorry, SwipeOver is not currently compatible with landscape." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+		[alert show];
+		return;
+	}
+
 	if ([[overlayWindow currentView] isKindOfClass:[RAHostedAppView class]])
 		((RAHostedAppView*)[overlayWindow currentView]).autosizesApp = YES;
 	[overlayWindow currentView].transform = CGAffineTransformIdentity;
