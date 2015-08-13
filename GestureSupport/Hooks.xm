@@ -95,6 +95,18 @@ struct VelocityData {
     if (screenEdgePanRecognizer.state == 1)
     {
         CGPoint location = MSHookIvar<CGPoint>(screenEdgePanRecognizer, "_lastTouchLocation");
+
+        // Adjust for the two unsupported orientations... what...
+        if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeLeft && (location.x != 0 && location.y != 0))
+        {
+            location.x = UIScreen.mainScreen.bounds.size.width - location.x;
+        }
+        else if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationPortraitUpsideDown && (location.x != 0 && location.y != 0))
+        {
+            location.x = UIScreen.mainScreen.bounds.size.width - location.x;
+        }
+
+
         if (shouldBeOverridingForRecognizer == NO)
             shouldBeOverridingForRecognizer = [RAGestureManager.sharedInstance canHandleMovementWithPoint:location velocity:screenEdgePanRecognizer.RA_velocity forEdge:screenEdgePanRecognizer.targetEdges];
         if (shouldBeOverridingForRecognizer) 

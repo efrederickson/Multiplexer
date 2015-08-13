@@ -81,7 +81,6 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
 
         if ([[%c(SBUIController) sharedInstance] shouldShowControlCenterTabControlOnFirstSwipe] || [RASettings.sharedInstance alwaysShowSOGrabber])
         {
-            NSLog(@"[ReachApp] %d %d", isShowingGrabber, isPastGrabber);
             if (isShowingGrabber == NO && isPastGrabber == NO)
             {
                 isShowingGrabber = YES;

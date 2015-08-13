@@ -163,7 +163,7 @@ extern int rotationDegsForOrientation(int o);
 
 	if (UIApplication.sharedApplication.statusBarOrientation != UIInterfaceOrientationPortrait)
 	{
-		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:LOCALIZE(@"MULTIPLEXER") message:@"Sorry, SwipeOver is not currently compatible with landscape." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:LOCALIZE(@"MULTIPLEXER") message:@"Sorry, SwipeOver's side-by-side mode is not currently compatible with landscape." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
 		[alert show];
 		return;
 	}

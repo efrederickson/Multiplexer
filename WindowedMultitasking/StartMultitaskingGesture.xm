@@ -95,7 +95,6 @@ BOOL locationIsInValidArea(CGFloat x)
 
         return RAGestureCallbackResultSuccess;
     } withCondition:^BOOL(CGPoint location, CGPoint velocity) {
-        NSLog(@"[ReachApp] location %@", NSStringFromCGPoint(location));
         return [RASettings.sharedInstance windowedMultitaskingEnabled] && locationIsInValidArea(location.x) && ![[%c(SBUIController) sharedInstance] isAppSwitcherShowing] && ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && [UIApplication.sharedApplication _accessibilityFrontMostApplication] != nil;
     } forEdge:UIRectEdgeBottom identifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture" priority:RAGesturePriorityDefault];
 }
