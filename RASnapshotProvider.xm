@@ -122,7 +122,16 @@
 			RAHostedAppView *hostedView = [((RAWindowBar*)view) attachedView];
 
 			UIImage *image = [RASnapshotProvider.sharedInstance snapshotForIdentifier:hostedView.bundleIdentifier];
-			[image drawInRect:CGRectMake([hostedView convertPoint:hostedView.frame.origin toView:nil].x, [hostedView convertPoint:hostedView.frame.origin toView:nil].y, view.frame.size.width, view.frame.size.height)];
+			CIImage *coreImage = image.CIImage;
+			if (!coreImage)
+			    coreImage = [CIImage imageWithCGImage:image.CGImage];
+
+			coreImage = [coreImage imageByApplyingTransform:CGAffineTransformInvert(view.transform)];
+			image = [UIImage imageWithCIImage:coreImage];
+			[image drawInRect:view.frame];
+
+			//[image drawInRect:CGRectMake([hostedView convertPoint:hostedView.frame.origin toView:nil].x, [hostedView convertPoint:hostedView.frame.origin toView:nil].y, view.frame.size.width, view.frame.size.height)];
+    		//CGContextConcatCTM(c, view.transform);
 
 			/*SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:hostedView.bundleIdentifier];
 			FBScene *scene = [app mainScene];
