@@ -19,3 +19,4 @@
 "FAVORITES" = "Favorites";
 "RECENTS" = "Recent";
 "ACTIVE_APP_WARNING" = "%@\n is currently opened";
+"ASPHALEIA2_AUTH_FAILED" = "Asphaleia 2\n authentication failed for\n %@.\nTap to try again.";

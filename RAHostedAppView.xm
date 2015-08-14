@@ -4,6 +4,7 @@
 #import "RAMessagingServer.h"
 #import "RASnapshotProvider.h"
 #import "RASpringBoardKeyboardActivation.h"
+#import "Asphaleia2.h"
 
 NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
@@ -17,8 +18,8 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
     UILabel *isForemostAppLabel;
 
-    UILabel *biolockdownDidFailLabel;
-    UITapGestureRecognizer *biolockdownFailedRetryTapGesture;
+    UILabel *authenticationDidFailLabel;
+    UITapGestureRecognizer *authenticationFailedRetryTapGesture;
 }
 @end
 
@@ -130,19 +131,22 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
     }
 
     IF_BIOLOCKDOWN {
-
         id failedBlock = ^{
-            if (!biolockdownDidFailLabel)
+            [self removeLoadingIndicator];
+            if (!authenticationDidFailLabel)
             {
-                biolockdownDidFailLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, (self.frame.size.height - 40) / 2, self.frame.size.width, 40)];
-                biolockdownDidFailLabel.textColor = [UIColor whiteColor];
-                biolockdownDidFailLabel.textAlignment = NSTextAlignmentCenter;
-                biolockdownDidFailLabel.font = [UIFont systemFontOfSize:36];
-                biolockdownDidFailLabel.text = [NSString stringWithFormat:LOCALIZE(@"BIOLOCKDOWN_AUTH_FAILED"),self.app.displayName];
-                [self addSubview:biolockdownDidFailLabel];
+                authenticationDidFailLabel = [[UILabel alloc] initWithFrame:self.bounds];
+                authenticationDidFailLabel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.8];
+                authenticationDidFailLabel.textColor = [UIColor whiteColor];
+                authenticationDidFailLabel.textAlignment = NSTextAlignmentCenter;
+                authenticationDidFailLabel.font = [UIFont systemFontOfSize:36];
+                authenticationDidFailLabel.numberOfLines = 0;
+                authenticationDidFailLabel.lineBreakMode = NSLineBreakByWordWrapping;
+                authenticationDidFailLabel.text = [NSString stringWithFormat:LOCALIZE(@"BIOLOCKDOWN_AUTH_FAILED"),self.app.displayName];
+                [self addSubview:authenticationDidFailLabel];
 
-                biolockdownFailedRetryTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(loadApp)];
-                [self addGestureRecognizer:biolockdownFailedRetryTapGesture];
+                authenticationFailedRetryTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(loadApp)];
+                [self addGestureRecognizer:authenticationFailedRetryTapGesture];
                 self.userInteractionEnabled = YES;
             }
         };
@@ -152,7 +156,35 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
         }, failedBlock /* stupid commas */);
     }
     else
-        [self _actualLoadApp];
+    {
+        IF_ASPHALEIA2 {
+            void (^failedBlock)() = ^{
+                [self removeLoadingIndicator];
+                if (!authenticationDidFailLabel)
+                {
+                    authenticationDidFailLabel = [[UILabel alloc] initWithFrame:self.bounds];
+                    authenticationDidFailLabel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.8];
+                    authenticationDidFailLabel.textColor = [UIColor whiteColor];
+                    authenticationDidFailLabel.textAlignment = NSTextAlignmentCenter;
+                    authenticationDidFailLabel.font = [UIFont systemFontOfSize:36];
+                    authenticationDidFailLabel.numberOfLines = 0;
+                    authenticationDidFailLabel.lineBreakMode = NSLineBreakByWordWrapping;
+                    authenticationDidFailLabel.text = [NSString stringWithFormat:LOCALIZE(@"ASPHALEIA2_AUTH_FAILED"),self.app.displayName];
+                    [self addSubview:authenticationDidFailLabel];
+
+                    authenticationFailedRetryTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(loadApp)];
+                    [self addGestureRecognizer:authenticationFailedRetryTapGesture];
+                    self.userInteractionEnabled = YES;
+                }
+            };
+
+            ASPHALEIA2_AUTHENTICATE_APP(app.bundleIdentifier, ^{
+                [self _actualLoadApp];
+            }, failedBlock);
+        }
+        else
+            [self _actualLoadApp];
+    }
 
     if (self.showSplashscreenInsteadOfSpinner)
     {
@@ -191,14 +223,19 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
     }
     else
     {
-        if (self.showSplashscreenInsteadOfSpinner)
-        {
-            [splashScreenImageView removeFromSuperview];
-            splashScreenImageView = nil;
-        }
-        else
-            [activityView stopAnimating];
+        [self removeLoadingIndicator];
     }
+}
+
+-(void) removeLoadingIndicator
+{
+    if (self.showSplashscreenInsteadOfSpinner)
+    {
+        [splashScreenImageView removeFromSuperview];
+        splashScreenImageView = nil;
+    }
+    else
+        [activityView stopAnimating];
 }
 
 -(void) setFrame:(CGRect)frame
@@ -253,12 +290,12 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
     FBScene *scene = [app mainScene];
 
-    if (biolockdownDidFailLabel)
+    if (authenticationDidFailLabel)
     {
-        [biolockdownDidFailLabel removeFromSuperview];
-        biolockdownDidFailLabel = nil;
+        [authenticationDidFailLabel removeFromSuperview];
+        authenticationDidFailLabel = nil;
 
-        [self removeGestureRecognizer:biolockdownFailedRetryTapGesture];
+        [self removeGestureRecognizer:authenticationFailedRetryTapGesture];
         self.userInteractionEnabled = NO;
     }
 
