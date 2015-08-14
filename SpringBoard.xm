@@ -49,10 +49,10 @@
         [RASwipeOverManager.sharedInstance stopUsingSwipeOver];
     }
 
-    if (RAMissionControlManager.sharedInstance.isShowingMissionControl)
-    {
-        [RAMissionControlManager.sharedInstance hideMissionControl:YES];
-    }
+    //if (RAMissionControlManager.sharedInstance.isShowingMissionControl)
+    //{
+    //    [RAMissionControlManager.sharedInstance hideMissionControl:YES];
+    //}
 
     return %orig;
 }

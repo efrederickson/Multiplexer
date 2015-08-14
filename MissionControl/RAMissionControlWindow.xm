@@ -467,4 +467,25 @@
 	otherRunningAppsScrollView = nil;
 	windowedAppScrollView = nil;
 }
+
+-(UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
+{
+    NSEnumerator *objects = [self.subviews reverseObjectEnumerator];
+    UIView *subview;
+    while ((subview = [objects nextObject])) 
+    {
+        UIView *success = [subview hitTest:[self convertPoint:point toView:subview] withEvent:event];
+        if (success)
+            return success;
+    }
+    return self;
+    //return [super hitTest:point withEvent:event];
+}
+
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event 
+{
+	if (CGRectContainsPoint(self.frame, point))
+		return YES;
+	return [super pointInside:point withEvent:event];
+}
 @end

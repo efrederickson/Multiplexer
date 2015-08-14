@@ -36,6 +36,11 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	return override;
 }
 
+-(void) removeTemporaryOverrideForIdentifier:(NSString*)identifier
+{
+	[temporaryOverrides removeObjectForKey:identifier];
+}
+
 -(NSInteger) popTemporaryOverrideForApplication:(NSString*)identifier is:(RABackgroundMode)mode
 {
 	NSInteger popped = [self popTemporaryOverrideForApplication:identifier];

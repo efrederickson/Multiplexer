@@ -40,8 +40,17 @@
 		{
 			[RAMissionControlManager.sharedInstance showMissionControl:YES];
 	    }
+	    else
+	    	[RAMissionControlManager.sharedInstance hideMissionControl:YES];
 
 		return YES;
+	}
+	else
+	{
+		if ([RAMissionControlManager.sharedInstance isShowingMissionControl])
+		{
+			[RAMissionControlManager.sharedInstance hideMissionControl:YES];
+		}
 	}
 
 	BOOL s = %orig;

@@ -68,18 +68,24 @@
                     [[%c(SBAppSwitcherModel) sharedInstance] removeDisplayItem:item];
                 }
             }
+            [RABackgrounder.sharedInstance removeTemporaryOverrideForIdentifier:arg1.identifier];
         }
 
         if ([RABackgrounder.sharedInstance shouldKeepInForeground:arg1.identifier] && arg2.backgrounded == YES)
         {
             [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
+            [RABackgrounder.sharedInstance removeTemporaryOverrideForIdentifier:arg1.identifier];
             return;
         }
         else if ([RABackgrounder.sharedInstance backgroundModeForIdentifier:arg1.identifier] == RABackgroundModeNative && arg2.backgrounded)
+        {
             [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
+            [RABackgrounder.sharedInstance removeTemporaryOverrideForIdentifier:arg1.identifier];
+        }
         else if ([RABackgrounder.sharedInstance shouldSuspendImmediately:arg1.identifier] && arg2.backgrounded)
         {
             [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
+            [RABackgrounder.sharedInstance removeTemporaryOverrideForIdentifier:arg1.identifier];
 
             //SBApplication *app = [[%c(SBApplicationController) sharedInstance] RA_applicationWithBundleIdentifier:arg1.identifier];
             //if ([suspendImmediatelyVerifierDict objectForKey:arg1.identifier] == nil)
@@ -91,6 +97,7 @@
         else if ([RABackgrounder.sharedInstance shouldSuspendImmediately:arg1.identifier] && arg2.backgrounded == NO)// && [suspendImmediatelyVerifierDict objectForKey:arg1.identifier] != nil)
         {
             [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
+            [RABackgrounder.sharedInstance removeTemporaryOverrideForIdentifier:arg1.identifier];
             //BKSProcessAssertion *assertion = suspendImmediatelyVerifierDict[arg1.identifier];
             //[assertion invalidate];
             //[suspendImmediatelyVerifierDict removeObjectForKey:arg1.identifier];
@@ -108,6 +115,7 @@
     if ([RABackgrounder.sharedInstance preventKillingOfIdentifier:self.bundleIdentifier])
     {
         [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:self.bundleIdentifier]];
+            [RABackgrounder.sharedInstance removeTemporaryOverrideForIdentifier:self.bundleIdentifier];
         return;
     }
     %orig;
@@ -116,13 +124,17 @@
 -(BOOL) _queue_supportsBackgroundTaskAssertions
 {
     if ([RABackgrounder.sharedInstance shouldSuspendImmediately:self.bundleIdentifier])
+    {
         return NO;
+    }
     return %orig;
 }
 -(BOOL) _queue_supportsContinuousBackgroundMode
 {
     if ([RABackgrounder.sharedInstance shouldSuspendImmediately:self.bundleIdentifier])
+    {
         return NO;
+    }
     return %orig;   
 }
 %end
