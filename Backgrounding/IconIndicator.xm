@@ -115,13 +115,14 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
     return [objc_getAssociatedObject(self, @selector(RA_isIconIndicatorInhibited)) boolValue];
 }
 
-/*-(void) layoutSubviews
+-(void) layoutSubviews
 {
     %orig;
 
     //if ([self viewWithTag:9962] == nil)
+    // this is back in, again, to try to fix "Smartclose badges show randomly in the app switcher for random applications even though I only have one app smart closed"
 	    [self RA_updateIndicatorView:GET_INFO];
-}*/
+}
 
 - (void)setIsEditing:(_Bool)arg1 animated:(_Bool)arg2
 {
