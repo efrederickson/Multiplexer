@@ -18,4 +18,4 @@
 "WIDGETS" = "Widgets";
 "FAVORITES" = "Favorites";
 "RECENTS" = "Recent";
-"ACTIVE_APP_WARNING" = "%@ is currently opened";
+"ACTIVE_APP_WARNING" = "%@\n is currently opened";
