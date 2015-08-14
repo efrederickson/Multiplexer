@@ -5,7 +5,7 @@
 @interface RAMessagingClient : NSObject {
 	CPDistributedMessagingCenter *serverCenter;
 }
-+(id) sharedInstance;
++(instancetype) sharedInstance;
 
 @property (nonatomic, readonly) RAMessageAppData currentData;
 

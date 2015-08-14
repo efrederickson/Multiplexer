@@ -17,6 +17,7 @@
 -(void) sendStoredDataToApp:(NSString*)identifier completion:(RAMessageCompletionCallback)callback;
 
 -(void) resizeApp:(NSString*)identifier toSize:(CGSize)size completion:(RAMessageCompletionCallback)callback;
+-(void) moveApp:(NSString*)identifier toOrigin:(CGPoint)origin completion:(RAMessageCompletionCallback)callback;
 -(void) endResizingApp:(NSString*)identifier completion:(RAMessageCompletionCallback)callback;
 
 -(void) rotateApp:(NSString*)identifier toOrientation:(UIInterfaceOrientation)orientation completion:(RAMessageCompletionCallback)callback;

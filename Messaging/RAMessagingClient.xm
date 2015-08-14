@@ -1,7 +1,7 @@
 #import "RAMessagingClient.h"
 
 @implementation RAMessagingClient
-+(id) sharedInstance
++(instancetype) sharedInstance
 {
 	SHARED_INSTANCE2(RAMessagingClient, [sharedInstance loadMessagingCenter]);
 }
@@ -11,6 +11,8 @@
 	RAMessageAppData data;
 
 	data.shouldForceSize = NO;
+	data.wantedClientOriginX = -1;
+	data.wantedClientOriginY = -1;
 	data.wantedClientWidth = -1;
 	data.wantedClientHeight = -1;
 	data.statusBarVisibility = YES;

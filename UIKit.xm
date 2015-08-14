@@ -20,8 +20,8 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
         if ([oldFrames objectForKey:@(self.hash)] == nil)
             [oldFrames setObject:[NSValue valueWithCGRect:frame] forKey:@(self.hash)];
 
-        frame.origin.x = 0;
-        frame.origin.y = 0;
+        frame.origin.x = RAMessagingClient.sharedInstance.currentData.wantedClientOriginX == -1 ? 0 : RAMessagingClient.sharedInstance.currentData.wantedClientOriginX;
+        frame.origin.y = RAMessagingClient.sharedInstance.currentData.wantedClientOriginY == -1 ? 0 : RAMessagingClient.sharedInstance.currentData.wantedClientOriginY;
         CGFloat overrideWidth = [RAMessagingClient.sharedInstance resizeSize].width;
         CGFloat overrideHeight = [RAMessagingClient.sharedInstance resizeSize].height;
         if (overrideWidth != -1 && overrideWidth != 0)

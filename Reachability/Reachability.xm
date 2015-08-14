@@ -470,8 +470,12 @@ CGFloat startingY = -1;
 
     if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
     {
-        topFrame = CGRectMake(topWindow.frame.origin.x, center.y, topWindow.frame.size.width, UIScreen.mainScreen.bounds.size.height - center.y);
-        bottomFrame = CGRectMake(bottomWindow.frame.origin.x, bottomWindow.frame.origin.y, bottomWindow.frame.size.width, center.y);
+        topFrame = CGRectMake(topWindow.frame.origin.x, 0, topWindow.frame.size.width, center.y);
+        bottomFrame = CGRectMake(bottomWindow.frame.origin.x, center.y, bottomWindow.frame.size.width, UIScreen.mainScreen.bounds.size.height - center.y);
+    }
+    else if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationPortraitUpsideDown)
+    {
+
     }
 
     if ([view isKindOfClass:[RAAppSliderProviderView class]])
@@ -480,12 +484,12 @@ CGFloat startingY = -1;
         sliderView.frame = topFrame;
     }
 
-    if ([RASettings.sharedInstance flipTopAndBottom])
+    /*if ([RASettings.sharedInstance flipTopAndBottom])
     {
         CGRect tmp = topFrame;
         topFrame = bottomFrame;
         bottomFrame = tmp;
-    }
+    }*/
 
     if (animate)
     {
@@ -518,19 +522,36 @@ CGFloat startingY = -1;
         if ([view isKindOfClass:[RAAppSliderProviderView class]])
         {
             RAAppSliderProviderView *sliderView = (RAAppSliderProviderView*)view;
-            width = sliderView.clientFrame.size.width;
-            height = sliderView.clientFrame.size.height;
-        }
-        else
-        {
+            //width = sliderView.clientFrame.size.width;
+            //height = sliderView.clientFrame.size.height;
+
+
             if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
             {
-                width = topWindow.frame.size.height;
+                width = center.y;
                 height = topWindow.frame.size.width;
             }
             else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
             {
                 width = topWindow.frame.size.height;
+                height = topWindow.frame.size.width;
+            }
+            else
+            {
+                width = sliderView.clientFrame.size.width;
+                height = sliderView.clientFrame.size.height;
+            }
+        }
+        else
+        {
+            if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
+            {
+                width = center.y;
+                height = topWindow.frame.size.width;
+            }
+            else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
+            {
+                width = bottomWindow.frame.origin.y;
                 height = topWindow.frame.size.width;
             }
             else
@@ -543,6 +564,9 @@ CGFloat startingY = -1;
         NSString *targetIdentifier = lastBundleIdentifier;
         if ([view isKindOfClass:[RAAppSliderProviderView class]])
             targetIdentifier = [((RAAppSliderProviderView*)view) currentBundleIdentifier];
+
+        if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
+            [RAMessagingServer.sharedInstance moveApp:targetIdentifier toOrigin:CGPointMake(bottomWindow.frame.size.height, 0) completion:nil];
 
         [RAMessagingServer.sharedInstance resizeApp:targetIdentifier toSize:CGSizeMake(width, height) completion:nil];
         [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:YES forApp:targetIdentifier completion:nil];
@@ -561,8 +585,11 @@ CGFloat startingY = -1;
     }
     else if ([UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
     {
+        //width = center.y;
         width = bottomWindow.frame.size.height;
         height = bottomWindow.frame.size.width;
+
+        [RAMessagingServer.sharedInstance moveApp:currentBundleIdentifier toOrigin:CGPointMake(bottomWindow.frame.origin.y, 0) completion:nil];
     }
     else
     {

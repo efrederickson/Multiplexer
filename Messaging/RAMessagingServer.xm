@@ -129,6 +129,8 @@ extern BOOL launchNextOpenIntoWindow;
 	{
 		// Initialize with some default values
 		ret.shouldForceSize = NO;
+		ret.wantedClientOriginX = -1;
+		ret.wantedClientOriginY = -1;
 		ret.wantedClientWidth = -1;
 		ret.wantedClientHeight = -1;
 		ret.statusBarVisibility = YES;
@@ -280,6 +282,16 @@ extern BOOL launchNextOpenIntoWindow;
 	RAMessageAppData data = [self getDataForIdentifier:identifier];
 	data.wantedClientWidth = size.width;
 	data.wantedClientHeight = size.height;
+	data.shouldForceSize = YES;
+	[self setData:data forIdentifier:identifier];
+	[self sendStoredDataToApp:identifier completion:callback];
+}
+
+-(void) moveApp:(NSString*)identifier toOrigin:(CGPoint)origin completion:(RAMessageCompletionCallback)callback
+{
+	RAMessageAppData data = [self getDataForIdentifier:identifier];
+	data.wantedClientOriginX = origin.x;
+	data.wantedClientOriginY = origin.y;
 	data.shouldForceSize = YES;
 	[self setData:data forIdentifier:identifier];
 	[self sendStoredDataToApp:identifier completion:callback];
