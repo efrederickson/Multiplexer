@@ -6,6 +6,7 @@
 #import "RAWindowStatePreservationSystemManager.h"
 #import "RAResourceImageProvider.h"
 
+extern BOOL allowOpenApp;
 const int rightSizeViewTag = 987654321;
 const int bottomSizeViewTag =  987654320;
 
@@ -158,7 +159,9 @@ const int bottomSizeViewTag =  987654320;
 
 -(void) maximize
 {
+	allowOpenApp = YES;
 	[[%c(SBUIController) sharedInstance] activateApplicationAnimated:attachedView.app];
+	allowOpenApp = NO;
 }
 
 -(void) minimize

@@ -11,6 +11,7 @@
 
 BOOL launchNextOpenIntoWindow = NO;
 BOOL override = NO;
+BOOL allowOpenApp = NO;
 
 %hook SBIconController
 -(void)iconWasTapped:(__unsafe_unretained SBApplicationIcon*)arg1 
@@ -35,10 +36,13 @@ BOOL override = NO;
 %hook SBUIController
 - (void)activateApplicationAnimated:(__unsafe_unretained SBApplication*)arg1
 {
-	if (launchNextOpenIntoWindow)
+	// Broken
+	//if (launchNextOpenIntoWindow)
+
+	if ([RASettings.sharedInstance launchIntoWindows] && allowOpenApp != YES)
 	{
 		[RADesktopManager.sharedInstance.currentDesktop createAppWindowForSBApplication:arg1 animated:YES];
-		launchNextOpenIntoWindow = NO;
+		//launchNextOpenIntoWindow = NO;
 		return;
 	}
 	%orig;
