@@ -15,6 +15,7 @@
 #import "RAMissionControlManager.h"
 #import "RADesktopManager.h"
 #import "RADesktopWindow.h"
+#import "Asphaleia2.h"
 
 #define SPRINGBOARD ([NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"])
 
@@ -97,5 +98,6 @@
     if (SPRINGBOARD)
     {
         %init;
+        LOAD_ASPHALEIA;
     }
 }

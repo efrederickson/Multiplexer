@@ -26,7 +26,7 @@ typedef void (^ASCommonAuthenticationHandler) (BOOL wasCancelled);
 
 @end
 
-#define LOAD_ASPHALEIA dlopen("/usr/lib/libasphaleiaui.dylib", RTLD_LAZY);
+#define LOAD_ASPHALEIA if ([NSFileManager.defaultManager fileExistsAtPath:@"/usr/lib/libasphaleiaui.dylib"]) dlopen("/usr/lib/libasphaleiaui.dylib", RTLD_LAZY);
 
 #define HAS_ASPHALEIA2 (objc_getClass("ASCommon") != nil)
 #define IF_ASPHALEIA2  if (HAS_ASPHALEIA2)
