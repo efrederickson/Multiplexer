@@ -11,7 +11,7 @@
     if (icon && !iconView)
 	    iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
 
-    iconView.layer.shadowRadius = 12; // iconView.layer.cornerRadius;
+    iconView.layer.shadowRadius = THEMED(missionControlIconPreviewShadowRadius); // iconView.layer.cornerRadius;
     iconView.layer.shadowOpacity = 0.8;
     iconView.layer.shadowOffset = CGSizeMake(0, 0);
     iconView.userInteractionEnabled = NO;

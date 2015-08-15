@@ -25,6 +25,10 @@
 #import "RALocalizer.h"
 #define LOCALIZE(x) [RALocalizer.sharedInstance localizedStringForKey:x]
 
+#import "RAThemeManager.h"
+// Note that "x" expands into the passed variable
+#define THEMED(x) RAThemeManager.sharedInstance.currentTheme.x
+
 #if DEBUG
 #define NSLog NSLog
 #else

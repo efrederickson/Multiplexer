@@ -120,7 +120,7 @@ extern int rotationDegsForOrientation(int o);
     UIView *detachView = [[UIView alloc] initWithFrame:CGRectMake(0, -20, view.frame.size.width, 20)];
     UITapGestureRecognizer *detachGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(detachViewAndCloseSwipeOver)];
     [detachView addGestureRecognizer:detachGesture];
-    detachView.backgroundColor = [UIColor grayColor];
+    detachView.backgroundColor = THEMED(swipeOverDetachBarColor);
     detachView.userInteractionEnabled = YES;
     detachGesture.delegate = overlayWindow;
     detachView.tag = 9903553;

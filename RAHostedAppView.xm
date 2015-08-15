@@ -125,6 +125,8 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
         isForemostAppLabel.textColor = [UIColor whiteColor];
         isForemostAppLabel.textAlignment = NSTextAlignmentCenter;
         isForemostAppLabel.font = [UIFont systemFontOfSize:36];
+        isForemostAppLabel.numberOfLines = 0;
+        isForemostAppLabel.lineBreakMode = NSLineBreakByWordWrapping;
         isForemostAppLabel.text = [NSString stringWithFormat:LOCALIZE(@"ACTIVE_APP_WARNING"),self.app.displayName];
         [self addSubview:isForemostAppLabel];
         return;

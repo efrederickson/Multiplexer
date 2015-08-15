@@ -72,4 +72,6 @@ enum RAGrabArea {
 -(NSInteger) windowRotationLockMode;
 -(RAGrabArea) windowedMultitaskingGrabArea;
 -(RAGrabArea) swipeOverGrabArea;
+
+-(NSString*) currentThemeIdentifier;
 @end 

@@ -1,6 +1,7 @@
 #import "RASettings.h"
 #import "headers.h"
 #import "RABackgrounder.h"
+#import "RAThemeManager.h"
 
 extern id/*RANCViewController* */ ncAppViewController;
 
@@ -68,6 +69,7 @@ int disableAutoDismiss = -1;
 	if ([self shouldShowStatusBarIcons] == NO && [objc_getClass("SBApplication") respondsToSelector:@selector(RA_clearAllStatusBarIcons)])
 		[objc_getClass("SBApplication") performSelector:@selector(RA_clearAllStatusBarIcons)];
 
+	[RAThemeManager.sharedInstance invalidateCurrentThemeAndReload:[self currentThemeIdentifier]];
 }
 
 -(BOOL) enabled
@@ -279,6 +281,7 @@ int disableAutoDismiss = -1;
 -(BOOL) windowedMultitaskingEnabled { return [self enabled] && BOOL(@"windowedMultitaskingEnabled", YES); }
 -(BOOL) exitAppAfterUsingActivatorAction { return BOOL(@"exitAppAfterUsingActivatorAction", YES); }
 -(BOOL) windowedMultitaskingCompleteAnimations { return BOOL(@"windowedMultitaskingCompleteAnimations", NO); }
+-(NSString*) currentThemeIdentifier { return _settings[@"currentThemeIdentifier"] ?: @"com.eljahandandrew.multiplexer.themes.default"; }
 
 -(RAGrabArea) windowedMultitaskingGrabArea
 {

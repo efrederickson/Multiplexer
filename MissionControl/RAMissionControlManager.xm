@@ -119,7 +119,7 @@ CGRect swappedForOrientation(CGRect in)
 	[window _rotateWindowToOrientation:UIApplication.sharedApplication.statusBarOrientation updateStatusBar:YES duration:1 skipCallbacks:NO];
 
 	//_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:1];
-	_UIBackdropViewSettings *blurSettings = [_UIBackdropViewSettings settingsForStyle:1];
+	_UIBackdropViewSettings *blurSettings = [_UIBackdropViewSettings settingsForStyle:THEMED(missionControlBlurStyle)];
 	[blurSettings setBlurQuality:@"low"];
 	_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithSettings:blurSettings];
 	blurView.frame = window.frame;

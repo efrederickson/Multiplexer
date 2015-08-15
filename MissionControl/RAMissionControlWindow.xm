@@ -81,7 +81,7 @@
 		y = y + desktopLabel.frame.size.height;
 
 		desktopScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y, self.frame.size.width, height * 1.2)];
-		desktopScrollView.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.3];
+		desktopScrollView.backgroundColor = [THEMED(missionControlScrollViewBackgroundColor) colorWithAlphaComponent:THEMED(missionControlScrollViewOpacity)];
 
 		[self addSubview:desktopScrollView];
 	}
@@ -167,7 +167,7 @@
 		[self addSubview:windowedLabel];
 
 		windowedAppScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + windowedLabel.frame.size.height, self.frame.size.width, height * 1.2)];
-		windowedAppScrollView.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.3];
+		windowedAppScrollView.backgroundColor = [THEMED(missionControlScrollViewBackgroundColor) colorWithAlphaComponent:THEMED(missionControlScrollViewOpacity)];
 
 		[self addSubview:windowedAppScrollView];
 	}
@@ -227,7 +227,7 @@
 		[self addSubview:otherLabel];
 
 		otherRunningAppsScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + otherLabel.frame.size.height, self.frame.size.width, height * 1.2)];
-		otherRunningAppsScrollView.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.3];
+		otherRunningAppsScrollView.backgroundColor = [THEMED(missionControlScrollViewBackgroundColor) colorWithAlphaComponent:THEMED(missionControlScrollViewOpacity)];
 
 		[self addSubview:otherRunningAppsScrollView];
 	}

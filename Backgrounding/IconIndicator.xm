@@ -75,11 +75,11 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 		badge = [[RAIconBadgeView alloc] init];
 		badge.tag = 9962;
 
-		badge.textColor = UIColor.whiteColor;
+		badge.textColor = THEMED(backgroundingIndicatorTextColor);
 		badge.textAlignment = NSTextAlignmentCenter;
 		badge.clipsToBounds = YES;
 		badge.layer.cornerRadius = 12;
-		badge.backgroundColor = [UIColor colorWithRed:60/255.0f green:108/255.0f blue:255/255.0f alpha:1.0f];
+		badge.backgroundColor = THEMED(backgroundingIndicatorBackgroundColor);
 		[self addSubview:badge];
 
 		CGPoint overhang = [%c(SBIconBadgeView) _overhang];
