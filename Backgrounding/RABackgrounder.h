@@ -42,6 +42,7 @@ enum RAIconIndicatorViewInfo {
 -(BOOL) hasUnlimitedBackgroundTime:(NSString*)identifier;
 
 -(void) temporarilyApplyBackgroundingMode:(RABackgroundMode)mode forApplication:(SBApplication*)app andCloseForegroundApp:(BOOL)close;
+-(void) queueRemoveTemporaryOverrideForIdentifier:(NSString*)identifier;
 -(void) removeTemporaryOverrideForIdentifier:(NSString*)identifier;
 
 -(BOOL) application:(NSString*)identifier overrideBackgroundMode:(NSString*)mode;

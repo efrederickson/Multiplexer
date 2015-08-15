@@ -2,6 +2,7 @@
 #import "RASettings.h"
 
 NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
+NSMutableDictionary *temporaryShouldPop = [NSMutableDictionary dictionary];
 
 @implementation RABackgrounder
 +(id) sharedInstance
@@ -32,13 +33,25 @@ NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 	if (![temporaryOverrides objectForKey:identifier])
 		return -1;
 	RABackgroundMode override = (RABackgroundMode)[temporaryOverrides[identifier] intValue];
-	[temporaryOverrides removeObjectForKey:identifier];
 	return override;
+}
+
+-(void) queueRemoveTemporaryOverrideForIdentifier:(NSString*)identifier
+{
+	NSLog(@"[ReachApp] queue %@", identifier);
+	temporaryShouldPop[identifier] = @YES;
 }
 
 -(void) removeTemporaryOverrideForIdentifier:(NSString*)identifier
 {
-	[temporaryOverrides removeObjectForKey:identifier];
+	if ([temporaryShouldPop objectForKey:identifier] != nil && [[temporaryShouldPop objectForKey:identifier] boolValue])
+	{
+	NSLog(@"[ReachApp] remove %@", identifier);
+		[temporaryShouldPop removeObjectForKey:identifier];
+		[temporaryOverrides removeObjectForKey:identifier];	
+	}
+	else
+		NSLog(@"[ReachApp] ignore remove %@", identifier);
 }
 
 -(NSInteger) popTemporaryOverrideForApplication:(NSString*)identifier is:(RABackgroundMode)mode

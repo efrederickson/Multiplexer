@@ -66,7 +66,6 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 		[RASettings.sharedInstance backgrounderEnabled] == NO)
 	{
 		[[self viewWithTag:9962] removeFromSuperview];
-		//SET_INFO(RAIconIndicatorViewInfoNone);
 		return;
 	}
 

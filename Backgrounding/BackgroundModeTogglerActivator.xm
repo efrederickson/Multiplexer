@@ -22,7 +22,7 @@ static RAActivatorBackgrounderToggleModeListener *sharedInstance$RAActivatorBack
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    SBApplication *app = [UIApplication sharedApplication]._accessibilityFrontMostApplication;
+    SBApplication *app = UIApplication.sharedApplication._accessibilityFrontMostApplication;
     if (!app)
         return;
 
@@ -44,12 +44,10 @@ static RAActivatorBackgrounderToggleModeListener *sharedInstance$RAActivatorBack
     }
     else if (buttonIndex == 2)
     {
-        // Disabled
         [RABackgrounder.sharedInstance temporarilyApplyBackgroundingMode:RABackgroundModeForceNone forApplication:app andCloseForegroundApp:dismissApp];
     }
-    else if (buttonIndex == 3)
+    else// if (buttonIndex == 3)
     {
-        // Suspend Immediately
         [RABackgrounder.sharedInstance temporarilyApplyBackgroundingMode:RABackgroundModeSuspendImmediately forApplication:app andCloseForegroundApp:dismissApp];
     }
 }
