@@ -77,7 +77,7 @@ BOOL locationIsInValidArea(CGFloat x)
                     appView.transform = CGAffineTransformMakeScale(0.5, 0.5);
                 } completion:^(BOOL _) {
                     // Close app
-                    [RABackgrounder.sharedInstance temporarilyApplyBackgroundingMode:RABackgroundModeForcedForeground forApplication:UIApplication.sharedApplication._accessibilityFrontMostApplication andCloseForegroundApp:NO];
+                    //[RABackgrounder.sharedInstance temporarilyApplyBackgroundingMode:RABackgroundModeForcedForeground forApplication:UIApplication.sharedApplication._accessibilityFrontMostApplication andCloseForegroundApp:NO];
                     FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
                         SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
                         [transaction begin];
