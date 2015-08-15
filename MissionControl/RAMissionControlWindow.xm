@@ -411,7 +411,7 @@
 		CGPoint newCenter = [gesture translationInView:gesture.view];
 		//newCenter.x += initialCenter.x;
 		newCenter.x = initialCenter.x;
-		if (newCenter.y > 0)
+		if (newCenter.y > 0 || gesture.view.tag == 0)
 			newCenter.y = initialCenter.y + (newCenter.y / 5); //initialCenter.y;
 		else
 			newCenter.y += initialCenter.y;
