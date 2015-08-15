@@ -1,6 +1,25 @@
 #import "RABackgrounder.h"
 #import "RASettings.h"
 
+NSString *FriendlyNameForBackgroundMode(RABackgroundMode mode)
+{
+	switch (mode)
+	{
+		case RABackgroundModeNative:
+			return LOCALIZE(@"NATIVE");
+		case RABackgroundModeForcedForeground:
+			return LOCALIZE(@"FORCE_FOREGROUND");
+		case RABackgroundModeForceNone:
+			return LOCALIZE(@"DISABLE");
+		case RABackgroundModeSuspendImmediately:
+			return LOCALIZE(@"SUSPEND_IMMEDIATELY");
+		case RABackgroundModeUnlimitedBackgroundingTime:
+			return LOCALIZE(@"UNLIMITED_BACKGROUNDING_TIME");
+		default:
+			return @"Unknown";
+	}
+}
+
 NSMutableDictionary *temporaryOverrides = [NSMutableDictionary dictionary];
 NSMutableDictionary *temporaryShouldPop = [NSMutableDictionary dictionary];
 

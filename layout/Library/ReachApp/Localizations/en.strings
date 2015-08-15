@@ -1,7 +1,7 @@
 "BIOLOCKDOWN_AUTH_DESCRIPTION" = "Multiplexer requires authentication";
 "BIOLOCKDOWN_AUTH_FAILED" = "BioLockdown authentication failed for %@. Tap to try again.";
 "MULTIPLEXER" = "Multiplexer";
-"BACKGROUNDER_POPUP_SWITCHER_TEXT" = "Which backgrounding mode would you like to enable for %@?";
+"BACKGROUNDER_POPUP_SWITCHER_TEXT" = "Which backgrounding mode would you like to enable for %@ (currently %@)?";
 "CANCEL" = "Cancel";
 "FORCE_FOREGROUND" = "Force Foreground";
 "NATIVE" = "Native";
@@ -20,3 +20,4 @@
 "RECENTS" = "Recent";
 "ACTIVE_APP_WARNING" = "%@\n is currently opened";
 "ASPHALEIA2_AUTH_FAILED" = "Asphaleia 2\n authentication failed for\n %@.\nTap to try again.";
+"UNLIMITED_BACKGROUNDING_TIME" = "Unlimited Backgrounding Time";

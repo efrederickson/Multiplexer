@@ -26,6 +26,8 @@ enum RAIconIndicatorViewInfo {
 	RAIconIndicatorViewInfoUninhibit = 4096,
 };
 
+NSString *FriendlyNameForBackgroundMode(RABackgroundMode mode);
+
 @interface RABackgrounder : NSObject
 +(id) sharedInstance;
 

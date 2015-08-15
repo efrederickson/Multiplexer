@@ -15,7 +15,9 @@ static RAActivatorBackgrounderToggleModeListener *sharedInstance$RAActivatorBack
     if (!app)
         return;
 
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:LOCALIZE(@"MULTIPLEXER") message:[NSString stringWithFormat:LOCALIZE(@"BACKGROUNDER_POPUP_SWITCHER_TEXT"),app.displayName] delegate:self cancelButtonTitle:LOCALIZE(@"CANCEL") otherButtonTitles:LOCALIZE(@"FORCE_FOREGROUND"), LOCALIZE(@"NATIVE"), LOCALIZE(@"SUSPEND_IMMEDIATELY"), LOCALIZE(@"DISABLE"), nil];
+    NSString *friendlyCurrentBackgroundMode = FriendlyNameForBackgroundMode((RABackgroundMode)[RABackgrounder.sharedInstance backgroundModeForIdentifier:app.bundleIdentifier]);
+
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:LOCALIZE(@"MULTIPLEXER") message:[NSString stringWithFormat:LOCALIZE(@"BACKGROUNDER_POPUP_SWITCHER_TEXT"),app.displayName,friendlyCurrentBackgroundMode] delegate:self cancelButtonTitle:LOCALIZE(@"CANCEL") otherButtonTitles:LOCALIZE(@"FORCE_FOREGROUND"), LOCALIZE(@"NATIVE"), LOCALIZE(@"SUSPEND_IMMEDIATELY"), LOCALIZE(@"DISABLE"), nil];
 
     [alert show];
 }
