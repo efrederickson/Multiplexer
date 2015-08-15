@@ -105,16 +105,21 @@ struct VelocityData {
         {
             location.x = UIScreen.mainScreen.bounds.size.width - location.x;
         }
-
+        else if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeRight)
+        {
+            CGFloat t = location.y;
+            location.y = location.x;
+            location.x = t;
+        }
 
         if (shouldBeOverridingForRecognizer == NO)
             shouldBeOverridingForRecognizer = [RAGestureManager.sharedInstance canHandleMovementWithPoint:location velocity:screenEdgePanRecognizer.RA_velocity forEdge:screenEdgePanRecognizer.targetEdges];
+
         if (shouldBeOverridingForRecognizer) 
         {
             if ([RAGestureManager.sharedInstance handleMovementOrStateUpdate:UIGestureRecognizerStateBegan withPoint:location velocity:screenEdgePanRecognizer.RA_velocity forEdge:screenEdgePanRecognizer.targetEdges])
             {
                 currentEdge = screenEdgePanRecognizer.targetEdges;
-                BKSHIDServicesCancelTouchesOnMainDisplay(); // Don't send to the app, or anywhere else
             }
         }
     }

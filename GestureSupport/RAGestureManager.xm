@@ -137,14 +137,16 @@
 				if (callback.callbackBlock)
 				{
 					RAGestureCallbackResult result = callback.callbackBlock(state, point, velocity);
-					ret = YES;
+					if (result == RAGestureCallbackResultSuccessAndContinue || result == RAGestureCallbackResultSuccessAndStop)
+						ret = YES;
 					if (result == RAGestureCallbackResultSuccessAndStop)
 						break;
 				}
 				else if (callback.target && [callback.target respondsToSelector:@selector(RAGestureCallback_handle:withPoint:velocity:forEdge:)])
 				{
 					RAGestureCallbackResult result = [callback.target RAGestureCallback_handle:state withPoint:point velocity:velocity forEdge:edge];
-					ret = YES;
+					if (result == RAGestureCallbackResultSuccessAndContinue || result == RAGestureCallbackResultSuccessAndStop)
+						ret = YES;
 					if (result == RAGestureCallbackResultSuccessAndStop)
 						break;
 				}

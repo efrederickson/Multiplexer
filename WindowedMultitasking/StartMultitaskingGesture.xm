@@ -58,7 +58,6 @@ BOOL locationIsInValidArea(CGFloat x)
             [[%c(SBUIController) sharedInstance] restoreContentAndUnscatterIconsAnimated:NO];
 
             // Assign view
-            //appView = [MSHookIvar<UIView*>(topApp.mainScene.contextHostManager, "_hostView") superview];
             appView = [RAHostManager systemHostViewForApplication:topApp].superview;
         }
         else if (state == UIGestureRecognizerStateChanged)
