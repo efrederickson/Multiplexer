@@ -19,6 +19,9 @@ extern BOOL overrideCC;
 @interface RAMissionControlManager () {
 	SBApplication *lastOpenedApp;
 	NSMutableArray *appsWithoutWindows;
+
+	__block UIView *originalAppView;
+	__block CGRect originalAppFrame;
 }
 @end
 
@@ -44,6 +47,7 @@ CGRect swappedForOrientation(CGRect in)
 +(instancetype) sharedInstance
 {
 	SHARED_INSTANCE2(RAMissionControlManager, 
+		sharedInstance->originalAppView = nil;
 	);
 }
 
@@ -55,6 +59,7 @@ CGRect swappedForOrientation(CGRect in)
 	if (app)
 		lastOpenedApp = app;
 
+	UIApplication.sharedApplication.statusBarHidden = NO;
 	void (^dismissApp)() = ^{
 	    FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
 	        [[[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:lastOpenedApp] begin];
@@ -73,8 +78,6 @@ CGRect swappedForOrientation(CGRect in)
 	
 	[window makeKeyAndVisible];
 
-	__block UIView *originalAppView = nil;
-	__block CGRect originalAppFrame;
 	if (lastOpenedApp)
 	{
 		originalAppView = [RAHostManager systemHostViewForApplication:lastOpenedApp].superview;
@@ -90,8 +93,8 @@ CGRect swappedForOrientation(CGRect in)
 			[UIView animateWithDuration:0.5 animations:^{
 				originalAppView.frame = CGRectMake(originalAppFrame.origin.x, originalAppView.frame.size.height, originalAppFrame.size.width, originalAppFrame.size.height);
 			} completion:^(BOOL _) {
-				originalAppView.frame = originalAppFrame;
-				dismissApp();
+				//originalAppView.frame = originalAppFrame;
+				//dismissApp();
 			}];
 	}
 	else if (lastOpenedApp) // dismiss even if not animating open
@@ -152,6 +155,7 @@ CGRect swappedForOrientation(CGRect in)
 	[RASnapshotProvider.sharedInstance storeSnapshotOfMissionControl:window];
 
 	void (^destructor)() = ^{
+		originalAppView = nil;
 		_isShowingMissionControl = NO;
 		[window deconstructComponents];
 		window.hidden = YES;
@@ -159,9 +163,19 @@ CGRect swappedForOrientation(CGRect in)
 	};
 
 	if (animated)
+	{
+		if (originalAppView)
+			[UIView animateWithDuration:0.5 animations:^{
+				originalAppView.frame = originalAppFrame;
+			}];
 		[UIView animateWithDuration:0.5 animations:^{ window.frame = swappedForOrientation(CGRectMake(0, -window.frame.size.height, window.frame.size.width, window.frame.size.height)); } completion:^(BOOL _) { destructor(); }];
+	}
 	else
+	{
+		if (originalAppView)
+			originalAppView.frame = originalAppFrame;
 		destructor();
+	}
 
 	[RADesktopManager.sharedInstance reshowDesktop];
 	[RADesktopManager.sharedInstance.currentDesktop loadApps];
