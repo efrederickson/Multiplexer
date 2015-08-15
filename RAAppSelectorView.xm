@@ -66,7 +66,7 @@
         [self addSubview:iconView];
 	}
 	contentSize.width = self.frame.size.width;
-	contentSize.height += fullSize.height;
+	contentSize.height += fullSize.height * 1.5;
 	[self setContentSize:contentSize];
 }
 
