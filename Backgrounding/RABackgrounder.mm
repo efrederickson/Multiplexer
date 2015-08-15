@@ -38,7 +38,6 @@ NSMutableDictionary *temporaryShouldPop = [NSMutableDictionary dictionary];
 
 -(void) queueRemoveTemporaryOverrideForIdentifier:(NSString*)identifier
 {
-	NSLog(@"[ReachApp] queue %@", identifier);
 	temporaryShouldPop[identifier] = @YES;
 }
 
@@ -46,12 +45,9 @@ NSMutableDictionary *temporaryShouldPop = [NSMutableDictionary dictionary];
 {
 	if ([temporaryShouldPop objectForKey:identifier] != nil && [[temporaryShouldPop objectForKey:identifier] boolValue])
 	{
-	NSLog(@"[ReachApp] remove %@", identifier);
 		[temporaryShouldPop removeObjectForKey:identifier];
 		[temporaryOverrides removeObjectForKey:identifier];	
 	}
-	else
-		NSLog(@"[ReachApp] ignore remove %@", identifier);
 }
 
 -(NSInteger) popTemporaryOverrideForApplication:(NSString*)identifier is:(RABackgroundMode)mode
