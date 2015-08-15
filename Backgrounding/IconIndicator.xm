@@ -223,8 +223,7 @@ inline NSString *getAppNameFromIndicatorName(NSString *indicatorName)
 -(id) contentsImage
 {
 	UIImage *img = [ALApplicationList.sharedApplicationList iconOfSize:15 forDisplayIdentifier:getAppNameFromIndicatorName(self.item.indicatorName)];
-
-    return [_UILegibilityImageSet imageFromImage:img withShadowImage:nil];
+    return [_UILegibilityImageSet imageFromImage:img withShadowImage:img];
 }
 -(CGFloat) standardPadding { return 4; }
 %end
@@ -234,7 +233,7 @@ inline NSString *getAppNameFromIndicatorName(NSString *indicatorName)
 	if ([self.indicatorName hasPrefix:@"multiplexer-"])
 	{
 		//NSString *actualName = getAppNameFromIndicatorName(self.indicatorName);
-		return 4; // Shows just after wifi, before the loading/sync indicator
+		return 7; // Shows just after wifi, before the loading/sync indicator
 	}
 	return %orig;
 }
