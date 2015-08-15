@@ -11,6 +11,7 @@
 #import "RAGestureManager.h"
 #import "RAWindowStatePreservationSystemManager.h"
 #import "RALockStateUpdater.h"
+#import "RAHostManager.h"
 #import "RARunningAppsProvider.h"
 
 extern BOOL overrideCC;
@@ -53,11 +54,6 @@ CGRect swappedForOrientation(CGRect in)
 	SBApplication *app = UIApplication.sharedApplication._accessibilityFrontMostApplication;
 	if (app)
 		lastOpenedApp = app;
-    FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
-        SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:app];
-        [transaction begin];
-    }];
-    [(FBWorkspaceEventQueue*)[%c(FBWorkspaceEventQueue) sharedInstance] executeOrAppendEvent:event];
 
 	if (window)
 		window = nil;
@@ -69,9 +65,30 @@ CGRect swappedForOrientation(CGRect in)
 		window.frame = swappedForOrientation(CGRectMake(0, -window.frame.size.height, window.frame.size.width, window.frame.size.height));
 	
 	[window makeKeyAndVisible];
+
+	__block UIView *originalAppView = nil;
+	__block CGRect originalAppFrame;
+	if (lastOpenedApp)
+	{
+		originalAppView = [RAHostManager systemHostViewForApplication:lastOpenedApp].superview;
+		originalAppFrame = originalAppView.frame;
+	}
 	if (animated)
+	{
 		//[UIView animateWithDuration:0.5 animations:^{ window.alpha = 1; }];
 		[UIView animateWithDuration:0.5 animations:^{ window.frame = CGRectMake(0, 0, window.frame.size.width, window.frame.size.height); } completion:nil];
+		if (originalAppView)
+			[UIView animateWithDuration:0.5 animations:^{
+				originalAppView.frame = CGRectMake(originalAppFrame.origin.x, originalAppView.frame.size.height, originalAppFrame.size.width, originalAppFrame.size.height);
+				} completion:^(BOOL _) {
+					originalAppView.frame = originalAppFrame;
+
+				    FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
+				        [[[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:app] begin];
+				    }];
+				    [(FBWorkspaceEventQueue*)[%c(FBWorkspaceEventQueue) sharedInstance] executeOrAppendEvent:event];
+				}];
+	}
 
 	//[window updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
 	
