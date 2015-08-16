@@ -5,5 +5,6 @@
 	SBIconView *iconView;
 }
 @property (nonatomic, retain) SBApplication *application;
+@property (nonatomic, retain) UIImage *originalImage;
 -(void) generatePreview;
 @end

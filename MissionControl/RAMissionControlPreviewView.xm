@@ -14,7 +14,9 @@
     iconView.layer.shadowRadius = THEMED(missionControlIconPreviewShadowRadius); // iconView.layer.cornerRadius;
     iconView.layer.shadowOpacity = 0.8;
     iconView.layer.shadowOffset = CGSizeMake(0, 0);
+    iconView.layer.shouldRasterize = YES;
     iconView.userInteractionEnabled = NO;
+	iconView.iconLabelAlpha = 0;
 
     [self addSubview:iconView];
     [self updateIconViewFrame];
@@ -26,12 +28,5 @@
 		return;
 	[self bringSubviewToFront:iconView];
 	iconView.frame = CGRectMake( (self.frame.size.width / 2) - (iconView.frame.size.width / 2), (self.frame.size.height / 2) - (iconView.frame.size.height / 2), iconView.frame.size.width, iconView.frame.size.height );
-	iconView.iconLabelAlpha = 0;
-}
-
--(void) setFrame:(CGRect)frame
-{
-	[super setFrame:frame];
-	[self updateIconViewFrame];
 }
 @end

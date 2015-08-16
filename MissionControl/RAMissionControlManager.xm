@@ -113,8 +113,8 @@ CGRect swappedForOrientation2(CGRect in)
 	}
 
 	[window updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
-	
-	[RAGestureManager.sharedInstance addGestureRecognizerWithTarget:self forEdge:UIRectEdgeBottom identifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture"];
+	UIApplication.sharedApplication.statusBarHidden = NO;
+	[RAGestureManager.sharedInstance addGestureRecognizerWithTarget:self forEdge:UIRectEdgeBottom identifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture" priority:RAGesturePriorityHigh];
 	overrideCC = YES;
 }
 
