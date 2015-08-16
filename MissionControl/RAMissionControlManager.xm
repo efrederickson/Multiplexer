@@ -43,6 +43,24 @@ CGRect swappedForOrientation(CGRect in)
 	return in;
 }
 
+CGRect swappedForOrientation2(CGRect in)
+{
+	if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
+	{
+		CGFloat x = in.origin.x;
+		in.origin.x = in.origin.y;
+		in.origin.y = x;
+	}
+	else if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeRight)
+	{
+		CGFloat x = in.origin.x;
+		in.origin.x = -in.size.width;
+		in.origin.y = x;
+	}
+
+	return in;
+}
+
 @implementation RAMissionControlManager
 +(instancetype) sharedInstance
 {
@@ -83,7 +101,7 @@ CGRect swappedForOrientation(CGRect in)
 
 		if (originalAppView)
 			[UIView animateWithDuration:0.5 animations:^{
-				originalAppView.frame = CGRectMake(originalAppFrame.origin.x, originalAppView.frame.size.height, originalAppFrame.size.width, originalAppFrame.size.height);
+				originalAppView.frame = swappedForOrientation2(CGRectMake(originalAppFrame.origin.x, originalAppView.frame.size.height, originalAppFrame.size.width, originalAppFrame.size.height));
 			} completion:^(BOOL _) {
 				//originalAppView.frame = originalAppFrame;
 				//dismissApp();
@@ -94,7 +112,7 @@ CGRect swappedForOrientation(CGRect in)
 		originalAppView.frame = CGRectMake(originalAppFrame.origin.x, originalAppView.frame.size.height, originalAppFrame.size.width, originalAppFrame.size.height);
 	}
 
-	//[window updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
+	[window updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
 	
 	[RAGestureManager.sharedInstance addGestureRecognizerWithTarget:self forEdge:UIRectEdgeBottom identifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture"];
 	overrideCC = YES;
