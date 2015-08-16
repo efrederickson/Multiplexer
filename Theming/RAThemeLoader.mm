@@ -37,6 +37,7 @@
 	ret.windowedMultitaskingMinIconTint = COLOR(@"windowedMultitaskingMinIconTint");
 	ret.windowedMultitaskingRotationIconBackgroundColor = COLOR(@"windowedMultitaskingRotationIconBackgroundColor");
 	ret.windowedMultitaskingRotationIconTint = COLOR(@"windowedMultitaskingRotationIconTint");
+	ret.windowedMultitaskingBarTitleColor = COLOR(@"windowedMultitaskingBarTitleColor");
 
 	ret.windowedMultitaskingCloseButtonAlignment = [dict[@"windowedMultitaskingCloseButtonAlignment"] intValue];
 	ret.windowedMultitaskingCloseButtonPriority = [dict[@"windowedMultitaskingCloseButtonPriority"] intValue];
