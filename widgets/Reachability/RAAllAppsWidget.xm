@@ -17,11 +17,11 @@
 	UIScrollView *allAppsView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 200)];
 
 	CGSize size = [%c(SBIconView) defaultIconSize];
-	spacing = (frame.size.width - (iconsPerLine * size.width)) / iconsPerLine;
+	spacing = (frame.size.width - (iconsPerLine * size.width)) / (iconsPerLine + 1);
 	//NSString *currentBundleIdentifier = [[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier;
 	//if (!currentBundleIdentifier)
 	//	return nil;
-	CGSize contentSize = CGSizeMake(10, 10);
+	CGSize contentSize = CGSizeMake(spacing, 10);
 	CGFloat interval = (size.width + spacing) * iconsPerLine;
 	NSInteger intervalCount = 1;
 	BOOL isTop = YES;
@@ -46,7 +46,7 @@
 
 	width = interval;
 	isTop = YES;
-	contentSize = CGSizeMake(10, 10);
+	contentSize = CGSizeMake(spacing, 10);
 	intervalCount = 1;
 	hasSecondRow = NO;
 	for (NSString *str in allApps)
