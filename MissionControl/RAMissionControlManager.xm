@@ -59,14 +59,6 @@ CGRect swappedForOrientation(CGRect in)
 	if (app)
 		lastOpenedApp = app;
 
-	UIApplication.sharedApplication.statusBarHidden = NO;
-	void (^dismissApp)() = ^{
-	    FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
-	        [[[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:lastOpenedApp] begin];
-	    }];
-	    [(FBWorkspaceEventQueue*)[%c(FBWorkspaceEventQueue) sharedInstance] executeOrAppendEvent:event];
-	};
-
 	if (window)
 		window = nil;
 
@@ -98,7 +90,9 @@ CGRect swappedForOrientation(CGRect in)
 			}];
 	}
 	else if (lastOpenedApp) // dismiss even if not animating open
-		dismissApp();
+	{
+		originalAppView.frame = CGRectMake(originalAppFrame.origin.x, originalAppView.frame.size.height, originalAppFrame.size.width, originalAppFrame.size.height);
+	}
 
 	//[window updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
 	
