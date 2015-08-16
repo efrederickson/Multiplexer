@@ -34,7 +34,7 @@
 
 - (_Bool)_activateAppSwitcher
 {
-	if ([RASettings.sharedInstance replaceAppSwitcherWithMC])
+	if ([RASettings.sharedInstance replaceAppSwitcherWithMC] && [RASettings.sharedInstance missionControlEnabled])
 	{
 		if (RAMissionControlManager.sharedInstance.isShowingMissionControl == NO)
 		{
