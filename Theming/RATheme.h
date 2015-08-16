@@ -36,7 +36,7 @@
 @property (nonatomic) int windowedMultitaskingRotationPriority;
 
 @property (nonatomic) int windowedMultitaskingBlurStyle;
-@property (nonatomic) UIColor *windowedMultitaskingOverlayColor;
+@property (nonatomic, retain) UIColor *windowedMultitaskingOverlayColor;
 
 // SwipeOver
 

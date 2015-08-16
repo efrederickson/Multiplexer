@@ -29,7 +29,7 @@
 {
 	if (self = [super initWithFrame:frame])
 	{
-		trashIcon = [UIImage imageWithContentsOfFile:@"/Library/ReachApp/Trash.png"];
+		trashIcon = [UIImage imageWithContentsOfFile:[NSString stringWithFormat:@"%@/Trash.png",RA_BASE_PATH]];
 	}
 	return self;
 }

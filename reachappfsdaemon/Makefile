@@ -1,5 +1,5 @@
 ARCHS = armv7 armv7s arm64
-CFLAGS = -I../
+CFLAGS = -I../ -I../Theming
 
 include $(THEOS)/makefiles/common.mk
 

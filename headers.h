@@ -20,7 +20,7 @@
 #import <notify.h>
 #import <IOKit/hid/IOHIDEvent.h>
 
-#define RA_BASE_PATH @"/Library/ReachApp"
+#define RA_BASE_PATH @"/Library/Multiplexer"
 
 #import "RALocalizer.h"
 #define LOCALIZE(x) [RALocalizer.sharedInstance localizedStringForKey:x]
