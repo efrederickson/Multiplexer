@@ -15,6 +15,7 @@
     iconView.layer.shadowOpacity = 0.8;
     iconView.layer.shadowOffset = CGSizeMake(0, 0);
     iconView.layer.shouldRasterize = YES;
+    iconView.layer.rasterizationScale = UIScreen.mainScreen.scale;
     iconView.userInteractionEnabled = NO;
 	iconView.iconLabelAlpha = 0;
 
