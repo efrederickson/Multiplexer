@@ -25,7 +25,7 @@
 		RATheme *theme = [RAThemeLoader loadFromFile:themeName];
 		if (theme.themeIdentifier)
 		{
-			NSLog(@"[ReachApp] adding %@", theme.themeIdentifier);
+			//NSLog(@"[ReachApp] adding %@", theme.themeIdentifier);
 			allThemes[theme.themeIdentifier] = theme;
 
 			if ([theme.themeIdentifier isEqual:currentIdentifier])

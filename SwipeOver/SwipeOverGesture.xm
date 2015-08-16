@@ -159,7 +159,7 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
         if (![RASwipeOverManager.sharedInstance isUsingSwipeOver])
             [RASwipeOverManager.sharedInstance startUsingSwipeOver];
         
-        if (state == UIGestureRecognizerStateChanged)
+        //if (state == UIGestureRecognizerStateChanged)
             [RASwipeOverManager.sharedInstance sizeViewForTranslation:translation state:state];
 
         return RAGestureCallbackResultSuccess;

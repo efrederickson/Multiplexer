@@ -86,7 +86,8 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 		badge.frame = CGRectMake(-overhang.x, -overhang.y, badge.frame.size.width, badge.frame.size.height);
 	}
 
-	badge.text = text;
+	[badge performSelectorOnMainThread:@selector(setText:) withObject:text waitUntilDone:YES];
+	//badge.text = text;
 	SET_INFO(info);
 }
 

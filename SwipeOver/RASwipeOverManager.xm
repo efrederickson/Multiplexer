@@ -5,6 +5,7 @@
 #import "RADesktopManager.h"
 #import "RADesktopWindow.h"
 #import "RAMessagingServer.h"
+#import "RAResourceImageProvider.h"
 
 extern int rotationDegsForOrientation(int o);
 
@@ -117,7 +118,9 @@ extern int rotationDegsForOrientation(int o);
     [view rotateToOrientation:UIInterfaceOrientationPortrait];
     [view loadApp];
 
-    UIView *detachView = [[UIView alloc] initWithFrame:CGRectMake(0, -20, view.frame.size.width, 20)];
+    UIImageView *detachView = [[UIImageView alloc] initWithFrame:CGRectMake(0, -20, view.frame.size.width, 20)];
+    detachView.image = [RAResourceImageProvider imageForFilename:@"SwipeOverDetachImage" constrainedToSize:CGSizeMake(97, 28)];
+    detachView.contentMode = UIViewContentModeScaleAspectFit;
     UITapGestureRecognizer *detachGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(detachViewAndCloseSwipeOver)];
     [detachView addGestureRecognizer:detachGesture];
     detachView.backgroundColor = THEMED(swipeOverDetachBarColor);
