@@ -7,10 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #import "RAKeyboardStateListener.h"
-
-#if DEBUG
 #import "RASettings.h"
-#endif
 
 extern BOOL launchNextOpenIntoWindow;
 

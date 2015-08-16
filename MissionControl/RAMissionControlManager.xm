@@ -220,9 +220,11 @@ CGRect swappedForOrientation2(CGRect in)
 -(RAGestureCallbackResult) RAGestureCallback_handle:(UIGestureRecognizerState)state withPoint:(CGPoint)location velocity:(CGPoint)velocity forEdge:(UIRectEdge)edge
 {
 	static CGPoint initialCenter;
+	static CGRect initialAppFrame;
 
 	if (state == UIGestureRecognizerStateEnded)
 	{
+		overrideCC = NO;
 		if (window.frame.origin.y + window.frame.size.height + velocity.y < UIScreen.mainScreen._interfaceOrientedBounds.size.height / 2)
 		{
 			// Close
@@ -231,6 +233,8 @@ CGRect swappedForOrientation2(CGRect in)
 
 			[UIView animateWithDuration:duration animations:^{
 				window.center = CGPointMake(window.center.x, -initialCenter.y);
+				if (originalAppView)
+					originalAppView.frame = originalAppFrame;
 			} completion:^(BOOL _) {
 				[self hideMissionControl:NO];
 			}];
@@ -242,16 +246,23 @@ CGRect swappedForOrientation2(CGRect in)
 
 			[UIView animateWithDuration:duration animations:^{
 				window.center = initialCenter;
+				if (originalAppView)
+					originalAppView.frame = swappedForOrientation2(CGRectMake(originalAppFrame.origin.x, originalAppView.frame.size.height, originalAppFrame.size.width, originalAppFrame.size.height));
 			}];
 		}
 	}
 	else if (state == UIGestureRecognizerStateBegan)
 	{
+		overrideCC = YES;
 		initialCenter = window.center;
+		if (originalAppView)
+			initialAppFrame = initialAppFrame;
 	}
 	else
 	{
 		window.center = CGPointMake(window.center.x, location.y - initialCenter.y);
+		if (originalAppView)
+			originalAppView.frame = CGRectMake(originalAppView.frame.origin.x, UIScreen.mainScreen._interfaceOrientedBounds.size.height - (UIScreen.mainScreen._interfaceOrientedBounds.size.height - location.y), originalAppFrame.size.width, originalAppFrame.size.height);
 	}
 	return RAGestureCallbackResultSuccess;
 }

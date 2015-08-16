@@ -32,7 +32,7 @@
 #if DEBUG
 #define NSLog NSLog
 #else
-#define NSLog 
+#define NSLog(...)
 #endif
 
 #define IS_SPRINGBOARD [NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"]
