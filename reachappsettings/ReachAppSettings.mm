@@ -13,6 +13,8 @@
 #import "RAHeaderView.h"
 #import "PDFImage.h"
 #import "headers.h"
+#import "RAThemeManager.h"
+#import "RASettings.h"
 
 @interface PSViewController (Protean)
 -(void) viewDidLoad;
@@ -85,7 +87,20 @@
                  @"icon": @"ra_enabled.png",
                  },
 #endif
-                 
+
+             @{
+                @"cell": @"PSLinkListCell",
+                @"default": [RASettings.sharedInstance currentThemeIdentifier],
+                @"defaults": @"com.efrederickson.reachapp.settings",
+                @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                @"label": @"Current Theme",
+                @"icon": @"theme.png",
+                @"key": @"currentThemeIdentifier",
+                @"detail": @"PSListItemsController",
+                @"valuesDataSource": @"getThemeValues:",
+                @"titlesDataSource": @"getThemeTitles:",
+             },
+
              @{ @"footerText": @"Let apps run in the background." },
              @{
                  @"cell": @"PSLinkCell",
@@ -165,6 +180,24 @@
                  @"icon": @"tutorial.png"
                  },
              ];
+}
+
+-(NSArray*) getThemeTitles:(id)target
+{
+    NSArray *themes = [RAThemeManager.sharedInstance allThemes];
+    NSMutableArray *ret = [NSMutableArray array];
+    for (RATheme *theme in themes)
+        [ret addObject:theme.themeName];
+    return ret;
+}
+
+-(NSArray*) getThemeValues:(id)target
+{
+    NSArray *themes = [RAThemeManager.sharedInstance allThemes];
+    NSMutableArray *ret = [NSMutableArray array];
+    for (RATheme *theme in themes)
+        [ret addObject:theme.themeIdentifier];
+    return ret;
 }
 
 -(void) showSupportDialog

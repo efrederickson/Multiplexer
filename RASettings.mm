@@ -2,9 +2,7 @@
 #import "headers.h"
 #import "RABackgrounder.h"
 #import "RAThemeManager.h"
-
-extern id/*RANCViewController* */ ncAppViewController;
-
+#import "RANCViewController.h"
 
 #define BOOL(key, default) ([_settings objectForKey:key] != nil ? [_settings[key] boolValue] : default) 
 
@@ -64,7 +62,7 @@ int disableAutoDismiss = -1;
 	enabled = -1;
 
 	if ([previousNCAppSetting isEqual:self.NCApp] == NO)
-		[ncAppViewController performSelector:@selector(forceReloadAppLikelyBecauseTheSettingChanged)];
+		[[objc_getClass("RANCViewController") sharedViewController] forceReloadAppLikelyBecauseTheSettingChanged]; // using objc_getClass allows RASettings to be used in reachappsettings
 
 	if ([self shouldShowStatusBarIcons] == NO && [objc_getClass("SBApplication") respondsToSelector:@selector(RA_clearAllStatusBarIcons)])
 		[objc_getClass("SBApplication") performSelector:@selector(RA_clearAllStatusBarIcons)];

@@ -8,7 +8,14 @@
 }
 @end
 
+extern RANCViewController *ncAppViewController;
+
 @implementation RANCViewController
++(instancetype) sharedViewController
+{
+	return ncAppViewController;
+}
+
 -(void) forceReloadAppLikelyBecauseTheSettingChanged
 {
 	[appView unloadApp];
