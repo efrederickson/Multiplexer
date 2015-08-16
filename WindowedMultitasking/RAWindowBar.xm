@@ -89,7 +89,7 @@ const int bottomSizeViewTag =  987654320;
     titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, myFrame.size.width, height)];
     titleLabel.textAlignment = NSTextAlignmentCenter;
     titleLabel.font = [UIFont systemFontOfSize:18];
-    titleLabel.textColor = [UIColor colorWithRed:115/255.0f green:114/255.0f blue:115/255.0f alpha:1.0f];
+    titleLabel.textColor = THEMED(windowedMultitaskingBarTitleColor);
     titleLabel.text = [view displayName];
     [self addSubview:titleLabel];
 

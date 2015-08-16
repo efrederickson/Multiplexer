@@ -38,6 +38,8 @@
 	<string>80000000</string>
 	<key>windowedMultitaskingRotationIconBackgroundColor</key>
 	<string>B974F5</string>
+	<key>windowedMultitaskingBarTitleColor</key>
+	<string>737273</string>
 	<key>windowedMultitaskingBlurStyle</key>
 	<integer>2</integer>
 	<key>windowedMultitaskingOverlayColor</key>
