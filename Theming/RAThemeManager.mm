@@ -22,8 +22,11 @@
 
 	for (NSString *themeName in themeFileNames)
 	{
+		if ([themeName hasSuffix:@"plist"] == NO)
+			continue;
+
 		RATheme *theme = [RAThemeLoader loadFromFile:themeName];
-		if (theme.themeIdentifier)
+		if (theme && theme.themeIdentifier)
 		{
 			//NSLog(@"[ReachApp] adding %@", theme.themeIdentifier);
 			allThemes[theme.themeIdentifier] = theme;

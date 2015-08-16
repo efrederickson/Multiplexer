@@ -43,9 +43,9 @@ extern void RA_BGAppsControllerNeedsToReload();
              	@"cell": @"PSLinkListCell",
              	@"label": @"Background Mode",
              	@"key": @"backgroundMode",
-             	@"validTitles": @[ @"Native",                 /*@"Forced Native (old apps) [broken]",*/     @"Unlimited Backgrounding Time",                  @"Force Foreground",                 @"Disabled (Kill on exit)",      @"Suspend Immediately (SmartClose)" ],
-             	@"validValues": @[ @(RABackgroundModeNative), /*@(RABackgroundModeForceNativeForOldApps),*/ @(RABackgroundModeUnlimitedBackgroundingTime),    @(RABackgroundModeForcedForeground), @(RABackgroundModeForceNone),    @(RABackgroundModeSuspendImmediately)],
-                @"shortTitles": @[ @"Native",                 /*@"Native+ [broken]",*/                      @"∞",                                             @"Forced",                           @"Disabled",                     @"SmartClose" ],
+             	@"validTitles": @[ @"Native",                 @"Unlimited Backgrounding Time",                  @"Force Foreground",                 @"Kill on Exit",      @"Suspend Immediately" ],
+             	@"validValues": @[ @(RABackgroundModeNative), @(RABackgroundModeUnlimitedBackgroundingTime),    @(RABackgroundModeForcedForeground), @(RABackgroundModeForceNone),    @(RABackgroundModeSuspendImmediately)],
+                @"shortTitles": @[ @"Native",                 @"∞",                                             @"Forced",                           @"Disabled",                     @"SmartClose" ],
              	@"default": @(RABackgroundModeNative),
              	@"detail": @"PSListItemsController"
              	},

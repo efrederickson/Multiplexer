@@ -87,16 +87,17 @@
                  @"icon": @"ra_enabled.png",
                  },
 #endif
+             @{ @"footerText": @"Customize the look of Multiplexer." },
 
              @{
                 @"cell": @"PSLinkListCell",
                 @"default": [RASettings.sharedInstance currentThemeIdentifier],
                 @"defaults": @"com.efrederickson.reachapp.settings",
                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-                @"label": @"Current Theme",
+                @"label": @"Theme",
                 @"icon": @"theme.png",
                 @"key": @"currentThemeIdentifier",
-                @"detail": @"PSListItemsController",
+                @"detail": @"RAListItemsController",
                 @"valuesDataSource": @"getThemeValues:",
                 @"titlesDataSource": @"getThemeTitles:",
              },
@@ -177,7 +178,8 @@
                  @"cell": @"PSLinkCell",
                  @"label": @"Tutorial",
                  @"action": @"showTutorial",
-                 @"icon": @"tutorial.png"
+                 @"icon": @"tutorial.png",
+                 @"enabled": @NO,
                  },
              ];
 }

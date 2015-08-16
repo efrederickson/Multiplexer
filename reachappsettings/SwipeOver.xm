@@ -63,7 +63,7 @@
              @{ @"label": @"Swipe In From..."},
              @{
                  @"cell": @"PSSegmentCell",
-                 @"validTitles": @[ @"Anywhere (Default)",            @"Top",                      @"Middle",           @"Bottom" ],
+                 @"validTitles": @[ @"Anywhere",               @"Top",                      @"Middle",           @"Bottom" ],
                  @"validValues": @[ @(RAGrabAreaSideAnywhere), @(RAGrabAreaSideTopThird), @(RAGrabAreaSideMiddleThird), @(RAGrabAreaSideBottomThird) ],
                  @"default": @(RAGrabAreaSideAnywhere),
                  @"key": @"swipeOverGrabArea",

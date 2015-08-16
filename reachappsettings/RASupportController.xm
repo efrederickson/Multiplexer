@@ -4,102 +4,8 @@
 #import <SettingsKit/SKStandardController.h>
 #import <SettingsKit/SKPersonCell.h>
 #import <SettingsKit/SKSharedHelper.h>
-#include <sys/sysctl.h>
-#include <sys/utsname.h>
 
-@interface RAMiniPersonCell : PSTableCell { // SKPersonCell
-    UIImageView *_background;
-    UILabel *label;
-    UILabel *label2;
-}
-
--(NSString*)personDescription;
--(NSString*)imageName;
--(NSString*)name;
--(NSString*)twitterHandle;
-
--(void)updateImage;
--(NSString*)localizedString:(NSString*)string;
-@end
-
-
-@implementation RAMiniPersonCell
--(id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
-    if((self = [super initWithStyle:style reuseIdentifier:reuseIdentifier])){
-        UIImage *bkIm = [UIImage imageNamed:self.imageName inBundle:[NSBundle bundleForClass:self.class]];
-        _background = [[UIImageView alloc] initWithImage:bkIm];
-        _background.frame = CGRectMake(9, 3, 34, 34);
-        [self addSubview:_background];
-        
-        CGRect frame = [self frame];
-        
-        label = [[UILabel alloc] initWithFrame:CGRectMake(9 + 34 + 5, 3, frame.size.width, frame.size.height - 6)];
-        [label setText:LCL(self.name)];
-        [label setBackgroundColor:[UIColor clearColor]];
-        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-            [label setFont:[UIFont fontWithName:@"Helvetica Light" size:15]];
-        else
-            [label setFont:[UIFont fontWithName:@"HelveticaNeue" size:15]];
-        //[label setTextColor:[UIColor colorWithRed:73/255.0f green:73/255.0f blue:73/255.0f alpha:1.0f]];
-    [label sizeToFit];
-        [self addSubview:label];
-        
-        label2 = [[UILabel alloc] initWithFrame:CGRectMake(frame.origin.x + 84, frame.origin.y + 42, frame.size.width, frame.size.height)];
-        [label2 setText:LCL(self.personDescription)];
-        [label2 setBackgroundColor:[UIColor clearColor]];
-        [label2 setFont:[UIFont fontWithName:@"Helvetica" size:15]];
-        [label2 setTextColor:[UIColor colorWithRed:115/255.0f green:115/255.0f blue:115/255.0f alpha:1.0f]];
-        [label2 sizeToFit];
-        label2.frame = CGRectMake(frame.size.width - label2.frame.size.width - 10, (frame.size.height - label2.frame.size.height) / 2, label2.frame.size.width, label2.frame.size.height);
-        [self addSubview:label2];
-    }
-    return self;
-}
-
--(void) layoutSubviews
-{
-    [super layoutSubviews];
-    CGRect frame = self.frame;
-    CGFloat imgSize = self.frame.size.height - 10;
-    _background.frame = CGRectMake(18, 5, imgSize, imgSize);
-    label.frame = CGRectMake(_background.frame.origin.x + _background.frame.size.width + 15, (frame.size.height - label.frame.size.height) / 2, label.frame.size.width, label.frame.size.height);
-    label2.frame = CGRectMake(frame.size.width - label2.frame.size.width - 40, (frame.size.height - label2.frame.size.height) / 2, label2.frame.size.width, label2.frame.size.height);
-}
-
--(NSString*)personDescription { return @""; }
--(NSString*)imageName { return @""; }
--(NSString*)name { return @""; }
--(NSString*)twitterHandle { return @""; }
-
--(void)updateImage
-{
-    UIImage *bkIm = [UIImage imageNamed:self.imageName inBundle:[NSBundle bundleForClass:self.class]];
-    _background.image = bkIm;
-}
-
--(NSString*)localizedString:(NSString*)string
-{
-    return [[(PSListController*)self.superview bundle] localizedStringForKey:string value:string table:nil] ?: string;
-}
-
-@end
 @interface RAMakersController : SKTintedListController<SKListControllerProtocol, MFMailComposeViewControllerDelegate>
-@end
-@interface RAElijahPersonCell : RAMiniPersonCell
-@end
-@interface RAAndrewPersonCell : RAMiniPersonCell
-@end
-
-@implementation RAElijahPersonCell
--(NSString*)personDescription { return @"@daementor"; }
--(NSString*)name { return @"Elijah Frederickson"; }
--(NSString*)imageName { return @"elijah.png"; }
-@end
-
-@implementation RAAndrewPersonCell
--(NSString*)personDescription { return @"@drewplex"; }
--(NSString*)name { return @"Andrew Abosh"; }
--(NSString*)imageName { return @"andrew.png"; }
 @end
 
 @implementation RAMakersController
@@ -112,22 +18,101 @@
 
 - (id)customSpecifiers {
     return @[
-             @{ @"cell": @"PSGroupCell", @"label": @"Developer" },
+             @{ @"cell": @"PSGroupCell", @"label": @"Developed and Designed by" },
              @{
                  @"cell": @"PSLinkCell",
-                 @"cellClass": @"RAElijahPersonCell",
+                 //@"cellClass": @"RAElijahPersonCell",
                  @"height": @45,
-                 @"action": @"openElijahTwitter"
+                 @"action": @"openElijahTwitter",
+                 @"label": @"Elijah Frederickson",
+                 @"icon": @"elijah"
                  },
-             @{ @"cell": @"PSGroupCell", @"label": @"Designer" },
              @{
                  @"cell": @"PSLinkCell",
-                 @"cellClass": @"RAAndrewPersonCell",
+                 //@"cellClass": @"RAAndrewPersonCell",
                  @"height": @45,
-                 @"action": @"openAndrewTwitter"
+                 @"action": @"openAndrewTwitter",
+                 @"label": @"Andrew Abosh",
+                 @"icon": @"andrew"
+                 },
+
+             @{ @"label": @"Beta tested by" },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"action": @"openAndiTwitter",
+                 @"label": @"Andi Andreas",
+                 @"icon": @"Andi"
+                 },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"action": @"openBetaPage",
+                 @"label": @"Beta382",
+                 @"icon": @"beta382"
+                 },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"action": @"openBindersPAge",
+                 @"label": @"BindersFullOfWomen",
+                 @"icon": @"Binders"
+                 },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"action": @"openDavidTwitter",
+                 @"label": @"David",
+                 @"icon": @"David"
+                 },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"action": @"openJackTwitter",
+                 @"label": @"Jack Haal",
+                 @"icon": @"Jack"
+                 },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"action": @"openMosheTwitter",
+                 @"label": @"Moshe Dancykier",
+                 @"icon": @"Moshe"
+                 },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"action": @"openWilsonTwitter",
+                 @"label": @"Wilson (TM3Dev)",
+                 @"icon": @"Wilson"
+                 },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"action": @"openZiph0nTwitter",
+                 @"label": @"Ziph0n",
+                 @"icon": @"Ziphon"
+                 },
+
+            @{ @"label": @"Special Thanks To" },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"action": @"openChonTwitter",
+                 @"label": @"Chon Lee",
+                 @"icon": @"Chon"
+                 },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"action": @"openEthanTwitter",
+                 @"label": @"Ethan Arbuckle",
+                 @"icon": @"EthanArbuckle"
+                 },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"action": @"openSharedRoutineTwitter",
+                 @"label": @"sharedRoutine",
+                 @"icon": @"SharedRoutine"
                  },
 
              @{ @"cell": @"PSGroupCell" },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"label": @"Site",
+                 @"action": @"openSite",
+                 @"icon": @"ra_makers.png"
+                 },
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Source Code",
@@ -140,25 +125,12 @@
 \n\
 This code thanks: \n\
 ForceReach, Reference, MessageBox \n\
+Previous research done by @b3ll and @freerunnering \n\
 Pastie 8684110 \n\
-Various tips and help: @sharedRoutine \n\
-Various concepts and help: Ethan Arbuckle \n\
 \n\
-There was much knowledge to be gained from perusing those sources, however no copyright infringement occured. \n\
+A special thanks goes to those who contributed ideas, feature enhancements, bug reports, and who showed support. \n\
 \n\
-\n\
-Beta Testers:\n\
-Beta382\n\
-Bindersfullofwomen\n\
-Djaovx\n\
-Moshed\n\
-Nexuist\n\
-TM3Dev\n\
-JackHaal\n\
-\n\
-\n\
-And thanks to all who tested beta versions and/or reported feedback. \n\
-Also, a special thanks goes to those who contributed ideas, feature enhancements, bug reports, and the like. \n\
+Crafted with love in 🇨🇦 and 🇺🇸. \n\
 \n",
                 },
              ];
@@ -169,13 +141,18 @@ Also, a special thanks goes to those who contributed ideas, feature enhancements
     [SKSharedHelper openGitHub:@"mlnlover11/Multiplexer"];
 }
 
--(void) openElijahTwitter
-{
-    [SKSharedHelper openTwitter:@"daementor"];
-}
-
--(void) openAndrewTwitter
-{
-    [SKSharedHelper openTwitter:@"drewplex"];
-}
+-(void) openElijahTwitter { [SKSharedHelper openTwitter:@"daementor"]; }
+-(void) openAndrewTwitter { [SKSharedHelper openTwitter:@"drewplex"]; }
+-(void) openAndiTwitter { [SKSharedHelper openTwitter:@"Nexuist"]; } 
+-(void) openBetaPage { [UIApplication.sharedApplication openURL:[NSURL URLWithString:@"https://www.reddit.com/user/beta382"]]; }
+-(void) openChonTwitter { [SKSharedHelper openTwitter:@"HikoMitsuketa"]; }
+-(void) openDavidTwitter { [SKSharedHelper openTwitter:@"djaovx"]; }
+-(void) openJackTwitter { [SKSharedHelper openTwitter:@"JackHaal"]; }
+-(void) openMosheTwitter { [SKSharedHelper openTwitter:@"oniconpack"]; }
+-(void) openBindersPAge { [UIApplication.sharedApplication openURL:[NSURL URLWithString:@"https://www.reddit.com/user/_BindersFullOfWomen_"]]; }
+-(void) openWilsonTwitter { [SKSharedHelper openTwitter:@"xTM3x"]; }
+-(void) openZiph0nTwitter { [SKSharedHelper openTwitter:@"ziph0n"]; }
+-(void) openSharedRoutineTwitter { [SKSharedHelper openTwitter:@"sharedRoutine"]; }
+-(void) openEthanTwitter { [SKSharedHelper openTwitter:@"its_not_herpes"]; }
+-(void) openSite { [UIApplication.sharedApplication openURL:[NSURL URLWithString:@"https://elijahandandrew.com"]]; }
 @end

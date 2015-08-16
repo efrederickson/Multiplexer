@@ -58,7 +58,7 @@
 -(NSArray*) customSpecifiers
 {
     return @[
-             @{ @"footerText": @"Enable/disable Aura. After any change to the settings, a respring is recommended but not required." },
+             @{ @"footerText": @"Quickly enable or disable Aura. Re-open apps to apply changes." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
@@ -67,23 +67,25 @@
                  @"label": @"Enabled",
                  },
 
-             @{ @"footerText": @"This option changes whether to exit the current app after using the activator action to switch background modes." },
+             @{ @"label": @"Activator",
+                @"footerText": @"If enabled, the current app will be closed after performing the activation method.",
+             },
+             @{
+                @"cell": @"PSLinkCell",
+                @"action": @"showActivatorAction",
+                @"label": @"Activation Method",
+                //@"enabled": objc_getClass("LAEventSettingsController") != nil,
+             },
              @{
                 @"cell": @"PSSwitchCell",
-                @"label": @"Exit app after Menu",
+                @"label": @"Exit App After Menu",
                 @"default": @YES,
                 @"key": @"exitAppAfterUsingActivatorAction",
                 @"defaults": @"com.efrederickson.reachapp.settings",
                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-             },    
-             @{
-                @"cell": @"PSLinkCell",
-                @"action": @"showActivatorAction",
-                @"label": @"Activation method",
-                //@"enabled": objc_getClass("LAEventSettingsController") != nil,
              },
 
-             @{ @"label": @"Global Settings", @"footerText": @"" },
+             @{ @"label": @"Global", @"footerText": @"" },
              @{
                 @"cell": @"PSSwitchCell",
                 @"label": @"Show Icon Indicators",
@@ -94,7 +96,7 @@
              },
              @{
                 @"cell": @"PSSwitchCell",
-                @"label": @"Show in StatusBar",
+                @"label": @"Show on Status Bar",
                 @"default": @YES,
                 @"key": @"shouldShowStatusBarIcons",
                 @"defaults": @"com.efrederickson.reachapp.settings",
@@ -102,7 +104,7 @@
              },
              @{
                 @"cell": @"PSSwitchCell",
-                @"label": @"Show native in StatusBar",
+                @"label": @"Show Native in Status Bar",
                 @"default": @NO,
                 @"key": @"shouldShowStatusBarNativeIcons",
                 @"defaults": @"com.efrederickson.reachapp.settings",
@@ -113,14 +115,14 @@
                 @"cell": @"PSLinkListCell",
                 @"label": @"Background Mode",
                 @"key": @"globalBackgroundMode",
-                @"validTitles": @[ @"Native",                 /*@"Forced Native (old apps) [broken]",*/     @"Force Foreground",                 @"Disabled (Kill on exit)",      @"Suspend Immediately (SmartClose)" ],
-                @"validValues": @[ @(RABackgroundModeNative), /*@(RABackgroundModeForceNativeForOldApps),*/ @(RABackgroundModeForcedForeground), @(RABackgroundModeForceNone),    @(RABackgroundModeSuspendImmediately)],
-                @"shortTitles": @[ @"Native",                 /*@"Native+ [broken]",*/                      @"Forced",                           @"Disabled",                     @"SmartClose" ],
+                @"validTitles": @[ @"Native",                 @"Unlimited Backgrounding Time",                  @"Force Foreground",                 @"Kill on Exit",      @"Suspend Immediately" ],
+                @"validValues": @[ @(RABackgroundModeNative), @(RABackgroundModeUnlimitedBackgroundingTime),    @(RABackgroundModeForcedForeground), @(RABackgroundModeForceNone),    @(RABackgroundModeSuspendImmediately)],
+                @"shortTitles": @[ @"Native",                 @"∞",                                             @"Forced",                           @"Disabled",                     @"SmartClose" ],
                 @"default": @(RABackgroundModeNative),
                 @"detail": @"PSListItemsController",
                 @"defaults": @"com.efrederickson.reachapp.settings",
                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-                @"staticTextMessage": @"Does not apply to enabled apps with differing background modes in the \"Per App\" section."
+                @"staticTextMessage": @"Does not apply to apps enabled with differing options in the “Per App” section."
                 },
              @{
                 @"cell": @"PSSwitchCell",

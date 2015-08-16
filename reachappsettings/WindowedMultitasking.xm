@@ -68,7 +68,7 @@
              @{ @"label": @"Swipe Up From Bottom..."},
              @{
                  @"cell": @"PSSegmentCell",
-                 @"validTitles": @[ @"Left (Default)",            @"Middle",                      @"Right" ],
+                 @"validTitles": @[ @"Left",                      @"Middle",                      @"Right" ],
                  @"validValues": @[ @(RAGrabAreaBottomLeftThird), @(RAGrabAreaBottomMiddleThird), @(RAGrabAreaBottomRightThird), ],
                  @"default": @(RAGrabAreaBottomLeftThird),
                  @"key": @"windowedMultitaskingGrabArea",
