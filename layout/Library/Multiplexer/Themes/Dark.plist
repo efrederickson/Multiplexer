@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>identifier</key>
+	<string>com.eljahandandrew.multiplexer.themes.Dark</string>
+	<key>displayName</key>
+	<string>Dark</string>
+
+	<key>backgroundingIndicatorTextColor</key>
+	<string>FFFFFF</string>
+	<key>backgroundingIndicatorBackgroundColor</key>
+	<string>434a51</string>
+
+	<key>missionControlBlurStyle</key>
+	<integer>1</integer>
+	<key>missionControlScrollViewBackgroundColor</key>
+	<string>FFFFFF</string>
+	<key>missionControlScrollViewOpacity</key>
+	<real>0.3</real>
+	<key>missionControlIconPreviewShadowRadius</key>
+	<real>12</real>
+	<key>windowedMultitaskingWindowBarBackgroundColor</key>
+	<string>434a51</string>
+	<key>windowedMultitaskingCloseIconTint</key>
+	<string>80000000</string>
+	<key>windowedMultitaskingCloseIconBackgroundColor</key>
+	<string>FF7070</string>
+	<key>windowedMultitaskingMaxIconTint</key>
+	<string>80000000</string>
+	<key>windowedMultitaskingMaxIconBackgroundColor</key>
+	<string>73E8A6</string>
+	<key>windowedMultitaskingMinIconTint</key>
+	<string>80000000</string>
+	<key>windowedMultitaskingMinIconBackgroundColor</key>
+	<string>5ABFFF</string>
+	<key>windowedMultitaskingRotationIconTint</key>
+	<string>80000000</string>
+	<key>windowedMultitaskingRotationIconBackgroundColor</key>
+	<string>B974F5</string>
+	<key>windowedMultitaskingBlurStyle</key>
+	<integer>2</integer>
+	<key>windowedMultitaskingOverlayColor</key>
+	<string>99000000</string>
+	<key>swipeOverDetachBarColor</key>
+	<string>5a6168</string>
+	<key>windowedMultitaskingBarTitleColor</key>
+	<string>ffffff</string>
+</dict>
+</plist>
