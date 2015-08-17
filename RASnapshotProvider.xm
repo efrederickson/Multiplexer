@@ -102,9 +102,48 @@
 	[imageCache removeObjectForKey:[self createKeyForDesktop:desktop]];
 }
 
+- (UIImage*)rotateDesktopToMatchOrientation:(UIImage*)oldImage
+{
+	CGFloat degrees = 0;
+	if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeRight)
+		degrees = 270;
+	else if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
+		degrees = 90;
+	else if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationPortraitUpsideDown)
+		degrees = 180;
+
+	// https://stackoverflow.com/questions/20764623/rotate-newly-created-ios-image-90-degrees-prior-to-saving-as-png
+
+	//Calculate the size of the rotated view's containing box for our drawing space
+	UIView *rotatedViewBox = [[UIView alloc] initWithFrame:CGRectMake(0,0,oldImage.size.width, oldImage.size.height)];
+	CGAffineTransform t = CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(degrees));
+	rotatedViewBox.transform = t;
+
+	CGSize rotatedSize = rotatedViewBox.frame.size;
+	//CGSize rotatedSize = CGSizeApplyAffineTransform(oldImage.size, CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(degrees)));
+
+	//Create the bitmap context
+	UIGraphicsBeginImageContext(rotatedSize);
+	CGContextRef bitmap = UIGraphicsGetCurrentContext();
+
+	//Move the origin to the middle of the image so we will rotate and scale around the center.
+	CGContextTranslateCTM(bitmap, rotatedSize.width/2, rotatedSize.height/2);
+
+	//Rotate the image context
+	CGContextRotateCTM(bitmap, (degrees * M_PI / 180));
+
+	//Now, draw the rotated/scaled image into the context
+	CGContextScaleCTM(bitmap, 1.0, -1.0);
+	CGContextDrawImage(bitmap, CGRectMake(-oldImage.size.width / 2, -oldImage.size.height / 2, oldImage.size.width, oldImage.size.height), [oldImage CGImage]);
+
+	UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
+	return newImage;
+}
+
 -(UIImage*) renderPreviewForDesktop:(RADesktopWindow*)desktop
 {
-	UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen]._interfaceOrientedBounds.size, YES, [UIScreen mainScreen].scale);
+	UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].bounds.size, YES, [UIScreen mainScreen].scale);
 	CGContextRef c = UIGraphicsGetCurrentContext();
 
 	//[MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer renderInContext:c]; // Wallpaper
@@ -156,8 +195,11 @@
 			*/
 		}
 	}
+	if (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation))
+		CGContextRotateCTM(c, DEGREES_TO_RADIANS(90));
 	UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
 	UIGraphicsEndImageContext();
+	image = [self rotateDesktopToMatchOrientation:image];
 	MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer.contents = nil;
 	[[[%c(SBUIController) sharedInstance] window] layer].contents = nil;
 	desktop.layer.contents = nil;

@@ -109,7 +109,7 @@ CGRect swappedForOrientation2(CGRect in)
 	}
 	else if (lastOpenedApp) // dismiss even if not animating open
 	{
-		originalAppView.frame = CGRectMake(originalAppFrame.origin.x, originalAppView.frame.size.height, originalAppFrame.size.width, originalAppFrame.size.height);
+		originalAppView.frame = swappedForOrientation2(CGRectMake(originalAppFrame.origin.x, originalAppView.frame.size.height, originalAppFrame.size.width, originalAppFrame.size.height));
 	}
 
 	[window updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
@@ -196,7 +196,7 @@ CGRect swappedForOrientation2(CGRect in)
 	[RAGestureManager.sharedInstance stopIgnoringSwipesForIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
 	overrideCC = NO;
 
-	if (lastOpenedApp && lastOpenedApp.isRunning)
+	if (lastOpenedApp && lastOpenedApp.isRunning && UIApplication.sharedApplication._accessibilityFrontMostApplication != lastOpenedApp)
 	{
 		if ([RADesktopManager.sharedInstance isAppOpened:lastOpenedApp.bundleIdentifier] == NO)
 		{

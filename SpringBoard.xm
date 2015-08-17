@@ -16,6 +16,7 @@
 #import "RADesktopManager.h"
 #import "RADesktopWindow.h"
 #import "Asphaleia2.h"
+#import "RASnapshotProvider.h"
 
 #define SPRINGBOARD ([NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"])
 
@@ -93,17 +94,14 @@
 %end
 */
 
-/*
 %hook SpringBoard
 -(void)noteInterfaceOrientationChanged:(int)arg1 duration:(float)arg2
 {
-    if ([RASwipeOverManager.sharedInstance isUsingSwipeOver])
-        [RASwipeOverManager.sharedInstance stopUsingSwipeOver];
-
     %orig;
+    for (RADesktopWindow *desktop in RADesktopManager.sharedInstance.availableDesktops)
+        [RASnapshotProvider.sharedInstance forceReloadSnapshotOfDesktop:desktop];
 }
 %end
-*/
 
 %ctor
 {
