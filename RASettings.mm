@@ -280,6 +280,8 @@ int disableAutoDismiss = -1;
 -(BOOL) exitAppAfterUsingActivatorAction { return BOOL(@"exitAppAfterUsingActivatorAction", YES); }
 -(BOOL) windowedMultitaskingCompleteAnimations { return BOOL(@"windowedMultitaskingCompleteAnimations", NO); }
 -(NSString*) currentThemeIdentifier { return _settings[@"currentThemeIdentifier"] ?: @"com.eljahandandrew.multiplexer.themes.default"; }
+-(NSInteger) missionControlDesktopStyle { return [_settings[@"missionControlDesktopStyle"] ?: @1 intValue]; }
+-(BOOL) missionControlPagingEnabled { return BOOL(@"missionControlPagingEnabled", NO); }
 
 -(RAGrabArea) windowedMultitaskingGrabArea
 {

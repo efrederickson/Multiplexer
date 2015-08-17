@@ -55,6 +55,8 @@ enum RAGrabArea {
 -(BOOL) missionControlEnabled;
 -(BOOL) replaceAppSwitcherWithMC;
 -(BOOL) missionControlKillApps;
+-(NSInteger) missionControlDesktopStyle;
+-(BOOL) missionControlPagingEnabled;
 
 -(BOOL) isFirstRun;
 -(void) setFirstRun:(BOOL)value;

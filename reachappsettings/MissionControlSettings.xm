@@ -71,6 +71,26 @@
                  @"label": @"Replace App Switcher",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
+
+                 @{ @"label": @"Desktop Style" },
+             @{
+                 @"cell": @"PSSegmentCell",
+                 @"validTitles": @[ @"Outline", @"Darken" ],
+                 @"validValues": @[ @(0), @(1), ],
+                 @"default": @(1),
+                 @"key": @"missionControlDesktopStyle",
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @NO,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"missionControlPagingEnabled",
+                 @"label": @"Paged Scrolling",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+
                  @{ },
              @{
                  @"cell": @"PSSwitchCell",

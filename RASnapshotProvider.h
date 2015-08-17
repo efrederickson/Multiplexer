@@ -13,4 +13,6 @@
 
 -(UIImage*) snapshotForIdentifier:(NSString*)identifier;
 -(void) forceReloadOfSnapshotForIdentifier:(NSString*)identifier;
+
+-(void) forceReloadEverything;
 @end

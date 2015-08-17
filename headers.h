@@ -74,6 +74,13 @@ return sharedInstance;
 
 extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 
+@interface SBAppSwitcherSnapshotView : UIView
+- (void)setOrientation:(long long)arg1 orientationBehavior:(int)arg2;
+- (void)_loadSnapshotAsync;
+- (void)_loadZoomUpSnapshotSync;
+- (void)_loadSnapshotSync;
+@end
+
 @interface _SBFVibrantSettings : NSObject
 {
     int _style;

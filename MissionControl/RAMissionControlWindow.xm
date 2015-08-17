@@ -9,10 +9,12 @@
 #import "RAMissionControlManager.h"
 #import "RASettings.h"
 #import "RAResourceImageProvider.h"
+#import "RARunningAppsProvider.h"
 
 @interface RAMissionControlWindow ()  {
 	UIScrollView *desktopScrollView, *windowedAppScrollView, *otherRunningAppsScrollView;
 	UILabel *desktopLabel, *windowedLabel, *otherLabel;
+	UIButton *windowedKillAllButton, *otherKillAllButton;
 	
 	UIImageView *trashImageView;
 	UIImage *trashIcon;
@@ -65,7 +67,7 @@
 	}*/
 
 	// DESKTOP
-	CGFloat y = 20;
+	CGFloat y = 27;
 
 	if (desktopScrollView)
 	{
@@ -73,7 +75,7 @@
 	}
 	else
 	{
-		desktopLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, y, self.frame.size.width - 20, 25)];
+		desktopLabel = [[UILabel alloc] initWithFrame:CGRectMake(panePadding, y, self.frame.size.width - 20, 25)];
 		desktopLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
 		desktopLabel.textColor = UIColor.whiteColor;
 		desktopLabel.text = LOCALIZE(@"DESKTOPS");
@@ -97,14 +99,19 @@
 		[desktopScrollView addSubview:preview];
 		preview.image = [RASnapshotProvider.sharedInstance snapshotForDesktop:desktop];
 
-		if (desktop == RADesktopManager.sharedInstance.currentDesktop)
+		if (desktop == RADesktopManager.sharedInstance.currentDesktop && [RASettings.sharedInstance missionControlDesktopStyle] == 0)
 		{
-			preview.contentMode = UIViewContentModeScaleToFill;
 			preview.backgroundColor = [UIColor clearColor];
 			preview.clipsToBounds = YES;
 			preview.layer.borderWidth = 2;
 			preview.layer.cornerRadius = 10;
 			preview.layer.borderColor = [UIColor whiteColor].CGColor;
+		}
+		else if (desktop != RADesktopManager.sharedInstance.currentDesktop && [RASettings.sharedInstance missionControlDesktopStyle] == 1)
+		{
+			UIView *crapView = [[UIView alloc] initWithFrame:(CGRect){{ 0, 0 }, preview.frame.size }];
+			crapView.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.5];
+			[preview addSubview:crapView];
 		}
 
 		UITapGestureRecognizer *g = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleDesktopTap:)];
@@ -126,7 +133,7 @@
 
 	UIButton *newDesktopButton = [[UIButton alloc] init];
 	newDesktopButton.frame = CGRectMake(x, 20, width, height);
-	newDesktopButton.backgroundColor = [UIColor darkGrayColor];
+	newDesktopButton.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.2]; //[UIColor darkGrayColor];
 	[newDesktopButton setTitle:@"+" forState:UIControlStateNormal];
 	newDesktopButton.titleLabel.font = [UIFont systemFontOfSize:36];
 	[newDesktopButton addTarget:self action:@selector(createNewDesktop) forControlEvents:UIControlEventTouchUpInside];
@@ -137,6 +144,9 @@
 
 	// We do this AFTER rendering the desktop
 	[RADesktopManager.sharedInstance hideDesktop];
+
+	//width = UIScreen.mainScreen.bounds.size.width / 4.5714;
+	//height = UIScreen.mainScreen.bounds.size.height / 4.36;
 }
 
 -(void) reloadWindowedAppsSection
@@ -160,7 +170,7 @@
 			[appsWithoutWindows removeObject:app];
 
 	CGFloat x = panePadding;
-	CGFloat y = desktopScrollView.frame.origin.y + desktopScrollView.frame.size.height;
+	CGFloat y = desktopScrollView.frame.origin.y + desktopScrollView.frame.size.height + 7;
 
 	if (windowedAppScrollView)
 	{
@@ -168,14 +178,23 @@
 	}
 	else
 	{
-		windowedLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, y, self.frame.size.width - 20, 25)];
+		windowedLabel = [[UILabel alloc] initWithFrame:CGRectMake(panePadding, y, self.frame.size.width - 20, 25)];
 		windowedLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
 		windowedLabel.textColor = UIColor.whiteColor;
 		windowedLabel.text = LOCALIZE(@"ON_THIS_DESKTOP");
 		[self addSubview:windowedLabel];
 
+		otherKillAllButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		[otherKillAllButton setTitle:LOCALIZE(@"KILL_ALL") forState:UIControlStateNormal];
+		otherKillAllButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
+		otherKillAllButton.titleLabel.textColor = [UIColor whiteColor];
+		otherKillAllButton.frame = CGRectMake(self.frame.size.width - 100, y, 100 - panePadding, 25);
+		[otherKillAllButton addTarget:self action:@selector(killAllWindowed) forControlEvents:UIControlEventTouchUpInside];
+		[self addSubview:otherKillAllButton];
+
 		windowedAppScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + windowedLabel.frame.size.height, self.frame.size.width, height * 1.2)];
 		windowedAppScrollView.backgroundColor = [THEMED(missionControlScrollViewBackgroundColor) colorWithAlphaComponent:THEMED(missionControlScrollViewOpacity)];
+		windowedAppScrollView.pagingEnabled = [RASettings.sharedInstance missionControlPagingEnabled];
 
 		[self addSubview:windowedAppScrollView];
 	}
@@ -220,7 +239,7 @@
 -(void) reloadOtherAppsSection
 {
 	CGFloat x = panePadding;
-	CGFloat y = windowedAppScrollView.frame.origin.y + windowedAppScrollView.frame.size.height;
+	CGFloat y = windowedAppScrollView.frame.origin.y + windowedAppScrollView.frame.size.height + 7;
 
 	if (otherRunningAppsScrollView)
 	{
@@ -228,14 +247,23 @@
 	}
 	else
 	{
-		otherLabel = [[UILabel alloc] initWithFrame:CGRectMake(15, y, self.frame.size.width - 20, 25)];
+		otherLabel = [[UILabel alloc] initWithFrame:CGRectMake(panePadding, y, self.frame.size.width - 20, 25)];
 		otherLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
 		otherLabel.textColor = UIColor.whiteColor;
 		otherLabel.text = LOCALIZE(@"RUNNING_ELSEWHERE");
 		[self addSubview:otherLabel];
 
+		otherKillAllButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		[otherKillAllButton setTitle:LOCALIZE(@"KILL_ALL") forState:UIControlStateNormal];
+		otherKillAllButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
+		otherKillAllButton.titleLabel.textColor = [UIColor whiteColor];
+		otherKillAllButton.frame = CGRectMake(self.frame.size.width - 100, y, 100 - panePadding, 25);
+		[otherKillAllButton addTarget:self action:@selector(killAllOther) forControlEvents:UIControlEventTouchUpInside];
+		[self addSubview:otherKillAllButton];
+
 		otherRunningAppsScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + otherLabel.frame.size.height, self.frame.size.width, height * 1.2)];
 		otherRunningAppsScrollView.backgroundColor = [THEMED(missionControlScrollViewBackgroundColor) colorWithAlphaComponent:THEMED(missionControlScrollViewOpacity)];
+		otherRunningAppsScrollView.pagingEnabled = [RASettings.sharedInstance missionControlPagingEnabled];
 
 		[self addSubview:otherRunningAppsScrollView];
 	}
@@ -270,7 +298,7 @@
 		emptyLabel.text = LOCALIZE(@"NO_APPS");
 		emptyLabel.textColor = [UIColor whiteColor];
 		emptyLabel.alpha = 0.7;
-		[windowedAppScrollView addSubview:emptyLabel];
+		[otherRunningAppsScrollView addSubview:emptyLabel];
 	}
 
 	otherRunningAppsScrollView.contentSize = CGSizeMake(MAX(x, self.frame.size.width + (empty ? 0 : 1)), height * 1.2); // make slightly scrollable
@@ -467,6 +495,39 @@
 {
 	[self.manager hideMissionControl:YES];
 	[UIApplication.sharedApplication launchApplicationWithIdentifier:[[[gesture view] performSelector:@selector(application)] bundleIdentifier] suspended:NO];
+}
+
+-(void) killAllWindowed
+{
+	for (UIView *view in windowedAppScrollView.subviews)
+	{
+		if ([view isKindOfClass:[RAMissionControlPreviewView class]])
+		{
+			RAMissionControlPreviewView *realView = (RAMissionControlPreviewView*)view;
+			SBApplication *app = realView.application;
+			[RAAppKiller killAppWithSBApplication:app completion:^{
+				[runningApplications removeObject:app];
+				[self performSelectorOnMainThread:@selector(reloadWindowedAppsSection:) withObject:RARunningAppsProvider.sharedInstance.runningApplications waitUntilDone:YES];
+				[self performSelectorOnMainThread:@selector(reloadOtherAppsSection) withObject:nil waitUntilDone:YES];
+			}];
+		}
+	}
+}
+
+-(void) killAllOther
+{
+	for (UIView *view in otherRunningAppsScrollView.subviews)
+	{
+		if ([view isKindOfClass:[RAMissionControlPreviewView class]])
+		{
+			RAMissionControlPreviewView *realView = (RAMissionControlPreviewView*)view;
+			SBApplication *app = realView.application;
+			[RAAppKiller killAppWithSBApplication:app completion:^{
+				[self performSelectorOnMainThread:@selector(reloadWindowedAppsSection:) withObject:RARunningAppsProvider.sharedInstance.runningApplications waitUntilDone:YES];
+				[self performSelectorOnMainThread:@selector(reloadOtherAppsSection) withObject:nil waitUntilDone:YES];
+			}];
+		}
+	}
 }
 
 -(void) deconstructComponents

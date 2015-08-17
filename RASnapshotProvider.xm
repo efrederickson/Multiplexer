@@ -15,10 +15,11 @@
 	UIImage *image = nil;
 
 	SBDisplayItem *item = [%c(SBDisplayItem) displayItemWithType:@"App" displayIdentifier:identifier];
-	NSObject *view = [[[%c(SBUIController) sharedInstance] switcherController] performSelector:@selector(_snapshotViewForDisplayItem:) withObject:item];
+	SBAppSwitcherSnapshotView *view = [[[%c(SBUIController) sharedInstance] switcherController] performSelector:@selector(_snapshotViewForDisplayItem:) withObject:item];
+	[view setOrientation:UIApplication.sharedApplication.statusBarOrientation orientationBehavior:0];
 	if (view)
 	{
-		[view performSelector:@selector(_loadSnapshotSync)];
+		[view _loadSnapshotSync];
 		image = MSHookIvar<UIImageView*>(view, "_snapshotImageView").image;	
 	}
 
@@ -102,7 +103,7 @@
 	[imageCache removeObjectForKey:[self createKeyForDesktop:desktop]];
 }
 
-- (UIImage*)rotateDesktopToMatchOrientation:(UIImage*)oldImage
+- (UIImage*)rotateImageToMatchOrientation:(UIImage*)oldImage
 {
 	CGFloat degrees = 0;
 	if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeRight)
@@ -199,10 +200,15 @@
 		CGContextRotateCTM(c, DEGREES_TO_RADIANS(90));
 	UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
 	UIGraphicsEndImageContext();
-	image = [self rotateDesktopToMatchOrientation:image];
+	image = [self rotateImageToMatchOrientation:image];
 	MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer.contents = nil;
 	[[[%c(SBUIController) sharedInstance] window] layer].contents = nil;
 	desktop.layer.contents = nil;
 	return image;
+}
+
+-(void) forceReloadEverything
+{
+	[imageCache removeAllObjects];
 }
 @end

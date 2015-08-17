@@ -98,8 +98,7 @@
 -(void)noteInterfaceOrientationChanged:(int)arg1 duration:(float)arg2
 {
     %orig;
-    for (RADesktopWindow *desktop in RADesktopManager.sharedInstance.availableDesktops)
-        [RASnapshotProvider.sharedInstance forceReloadSnapshotOfDesktop:desktop];
+    [RASnapshotProvider.sharedInstance forceReloadEverything];
 }
 %end
 

@@ -88,7 +88,7 @@ CGRect swappedForOrientation2(CGRect in)
 	
 	[window makeKeyAndVisible];
 
-	if (lastOpenedApp)
+	if (lastOpenedApp && lastOpenedApp.isRunning)
 	{
 		originalAppView = [RAHostManager systemHostViewForApplication:lastOpenedApp].superview;
 		originalAppFrame = originalAppView.frame;

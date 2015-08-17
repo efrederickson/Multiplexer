@@ -21,3 +21,4 @@
 "ACTIVE_APP_WARNING" = "%@\n is currently opened";
 "ASPHALEIA2_AUTH_FAILED" = "Asphaleia 2\n authentication failed for\n %@.\nTap to try again.";
 "UNLIMITED_BACKGROUNDING_TIME" = "Unlimited Backgrounding Time";
+"KILL_ALL" = "Kill All";

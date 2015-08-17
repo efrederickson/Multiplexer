@@ -35,13 +35,13 @@ extern "C" void BKSTerminateApplicationForReasonAndReportWithDescription(NSStrin
 	}
 	else 
 	{
-		if (tries == 0)
+		//if (tries == 0)
 		{
 			// Try nicely
 			FBApplicationProcess *process = [[%c(FBProcessManager) sharedInstance] createApplicationProcessForBundleID:app.bundleIdentifier];
     		[process killForReason:1 andReport:NO withDescription:@"PSY SLAYED" completion:nil];
 		}
-		else if (tries == 1)
+		/*else if (tries == 1)
 		{
 			BKSTerminateApplicationForReasonAndReportWithDescription(app.bundleIdentifier, 5, 1, @"PSY SLAYED");
 		}
@@ -53,7 +53,7 @@ extern "C" void BKSTerminateApplicationForReasonAndReportWithDescription(NSStrin
 		{
 			// Attempt force
 			kill(app.pid, SIGKILL);
-		}
+		}*/
 		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
 			[RAAppKiller checkAppDead:app withTries:tries + 1 andCompletion:handler];
 		});
