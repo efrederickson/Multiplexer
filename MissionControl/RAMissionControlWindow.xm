@@ -8,6 +8,7 @@
 #import "RADesktopWindow.h"
 #import "RAMissionControlManager.h"
 #import "RASettings.h"
+#import "RAResourceImageProvider.h"
 
 @interface RAMissionControlWindow ()  {
 	UIScrollView *desktopScrollView, *windowedAppScrollView, *otherRunningAppsScrollView;
@@ -29,7 +30,7 @@
 {
 	if (self = [super initWithFrame:frame])
 	{
-		trashIcon = [UIImage imageWithContentsOfFile:[NSString stringWithFormat:@"%@/Trash.png",RA_BASE_PATH]];
+		trashIcon = [RAResourceImageProvider imageForFilename:@"Trash.png"];
 	}
 	return self;
 }
