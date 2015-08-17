@@ -16,7 +16,7 @@ BOOL allowOpenApp = NO;
 %hook SBIconController
 -(void)iconWasTapped:(__unsafe_unretained SBApplicationIcon*)arg1 
 {
-	if ([RASettings.sharedInstance launchIntoWindows] && arg1.application)
+	if ([RASettings.sharedInstance windowedMultitaskingEnabled] && [RASettings.sharedInstance launchIntoWindows] && arg1.application)
 	{
 		[RADesktopManager.sharedInstance.currentDesktop createAppWindowForSBApplication:arg1.application animated:YES];
 		override = YES;
@@ -39,7 +39,7 @@ BOOL allowOpenApp = NO;
 	// Broken
 	//if (launchNextOpenIntoWindow)
 
-	if ([RASettings.sharedInstance launchIntoWindows] && allowOpenApp != YES)
+	if ([RASettings.sharedInstance windowedMultitaskingEnabled] &&[RASettings.sharedInstance launchIntoWindows] && allowOpenApp != YES)
 	{
 		[RADesktopManager.sharedInstance.currentDesktop createAppWindowForSBApplication:arg1 animated:YES];
 		//launchNextOpenIntoWindow = NO;
