@@ -133,7 +133,7 @@ CGRect swappedForOrientation2(CGRect in)
 
 	//_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:1];
 	_UIBackdropViewSettings *blurSettings = [_UIBackdropViewSettings settingsForStyle:THEMED(missionControlBlurStyle)];
-	[blurSettings setBlurQuality:@"low"];
+	[blurSettings setBlurQuality:@"low"]; // speed++ hopefully
 	_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithSettings:blurSettings];
 	blurView.frame = window.frame;
 	[window addSubview:blurView];
@@ -193,7 +193,7 @@ CGRect swappedForOrientation2(CGRect in)
 	[RADesktopManager.sharedInstance reshowDesktop];
 	[RADesktopManager.sharedInstance.currentDesktop loadApps];
 	[RAGestureManager.sharedInstance removeGestureWithIdentifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture"];
-	[RAGestureManager.sharedInstance stopIgnoringSwipesForIdentifier:@"com.efrederickson.reachapp.missioncontrol.systemgesture"];
+	[RAGestureManager.sharedInstance stopIgnoringSwipesForIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
 	overrideCC = NO;
 
 	if (lastOpenedApp && lastOpenedApp.isRunning)
@@ -264,7 +264,7 @@ CGRect swappedForOrientation2(CGRect in)
 	{
 		window.center = CGPointMake(window.center.x, location.y - initialCenter.y);
 		if (originalAppView)
-			originalAppView.frame = CGRectMake(originalAppView.frame.origin.x, UIScreen.mainScreen._interfaceOrientedBounds.size.height - (UIScreen.mainScreen._interfaceOrientedBounds.size.height - location.y), originalAppFrame.size.width, originalAppFrame.size.height);
+			originalAppView.frame = swappedForOrientation2(CGRectMake(originalAppView.frame.origin.x, UIScreen.mainScreen._interfaceOrientedBounds.size.height - (UIScreen.mainScreen._interfaceOrientedBounds.size.height - location.y), originalAppFrame.size.width, originalAppFrame.size.height));
 	}
 	return RAGestureCallbackResultSuccess;
 }

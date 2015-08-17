@@ -109,17 +109,27 @@
 {
 	// If we don't do this check here, but in canHandleMovementWithPoint:forEdge:, the recognizer hooks will not begin tracking the swipe
 	// This is an issue if someone calls stopIgnoringSwipesForIdentifier: while a swipe is going on. 
-	for (NSValue *value in ignoredAreas.allValues)
+	/*for (NSString *key in ignoredAreas.allKeys)
 	{
+		NSValue *value = ignoredAreas[key];
 		CGRect rect = [value CGRectValue];
 		if (CGRectContainsPoint(rect, point))
 			return NO; // IGNORED
-	}
+	}*/
 
 	BOOL ret = NO;
 	for (int i = 0; i < gestures.count; i++)
 	{
 		RAGestureCallback *callback = [self callbackAtIndex:i];
+
+		NSValue *value = [ignoredAreas objectForKey:callback.identifier];
+		if (value)
+		{
+			CGRect rect = [value CGRectValue];
+			if (CGRectContainsPoint(rect, point))
+				continue;
+		}
+
 		if (callback.screenEdge & edge)
 		{
 			BOOL isThisCallbackCapable = NO;
