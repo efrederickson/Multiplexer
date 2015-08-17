@@ -45,6 +45,7 @@ extern int rotationDegsForOrientation(int o);
 {
 	[overlayWindow removeOverlayFromUnderlyingAppImmediately];
 	[RAMessagingServer.sharedInstance endResizingApp:currentAppIdentifier completion:nil];
+	[[%c(SBUIController) sharedInstance] releaseSwitcherOrientationLock];
 
 	isUsingSwipeOver = NO;
 	currentAppIdentifier = nil;
@@ -71,7 +72,6 @@ extern int rotationDegsForOrientation(int o);
 	[overlayWindow updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
 	
 	[self showApp:nil];
-	[[%c(SBUIController) sharedInstance] releaseSwitcherOrientationLock];
 }
 
 -(void) showApp:(NSString*)identifier
