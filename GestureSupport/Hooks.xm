@@ -120,6 +120,7 @@ struct VelocityData {
             if ([RAGestureManager.sharedInstance handleMovementOrStateUpdate:UIGestureRecognizerStateBegan withPoint:location velocity:screenEdgePanRecognizer.RA_velocity forEdge:screenEdgePanRecognizer.targetEdges])
             {
                 currentEdge = screenEdgePanRecognizer.targetEdges;
+                BKSHIDServicesCancelTouchesOnMainDisplay();
             }
         }
     }
