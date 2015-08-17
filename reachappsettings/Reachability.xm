@@ -159,8 +159,9 @@
                  @"label": @"Appear at Bottom",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
+                 */
              ];
-*/
+
 }
 @end
 
