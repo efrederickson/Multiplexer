@@ -146,6 +146,12 @@
 -(void) reloadWindowedAppsSection:(NSArray*)runningApplicationsArg
 {
 	runningApplications = [runningApplicationsArg mutableCopy];
+
+	NSArray *switcherOrder = [[[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary] copy];
+	[runningApplications sortUsingComparator:^NSComparisonResult(SBApplication *obj1, SBApplication *obj2) {
+    	return [@([switcherOrder indexOfObject:obj1.bundleIdentifier]) compare:@([switcherOrder indexOfObject:obj2.bundleIdentifier])];
+	}];
+	
 	appsWithoutWindows = [runningApplications mutableCopy];
 	NSArray *visibleIcons = [[[%c(SBIconViewMap) homescreenMap] iconModel] visibleIconIdentifiers];
 	for (SBApplication *app in runningApplications)
