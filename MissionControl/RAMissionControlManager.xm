@@ -196,7 +196,7 @@ CGRect swappedForOrientation2(CGRect in)
 	[RAGestureManager.sharedInstance stopIgnoringSwipesForIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
 	overrideCC = NO;
 
-	if (lastOpenedApp && lastOpenedApp.isRunning)
+	if (lastOpenedApp && lastOpenedApp.isRunning && UIApplication.sharedApplication._accessibilityFrontMostApplication != lastOpenedApp)
 	{
 		if ([RADesktopManager.sharedInstance isAppOpened:lastOpenedApp.bundleIdentifier] == NO)
 		{
