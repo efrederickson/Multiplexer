@@ -99,6 +99,7 @@
 
 		if (desktop == RADesktopManager.sharedInstance.currentDesktop)
 		{
+			preview.contentMode = UIViewContentModeScaleToFill;
 			preview.backgroundColor = [UIColor clearColor];
 			preview.clipsToBounds = YES;
 			preview.layer.borderWidth = 2;

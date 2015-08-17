@@ -74,6 +74,40 @@ return sharedInstance;
 
 extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 
+@interface _SBFVibrantSettings : NSObject
+{
+    int _style;
+    UIColor *_referenceColor;
+    id _legibilitySettings; // _UILegibilitySettings *_legibilitySettings;
+    float _referenceContrast;
+    UIColor *_tintColor;
+    UIColor *_shimmerColor;
+    UIColor *_chevronShimmerColor;
+    UIColor *_highlightColor;
+    UIColor *_highlightLimitingColor;
+}
+
++ (id)vibrantSettingsWithReferenceColor:(id)arg1 referenceContrast:(float)arg2 legibilitySettings:(id)arg3;
+@property(retain, nonatomic) UIColor *highlightLimitingColor; // @synthesize highlightLimitingColor=_highlightLimitingColor;
+@property(retain, nonatomic) UIColor *highlightColor; // @synthesize highlightColor=_highlightColor;
+@property(retain, nonatomic) UIColor *chevronShimmerColor; // @synthesize chevronShimmerColor=_chevronShimmerColor;
+@property(retain, nonatomic) UIColor *shimmerColor; // @synthesize shimmerColor=_shimmerColor;
+@property(retain, nonatomic) UIColor *tintColor; // @synthesize tintColor=_tintColor;
+@property(readonly, nonatomic) float referenceContrast; // @synthesize referenceContrast=_referenceContrast;
+//@property(readonly, nonatomic) _UILegibilitySettings *legibilitySettings; // @synthesize legibilitySettings=_legibilitySettings;
+@property(readonly, nonatomic) UIColor *referenceColor; // @synthesize referenceColor=_referenceColor;
+@property(readonly, nonatomic) int style; // @synthesize style=_style;
+- (id)highlightLimitingViewWithFrame:(struct CGRect)arg1;
+- (id)tintViewWithFrame:(struct CGRect)arg1;
+- (id)_computeSourceColorDodgeColorForDestinationColor:(id)arg1 producingLuminanceChange:(float)arg2;
+- (int)_style;
+- (unsigned int)hash;
+- (BOOL)isEqual:(id)arg1;
+- (void)dealloc;
+- (id)initWithReferenceColor:(id)arg1 referenceContrast:(float)arg2 legibilitySettings:(id)arg3;
+
+@end
+
 typedef struct {
     BOOL itemIsEnabled[25];
     char timeString[64];
@@ -193,7 +227,10 @@ typedef enum
 @end
 
 @interface SBChevronView : UIView
+@property(retain, nonatomic) _SBFVibrantSettings *vibrantSettings;
 -(void) setState:(int)state animated:(BOOL)animated;
+- (void)setBackgroundView:(id)arg1;
+@property(retain, nonatomic) UIColor *color;
 @end
 
 @interface SBControlCenterGrabberView : UIView

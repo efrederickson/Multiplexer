@@ -81,12 +81,18 @@
 
 	if ([view viewWithTag:999] == nil && ([RASettings.sharedInstance missionControlEnabled] && ![RASettings.sharedInstance replaceAppSwitcherWithMC]))
 	{
-		SBControlCenterGrabberView *grabber = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:CGRectMake(0, 0, 50, 30)];
+		SBControlCenterGrabberView *grabber = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:CGRectMake(0, 0, 60, 40)];
 		grabber.center = CGPointMake(view.frame.size.width / 2, 20/2);
 		
+		grabber.backgroundColor = [UIColor clearColor];
+		//grabber.chevronView.vibrantSettings = [%c(_SBFVibrantSettings) vibrantSettingsWithReferenceColor:UIColor.whiteColor referenceContrast:0.5 legibilitySettings:nil];
+
+		_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:2060];
+		blurView.frame = grabber.frame;
+		[grabber insertSubview:blurView atIndex:0];
+
 		[grabber.chevronView setState:1 animated:NO];
 
-		grabber.backgroundColor = [UIColor whiteColor];
 		grabber.layer.cornerRadius = 5;
 
 		//[grabber.chevronView setState:1 animated:YES];
@@ -107,13 +113,24 @@
 
 	if ([view viewWithTag:999] == nil && ([RASettings.sharedInstance missionControlEnabled] && ![RASettings.sharedInstance replaceAppSwitcherWithMC]))
 	{
-		SBControlCenterGrabberView *grabber = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:CGRectMake(0, 0, 50, 30)];
+		SBControlCenterGrabberView *grabber = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:CGRectMake(0, 0, 60, 40)];
 		grabber.center = CGPointMake(view.frame.size.width / 2, 20/2);
 		
+		
+		grabber.backgroundColor = [UIColor clearColor];
+		//grabber.chevronView.vibrantSettings = [%c(_SBFVibrantSettings) vibrantSettingsWithReferenceColor:UIColor.whiteColor referenceContrast:0.5 legibilitySettings:nil];
+
+		_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:2060];
+		blurView.frame = grabber.frame;
+		[grabber insertSubview:blurView atIndex:0];
+
 		[grabber.chevronView setState:1 animated:NO];
 
-		grabber.backgroundColor = [UIColor whiteColor];
 		grabber.layer.cornerRadius = 5;
+
+		//[grabber.chevronView setState:1 animated:YES];
+		grabber.tag = 999;
+		[view addSubview:grabber];
 
 		//[grabber.chevronView setState:1 animated:YES];
 		grabber.tag = 999;
