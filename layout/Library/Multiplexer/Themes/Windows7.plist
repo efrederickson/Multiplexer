@@ -75,5 +75,8 @@
 	<integer>3</integer>
 	<key>windowedMultaskingBarTitleTextAlignment</key>
 	<string>NSTextAlignmentLeft</string>
+
+	<key>windowedMultitaskingBarButtonCornerType</key>
+	<integer>1</integer>
 </dict>
 </plist>

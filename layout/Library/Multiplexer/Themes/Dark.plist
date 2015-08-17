@@ -65,5 +65,8 @@
 	<integer>0</integer>
 	<key>windowedMultaskingBarTitleTextAlignment</key>
 	<integer>1</integer>
+
+	<key>windowedMultitaskingBarButtonCornerType</key>
+	<integer>1</integer>
 </dict>
 </plist>
