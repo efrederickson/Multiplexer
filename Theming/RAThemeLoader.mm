@@ -38,6 +38,7 @@
 	ret.windowedMultitaskingRotationIconBackgroundColor = COLOR(@"windowedMultitaskingRotationIconBackgroundColor");
 	ret.windowedMultitaskingRotationIconTint = COLOR(@"windowedMultitaskingRotationIconTint");
 	ret.windowedMultitaskingBarTitleColor = COLOR(@"windowedMultitaskingBarTitleColor");
+	ret.windowedMultaskingBarTitleTextAlignment = [RAThemeLoader getTextAlignment:dict[@"windowedMultaskingBarTitleTextAlignment"]];
 
 	ret.windowedMultitaskingCloseButtonAlignment = [dict[@"windowedMultitaskingCloseButtonAlignment"] intValue];
 	ret.windowedMultitaskingCloseButtonPriority = [dict[@"windowedMultitaskingCloseButtonPriority"] intValue];
@@ -48,11 +49,48 @@
 	ret.windowedMultitaskingRotationAlignment = [dict[@"windowedMultitaskingRotationAlignment"] intValue];
 	ret.windowedMultitaskingRotationPriority = [dict[@"windowedMultitaskingRotationPriority"] intValue];
 
+	ret.windowedMultitaskingCloseIconOverlayColor = COLOR(@"windowedMultitaskingCloseIconOverlayColor") ?: ret.windowedMultitaskingCloseIconBackgroundColor;
+	ret.windowedMultitaskingMaxIconOverlayColor = COLOR(@"windowedMultitaskingMaxIconOverlayColor") ?: ret.windowedMultitaskingMaxIconBackgroundColor;
+	ret.windowedMultitaskingMinIconOverlayColor = COLOR(@"windowedMultitaskingMinIconOverlayColor") ?: ret.windowedMultitaskingMinIconBackgroundColor;
+	ret.windowedMultitaskingRotationIconOverlayColor = COLOR(@"windowedMultitaskingRotationIconOverlayColor") ?: ret.windowedMultitaskingRotationIconBackgroundColor;
+
 	ret.windowedMultitaskingBlurStyle = [dict[@"windowedMultitaskingBlurStyle"] intValue];
 	ret.windowedMultitaskingOverlayColor = COLOR(@"windowedMultitaskingOverlayColor");
 
 	ret.swipeOverDetachBarColor = COLOR(@"swipeOverDetachBarColor");
 
 	return ret;
+}
+
++(NSTextAlignment) getTextAlignment:(NSObject*)value
+{
+	if ([value isKindOfClass:[NSString class]])
+	{
+		if ([value isEqual:@"NSTextAlignmentLeft"] || [value isEqual:@"0"])
+			return NSTextAlignmentLeft;
+		if ([value isEqual:@"NSTextAlignmentCenter"] || [value isEqual:@"1"])
+			return NSTextAlignmentCenter;
+		if ([value isEqual:@"NSTextAlignmentRight"] || [value isEqual:@"2"])
+			return NSTextAlignmentRight;
+		if ([value isEqual:@"NSTextAlignmentJustified"] || [value isEqual:@"3"])
+			return NSTextAlignmentJustified;
+		if ([value isEqual:@"NSTextAlignmentNatural"] || [value isEqual:@"4"])
+			return NSTextAlignmentNatural;
+	}
+	else if ([value isKindOfClass:[NSNumber class]])
+	{
+		int actualValue = [((NSNumber*)value) intValue];
+		if (actualValue == 0)
+			return NSTextAlignmentLeft;
+		else if (actualValue == 1)
+			return NSTextAlignmentCenter;
+		else if (actualValue == 2)
+			return NSTextAlignmentRight;
+		else if (actualValue == 3)
+			return NSTextAlignmentJustified;
+		else if (actualValue == 4)
+			return NSTextAlignmentNatural;
+	}
+	return NSTextAlignmentCenter;
 }
 @end

@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>identifier</key>
-	<string>com.eljahandandrew.multiplexer.themes.default</string>
+	<string>com.eljahandandrew.multiplexer.themes.windows7</string>
 	<key>displayName</key>
-	<string>Default</string>
+	<string>Windows 7</string>
 
 	<key>backgroundingIndicatorTextColor</key>
 	<string>FFFFFF</string>
@@ -20,40 +20,49 @@
 	<real>0.3</real>
 	<key>missionControlIconPreviewShadowRadius</key>
 	<real>12</real>
+
 	<key>windowedMultitaskingWindowBarBackgroundColor</key>
-	<string>E5E4E5</string>
+	<string>6aacf6</string>
 	<key>windowedMultitaskingCloseIconTint</key>
-	<string>80000000</string>
+	<string>000000</string>
 	<key>windowedMultitaskingCloseIconBackgroundColor</key>
 	<string>FF7070</string>
 	<key>windowedMultitaskingMaxIconTint</key>
-	<string>80000000</string>
+	<string>000000</string>
 	<key>windowedMultitaskingMaxIconBackgroundColor</key>
-	<string>73E8A6</string>
+	<string>00000000</string>
 	<key>windowedMultitaskingMinIconTint</key>
-	<string>80000000</string>
+	<string>000000</string>
 	<key>windowedMultitaskingMinIconBackgroundColor</key>
-	<string>5ABFFF</string>
+	<string>00000000</string>
 	<key>windowedMultitaskingRotationIconTint</key>
-	<string>80000000</string>
+	<string>000000</string>
 	<key>windowedMultitaskingRotationIconBackgroundColor</key>
-	<string>B974F5</string>
+	<string>00000000</string>
 	<key>windowedMultitaskingBarTitleColor</key>
-	<string>737273</string>
+	<string>FFFFFF</string>
 	<key>windowedMultitaskingBlurStyle</key>
 	<integer>2</integer>
 	<key>windowedMultitaskingOverlayColor</key>
 	<string>99000000</string>
+	<key>windowedMultitaskingCloseIconOverlayColor</key>
+	<string>FFFFFF</string>
+	<key>windowedMultitaskingMaxIconOverlayColor</key>
+	<string>FFFFFF</string>
+	<key>windowedMultitaskingMinIconOverlayColor</key>
+	<string>FFFFFF</string>
+	<key>windowedMultitaskingRotationIconOverlayColor</key>
+	<string>FFFFFF</string>
 
 	<key>swipeOverDetachBarColor</key>
-	<string>E5E4E5</string>
+	<string>6aacf6</string>
 
 	<key>windowedMultitaskingCloseButtonAlignment</key>
-	<integer>0</integer>
+	<integer>1</integer>
 	<key>windowedMultitaskingMaxButtonAlignment</key>
-	<integer>0</integer>
+	<integer>1</integer>
 	<key>windowedMultitaskingMinButtonAlignment</key>
-	<integer>0</integer>
+	<integer>1</integer>
 	<key>windowedMultitaskingRotationAlignment</key>
 	<integer>1</integer>
 	<key>windowedMultitaskingCloseButtonPriority</key>
@@ -63,8 +72,8 @@
 	<key>windowedMultitaskingMinButtonPriority</key>
 	<integer>2</integer>
 	<key>windowedMultitaskingRotationPriority</key>
-	<integer>0</integer>
+	<integer>3</integer>
 	<key>windowedMultaskingBarTitleTextAlignment</key>
-	<integer>1</integer>
+	<string>NSTextAlignmentLeft</string>
 </dict>
 </plist>

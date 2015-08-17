@@ -46,5 +46,24 @@
 	<string>5a6168</string>
 	<key>windowedMultitaskingBarTitleColor</key>
 	<string>ffffff</string>
+
+	<key>windowedMultitaskingCloseButtonAlignment</key>
+	<integer>0</integer>
+	<key>windowedMultitaskingMaxButtonAlignment</key>
+	<integer>0</integer>
+	<key>windowedMultitaskingMinButtonAlignment</key>
+	<integer>0</integer>
+	<key>windowedMultitaskingRotationAlignment</key>
+	<integer>1</integer>
+	<key>windowedMultitaskingCloseButtonPriority</key>
+	<integer>0</integer>
+	<key>windowedMultitaskingMaxButtonPriority</key>
+	<integer>1</integer>
+	<key>windowedMultitaskingMinButtonPriority</key>
+	<integer>2</integer>
+	<key>windowedMultitaskingRotationPriority</key>
+	<integer>0</integer>
+	<key>windowedMultaskingBarTitleTextAlignment</key>
+	<integer>1</integer>
 </dict>
 </plist>

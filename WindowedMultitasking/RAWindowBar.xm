@@ -5,6 +5,15 @@
 #import "RASettings.h"
 #import "RAWindowStatePreservationSystemManager.h"
 #import "RAResourceImageProvider.h"
+#import "RAInsetLabel.h"
+
+@interface RAWindowBarIconInfo : NSObject
+@property (nonatomic) NSInteger alignment;
+@property (nonatomic) NSInteger priority;
+@property (nonatomic, retain) id item;
+@end
+@implementation RAWindowBarIconInfo
+@end
 
 extern BOOL allowOpenApp;
 const int rightSizeViewTag = 987654321;
@@ -25,7 +34,7 @@ const int bottomSizeViewTag =  987654320;
 	UITapGestureRecognizer *tapGesture, *doubleTapGesture;
 	UIRotationGestureRecognizer *rotateGesture;
 
-	UILabel *titleLabel;
+	RAInsetLabel *titleLabel;
 	UIButton *closeButton, *maximizeButton, *minimizeButton, *sizingLockButton;
 }
 @end
@@ -86,8 +95,9 @@ const int bottomSizeViewTag =  987654320;
     enableDrag = YES;
     enableLongPress = YES;
 
-    titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, myFrame.size.width, height)];
-    titleLabel.textAlignment = NSTextAlignmentCenter;
+    titleLabel = [[RAInsetLabel alloc] initWithFrame:CGRectMake(0, 0, myFrame.size.width, height)];
+    titleLabel.textInset = UIEdgeInsetsMake(0, 5, 0, 5);
+    titleLabel.textAlignment = THEMED(windowedMultaskingBarTitleTextAlignment);
     titleLabel.font = [UIFont systemFontOfSize:18];
     titleLabel.textColor = THEMED(windowedMultitaskingBarTitleColor);
     titleLabel.text = [view displayName];
@@ -99,47 +109,180 @@ const int bottomSizeViewTag =  987654320;
     buttonSize = tmp;
     spacing = (height - buttonSize) / 2.0;
 
-	closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-	closeButton.frame = CGRectMake(5, spacing, buttonSize, buttonSize);
-	[closeButton setImage:[RAResourceImageProvider imageForFilename:@"Close" size:CGSizeMake(16, 16) tintedTo:THEMED(windowedMultitaskingCloseIconTint)] forState:UIControlStateNormal];
-	closeButton.clipsToBounds = YES;
-	[closeButton addTarget:self action:@selector(closeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
-	closeButton.backgroundColor = THEMED(windowedMultitaskingCloseIconBackgroundColor);
-	closeButton.layer.cornerRadius = closeButton.frame.size.width / 2;
-	[self addSubview:closeButton];
+    /*
+        alignment:
+		0 = left
+		1 = right
+    */
 
-	maximizeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-	maximizeButton.frame = CGRectMake(closeButton.frame.origin.x + closeButton.frame.size.width + 5, spacing, buttonSize, buttonSize);
-	[maximizeButton setImage:[RAResourceImageProvider imageForFilename:@"Plus" size:CGSizeMake(16, 16) tintedTo:THEMED(windowedMultitaskingMaxIconTint)] forState:UIControlStateNormal];
-	maximizeButton.clipsToBounds = YES;
-	[maximizeButton addTarget:self action:@selector(maximizeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
-	maximizeButton.backgroundColor = THEMED(windowedMultitaskingMaxIconBackgroundColor);
-	maximizeButton.layer.cornerRadius = maximizeButton.frame.size.width / 2;
-	[self addSubview:maximizeButton];
+    static id closeItemIdentifier = [[NSObject alloc] init],
+    	maxItemIdentifier = [[NSObject alloc] init],
+    	minItemIdentifier = [[NSObject alloc] init],
+    	rotationItemIdentifier = [[NSObject alloc] init];
 
-	minimizeButton = [UIButton buttonWithType:UIButtonTypeCustom];
-	minimizeButton.frame = CGRectMake(maximizeButton.frame.origin.x + maximizeButton.frame.size.width + 5, spacing, buttonSize, buttonSize);
-	[minimizeButton setImage:[RAResourceImageProvider imageForFilename:@"Minus" size:CGSizeMake(16, 16) tintedTo:THEMED(windowedMultitaskingMinIconTint)] forState:UIControlStateNormal];
-	minimizeButton.clipsToBounds = YES;
-	[minimizeButton addTarget:self action:@selector(minimizeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
-	minimizeButton.backgroundColor = THEMED(windowedMultitaskingMinIconBackgroundColor);
-	minimizeButton.layer.cornerRadius = minimizeButton.frame.size.width / 2;
-	[self addSubview:minimizeButton];
+    NSMutableArray *infos = [NSMutableArray array];
+
+    NSInteger closeAlignment = THEMED(windowedMultitaskingCloseButtonAlignment);
+    NSInteger maxAlignment = THEMED(windowedMultitaskingMaxButtonAlignment);
+    NSInteger minAlignment = THEMED(windowedMultitaskingMinButtonAlignment);
+    NSInteger rotationAlignment = THEMED(windowedMultitaskingRotationAlignment);
+
+    NSInteger closePriority = THEMED(windowedMultitaskingCloseButtonPriority);
+    NSInteger maxPriority = THEMED(windowedMultitaskingMaxButtonPriority);
+    NSInteger minPriority = THEMED(windowedMultitaskingMinButtonPriority);
+    NSInteger rotationPriority = THEMED(windowedMultitaskingRotationPriority);
+
+    RAWindowBarIconInfo *tmpItem = [[RAWindowBarIconInfo alloc] init];
+    tmpItem.alignment = closeAlignment;
+    tmpItem.priority = closePriority;
+    tmpItem.item = closeItemIdentifier;
+    [infos addObject:tmpItem];
+
+	tmpItem = [[RAWindowBarIconInfo alloc] init];
+    tmpItem.alignment = maxAlignment;
+    tmpItem.priority = maxPriority;
+    tmpItem.item = maxItemIdentifier;
+    [infos addObject:tmpItem];
+    
+    tmpItem = [[RAWindowBarIconInfo alloc] init];
+    tmpItem.alignment = minAlignment;
+    tmpItem.priority = minPriority;
+    tmpItem.item = minItemIdentifier;
+    [infos addObject:tmpItem];
+    
+    tmpItem = [[RAWindowBarIconInfo alloc] init];
+    tmpItem.alignment = rotationAlignment;
+    tmpItem.priority = rotationPriority;
+    tmpItem.item = rotationItemIdentifier;
+    [infos addObject:tmpItem];
+
+    NSMutableArray *leftIconOrder = [NSMutableArray array];
+    NSMutableArray *rightIconOrder = [NSMutableArray array];
+
+    for (int i = 0; i < infos.count; i++)
+	{
+		RAWindowBarIconInfo *info = infos[i];
+		if (info.alignment == 0)
+			[leftIconOrder addObject:info];
+		else
+			[rightIconOrder addObject:info];
+	}
+
+	[leftIconOrder sortUsingComparator:^(RAWindowBarIconInfo *a, RAWindowBarIconInfo *b) {
+		if (a.priority > b.priority)
+			return (NSComparisonResult)NSOrderedDescending;
+		else if (a.priority < b.priority)
+			return (NSComparisonResult)NSOrderedAscending;
+
+	    return (NSComparisonResult)NSOrderedSame;
+	}];
+
+	[rightIconOrder sortUsingComparator:^(RAWindowBarIconInfo *a, RAWindowBarIconInfo *b) {
+		if (a.priority > b.priority)
+			return (NSComparisonResult)NSOrderedDescending;
+		else if (a.priority < b.priority)
+			return (NSComparisonResult)NSOrderedAscending;
+
+	    return (NSComparisonResult)NSOrderedSame;
+	}];
+
+
+	CGFloat leftSpace = 5;
+	CGFloat rightSpace = self.frame.size.width - buttonSize - 5;
+
+	UIButton *(^createCloseButton)() = ^{
+		closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		closeButton.frame = CGRectMake(5, spacing, buttonSize, buttonSize);
+		[closeButton setImage:[RAResourceImageProvider imageForFilename:@"Close" size:CGSizeMake(16, 16) tintedTo:THEMED(windowedMultitaskingCloseIconTint)] forState:UIControlStateNormal];
+		closeButton.clipsToBounds = YES;
+		[closeButton addTarget:self action:@selector(closeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
+		closeButton.backgroundColor = THEMED(windowedMultitaskingCloseIconBackgroundColor);
+		closeButton.layer.cornerRadius = closeButton.frame.size.width / 2;
+		[self addSubview:closeButton];
+		return closeButton;
+	};
+
+
+	UIButton *(^createMaxButton)() = ^{
+		maximizeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		maximizeButton.frame = CGRectMake(closeButton.frame.origin.x + closeButton.frame.size.width + 5, spacing, buttonSize, buttonSize);
+		[maximizeButton setImage:[RAResourceImageProvider imageForFilename:@"Plus" size:CGSizeMake(16, 16) tintedTo:THEMED(windowedMultitaskingMaxIconTint)] forState:UIControlStateNormal];
+		maximizeButton.clipsToBounds = YES;
+		[maximizeButton addTarget:self action:@selector(maximizeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
+		maximizeButton.backgroundColor = THEMED(windowedMultitaskingMaxIconBackgroundColor);
+		maximizeButton.layer.cornerRadius = maximizeButton.frame.size.width / 2;
+		[self addSubview:maximizeButton];
+		return maximizeButton;
+	};
+
+	UIButton *(^createMinButton)() = ^{
+		minimizeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		minimizeButton.frame = CGRectMake(maximizeButton.frame.origin.x + maximizeButton.frame.size.width + 5, spacing, buttonSize, buttonSize);
+		[minimizeButton setImage:[RAResourceImageProvider imageForFilename:@"Minus" size:CGSizeMake(16, 16) tintedTo:THEMED(windowedMultitaskingMinIconTint)] forState:UIControlStateNormal];
+		minimizeButton.clipsToBounds = YES;
+		[minimizeButton addTarget:self action:@selector(minimizeButtonTap:) forControlEvents:UIControlEventTouchUpInside];
+		minimizeButton.backgroundColor = THEMED(windowedMultitaskingMinIconBackgroundColor);
+		minimizeButton.layer.cornerRadius = minimizeButton.frame.size.width / 2;
+		[self addSubview:minimizeButton];
+		return minimizeButton;
+	};
+
+	UIButton *(^createRotationButton)() = ^{
+		sizingLockButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		sizingLockButton.frame = CGRectMake(self.frame.size.width - (buttonSize + 5), spacing, buttonSize, buttonSize);
+		sizingLockButton.titleLabel.font = [UIFont systemFontOfSize:13];
+		[sizingLockButton setImage:[RAResourceImageProvider imageForFilename:@"Unlocked" size:CGSizeMake(16, 16) tintedTo:THEMED(windowedMultitaskingRotationIconTint)] forState:UIControlStateNormal];
+		sizingLockButton.clipsToBounds = YES;
+		[sizingLockButton addTarget:self action:@selector(sizingLockButtonTap:) forControlEvents:UIControlEventTouchUpInside];
+		sizingLockButton.backgroundColor = THEMED(windowedMultitaskingRotationIconBackgroundColor);
+		sizingLockButton.layer.cornerRadius = sizingLockButton.frame.size.width / 2;
+		[self addSubview:sizingLockButton];
+		return sizingLockButton;
+	};
+
+	for (RAWindowBarIconInfo *item in leftIconOrder)
+	{
+		UIButton *button = nil;
+		if (item.item == closeItemIdentifier)
+			button = createCloseButton();
+		else if (item.item == maxItemIdentifier)
+			button = createMaxButton();
+		else if (item.item == minItemIdentifier)
+			button = createMinButton();
+		else if (item.item == rotationItemIdentifier)
+			button = createRotationButton();
+
+		if (button)
+		{
+			button.frame = CGRectMake(leftSpace, spacing, buttonSize, buttonSize);
+			leftSpace += button.frame.size.width + 5;
+		}
+	}
+
+	for (RAWindowBarIconInfo *item in rightIconOrder)
+	{
+		UIButton *button = nil;
+		if (item.item == closeItemIdentifier)
+			button = createCloseButton();
+		else if (item.item == maxItemIdentifier)
+			button = createMaxButton();
+		else if (item.item == minItemIdentifier)
+			button = createMinButton();
+		else if (item.item == rotationItemIdentifier)
+			button = createRotationButton();
+
+		if (button)
+		{
+			button.frame = CGRectMake(rightSpace, spacing, buttonSize, buttonSize);
+			rightSpace -= button.frame.size.width + 5;
+		}
+	}
 
 	sizingLocked = NO;
 	appRotationLocked = NO;
-	sizingLockButton = [UIButton buttonWithType:UIButtonTypeCustom];
-	sizingLockButton.frame = CGRectMake(self.frame.size.width - (buttonSize + 5), spacing, buttonSize, buttonSize);
-	sizingLockButton.titleLabel.font = [UIFont systemFontOfSize:13];
-	[sizingLockButton setImage:[RAResourceImageProvider imageForFilename:@"Unlocked" size:CGSizeMake(16, 16) tintedTo:THEMED(windowedMultitaskingRotationIconTint)] forState:UIControlStateNormal];
-	sizingLockButton.clipsToBounds = YES;
-	[sizingLockButton addTarget:self action:@selector(sizingLockButtonTap:) forControlEvents:UIControlEventTouchUpInside];
-	sizingLockButton.backgroundColor = THEMED(windowedMultitaskingRotationIconBackgroundColor);
-	sizingLockButton.layer.cornerRadius = sizingLockButton.frame.size.width / 2;
-	[self addSubview:sizingLockButton];
 
-	CAShapeLayer * maskLayer = [CAShapeLayer layer];
-	maskLayer.path = [UIBezierPath bezierPathWithRoundedRect:self.bounds byRoundingCorners: UIRectCornerTopLeft | UIRectCornerTopRight cornerRadii: (CGSize){6.0, 6.0}].CGPath;
+	CAShapeLayer *maskLayer = [CAShapeLayer layer];
+	maskLayer.path = [UIBezierPath bezierPathWithRoundedRect:self.bounds byRoundingCorners:UIRectCornerTopLeft | UIRectCornerTopRight cornerRadii:(CGSize){6.0, 6.0}].CGPath;
 	self.layer.mask = maskLayer;
 }
 

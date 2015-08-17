@@ -36,7 +36,7 @@
 	closeButton.titleLabel.textColor = [UIColor whiteColor];
 	closeButton.frame = CGRectMake(0, 0, buttonSize, buttonSize);
 	closeButton.center = CGPointMake(self.center.x, self.center.y + (closeButton.frame.size.height / 2));
-	[closeButton setImage:[RAResourceImageProvider imageForFilename:@"Close" size:CGSizeMake(imageSize, imageSize) tintedTo:THEMED(windowedMultitaskingCloseIconBackgroundColor)] forState:UIControlStateNormal];
+	[closeButton setImage:[RAResourceImageProvider imageForFilename:@"Close" size:CGSizeMake(imageSize, imageSize) tintedTo:THEMED(windowedMultitaskingCloseIconOverlayColor)] forState:UIControlStateNormal];
 	closeButton.titleLabel.font = [UIFont systemFontOfSize:36];
 	[closeButton addTarget:self action:@selector(buttonPress:) forControlEvents:UIControlEventTouchDown];
 	[closeButton addTarget:self action:@selector(buttonRelease:) forControlEvents:UIControlEventTouchUpInside];
@@ -52,7 +52,7 @@
 	maximizeButton.titleLabel.textColor = [UIColor whiteColor];
 	maximizeButton.frame = CGRectMake(0, 0, buttonSize, buttonSize);
 	maximizeButton.center = CGPointMake(self.center.x - maximizeButton.frame.size.width, self.center.y - (maximizeButton.frame.size.height / 2));
-	[maximizeButton setImage:[RAResourceImageProvider imageForFilename:@"Plus" size:CGSizeMake(imageSize, imageSize) tintedTo:THEMED(windowedMultitaskingMaxIconBackgroundColor)] forState:UIControlStateNormal];
+	[maximizeButton setImage:[RAResourceImageProvider imageForFilename:@"Plus" size:CGSizeMake(imageSize, imageSize) tintedTo:THEMED(windowedMultitaskingMaxIconOverlayColor)] forState:UIControlStateNormal];
 	maximizeButton.titleLabel.font = [UIFont systemFontOfSize:36];
 	[maximizeButton addTarget:self action:@selector(buttonPress:) forControlEvents:UIControlEventTouchDown];
 	[maximizeButton addTarget:self action:@selector(buttonRelease:) forControlEvents:UIControlEventTouchUpInside];
@@ -67,7 +67,7 @@
 	minimizeButton.titleLabel.textColor = [UIColor whiteColor];
 	minimizeButton.frame = CGRectMake(0, 0, buttonSize, buttonSize);
 	minimizeButton.center = CGPointMake(self.center.x + minimizeButton.frame.size.width, self.center.y - (minimizeButton.frame.size.height / 2));
-	[minimizeButton setImage:[RAResourceImageProvider imageForFilename:@"Minus" size:CGSizeMake(imageSize, imageSize) tintedTo:THEMED(windowedMultitaskingMinIconBackgroundColor)] forState:UIControlStateNormal];
+	[minimizeButton setImage:[RAResourceImageProvider imageForFilename:@"Minus" size:CGSizeMake(imageSize, imageSize) tintedTo:THEMED(windowedMultitaskingMinIconOverlayColor)] forState:UIControlStateNormal];
 	minimizeButton.titleLabel.font = [UIFont systemFontOfSize:36];
 	[minimizeButton addTarget:self action:@selector(buttonPress:) forControlEvents:UIControlEventTouchDown];
 	[minimizeButton addTarget:self action:@selector(buttonRelease:) forControlEvents:UIControlEventTouchUpInside];
@@ -82,7 +82,7 @@
 	rotationLockButton.titleLabel.textColor = [UIColor whiteColor];
 	rotationLockButton.frame = CGRectMake(0, 0, buttonSize, buttonSize);
 	rotationLockButton.center = CGPointMake(self.center.x, self.center.y - (buttonSize * 1.5));
-	[rotationLockButton setImage:[RAResourceImageProvider imageForFilename:@"Unlocked" size:CGSizeMake(imageSize, imageSize) tintedTo:THEMED(windowedMultitaskingRotationIconBackgroundColor)] forState:UIControlStateNormal];
+	[rotationLockButton setImage:[RAResourceImageProvider imageForFilename:@"Unlocked" size:CGSizeMake(imageSize, imageSize) tintedTo:THEMED(windowedMultitaskingRotationIconOverlayColor)] forState:UIControlStateNormal];
 	rotationLockButton.titleLabel.font = [UIFont systemFontOfSize:36];
 	[rotationLockButton addTarget:self action:@selector(buttonPress:) forControlEvents:UIControlEventTouchDown];
 	[rotationLockButton addTarget:self action:@selector(buttonRelease:) forControlEvents:UIControlEventTouchUpInside];
@@ -94,11 +94,11 @@
 
 	if (self.appWindow.isLocked)
 	{
-		[rotationLockButton setImage:[RAResourceImageProvider imageForFilename:@"Lock" size:CGSizeMake(imageSize, imageSize) tintedTo:THEMED(windowedMultitaskingRotationIconBackgroundColor)] forState:UIControlStateNormal];
+		[rotationLockButton setImage:[RAResourceImageProvider imageForFilename:@"Lock" size:CGSizeMake(imageSize, imageSize) tintedTo:THEMED(windowedMultitaskingRotationIconOverlayColor)] forState:UIControlStateNormal];
 	}
 	else
 	{
-		[rotationLockButton setImage:[RAResourceImageProvider imageForFilename:@"Unlocked" size:CGSizeMake(imageSize, imageSize) tintedTo:THEMED(windowedMultitaskingRotationIconBackgroundColor)] forState:UIControlStateNormal];
+		[rotationLockButton setImage:[RAResourceImageProvider imageForFilename:@"Unlocked" size:CGSizeMake(imageSize, imageSize) tintedTo:THEMED(windowedMultitaskingRotationIconOverlayColor)] forState:UIControlStateNormal];
 	}
 }
 
@@ -200,11 +200,11 @@
 
 	if (self.appWindow.isLocked)
 	{
-		[rotationLockButton setImage:[RAResourceImageProvider imageForFilename:@"Lock" size:CGSizeMake(imageSize, imageSize) tintedTo:[UIColor colorWithRed:185/255.0f green:116/255.0f blue:245/255.0f alpha:1.0f]] forState:UIControlStateNormal];
+		[rotationLockButton setImage:[RAResourceImageProvider imageForFilename:@"Lock" size:CGSizeMake(imageSize, imageSize) tintedTo:THEMED(windowedMultitaskingRotationIconOverlayColor)] forState:UIControlStateNormal];
 	}
 	else
 	{
-		[rotationLockButton setImage:[RAResourceImageProvider imageForFilename:@"Unlocked" size:CGSizeMake(imageSize, imageSize) tintedTo:[UIColor colorWithRed:185/255.0f green:116/255.0f blue:245/255.0f alpha:1.0f]] forState:UIControlStateNormal];
+		[rotationLockButton setImage:[RAResourceImageProvider imageForFilename:@"Unlocked" size:CGSizeMake(imageSize, imageSize) tintedTo:THEMED(windowedMultitaskingRotationIconOverlayColor)] forState:UIControlStateNormal];
 	}
 }
 @end

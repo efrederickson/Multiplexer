@@ -26,7 +26,13 @@
 @property (nonatomic, retain) UIColor *windowedMultitaskingRotationIconBackgroundColor;
 @property (nonatomic, retain) UIColor *windowedMultitaskingRotationIconTint;
 
+@property (nonatomic, retain) UIColor *windowedMultitaskingCloseIconOverlayColor;
+@property (nonatomic, retain) UIColor *windowedMultitaskingMaxIconOverlayColor;
+@property (nonatomic, retain) UIColor *windowedMultitaskingMinIconOverlayColor;
+@property (nonatomic, retain) UIColor *windowedMultitaskingRotationIconOverlayColor;
+
 @property (nonatomic, retain) UIColor *windowedMultitaskingBarTitleColor;
+@property (nonatomic) NSTextAlignment windowedMultaskingBarTitleTextAlignment;
 
 @property (nonatomic) int windowedMultitaskingCloseButtonAlignment;
 @property (nonatomic) int windowedMultitaskingCloseButtonPriority;

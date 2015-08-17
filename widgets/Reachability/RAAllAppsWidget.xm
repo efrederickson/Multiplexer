@@ -46,7 +46,6 @@
 
 	width = interval;
 	isTop = YES;
-	contentSize = CGSizeMake(10, 10);
 	intervalCount = 1;
 	hasSecondRow = NO;
 	for (NSString *str in allApps)
