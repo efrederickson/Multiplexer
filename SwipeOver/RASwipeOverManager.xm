@@ -16,6 +16,8 @@ extern int rotationDegsForOrientation(int o);
 	RASwipeOverOverlay *overlayWindow;
 
 	CGFloat start;
+
+	BOOL didWantOrientationEvents;
 }
 @end
 
@@ -36,6 +38,7 @@ extern int rotationDegsForOrientation(int o);
 	currentAppIdentifier = [[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier;
 
 	[self createEdgeView];
+	[[%c(SBUIController) sharedInstance] _lockOrientationForSwitcher];
 }
 
 -(void) stopUsingSwipeOver
@@ -68,6 +71,7 @@ extern int rotationDegsForOrientation(int o);
 	[overlayWindow updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
 	
 	[self showApp:nil];
+	[[%c(SBUIController) sharedInstance] releaseSwitcherOrientationLock];
 }
 
 -(void) showApp:(NSString*)identifier

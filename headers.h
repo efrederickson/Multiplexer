@@ -223,6 +223,8 @@ typedef enum
 -(void) restoreContentAndUnscatterIconsAnimated:(BOOL)arg1;
 - (_Bool)shouldShowControlCenterTabControlOnFirstSwipe;- (_Bool)isAppSwitcherShowing;
 -(BOOL) _activateAppSwitcher;
+-(void)_lockOrientationForSwitcher;
+-(void)releaseSwitcherOrientationLock;
 @end
 
 @interface SBDisplayItem : NSObject <NSCopying>
@@ -700,6 +702,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 // SpringBoard methods
 -(BOOL)launchApplicationWithIdentifier:(id)identifier suspended:(BOOL)suspended;
 -(SBApplication*) _accessibilityFrontMostApplication;
+-(void)setWantsOrientationEvents:(BOOL)events;
 
 - (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(id)arg2 changeApplicationFlag:(BOOL)arg3;
 

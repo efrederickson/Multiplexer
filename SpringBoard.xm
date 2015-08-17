@@ -93,6 +93,18 @@
 %end
 */
 
+/*
+%hook SpringBoard
+-(void)noteInterfaceOrientationChanged:(int)arg1 duration:(float)arg2
+{
+    if ([RASwipeOverManager.sharedInstance isUsingSwipeOver])
+        [RASwipeOverManager.sharedInstance stopUsingSwipeOver];
+
+    %orig;
+}
+%end
+*/
+
 %ctor
 {
     if (SPRINGBOARD)
