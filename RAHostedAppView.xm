@@ -121,7 +121,8 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
     if ([UIApplication.sharedApplication._accessibilityFrontMostApplication isEqual:app])
     {
-        isForemostAppLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, (self.frame.size.height - 40) / 2, self.frame.size.width, 40)];
+        isForemostAppLabel = [[UILabel alloc] initWithFrame:self.bounds];
+        isForemostAppLabel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.8];
         isForemostAppLabel.textColor = [UIColor whiteColor];
         isForemostAppLabel.textAlignment = NSTextAlignmentCenter;
         isForemostAppLabel.font = [UIFont systemFontOfSize:36];
