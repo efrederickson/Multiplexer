@@ -66,15 +66,15 @@
 {
 	if ([value isKindOfClass:[NSString class]])
 	{
-		if ([value isEqual:@"NSTextAlignmentLeft"] || [value isEqual:@"0"])
+		if ([value isEqual:@"NSTextAlignmentLeft"] || [value isEqual:@"0"] || [value isEqual:@"Left"])
 			return NSTextAlignmentLeft;
-		if ([value isEqual:@"NSTextAlignmentCenter"] || [value isEqual:@"1"])
+		if ([value isEqual:@"NSTextAlignmentCenter"] || [value isEqual:@"1"] || [value isEqual:@"Center"])
 			return NSTextAlignmentCenter;
-		if ([value isEqual:@"NSTextAlignmentRight"] || [value isEqual:@"2"])
+		if ([value isEqual:@"NSTextAlignmentRight"] || [value isEqual:@"2"] || [value isEqual:@"Right"])
 			return NSTextAlignmentRight;
-		if ([value isEqual:@"NSTextAlignmentJustified"] || [value isEqual:@"3"])
+		if ([value isEqual:@"NSTextAlignmentJustified"] || [value isEqual:@"3"] || [value isEqual:@"Justified"])
 			return NSTextAlignmentJustified;
-		if ([value isEqual:@"NSTextAlignmentNatural"] || [value isEqual:@"4"])
+		if ([value isEqual:@"NSTextAlignmentNatural"] || [value isEqual:@"4"] || [value isEqual:@"Natural"])
 			return NSTextAlignmentNatural;
 	}
 	else if ([value isKindOfClass:[NSNumber class]])
