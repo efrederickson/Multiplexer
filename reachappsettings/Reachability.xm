@@ -113,7 +113,7 @@
                  @"label": @"Show Bottom Grabber",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
-
+/*
              @{ @"footerText": @"This attempts to hide the lower status bar and force the upper status bar." },
              @{
                  @"cell": @"PSSwitchCell",
@@ -123,7 +123,7 @@
                  @"label": @"Unify Status Bar",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
-
+*/
 
              @{ @"footerText": @"Shows an app chooser that allows you to choose which app to show. If disabled, the last used app will be shown in Reachability." },
              @{
@@ -140,6 +140,7 @@
                 @"label": @"Widget Chooser Options",
             },
 
+/*
              @{ @"footerText": @"PLEASE NOTE THESE ARE BETA OPTIONS, STILL UNDER WORK OR TEMPORARILY BEING IGNORED. DO NOT SEND EMAILS RELATING TO THIS FEATURE. THEY WILL BE IGNORED. \n\nThat said, one will force applications into portrait and scale them to the screen size in landscape mode\nand the other will flip the top and bottom panes" },
              @{
                  @"cell": @"PSSwitchCell",
@@ -159,6 +160,7 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
              ];
+*/
 }
 @end
 
