@@ -232,7 +232,6 @@
             
         [self.rootController presentViewController:mailViewController animated:YES completion:nil];
     }
-
 }
 
 -(void)setPreferenceValue:(id)value specifier:(PSSpecifier*)specifier
