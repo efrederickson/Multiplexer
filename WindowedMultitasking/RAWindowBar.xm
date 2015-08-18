@@ -374,6 +374,8 @@ const int bottomSizeViewTag =  987654320;
 	    }];
 	else 
 		[self setTransform:CGAffineTransformRotate(CGAffineTransformMakeScale(scale, scale), rotation)];
+
+	[self saveWindowInfo];
 }
 
 -(void) addRotation:(CGFloat)rads updateApp:(BOOL)update
