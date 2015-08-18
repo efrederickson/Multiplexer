@@ -20,6 +20,7 @@ extern BOOL overrideCC;
 	SBApplication *lastOpenedApp;
 	NSMutableArray *appsWithoutWindows;
 
+	BOOL lastStatusBarHidden;
 	__block UIView *originalAppView;
 	__block CGRect originalAppFrame;
 }
@@ -113,6 +114,7 @@ CGRect swappedForOrientation2(CGRect in)
 	}
 
 	[window updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
+	lastStatusBarHidden = UIApplication.sharedApplication.statusBarHidden;
 	UIApplication.sharedApplication.statusBarHidden = NO;
 	[RAGestureManager.sharedInstance addGestureRecognizerWithTarget:self forEdge:UIRectEdgeBottom identifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture" priority:RAGesturePriorityHigh];
 	[RAGestureManager.sharedInstance ignoreSwipesBeginningInRect:UIScreen.mainScreen.bounds forIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
@@ -196,6 +198,7 @@ CGRect swappedForOrientation2(CGRect in)
 	[RADesktopManager.sharedInstance.currentDesktop loadApps];
 	[RAGestureManager.sharedInstance removeGestureWithIdentifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture"];
 	[RAGestureManager.sharedInstance stopIgnoringSwipesForIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
+	UIApplication.sharedApplication.statusBarHidden = lastStatusBarHidden;
 	overrideCC = NO;
 
 	//if (lastOpenedApp && lastOpenedApp.isRunning && UIApplication.sharedApplication._accessibilityFrontMostApplication != lastOpenedApp)
