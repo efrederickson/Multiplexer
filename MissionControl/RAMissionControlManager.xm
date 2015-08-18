@@ -196,13 +196,13 @@ CGRect swappedForOrientation2(CGRect in)
 	[RAGestureManager.sharedInstance stopIgnoringSwipesForIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
 	overrideCC = NO;
 
-	if (lastOpenedApp && lastOpenedApp.isRunning && UIApplication.sharedApplication._accessibilityFrontMostApplication != lastOpenedApp)
-	{
-		if ([RADesktopManager.sharedInstance isAppOpened:lastOpenedApp.bundleIdentifier] == NO)
-		{
-			[[%c(SBUIController) sharedInstance] activateApplicationAnimated:lastOpenedApp];
-		}
-	}
+	//if (lastOpenedApp && lastOpenedApp.isRunning && UIApplication.sharedApplication._accessibilityFrontMostApplication != lastOpenedApp)
+	//{
+	//	if ([RADesktopManager.sharedInstance isAppOpened:lastOpenedApp.bundleIdentifier] == NO)
+	//	{
+	//		[[%c(SBUIController) sharedInstance] activateApplicationAnimated:lastOpenedApp];
+	//	}
+	//}
 	lastOpenedApp = nil; // Fix it opening the same app later if on the Homescreen
 }
 
