@@ -3,17 +3,39 @@
 @implementation RARunningAppsProvider
 +(instancetype) sharedInstance
 {
-	SHARED_INSTANCE2(RARunningAppsProvider, sharedInstance->apps = [NSMutableArray array]);
+	SHARED_INSTANCE2(RARunningAppsProvider, 
+		sharedInstance->apps = [NSMutableArray array]; 
+		sharedInstance->targets = [NSMutableArray array];
+	);
 }
 
 -(void) addRunningApp:(SBApplication*)app
 {
 	[apps addObject:app];
+
+	for (NSObject<RARunningAppsProviderDelegate>* target in targets)
+		if ([target respondsToSelector:@selector(appDidStart:)])
+			[target appDidStart:app];
 }
 
 -(void) removeRunningApp:(SBApplication*)app
 {
 	[apps removeObject:app];
+
+	for (NSObject<RARunningAppsProviderDelegate>* target in targets)
+		if ([target respondsToSelector:@selector(appDidDie:)])
+			[target appDidDie:app];
+}
+
+-(void) addTarget:(__weak NSObject<RARunningAppsProviderDelegate>*)target
+{
+	if ([targets containsObject:target] == NO)
+		[targets addObject:target];
+}
+
+-(void) removeTarget:(__weak NSObject<RARunningAppsProviderDelegate>*)target
+{
+	[targets removeObject:target];
 }
 
 -(NSArray*) runningApplications { return apps; }

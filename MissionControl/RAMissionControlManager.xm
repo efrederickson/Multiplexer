@@ -116,6 +116,7 @@ CGRect swappedForOrientation2(CGRect in)
 	UIApplication.sharedApplication.statusBarHidden = NO;
 	[RAGestureManager.sharedInstance addGestureRecognizerWithTarget:self forEdge:UIRectEdgeBottom identifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture" priority:RAGesturePriorityHigh];
 	[RAGestureManager.sharedInstance ignoreSwipesBeginningInRect:UIScreen.mainScreen.bounds forIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
+	[RARunningAppsProvider.sharedInstance addTarget:window];
 	overrideCC = YES;
 }
 
@@ -166,6 +167,7 @@ CGRect swappedForOrientation2(CGRect in)
 -(void) hideMissionControl:(BOOL)animated
 {
 	[RASnapshotProvider.sharedInstance storeSnapshotOfMissionControl:window];
+	[RARunningAppsProvider.sharedInstance removeTarget:window];
 
 	void (^destructor)() = ^{
 		originalAppView = nil;

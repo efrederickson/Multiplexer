@@ -313,6 +313,47 @@
 	[self reloadDesktopSection];
 }
 
+-(void) removeCardForApplication:(SBApplication*)app
+{
+	CGFloat originX = -1;
+	UIView *targetView = nil;
+	UIScrollView *parentView = [appsWithoutWindows containsObject:app] ? otherRunningAppsScrollView : windowedAppScrollView;
+	NSArray *subviews = [parentView.subviews copy];
+
+	for (UIView *view in subviews)
+	{
+		if ([view isKindOfClass:[RAMissionControlPreviewView class]])
+		{
+			RAMissionControlPreviewView *real = (RAMissionControlPreviewView*)view;
+			if ([real.application.bundleIdentifier isEqualToString:app.bundleIdentifier])
+			{
+				originX = view.frame.origin.x;
+				targetView = view;
+			}
+		}
+
+		if (originX == -1)
+			continue;
+		else if (view.frame.origin.x == originX)
+		{
+			[UIView animateWithDuration:0.2 animations:^{
+				view.frame = CGRectOffset(view.frame, 0, view.frame.size.height + panePadding);
+			} completion:^(BOOL _) {
+				[view removeFromSuperview];
+			}];
+		}
+		else if (view.frame.origin.x > originX)
+			[UIView animateWithDuration:0.4 animations:^{
+				view.frame = CGRectOffset(view.frame, -view.frame.size.width - panePadding, 0);
+			}];
+	}
+
+	if (parentView.contentSize.width - 1 <= UIScreen.mainScreen._interfaceOrientedBounds.size.width)
+		; // don't make it too small to scroll
+	else if (targetView)
+		parentView.contentSize = CGSizeMake(parentView.contentSize.width - targetView.frame.size.width - panePadding + 1, parentView.contentSize.height);
+}
+
 -(void) handleAppPreviewPan:(UILongPressGestureRecognizer*)gesture
 {
 	static CGPoint initialCenter;
@@ -387,29 +428,7 @@
 					//[self performSelectorOnMainThread:@selector(reloadWindowedAppsSection) withObject:nil waitUntilDone:YES];
 					//[self performSelectorOnMainThread:@selector(reloadOtherAppsSection) withObject:nil waitUntilDone:YES];
 					dispatch_async(dispatch_get_main_queue(), ^{
-						CGFloat originX = gesture.view.frame.origin.x;
-						UIScrollView *parentView = (UIScrollView*)gesture.view.superview;
-						NSArray *subviews = [parentView.subviews copy];
-						for (UIView *view in subviews)
-						{
-							if (view.frame.origin.x == originX)
-							{
-								[UIView animateWithDuration:0.2 animations:^{
-									view.frame = CGRectOffset(view.frame, 0, view.frame.size.height + panePadding);
-								} completion:^(BOOL _) {
-									[view removeFromSuperview];
-								}];
-							}
-							else if (view.frame.origin.x > originX)
-								[UIView animateWithDuration:0.4 animations:^{
-									view.frame = CGRectOffset(view.frame, -view.frame.size.width - panePadding, 0);
-								}];
-						}
-
-						if (parentView.contentSize.width - 1 <= UIScreen.mainScreen._interfaceOrientedBounds.size.width)
-							; // don't make it too small to scroll
-						else
-							parentView.contentSize = CGSizeMake(parentView.contentSize.width - gesture.view.frame.size.width - panePadding + 1, parentView.contentSize.height);
+						[self removeCardForApplication:app];
 					});
 				}];
 
@@ -554,6 +573,17 @@
 			}];
 		}
 	}
+}
+
+-(void) appDidStart:(SBApplication*)app
+{
+	[self reloadWindowedAppsSection:RARunningAppsProvider.sharedInstance.runningApplications];
+	[self reloadOtherAppsSection];
+}
+
+-(void) appDidDie:(SBApplication*)app
+{
+	[self removeCardForApplication:app];
 }
 
 -(void) deconstructComponents
