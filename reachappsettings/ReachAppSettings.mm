@@ -181,7 +181,18 @@
                  @"icon": @"tutorial.png",
                  @"enabled": @NO,
                  },
+             @{
+                 @"cell": @"PSLinkCell",
+                 @"label": @"Theming Documentation",
+                 @"action": @"openThemingDocumentation",
+                 @"icon": @"tutorial.png",
+                 },
              ];
+}
+
+-(void) openThemingDocumentation
+{
+    [UIApplication.sharedApplication openURL:[NSURL URLWithString:@"https://elijahandandrew.com/multiplexer/ThemingDocumentation.html"]];
 }
 
 -(NSArray*) getThemeTitles:(id)target
