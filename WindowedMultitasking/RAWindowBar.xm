@@ -388,8 +388,6 @@ const int bottomSizeViewTag =  987654320;
 
     if (update)
 	{
-		[self saveWindowInfo];
-
     	CGFloat currentRotation = RADIANS_TO_DEGREES(atan2(self.transform.b, self.transform.a));
     	CGFloat rotateSnapDegrees = 0;
 
@@ -418,6 +416,8 @@ const int bottomSizeViewTag =  987654320;
 			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindow:self] animated:YES];
 			isSnapped = YES;
 		}
+		
+		[self saveWindowInfo];
     }
 }
 

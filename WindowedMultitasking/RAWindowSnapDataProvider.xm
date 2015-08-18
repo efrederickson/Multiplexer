@@ -212,5 +212,7 @@ try_bottom:
 	}
 	else
 		window.center = newCenter;
+
+	[window saveWindowInfo];
 }
 @end

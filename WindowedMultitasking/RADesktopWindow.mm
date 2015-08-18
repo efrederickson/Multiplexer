@@ -53,6 +53,8 @@
 		[UIView animateWithDuration:0.3 animations:^{
 			windowBar.center = info.center;
 			windowBar.transform = info.transform;
+		} completion:^(BOOL _) {
+			[windowBar updateClientRotation];	
 		}];
 	}
 

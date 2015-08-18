@@ -206,6 +206,7 @@ id SBWorkspace$sharedInstance;
         return;
 
     %orig;
+    [[%c(SBUIController) sharedInstance] releaseSwitcherOrientationLock];
 
     if (![RASettings.sharedInstance reachabilityEnabled])
     {
@@ -229,6 +230,7 @@ id SBWorkspace$sharedInstance;
     if (![RASettings.sharedInstance reachabilityEnabled])
         return;
     wasEnabled = YES;
+    [[%c(SBUIController) sharedInstance] _lockOrientationForSwitcher];
 
     UIWindow *w = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
     if ([RASettings.sharedInstance showNCInstead])
