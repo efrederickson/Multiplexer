@@ -77,6 +77,8 @@
 	<string>NSTextAlignmentLeft</string>
 
 	<key>windowedMultitaskingBarButtonCornerType</key>
-	<integer>1</integer>
+	<integer>0</integer>
+	<key>windowedMultitaskingBarTitleTextInset</key>
+	<integer>10</integer>
 </dict>
 </plist>

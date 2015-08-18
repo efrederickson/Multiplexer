@@ -35,6 +35,7 @@
 
 @property (nonatomic, retain) UIColor *windowedMultitaskingBarTitleColor;
 @property (nonatomic) NSTextAlignment windowedMultaskingBarTitleTextAlignment;
+@property (nonatomic) int windowedMultitaskingBarTitleTextInset;
 
 @property (nonatomic) int windowedMultitaskingCloseButtonAlignment;
 @property (nonatomic) int windowedMultitaskingCloseButtonPriority;

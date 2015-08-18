@@ -96,7 +96,7 @@ const int bottomSizeViewTag =  987654320;
     enableLongPress = YES;
 
     titleLabel = [[RAInsetLabel alloc] initWithFrame:CGRectMake(0, 0, myFrame.size.width, height)];
-    titleLabel.textInset = UIEdgeInsetsMake(0, 5, 0, 5);
+    titleLabel.textInset = UIEdgeInsetsMake(0, THEMED(windowedMultitaskingBarTitleTextInset) ?: 5, 0, THEMED(windowedMultitaskingBarTitleTextInset) ?: 5);
     titleLabel.textAlignment = THEMED(windowedMultaskingBarTitleTextAlignment);
     titleLabel.font = [UIFont systemFontOfSize:18];
     titleLabel.textColor = THEMED(windowedMultitaskingBarTitleColor);
@@ -416,7 +416,7 @@ const int bottomSizeViewTag =  987654320;
 			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindow:self] animated:YES];
 			isSnapped = YES;
 		}
-		
+
 		[self saveWindowInfo];
     }
 }

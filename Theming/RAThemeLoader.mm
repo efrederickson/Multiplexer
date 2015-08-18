@@ -50,6 +50,7 @@
 	ret.windowedMultitaskingRotationPriority = [dict[@"windowedMultitaskingRotationPriority"] intValue];
 
 	ret.windowedMultitaskingBarButtonCornerRadius = [dict[@"windowedMultitaskingBarButtonCornerType"] intValue];
+	ret.windowedMultitaskingBarTitleTextInset = [dict[@"windowedMultitaskingBarTitleTextInset"] intValue];
 
 	ret.windowedMultitaskingCloseIconOverlayColor = COLOR(@"windowedMultitaskingCloseIconOverlayColor") ?: ret.windowedMultitaskingCloseIconBackgroundColor;
 	ret.windowedMultitaskingMaxIconOverlayColor = COLOR(@"windowedMultitaskingMaxIconOverlayColor") ?: ret.windowedMultitaskingMaxIconBackgroundColor;
