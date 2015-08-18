@@ -8,7 +8,7 @@
 	SHARED_INSTANCE2(RASnapshotProvider, sharedInstance->imageCache = [NSCache new]);
 }
 
--(UIImage*) snapshotForIdentifier:(NSString*)identifier
+-(UIImage*) snapshotForIdentifier:(NSString*)identifier orientation:(UIInterfaceOrientation)orientation
 {
 	if ([imageCache objectForKey:identifier] != nil) return [imageCache objectForKey:identifier];
 	
@@ -16,7 +16,7 @@
 
 	SBDisplayItem *item = [%c(SBDisplayItem) displayItemWithType:@"App" displayIdentifier:identifier];
 	SBAppSwitcherSnapshotView *view = [[[%c(SBUIController) sharedInstance] switcherController] performSelector:@selector(_snapshotViewForDisplayItem:) withObject:item];
-	[view setOrientation:UIApplication.sharedApplication.statusBarOrientation orientationBehavior:0];
+	[view setOrientation:orientation orientationBehavior:0];
 	if (view)
 	{
 		[view _loadSnapshotSync];
@@ -53,6 +53,11 @@
 	}
 
 	return image;
+}
+
+-(UIImage*) snapshotForIdentifier:(NSString*)identifier
+{
+	return [self snapshotForIdentifier:identifier orientation:UIApplication.sharedApplication.statusBarOrientation];
 }
 
 -(void) forceReloadOfSnapshotForIdentifier:(NSString*)identifier
@@ -116,7 +121,8 @@
 	// https://stackoverflow.com/questions/20764623/rotate-newly-created-ios-image-90-degrees-prior-to-saving-as-png
 
 	//Calculate the size of the rotated view's containing box for our drawing space
-	UIView *rotatedViewBox = [[UIView alloc] initWithFrame:CGRectMake(0,0,oldImage.size.width, oldImage.size.height)];
+	static UIView *rotatedViewBox = [[UIView alloc] init];
+	rotatedViewBox.frame = CGRectMake(0,0,oldImage.size.width, oldImage.size.height);
 	CGAffineTransform t = CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(degrees));
 	rotatedViewBox.transform = t;
 
@@ -164,7 +170,7 @@
 		{
 			RAHostedAppView *hostedView = [((RAWindowBar*)view) attachedView];
 
-			UIImage *image = [RASnapshotProvider.sharedInstance snapshotForIdentifier:hostedView.bundleIdentifier];
+			UIImage *image = [self snapshotForIdentifier:hostedView.bundleIdentifier orientation:hostedView.orientation];
 			CIImage *coreImage = image.CIImage;
 			if (!coreImage)
 			    coreImage = [CIImage imageWithCGImage:image.CGImage];

@@ -1,15 +1,26 @@
 #import "RAMissionControlPreviewView.h"
 #import "RASnapshotProvider.h"
+#import "RADesktopWindow.h"
 
 @implementation RAMissionControlPreviewView
 -(void) generatePreview
 {
-	self.image = [RASnapshotProvider.sharedInstance snapshotForIdentifier:self.application.bundleIdentifier];
+	//self.image = [RASnapshotProvider.sharedInstance snapshotForIdentifier:self.application.bundleIdentifier];
+    [self performSelectorOnMainThread:@selector(setImage:) withObject:[RASnapshotProvider.sharedInstance snapshotForIdentifier:self.application.bundleIdentifier] waitUntilDone:NO];
 
-	if (!icon)
-    	icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:self.application.bundleIdentifier];
-    if (icon && !iconView)
-	    iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
+    //if (!icon)
+    //  icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:self.application.bundleIdentifier];
+    //if (icon && !iconView)
+    //    iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
+
+    NSOperationQueue* targetQueue = [NSOperationQueue mainQueue];
+    [targetQueue addOperationWithBlock:^{
+        if (!icon)
+          icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:self.application.bundleIdentifier];
+        if (icon && !iconView)
+            iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
+    }];
+    [targetQueue waitUntilAllOperationsAreFinished];
 
     iconView.layer.shadowRadius = THEMED(missionControlIconPreviewShadowRadius); // iconView.layer.cornerRadius;
     iconView.layer.shadowOpacity = 0.8;
@@ -19,8 +30,26 @@
     iconView.userInteractionEnabled = NO;
 	iconView.iconLabelAlpha = 0;
 
-    [self addSubview:iconView];
-    [self updateIconViewFrame];
+    [self performSelectorOnMainThread:@selector(addSubview:) withObject:iconView waitUntilDone:NO];
+    [self performSelectorOnMainThread:@selector(updateIconViewFrame) withObject:nil waitUntilDone:NO];
+}
+
+-(void) generatePreviewAsync
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+        [self generatePreview];
+    });
+}
+
+-(void) generateDesktopPreviewAsync:(id)desktop_ completion:(dispatch_block_t)completionBlock
+{
+    RADesktopWindow *desktop = (RADesktopWindow*)desktop_;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+        UIImage *image = [RASnapshotProvider.sharedInstance snapshotForDesktop:desktop];
+        [self performSelectorOnMainThread:@selector(setImage:) withObject:image waitUntilDone:YES];
+        if (completionBlock)
+            completionBlock();
+    });
 }
 
 -(void) updateIconViewFrame

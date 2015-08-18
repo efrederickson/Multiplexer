@@ -202,8 +202,8 @@ CGRect swappedForOrientation2(CGRect in)
 		{
 			[[%c(SBUIController) sharedInstance] activateApplicationAnimated:lastOpenedApp];
 		}
-		lastOpenedApp = nil; // Fix it opening the same app later if on the Homescreen
 	}
+	lastOpenedApp = nil; // Fix it opening the same app later if on the Homescreen
 }
 
 -(void) toggleMissionControl:(BOOL)animated

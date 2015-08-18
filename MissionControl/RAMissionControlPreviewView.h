@@ -5,6 +5,8 @@
 	SBIconView *iconView;
 }
 @property (nonatomic, retain) SBApplication *application;
-@property (nonatomic, retain) UIImage *originalImage;
+
 -(void) generatePreview;
+-(void) generatePreviewAsync;
+-(void) generateDesktopPreviewAsync:(id)desktop completion:(dispatch_block_t)completionBlock;
 @end

@@ -97,7 +97,8 @@
 		x += panePadding + preview.frame.size.width;
 
 		[desktopScrollView addSubview:preview];
-		preview.image = [RASnapshotProvider.sharedInstance snapshotForDesktop:desktop];
+		//preview.image = [RASnapshotProvider.sharedInstance snapshotForDesktop:desktop];
+		[preview generateDesktopPreviewAsync:desktop completion:desktop == RADesktopManager.sharedInstance.currentDesktop ? ^{ [RADesktopManager.sharedInstance performSelectorOnMainThread:@selector(hideDesktop) withObject:nil waitUntilDone:NO]; } : (dispatch_block_t)nil];
 
 		if (desktop == RADesktopManager.sharedInstance.currentDesktop && [RASettings.sharedInstance missionControlDesktopStyle] == 0)
 		{
@@ -143,7 +144,8 @@
 	desktopScrollView.contentSize = CGSizeMake(MAX(x, self.frame.size.width + 1), height * 1.2); // make slightly scrollable
 
 	// We do this AFTER rendering the desktop
-	[RADesktopManager.sharedInstance hideDesktop];
+	//[RADesktopManager.sharedInstance hideDesktop];
+	// ^^ see the generateDesktopPreviewAsync:completion: call about 40 lines up
 
 	//width = UIScreen.mainScreen.bounds.size.width / 4.5714;
 	//height = UIScreen.mainScreen.bounds.size.height / 4.36;
@@ -202,14 +204,15 @@
 	BOOL empty = YES;
 	for (RAHostedAppView *app in RADesktopManager.sharedInstance.currentDesktop.hostedWindows)
 	{
-		SBApplication *sbapp = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:app.bundleIdentifier];
+		SBApplication *sbapp = [[%c(SBApplicationController) sharedInstance] RA_applicationWithBundleIdentifier:app.bundleIdentifier];
 		[appsWithoutWindows removeObject:sbapp];
+
 		RAMissionControlPreviewView *preview = [[RAMissionControlPreviewView alloc] initWithFrame:CGRectMake(x, (windowedAppScrollView.frame.size.height - height) / 2, width, height)];
 		x += panePadding + preview.frame.size.width;
 
 		preview.application = sbapp;
 		[windowedAppScrollView addSubview:preview];
-		[preview generatePreview];
+		[preview generatePreviewAsync];
 
 		UITapGestureRecognizer *g = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(topIconViewTap:)];
 		[preview addGestureRecognizer:g];
@@ -278,7 +281,7 @@
 
 		preview.application = app;
 		[otherRunningAppsScrollView addSubview:preview];
-		[preview generatePreview];
+		[preview generatePreviewAsync];
 
 		UITapGestureRecognizer *g = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(topIconViewTap:)];
 		[preview addGestureRecognizer:g];
@@ -380,11 +383,34 @@
 				[RAAppKiller killAppWithSBApplication:app completion:^{
 					[runningApplications removeObject:app];
 
-					//NSLog(@"[ReachApp] killer of %@, %d", app.bundleIdentifier, app.pid);
+					[self performSelectorOnMainThread:@selector(reloadDesktopSection) withObject:nil waitUntilDone:NO];
+					//[self performSelectorOnMainThread:@selector(reloadWindowedAppsSection) withObject:nil waitUntilDone:YES];
+					//[self performSelectorOnMainThread:@selector(reloadOtherAppsSection) withObject:nil waitUntilDone:YES];
+					dispatch_async(dispatch_get_main_queue(), ^{
+						CGFloat originX = gesture.view.frame.origin.x;
+						UIScrollView *parentView = (UIScrollView*)gesture.view.superview;
+						NSArray *subviews = [parentView.subviews copy];
+						for (UIView *view in subviews)
+						{
+							if (view.frame.origin.x == originX)
+							{
+								[UIView animateWithDuration:0.2 animations:^{
+									view.frame = CGRectOffset(view.frame, 0, view.frame.size.height + panePadding);
+								} completion:^(BOOL _) {
+									[view removeFromSuperview];
+								}];
+							}
+							else if (view.frame.origin.x > originX)
+								[UIView animateWithDuration:0.4 animations:^{
+									view.frame = CGRectOffset(view.frame, -view.frame.size.width - panePadding, 0);
+								}];
+						}
 
-					[self performSelectorOnMainThread:@selector(reloadDesktopSection) withObject:nil waitUntilDone:YES];
-					[self performSelectorOnMainThread:@selector(reloadWindowedAppsSection) withObject:nil waitUntilDone:YES];
-					[self performSelectorOnMainThread:@selector(reloadOtherAppsSection) withObject:nil waitUntilDone:YES];
+						if (parentView.contentSize.width - 1 <= UIScreen.mainScreen._interfaceOrientedBounds.size.width)
+							; // don't make it too small to scroll
+						else
+							parentView.contentSize = CGSizeMake(parentView.contentSize.width - gesture.view.frame.size.width - panePadding + 1, parentView.contentSize.height);
+					});
 				}];
 
 			didKill = YES;

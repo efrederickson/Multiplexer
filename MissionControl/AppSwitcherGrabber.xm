@@ -81,7 +81,13 @@
 
 	if ([view viewWithTag:999] == nil && ([RASettings.sharedInstance missionControlEnabled] && ![RASettings.sharedInstance replaceAppSwitcherWithMC]))
 	{
-		SBControlCenterGrabberView *grabber = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:CGRectMake(0, 0, 60, 40)];
+		CGFloat width = 50, height = 30;
+		if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+		{
+			width = 60;
+		    height = 40;
+		}
+		SBControlCenterGrabberView *grabber = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:CGRectMake(0, 0, width, height)];
 		grabber.center = CGPointMake(view.frame.size.width / 2, 20/2);
 		
 		grabber.backgroundColor = [UIColor clearColor];
@@ -113,7 +119,13 @@
 
 	if ([view viewWithTag:999] == nil && ([RASettings.sharedInstance missionControlEnabled] && ![RASettings.sharedInstance replaceAppSwitcherWithMC]))
 	{
-		SBControlCenterGrabberView *grabber = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:CGRectMake(0, 0, 60, 40)];
+		CGFloat width = 50, height = 30;
+		if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+		{
+			width = 60;
+		    height = 40;
+		}
+		SBControlCenterGrabberView *grabber = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:CGRectMake(0, 0, width, height)];
 		grabber.center = CGPointMake(view.frame.size.width / 2, 20/2);
 		
 		
