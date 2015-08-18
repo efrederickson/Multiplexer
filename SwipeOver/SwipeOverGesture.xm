@@ -6,6 +6,7 @@
 #import "PDFImageOptions.h"
 #import "RASettings.h"
 #import "RAHostManager.h"
+#import "RAResourceImageProvider.h"
 
 UIView *grabberView;
 BOOL isShowingGrabber = NO;
@@ -95,7 +96,7 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
                 grabberView.frame = adjustFrameForRotation();
 
                 UIImageView *imgView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, grabberView.frame.size.width - 20, grabberView.frame.size.height - 20)];
-                imgView.image = [[PDFImage imageWithContentsOfFile:[NSString stringWithFormat:@"%@/Grabber.pdf",RA_BASE_PATH]] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(grabberView.frame.size.width - 20, grabberView.frame.size.height - 20)]];
+                imgView.image = [RAResourceImageProvider imageForFilename:@"Grabber" constrainedToSize:CGSizeMake(grabberView.frame.size.width - 20, grabberView.frame.size.height - 20)];
                 [grabberView addSubview:imgView];
                 grabberView.layer.cornerRadius = 5;
                 grabberView.clipsToBounds = YES;

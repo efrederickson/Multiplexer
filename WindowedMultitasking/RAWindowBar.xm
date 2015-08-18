@@ -202,7 +202,6 @@ const int bottomSizeViewTag =  987654320;
 		return closeButton;
 	};
 
-
 	UIButton *(^createMaxButton)() = ^{
 		maximizeButton = [UIButton buttonWithType:UIButtonTypeCustom];
 		maximizeButton.frame = CGRectMake(closeButton.frame.origin.x + closeButton.frame.size.width + 5, spacing, buttonSize, buttonSize);

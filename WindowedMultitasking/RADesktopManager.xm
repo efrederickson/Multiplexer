@@ -133,15 +133,6 @@ BOOL overrideUIWindow = NO;
 }
 %end
 
-
-%hook SBUIController
-- (void)activateApplicationAnimated:(__unsafe_unretained SBApplication*)arg1
-{
-	[RADesktopManager.sharedInstance removeAppWithIdentifier:arg1.bundleIdentifier animated:NO forceImmediateUnload:YES];
-    %orig;
-}
-%end
-
 %hook SpringBoard
 -(void)noteInterfaceOrientationChanged:(UIInterfaceOrientation)arg1 duration:(CGFloat)arg2
 {

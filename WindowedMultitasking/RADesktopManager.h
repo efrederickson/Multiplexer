@@ -10,6 +10,7 @@
 -(void) addDesktop:(BOOL)switchTo;
 -(void) removeDesktopAtIndex:(NSUInteger)index;
 -(void) removeAppWithIdentifier:(NSString*)bundleIdentifier animated:(BOOL)animated;
+-(void) removeAppWithIdentifier:(NSString*)bundleIdentifier animated:(BOOL)animated forceImmediateUnload:(BOOL)force;
 
 -(BOOL) isAppOpened:(NSString*)identifier;
 

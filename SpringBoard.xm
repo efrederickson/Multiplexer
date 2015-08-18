@@ -81,6 +81,18 @@
 }
 %end
 
+%hook SBToAppsWorkspaceTransaction
+- (void)_willBegin
+{
+    NSArray *apps = MSHookIvar<NSArray*>(self, "_toApplications");
+    for (SBApplication *app in apps)
+    {
+        [RADesktopManager.sharedInstance removeAppWithIdentifier:app.bundleIdentifier animated:NO forceImmediateUnload:YES];
+    }
+    %orig;
+}
+%end
+
 /*
 %hook SBRootFolderView
 - (_Bool)_hasMinusPages 

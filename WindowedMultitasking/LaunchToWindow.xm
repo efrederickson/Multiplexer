@@ -45,6 +45,10 @@ BOOL allowOpenApp = NO;
 		//launchNextOpenIntoWindow = NO;
 		return;
 	}
+	else
+	{
+		[RADesktopManager.sharedInstance removeAppWithIdentifier:arg1.bundleIdentifier animated:NO forceImmediateUnload:YES];
+	}
 	%orig;
 }
 %end
