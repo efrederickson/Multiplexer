@@ -70,19 +70,6 @@
 		}
 
         iconView.frame = CGRectMake(contentSize.width, contentSize.height, iconView.frame.size.width, iconView.frame.size.height);
-        switch (UIApplication.sharedApplication.statusBarOrientation)
-        {
-        	case UIInterfaceOrientationLandscapeRight:
-        		iconView.transform = CGAffineTransformMakeRotation(M_PI_2);
-        		break;
-        	case UIInterfaceOrientationLandscapeLeft:
-        		iconView.transform = CGAffineTransformMakeRotation(-M_PI_2);
-        		break;
-        	case UIInterfaceOrientationPortraitUpsideDown:
-        	case UIInterfaceOrientationPortrait:
-        	default:
-        		break;
-        }
 
         iconView.tag = index++;
         iconView.restorationIdentifier = app.bundleIdentifier;
