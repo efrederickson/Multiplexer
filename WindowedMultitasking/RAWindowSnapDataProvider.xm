@@ -165,10 +165,13 @@ try_bottom:
 	CGRect frame = window.frame;
 	CGPoint newCenter = window.center;
 
+	BOOL adjustStatusBar = NO;
+
 	switch (location)
 	{
 		case RAWindowSnapLocationLeftTop:
 			newCenter = CGPointMake(frame.size.width / 2, (frame.size.height / 2) + 20);
+			adjustStatusBar = YES;
 			break;
 		case RAWindowSnapLocationLeftMiddle:
 			newCenter.x = frame.size.width / 2;
@@ -179,6 +182,7 @@ try_bottom:
 
 		case RAWindowSnapLocationRightTop:
 			newCenter = CGPointMake(width - (frame.size.width / 2), (frame.size.height / 2) + 20);
+			adjustStatusBar = YES;
 			break;
 		case RAWindowSnapLocationRightMiddle:
 			newCenter.x = width - (frame.size.width / 2);
@@ -189,6 +193,7 @@ try_bottom:
 
 		case RAWindowSnapLocationTop:
 			newCenter.y = (frame.size.height / 2) + 20;
+			adjustStatusBar = YES;
 			break;
 		case RAWindowSnapLocationBottom:
 			newCenter.y = height - (frame.size.height / 2);
@@ -203,7 +208,24 @@ try_bottom:
 		default:
 			break;
 	}
-	
+
+	if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeRight && adjustStatusBar)
+	{
+		newCenter.y -= 20;
+	}
+	else if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeRight && (location == RAWindowSnapLocationRightMiddle || location == RAWindowSnapLocationRightBottom || location == RAWindowSnapLocationRightTop))
+	{
+		newCenter.x -= 20;
+	}
+	else if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeLeft && adjustStatusBar)
+	{
+		newCenter.y -= 20;
+	}
+	if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeLeft && (location == RAWindowSnapLocationLeftMiddle || location == RAWindowSnapLocationLeftBottom || location == RAWindowSnapLocationLeftTop))
+	{
+		newCenter.x += 20;
+	}
+
 	if (animated)
 	{
 		[UIView animateWithDuration:0.2 animations:^{

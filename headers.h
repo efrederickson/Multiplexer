@@ -194,6 +194,10 @@ typedef struct {
 
 @interface BBAction
 + (id)actionWithCallblock:(id /* block */)arg1;
++ (id)actionWithTextReplyCallblock:(id)arg1;
++ (id)actionWithLaunchBundleID:(id)arg1 callblock:(id)arg2;
++ (id)actionWithLaunchURL:(id)arg1 callblock:(id)arg2;
++ (id)actionWithCallblock:(id)arg1;
 @end
 
 typedef enum
@@ -222,6 +226,11 @@ typedef enum
 @property (nonatomic, copy) NSString *sectionID;
 @property (nonatomic, copy) BBAction *defaultAction;
 @property (nonatomic, copy) NSDate *date;
+
+@property(copy) BBAction * acknowledgeAction;
+@property(copy) BBAction * replyAction;
+
+@property(retain) NSDate * expirationDate;
 @end
 
 @interface SBBulletinBannerController : NSObject
@@ -267,8 +276,12 @@ typedef enum
 -(void) restoreContentAndUnscatterIconsAnimated:(BOOL)arg1;
 - (_Bool)shouldShowControlCenterTabControlOnFirstSwipe;- (_Bool)isAppSwitcherShowing;
 -(BOOL) _activateAppSwitcher;
--(void)_lockOrientationForSwitcher;
--(void)releaseSwitcherOrientationLock;
+- (void)_releaseTransitionOrientationLock;
+- (void)_releaseSystemGestureOrientationLock;
+- (void)releaseSwitcherOrientationLock;
+- (void)_lockOrientationForSwitcher;
+- (void)_lockOrientationForSystemGesture;
+- (void)_lockOrientationForTransition;
 @end
 
 @interface SBDisplayItem : NSObject <NSCopying>
