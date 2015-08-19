@@ -64,7 +64,7 @@
 -(void) _performDeferredLaunchWork
 {
     %orig;
-    [RADesktopManager.sharedInstance currentDesktop]; // load desktop (and previous windows!)
+    [RADesktopManager sharedInstance]; // load desktop (and previous windows!)
 }
 %end
 

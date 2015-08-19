@@ -38,4 +38,5 @@ SUBPROJECTS += reachappsettings
 SUBPROJECTS += reachappflipswitch
 SUBPROJECTS += reachappfsdaemon
 
+SUBPROJECTS += reachappassertiondhooks
 include $(THEOS_MAKE_PATH)/aggregate.mk

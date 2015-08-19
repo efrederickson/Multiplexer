@@ -59,7 +59,8 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
 - (void)applicationDidResume
 {
     %orig;
-    [RAMessagingClient.sharedInstance requestUpdateFromServer];
+    if (!IS_SPRINGBOARD)
+        [RAMessagingClient.sharedInstance requestUpdateFromServer];
 }
 
 - (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(unsafe_id)arg2 changeApplicationFlag:(BOOL)arg3

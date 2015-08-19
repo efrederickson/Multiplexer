@@ -100,6 +100,7 @@
                 @"detail": @"RAListItemsController",
                 @"valuesDataSource": @"getThemeValues:",
                 @"titlesDataSource": @"getThemeTitles:",
+                @"enabled": @([self getEnabled])
              },
 
              @{ @"footerText": @"Let apps run in the background." },

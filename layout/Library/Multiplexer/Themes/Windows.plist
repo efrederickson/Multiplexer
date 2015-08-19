@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>identifier</key>
-	<string>com.eljahandandrew.multiplexer.themes.windows7</string>
+	<string>com.eljahandandrew.multiplexer.themes.windows</string>
 	<key>displayName</key>
-	<string>Windows 7</string>
+	<string>Windows 8</string>
 
 	<key>backgroundingIndicatorTextColor</key>
 	<string>FFFFFF</string>
@@ -24,19 +24,19 @@
 	<key>windowedMultitaskingWindowBarBackgroundColor</key>
 	<string>6aacf6</string>
 	<key>windowedMultitaskingCloseIconTint</key>
-	<string>000000</string>
+	<string>FFFFFF</string>
 	<key>windowedMultitaskingCloseIconBackgroundColor</key>
-	<string>FF7070</string>
+	<string>E55F5F</string>
 	<key>windowedMultitaskingMaxIconTint</key>
-	<string>000000</string>
+	<string>375D87</string>
 	<key>windowedMultitaskingMaxIconBackgroundColor</key>
 	<string>00000000</string>
 	<key>windowedMultitaskingMinIconTint</key>
-	<string>000000</string>
+	<string>375D87</string>
 	<key>windowedMultitaskingMinIconBackgroundColor</key>
 	<string>00000000</string>
 	<key>windowedMultitaskingRotationIconTint</key>
-	<string>000000</string>
+	<string>375D87</string>
 	<key>windowedMultitaskingRotationIconBackgroundColor</key>
 	<string>00000000</string>
 	<key>windowedMultitaskingBarTitleColor</key>

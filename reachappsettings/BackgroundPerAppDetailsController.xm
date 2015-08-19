@@ -92,7 +92,7 @@ extern void RA_BGAppsControllerNeedsToReload();
             @{ 
                 @"cell": @"PSGroupCell",
                 @"label": @"Native Backgrounding Modes", 
-                @"footerText": @"A respring is required to apply changes to these values." 
+                @"footerText": @"A respring is required to apply changes to these values. Just because a mode has been enabled does not necessarily mean it will be used by the app.",
                 },
             @{
                 @"cell": @"PSSwitchCell",
