@@ -742,6 +742,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 - (void)_handleKeyUIEvent:(id)arg1;
 -(UIStatusBar*) statusBar;
 - (id)_mainScene;
+- (BOOL)_isSupportedOrientation:(int)arg1;
 
 // SpringBoard methods
 -(BOOL)launchApplicationWithIdentifier:(id)identifier suspended:(BOOL)suspended;

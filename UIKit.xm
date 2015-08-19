@@ -35,23 +35,23 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
 
 - (void)_rotateWindowToOrientation:(UIInterfaceOrientation)arg1 updateStatusBar:(BOOL)arg2 duration:(double)arg3 skipCallbacks:(BOOL)arg4
 {
-    if ([RAMessagingClient.sharedInstance shouldForceOrientation] && arg1 != [RAMessagingClient.sharedInstance forcedOrientation])
+    if ([RAMessagingClient.sharedInstance shouldForceOrientation] && arg1 != [RAMessagingClient.sharedInstance forcedOrientation] && [UIApplication.sharedApplication _isSupportedOrientation:arg1])
         return;
     %orig;
 }
 
 - (BOOL)_shouldAutorotateToInterfaceOrientation:(int)arg1 checkForDismissal:(BOOL)arg2 isRotationDisabled:(BOOL*)arg3
 {
-    if ([RAMessagingClient.sharedInstance shouldForceOrientation] && arg1 != [RAMessagingClient.sharedInstance forcedOrientation])
+    if ([RAMessagingClient.sharedInstance shouldForceOrientation] && arg1 != [RAMessagingClient.sharedInstance forcedOrientation] && [UIApplication.sharedApplication _isSupportedOrientation:arg1])
         return NO;
     return %orig;
 }
 
 - (void)_setWindowInterfaceOrientation:(int)arg1
 {
-    if ([RAMessagingClient.sharedInstance shouldForceOrientation] && arg1 != [RAMessagingClient.sharedInstance forcedOrientation])
+    if ([RAMessagingClient.sharedInstance shouldForceOrientation] && arg1 != [RAMessagingClient.sharedInstance forcedOrientation] && [UIApplication.sharedApplication _isSupportedOrientation:arg1])
         return;
-    %orig([RAMessagingClient.sharedInstance shouldForceOrientation] ? [RAMessagingClient.sharedInstance forcedOrientation] : arg1);
+    %orig([RAMessagingClient.sharedInstance shouldForceOrientation] && [UIApplication.sharedApplication _isSupportedOrientation:arg1] ? [RAMessagingClient.sharedInstance forcedOrientation] : arg1);
 }
 %end
 
@@ -107,6 +107,11 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
         orientation = prevousOrientation;
 
         setPreviousOrientation = NO;
+    }
+
+    if (![UIApplication.sharedApplication _isSupportedOrientation:orientation])
+    {
+        return;
     }
 
     for (UIWindow *window in [[UIApplication sharedApplication] windows]) {

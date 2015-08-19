@@ -1,5 +1,7 @@
 #import "RAMessagingClient.h"
 
+extern const char *__progname;
+
 @implementation RAMessagingClient
 +(instancetype) sharedInstance
 {
@@ -48,6 +50,8 @@
 
 -(void) _requestUpdateFromServerWithTries:(int)tries
 {
+	if (!NSBundle.mainBundle.bundleIdentifier || strcmp(__progname, "assertiond") == 0)
+		return;
 	NSDictionary *dict = @{ @"bundleIdentifier": NSBundle.mainBundle.bundleIdentifier };
 	NSDictionary *data = [serverCenter sendMessageAndReceiveReplyName:RAMessagingUpdateAppInfoMessageName userInfo:dict];
 	if (data && [data objectForKey:@"data"] != nil)

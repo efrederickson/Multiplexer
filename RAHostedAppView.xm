@@ -5,6 +5,7 @@
 #import "RASnapshotProvider.h"
 #import "RASpringBoardKeyboardActivation.h"
 #import "Asphaleia2.h"
+#import "dispatch_after_cancel.h"
 
 NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
@@ -20,6 +21,9 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
     UILabel *authenticationDidFailLabel;
     UITapGestureRecognizer *authenticationFailedRetryTapGesture;
+
+    int startTries;
+    dispatch_async_handle *preloadHandle;
 }
 @end
 
@@ -32,12 +36,18 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
         self.autosizesApp = NO;
         self.allowHidingStatusBar = YES;
         self.showSplashscreenInsteadOfSpinner = NO;
+        startTries = 0;
 	}
 	return self;
 }
 
 -(void) _preloadOrAttemptToUpdateReachabilityCounterpart
 {
+    if (preloadHandle && preloadHandle->didFree == 0)
+    {
+        free(preloadHandle);
+        preloadHandle = NULL;
+    }
     if (app)
     {
         if ([app mainScene])
@@ -66,6 +76,14 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
 -(void) preloadApp
 {
+    startTries++;
+    if (startTries > 5)
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:LOCALIZE(@"MULTIPLEXER") message:[NSString stringWithFormat:@"Unable to start app %@", app.displayName] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show];
+        return;
+    }
+
     if (app == nil)
         return;
 
@@ -79,7 +97,7 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
         [UIApplication.sharedApplication launchApplicationWithIdentifier:self.bundleIdentifier suspended:YES];
         [[%c(FBProcessManager) sharedInstance] createApplicationProcessForBundleID:self.bundleIdentifier]; // ummm...?
     }
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{ [self _preloadOrAttemptToUpdateReachabilityCounterpart]; }); 
+    preloadHandle = dispatch_after_cancellable(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{ [self _preloadOrAttemptToUpdateReachabilityCounterpart]; }); 
     // this ^ runs either way. when _preloadOrAttemptToUpdateReachabilityCounterpart runs, if the app is "loaded" it will not call preloadApp again, otherwise
     // it will call it again.
 }
@@ -112,6 +130,7 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
 -(void) loadApp
 {
+    startTries = 0;
 	[self preloadApp];
     if (!app)
         return;
@@ -285,6 +304,12 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
     [verifyTimer invalidate];
     verifyTimer = nil;
+
+    if (preloadHandle && preloadHandle->didFree == 0)
+    {
+        dispatch_after_cancel(preloadHandle);
+        preloadHandle = NULL;
+    }
 
     if (_isCurrentlyHosting == NO)
         return;

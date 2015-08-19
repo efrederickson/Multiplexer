@@ -13,6 +13,8 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
 @implementation RAFakePhoneMode
 +(CGSize) fakedSize
 {
+	if (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation))
+		return CGSizeMake(forcePhoneModeSize.height, forcePhoneModeSize.width);
 	return forcePhoneModeSize;
 }
 

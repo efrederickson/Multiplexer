@@ -309,6 +309,10 @@ extern BOOL launchNextOpenIntoWindow;
 -(void) rotateApp:(NSString*)identifier toOrientation:(UIInterfaceOrientation)orientation completion:(RAMessageCompletionCallback)callback
 {
 	RAMessageAppData data = [self getDataForIdentifier:identifier];
+
+	if (data.forcePhoneMode)
+		return;
+
 	data.forcedOrientation = orientation;
 	data.shouldForceOrientation = YES;
 	[self setData:data forIdentifier:identifier];
@@ -361,14 +365,6 @@ extern BOOL launchNextOpenIntoWindow;
 {
 	RAMessageAppData data = [self getDataForIdentifier:identifier];
 	
-	if (value)
-	{
-		data.forcedOrientation = UIInterfaceOrientationPortrait;
-		data.shouldForceOrientation = YES;
-	}
-	else
-		data.shouldForceOrientation = NO;
-
 	data.forcePhoneMode = value;
 	[self setData:data forIdentifier:identifier];
 	
