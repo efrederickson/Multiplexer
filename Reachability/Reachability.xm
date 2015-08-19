@@ -68,6 +68,13 @@ CGFloat old_grabberCenterY = -1;
     %orig;
 }
 
+- (void)_setKeepAliveTimerForDuration:(double)arg1
+{
+    if ((view || showingNC) && [RASettings.sharedInstance disableAutoDismiss])
+        return;
+    %orig;
+}
+
 - (void)deactivateReachabilityModeForObserver:(unsafe_id)arg1
 {
     if (overrideDisableForStatusBar)

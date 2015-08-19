@@ -32,6 +32,10 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
     }
 
     %orig(frame);
+    if ([RAMessagingClient.sharedInstance shouldResize] && self.subviews.count > 0 && ([self.class isEqual:UITextEffectsWindow.class] == NO))
+    {
+        ((UIView*)self.subviews[0]).frame = frame;
+    }
 }
 
 - (void)_rotateWindowToOrientation:(UIInterfaceOrientation)arg1 updateStatusBar:(BOOL)arg2 duration:(double)arg3 skipCallbacks:(BOOL)arg4
