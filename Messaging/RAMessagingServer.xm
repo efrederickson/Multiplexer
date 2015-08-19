@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #import "RAKeyboardStateListener.h"
 #import "RASettings.h"
+#import "RAAppKiller.h"
+#import "RADesktopManager.h"
 
 extern BOOL launchNextOpenIntoWindow;
 
@@ -62,7 +64,7 @@ extern BOOL launchNextOpenIntoWindow;
 	else if ([identifier isEqual:RAMessagingUpdateKeyboardContextIdMessageName])
 		[self setKeyboardContextId:[info[@"contextId"] integerValue] forIdentifier:info[@"bundleIdentifier"]];
 	else if ([identifier isEqual:RAMessagingRetrieveKeyboardContextIdMessageName])
-		return @{ @"contexId": @([self keyboardContextIdForIdentifier:info[@"bundleIdentifier"]]) };
+		return @{ @"contextId": @([self getStoredKeyboardContextIdForApp:info[@"bundleIdentifier"]]) };
 	else if ([identifier isEqual:RAMessagingUpdateKeyboardSizeMessageName])
 	{
 		CGSize size = CGSizeFromString(info[@"size"]);
@@ -135,6 +137,7 @@ extern BOOL launchNextOpenIntoWindow;
 		ret.canHideStatusBarIfWanted = NO;
 		ret.forcedOrientation = UIInterfaceOrientationPortrait;
 		ret.shouldForceOrientation = NO;
+		ret.forcePhoneMode = NO;
 	}
 	return ret;
 }
@@ -354,6 +357,29 @@ extern BOOL launchNextOpenIntoWindow;
 	[self sendStoredDataToApp:identifier completion:callback];
 }
 
+-(void) forcePhoneMode:(BOOL)value forIdentifier:(NSString*)identifier andRelaunchApp:(BOOL)relaunch
+{
+	RAMessageAppData data = [self getDataForIdentifier:identifier];
+	
+	if (value)
+	{
+		data.forcedOrientation = UIInterfaceOrientationPortrait;
+		data.shouldForceOrientation = YES;
+	}
+	else
+		data.shouldForceOrientation = NO;
+
+	data.forcePhoneMode = value;
+	[self setData:data forIdentifier:identifier];
+	
+	if (relaunch)
+	{
+		[RAAppKiller killAppWithIdentifier:identifier completion:^{
+			[RADesktopManager.sharedInstance updateWindowSizeForApplication:identifier];
+		}];
+	}
+}
+
 -(void) receiveShowKeyboardForAppWithIdentifier:(NSString*)identifier
 {
 	[RASpringBoardKeyboardActivation.sharedInstance showKeyboardForAppWithIdentifier:identifier];
@@ -372,11 +398,6 @@ extern BOOL launchNextOpenIntoWindow;
 -(unsigned int) getStoredKeyboardContextIdForApp:(NSString*)identifier
 {
 	return [contextIds objectForKey:identifier] != nil ? [contextIds[identifier] unsignedIntValue] : 0;
-}
-
--(NSInteger) keyboardContextIdForIdentifier:(NSString*)identifier
-{
-	return 0;
 }
 @end
 

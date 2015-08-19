@@ -3,7 +3,10 @@
 @implementation RAMessagingClient
 +(instancetype) sharedInstance
 {
-	SHARED_INSTANCE2(RAMessagingClient, [sharedInstance loadMessagingCenter]);
+	SHARED_INSTANCE2(RAMessagingClient, 
+		[sharedInstance loadMessagingCenter];
+		sharedInstance.hasRecievedData = NO;
+	);
 }
 
 -(void) loadMessagingCenter
@@ -21,6 +24,7 @@
 	data.forcedOrientation = UIInterfaceOrientationPortrait;
 	data.shouldForceOrientation = NO;
 	data.shouldUseExternalKeyboard = NO;
+	data.forcePhoneMode = NO;
 
 	_currentData = data; // Initialize data
 
@@ -51,6 +55,7 @@
 		RAMessageAppData actualData;
 		[data[@"data"] getBytes:&actualData length:sizeof(actualData)];
 		[self updateWithData:actualData];
+		self.hasRecievedData = YES;
 	}
 	else
 	{

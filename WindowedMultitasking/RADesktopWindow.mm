@@ -3,6 +3,8 @@
 #import "RAWindowStatePreservationSystemManager.h"
 #import "RADesktopManager.h"
 #import "RASnapshotProvider.h"
+#import "RAMessagingServer.h"
+#import "RAFakePhoneMode.h"
 
 @implementation RADesktopWindow
 -(id) initWithFrame:(CGRect)frame
@@ -23,7 +25,12 @@
 			if (bar.attachedView.app == view.app)
 				return bar;
 
-	view.frame = CGRectMake(0, 100, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height);
+	if ([RAFakePhoneMode shouldFakeForAppWithIdentifier:view.app.bundleIdentifier])
+	{
+		view.frame = (CGRect){ { 0, 100 }, [RAFakePhoneMode fakeSizeForAppWithIdentifier:view.app.bundleIdentifier] };
+	}
+	else
+		view.frame = CGRectMake(0, 100, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height);
 	view.center = self.center;
 
 	RAWindowBar *windowBar = [[RAWindowBar alloc] init];
@@ -101,6 +108,9 @@
 				[view removeFromSuperview];
 				[appViews removeObject:view];
 				[self saveInfo];
+
+				if (dontClearForcedPhoneState == NO && [RAFakePhoneMode shouldFakeForAppWithIdentifier:identifier])
+					[RAMessagingServer.sharedInstance forcePhoneMode:NO forIdentifier:identifier andRelaunchApp:YES];
 			};
 			if (animated)
 				[UIView animateWithDuration:0.3 animations:^{
@@ -113,6 +123,31 @@
 				destructor();
 
 			return;
+		}
+	}
+}
+
+-(void) updateWindowSizeForApplication:(NSString*)identifier
+{
+	for (RAHostedAppView *view in appViews)
+	{
+		if ([view.bundleIdentifier isEqual:identifier])
+		{
+			dontClearForcedPhoneState = YES;
+			[self removeAppWithIdentifier:identifier animated:NO forceImmediateUnload:YES];
+			[self createAppWindowWithIdentifier:identifier animated:NO];
+			dontClearForcedPhoneState = NO;
+
+			/*CGAffineTransform t = view.transform;
+			CGPoint origin = view.frame.origin;
+
+			view.transform = CGAffineTransformIdentity;
+			if ([RAFakePhoneMode shouldFakeForAppWithIdentifier:view.app.bundleIdentifier])
+				view.frame = (CGRect){ origin, [RAFakePhoneMode fakeSizeForAppWithIdentifier:view.app.bundleIdentifier] };
+			else
+				view.frame = CGRectMake(origin.x, origin.y, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height);
+
+			view.transform = t;*/
 		}
 	}
 }

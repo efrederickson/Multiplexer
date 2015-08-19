@@ -5,6 +5,8 @@
 @interface RADesktopWindow : UIWindow {
 	UIInterfaceOrientation lastKnownOrientation;
 	NSMutableArray *appViews;
+
+	BOOL dontClearForcedPhoneState;
 }
 
 -(RAWindowBar*) addAppWithView:(RAHostedAppView*)view animated:(BOOL)animated;
@@ -22,6 +24,8 @@
 -(CGFloat) baseRotationForOrientation;
 -(UIInterfaceOrientation) appOrientationRelativeToThisOrientation:(CGFloat)currentRotation;
 -(void) updateRotationOnClients:(UIInterfaceOrientation)orientation;
+
+-(void) updateWindowSizeForApplication:(NSString*)identifier;
 
 -(void) unloadApps;
 -(void) loadApps;

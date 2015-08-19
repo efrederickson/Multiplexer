@@ -106,6 +106,12 @@ BOOL overrideUIWindow = NO;
 		[w updateRotationOnClients:orientation];
 }
 
+-(void) updateWindowSizeForApplication:(NSString*)identifier
+{
+	for (RADesktopManager *w in windows)
+		[w updateWindowSizeForApplication:identifier];
+}
+
 -(RADesktopWindow*) desktopAtIndex:(NSUInteger)index { return windows[index]; }
 -(NSArray*) availableDesktops { return windows; }
 -(NSUInteger) currentDesktopIndex { return currentDesktopIndex; }

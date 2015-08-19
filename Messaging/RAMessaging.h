@@ -24,6 +24,7 @@ struct RAMessageAppData {
 	BOOL shouldForceOrientation;
 	BOOL shouldUseExternalKeyboard;
 	BOOL isBeingHosted;
+	BOOL forcePhoneMode;
 };
 
 static NSString *RAMessagingUpdateAppInfoMessageName = @"updateAppInfo";

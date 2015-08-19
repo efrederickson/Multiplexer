@@ -22,6 +22,7 @@
 -(NSArray*) availableDesktops;
 -(RADesktopWindow*) desktopAtIndex:(NSUInteger)index;
 
+-(void) updateWindowSizeForApplication:(NSString*)identifier;
 -(void) updateRotationOnClients:(UIInterfaceOrientation)orientation;
 
 -(void) hideDesktop;

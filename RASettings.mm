@@ -283,6 +283,7 @@ int disableAutoDismiss = -1;
 -(NSInteger) missionControlDesktopStyle { return [_settings[@"missionControlDesktopStyle"] ?: @1 intValue]; }
 -(BOOL) missionControlPagingEnabled { return BOOL(@"missionControlPagingEnabled", NO); }
 -(BOOL) showFavorites { return BOOL(@"showFavorites", YES); }
+-(BOOL) onlyShowWindowBarIconsOnOverlay { return BOOL(@"onlyShowWindowBarIconsOnOverlay", NO); }
 
 -(RAGrabArea) windowedMultitaskingGrabArea
 {

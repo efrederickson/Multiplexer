@@ -93,6 +93,14 @@
                  @"label": @"Always Enable Gestures",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @NO,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"onlyShowWindowBarIconsOnOverlay",
+                 @"label": @"Only Show Icons in Easy-Tap-Mode",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
 
              @{ @"footerText": @"If enabled, tapping an icon on the easy-tap-mode overlay will be delayed until the bounce animation is complete." },
              @{

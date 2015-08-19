@@ -18,7 +18,7 @@
 "WIDGETS" = "Widgets";
 "FAVORITES" = "Favorites";
 "RECENTS" = "Recent";
-"ACTIVE_APP_WARNING" = "%@\n is currently opened";
+"ACTIVE_APP_WARNING" = "%@\n is currently open";
 "ASPHALEIA2_AUTH_FAILED" = "Asphaleia 2\n authentication failed for\n %@.\nTap to try again.";
 "UNLIMITED_BACKGROUNDING_TIME" = "Unlimited Backgrounding Time";
 "KILL_ALL" = "Kill All";

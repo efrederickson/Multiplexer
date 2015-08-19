@@ -8,6 +8,7 @@
 +(instancetype) sharedInstance;
 
 @property (nonatomic, readonly) RAMessageAppData currentData;
+@property (nonatomic) BOOL hasRecievedData;
 
 -(void) requestUpdateFromServer;
 

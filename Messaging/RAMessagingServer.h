@@ -28,6 +28,8 @@
 
 -(void) setHosted:(BOOL)value forIdentifier:(NSString*)identifier completion:(RAMessageCompletionCallback)callback;
 
+-(void) forcePhoneMode:(BOOL)value forIdentifier:(NSString*)identifier andRelaunchApp:(BOOL)relaunch;
+
 -(unsigned int) getStoredKeyboardContextIdForApp:(NSString*)identifier;
 
 -(void) receiveShowKeyboardForAppWithIdentifier:(NSString*)identifier;
