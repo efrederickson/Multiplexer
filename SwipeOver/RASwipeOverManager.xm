@@ -247,7 +247,11 @@ extern int rotationDegsForOrientation(int o);
 			lastX = translation.x; 
 
 			newScale = newScale + sqrt(targetView.transform.a * targetView.transform.a + targetView.transform.c * targetView.transform.c);
-			CGFloat scale = MIN(MAX(newScale, 0.1), 0.98);
+			CGFloat scale = MIN(MAX(newScale, 0.1), UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation) ? (UIScreen.mainScreen._interfaceOrientedBounds.size.height / targetView.bounds.size.height) - 0.02 : 0.98);
+
+			//CGFloat height = UIScreen.mainScreen._interfaceOrientedBounds.size.height;
+			//if (targetView.bounds.size.height * scale >= height)
+			//	scale = scale - ((targetView.bounds.size.height * scale) - height);
 
 			//NSLog(@"[ReachApp] %f %f", newScale, scale);
 
