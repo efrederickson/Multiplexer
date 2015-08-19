@@ -23,7 +23,7 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
     UITapGestureRecognizer *authenticationFailedRetryTapGesture;
 
     int startTries;
-    dispatch_async_handle *preloadHandle;
+    BOOL disablePreload;
 }
 @end
 
@@ -37,17 +37,13 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
         self.allowHidingStatusBar = YES;
         self.showSplashscreenInsteadOfSpinner = NO;
         startTries = 0;
+        disablePreload = NO;
 	}
 	return self;
 }
 
 -(void) _preloadOrAttemptToUpdateReachabilityCounterpart
 {
-    if (preloadHandle && preloadHandle->didFree == 0)
-    {
-        free(preloadHandle);
-        preloadHandle = NULL;
-    }
     if (app)
     {
         if ([app mainScene])
@@ -57,7 +53,12 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
                 [[%c(SBWorkspace) sharedInstance] performSelector:@selector(RA_updateViewSizes) withObject:nil afterDelay:0.5]; // App is launched using ReachApp - animations commence. We have to wait for those animations to finish or this won't work.
         }
         else if (![app mainScene])
-            [self preloadApp];
+        {
+            if (disablePreload)
+                disablePreload = NO;
+            else
+                [self preloadApp];
+        }
     }
 }
 
@@ -97,7 +98,7 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
         [UIApplication.sharedApplication launchApplicationWithIdentifier:self.bundleIdentifier suspended:YES];
         [[%c(FBProcessManager) sharedInstance] createApplicationProcessForBundleID:self.bundleIdentifier]; // ummm...?
     }
-    preloadHandle = dispatch_after_cancellable(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{ [self _preloadOrAttemptToUpdateReachabilityCounterpart]; }); 
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{ [self _preloadOrAttemptToUpdateReachabilityCounterpart]; }); 
     // this ^ runs either way. when _preloadOrAttemptToUpdateReachabilityCounterpart runs, if the app is "loaded" it will not call preloadApp again, otherwise
     // it will call it again.
 }
@@ -131,6 +132,7 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 -(void) loadApp
 {
     startTries = 0;
+    disablePreload = NO;
 	[self preloadApp];
     if (!app)
         return;
@@ -305,11 +307,7 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
     [verifyTimer invalidate];
     verifyTimer = nil;
 
-    if (preloadHandle && preloadHandle->didFree == 0)
-    {
-        dispatch_after_cancel(preloadHandle);
-        preloadHandle = NULL;
-    }
+    disablePreload = YES;
 
     if (_isCurrentlyHosting == NO)
         return;

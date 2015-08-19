@@ -728,7 +728,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 @end
 
 @interface UIWindow () 
-+(id) keyWindow;
++(instancetype) keyWindow;
 -(id) firstResponder;
 + (void)setAllWindowsKeepContextInBackground:(BOOL)arg1;
 -(void) _setRotatableViewOrientation:(UIInterfaceOrientation)orientation duration:(CGFloat)duration force:(BOOL)force;

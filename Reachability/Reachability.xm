@@ -206,7 +206,6 @@ id SBWorkspace$sharedInstance;
         return;
 
     %orig;
-    [[%c(SBUIController) sharedInstance] releaseSwitcherOrientationLock];
 
     if (![RASettings.sharedInstance reachabilityEnabled])
     {
@@ -219,9 +218,7 @@ id SBWorkspace$sharedInstance;
         [self RA_closeCurrentView];
         if (draggerView)
             draggerView = nil;
-
     }
-
 }
 
 - (void) handleReachabilityModeActivated
@@ -230,7 +227,6 @@ id SBWorkspace$sharedInstance;
     if (![RASettings.sharedInstance reachabilityEnabled])
         return;
     wasEnabled = YES;
-    [[%c(SBUIController) sharedInstance] _lockOrientationForSwitcher];
 
     UIWindow *w = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
     if ([RASettings.sharedInstance showNCInstead])
@@ -572,11 +568,13 @@ CGFloat startingY = -1;
 
         [RAMessagingServer.sharedInstance resizeApp:targetIdentifier toSize:CGSizeMake(width, height) completion:nil];
         [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:YES forApp:targetIdentifier completion:nil];
+        [RAMessagingServer.sharedInstance rotateApp:targetIdentifier toOrientation:[UIApplication sharedApplication].statusBarOrientation completion:nil];
     }
 
     if ([view isKindOfClass:[%c(FBWindowContextHostWrapperView) class]] == NO && [view isKindOfClass:[RAAppSliderProviderView class]] == NO)
         return; // only resize when the app is being shown. That way it's more like native Reachability
 
+    [RAMessagingServer.sharedInstance rotateApp:lastBundleIdentifier toOrientation:[UIApplication sharedApplication].statusBarOrientation completion:nil];
 
     CGFloat width = -1, height = -1;
 
@@ -642,11 +640,11 @@ CGFloat startingY = -1;
     else
         [w addSubview:view];
 
-    if ([RASettings.sharedInstance enableRotation] && ![RASettings.sharedInstance scalingRotationMode])
+    //if ([RASettings.sharedInstance enableRotation] && ![RASettings.sharedInstance scalingRotationMode])
     {
         [RAMessagingServer.sharedInstance rotateApp:lastBundleIdentifier toOrientation:[UIApplication sharedApplication].statusBarOrientation completion:nil];
     }
-    else if ([RASettings.sharedInstance scalingRotationMode] && [UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
+    /*else if ([RASettings.sharedInstance scalingRotationMode] && [UIApplication sharedApplication].statusBarOrientation == UIInterfaceOrientationLandscapeRight)
     {
         overrideDisableForStatusBar = YES;
 
@@ -677,7 +675,7 @@ CGFloat startingY = -1;
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1.0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             overrideDisableForStatusBar = NO;
         });
-    }
+    }*/
 }
 
 %new -(void) RA_setView:(UIView*)view_ preferredHeight:(CGFloat)pHeight

@@ -290,8 +290,8 @@ extern BOOL launchNextOpenIntoWindow;
 -(void) moveApp:(NSString*)identifier toOrigin:(CGPoint)origin completion:(RAMessageCompletionCallback)callback
 {
 	RAMessageAppData data = [self getDataForIdentifier:identifier];
-	data.wantedClientOriginX = origin.x;
-	data.wantedClientOriginY = origin.y;
+	data.wantedClientOriginX = (float)origin.x;
+	data.wantedClientOriginY = (float)origin.y;
 	data.shouldForceSize = YES;
 	[self setData:data forIdentifier:identifier];
 	[self sendStoredDataToApp:identifier completion:callback];

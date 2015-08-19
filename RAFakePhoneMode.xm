@@ -23,6 +23,13 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
 	return forcePhoneModeSize;
 }
 
++(void) updateAppSizing
+{
+    CGRect f = UIWindow.keyWindow.frame;
+    f.origin = CGPointZero;
+    UIWindow.keyWindow.frame = f;
+}
+
 +(BOOL) shouldFakeForAppWithIdentifier:(NSString*)identifier
 {
 	IF_SPRINGBOARD {
@@ -110,6 +117,7 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
     {
         CGRect o = %orig;
         o.size = [RAFakePhoneMode fakedSize];
+        o.origin = CGPointZero;
         return o;
     }
 
@@ -125,6 +133,7 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
     {
         CGRect o = %orig;
         o.size = [RAFakePhoneMode fakedSize];
+        o.origin = CGPointZero;
         return o;
     }
 
@@ -140,6 +149,7 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
     {
         CGRect o = %orig;
         o.size = [RAFakePhoneMode fakedSize];
+        o.origin = CGPointZero;
         return o;
     }
 
@@ -155,6 +165,7 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
     {
         CGRect o = %orig;
         o.size = [RAFakePhoneMode fakedSize];
+        o.origin = CGPointZero;
         return o;
     }
 
@@ -170,6 +181,7 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
     {
         CGRect o = %orig;
      	o.size = CGSizeMake([RAFakePhoneMode fakedSize].width * self.scale, [RAFakePhoneMode fakedSize].height * self.scale);
+        o.origin = CGPointZero;
         return o;
     }
 
@@ -185,6 +197,7 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
     {
         CGRect o = %orig;
         o.size = [RAFakePhoneMode fakedSize];
+        o.origin = CGPointZero;
         return o;
     }
 
@@ -199,6 +212,7 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
     {
         CGRect o = %orig;
         o.size = [RAFakePhoneMode fakedSize];
+        o.origin = CGPointZero;
         return o;
     }
 
@@ -214,6 +228,7 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
     {
         CGRect o = %orig;
         o.size = [RAFakePhoneMode fakedSize];
+        o.origin = CGPointZero;
         return o;
     }
 
@@ -228,6 +243,7 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
     {
         CGRect o = %orig;
         o.size = [RAFakePhoneMode fakedSize];
+        o.origin = CGPointZero;
         return o;
     }
 
@@ -242,6 +258,7 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
     {
         CGRect o = %orig;
         o.size = [RAFakePhoneMode fakedSize];
+        o.origin = CGPointZero;
         return o;
     }
 

@@ -5,6 +5,7 @@
 #import "RAWidgetSectionManager.h"
 #import "RASettings.h"
 #import "RAMessagingClient.h"
+#import "RAFakePhoneMode.h"
 
 UIInterfaceOrientation prevousOrientation;
 BOOL setPreviousOrientation = NO;
@@ -51,7 +52,7 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
 {
     if ([RAMessagingClient.sharedInstance shouldForceOrientation] && arg1 != [RAMessagingClient.sharedInstance forcedOrientation] && [UIApplication.sharedApplication _isSupportedOrientation:arg1])
         return;
-    %orig([RAMessagingClient.sharedInstance shouldForceOrientation] && [UIApplication.sharedApplication _isSupportedOrientation:arg1] ? [RAMessagingClient.sharedInstance forcedOrientation] : arg1);
+    %orig([RAMessagingClient.sharedInstance shouldForceOrientation] && [UIApplication.sharedApplication _isSupportedOrientation:[RAMessagingClient.sharedInstance forcedOrientation]] ? [RAMessagingClient.sharedInstance forcedOrientation] : arg1);
 }
 %end
 
@@ -60,7 +61,10 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
 {
     %orig;
     if (!IS_SPRINGBOARD)
+    {
         [RAMessagingClient.sharedInstance requestUpdateFromServer];
+        [RAFakePhoneMode updateAppSizing];
+    }
 }
 
 - (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(unsafe_id)arg2 changeApplicationFlag:(BOOL)arg3
