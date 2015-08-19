@@ -26,7 +26,7 @@
 - (void)sectionRequestedSectionReload:(id)section animated:(BOOL)animated;
 @end
 
-@interface ReachAppNCAppSettingsListController: SKTintedListController<SKListControllerProtocol>
+@interface ReachAppNCAppSettingsListController: SKTintedListController<SKListControllerProtocol, UIAlertViewDelegate>
 @end
 
 @implementation ReachAppNCAppSettingsListController
@@ -54,7 +54,7 @@
 -(NSArray*) customSpecifiers
 {
     return @[
-             @{ @"footerText": @"Respring to apply changes." },
+             @{ @"footerText": @"Quickly enable or disable Quick Access." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
@@ -63,7 +63,7 @@
                  @"label": @"Enabled",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
-
+             @{ },
             @{
                  @"cell": @"PSLinkListCell",
                  @"detail": @"RANCAppSelectorView",
@@ -113,7 +113,7 @@
         NSString *dn = [self displayIdentifierForIndexPath:indexPath];
         NSString *key = @"NCApp";// [NSString stringWithFormat:@"NCApp-%@",dn];
         //BOOL value = [prefs[key] boolValue];
-        BOOL value = [dn isEqualToString:prefs[key]];
+        BOOL value = [dn isEqualToString:prefs[key] ?: @"com.apple.Preferences"];
         [(ALCheckCell*)cell loadValue:@(value)];
     }
     return cell;
@@ -180,5 +180,16 @@
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.7 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
       CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.settings/reloadSettings"), nil, nil, YES);
     });
+
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Quick Access" message:@"A respring is required to apply changes. Would you like to respring now?" delegate:self cancelButtonTitle:@"No" otherButtonTitles:@"Yes",nil];
+    [alert show];
+}
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex 
+{
+    if (buttonIndex == 1)
+    {
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.respring"), nil, nil, YES);
+    }
 }
 @end

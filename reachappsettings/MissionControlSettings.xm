@@ -48,13 +48,13 @@
 }
 -(UIColor*) tintColor { return [UIColor colorWithRed:255/255.0f green:205/255.0f blue:2/255.0f alpha:1.0f]; }
 -(UIColor*) switchTintColor { return [[UISwitch alloc] init].tintColor; }
--(NSString*) customTitle { return @"MissionControl"; }
+-(NSString*) customTitle { return @"Mission Control"; }
 -(BOOL) showHeartImage { return NO; }
 
 -(NSArray*) customSpecifiers
 {
     return @[
-             @{ @"footerText": @"" },
+             @{ @"footerText": @"Quickly enable or disable Mission Control." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
@@ -63,6 +63,8 @@
                  @"label": @"Enabled",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
+
+                 @{ @"footerText": @"If enabled the App Switcher will be replaced with the Mission Control view."},
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @NO,
@@ -72,11 +74,11 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
-                 @{ @"label": @"Desktop Style" },
+                 @{ @"label": @"Customization", @"footerText": @"Modifies the desktop portion of the Mission Control view." },
              @{
                  @"cell": @"PSSegmentCell",
-                 @"validTitles": @[ @"Outline", @"Darken" ],
-                 @"validValues": @[ @(0), @(1), ],
+                 @"validTitles": @[ @"Darken", @"Outline" ],
+                 @"validValues": @[ @(1), @(0), ],
                  @"default": @(1),
                  @"key": @"missionControlDesktopStyle",
                  @"defaults": @"com.efrederickson.reachapp.settings",
@@ -100,7 +102,7 @@
                  @"label": @"Kill App",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
-                 @{ },
+                 @{ @"label": @"Activator" },
              @{
                     @"cell": @"PSLinkCell",
                     @"action": @"showActivatorAction",

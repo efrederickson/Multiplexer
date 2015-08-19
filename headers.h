@@ -747,6 +747,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 -(BOOL)launchApplicationWithIdentifier:(id)identifier suspended:(BOOL)suspended;
 -(SBApplication*) _accessibilityFrontMostApplication;
 -(void)setWantsOrientationEvents:(BOOL)events;
+-(void)_relaunchSpringBoardNow;
 
 - (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(id)arg2 changeApplicationFlag:(BOOL)arg3;
 

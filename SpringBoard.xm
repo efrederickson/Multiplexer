@@ -114,11 +114,18 @@
 }
 %end
 
+void respring_notification(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
+{
+    [[UIApplication sharedApplication] _relaunchSpringBoardNow];
+}
+
 %ctor
 {
     if (SPRINGBOARD)
     {
         %init;
         LOAD_ASPHALEIA;
+
+        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, respring_notification, CFSTR("com.efrederickson.reachapp.respring"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
     }
 }

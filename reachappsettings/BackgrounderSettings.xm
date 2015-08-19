@@ -58,7 +58,7 @@
 -(NSArray*) customSpecifiers
 {
     return @[
-             @{ @"footerText": @"Quickly enable or disable Aura. Re-open apps to apply changes." },
+             @{ @"footerText": @"Quickly enable or disable Aura. Relaunch apps to apply changes." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
@@ -86,30 +86,6 @@
              },
 
              @{ @"label": @"Global", @"footerText": @"" },
-             @{
-                @"cell": @"PSSwitchCell",
-                @"label": @"Show Icon Indicators",
-                @"default": @YES,
-                @"key": @"showIconIndicators",
-                @"defaults": @"com.efrederickson.reachapp.settings",
-                @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-             },
-             @{
-                @"cell": @"PSSwitchCell",
-                @"label": @"Show on Status Bar",
-                @"default": @YES,
-                @"key": @"shouldShowStatusBarIcons",
-                @"defaults": @"com.efrederickson.reachapp.settings",
-                @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-             },
-             @{
-                @"cell": @"PSSwitchCell",
-                @"label": @"Show Native in Status Bar",
-                @"default": @NO,
-                @"key": @"shouldShowStatusBarNativeIcons",
-                @"defaults": @"com.efrederickson.reachapp.settings",
-                @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-             },           
     
              @{
                 @"cell": @"PSLinkListCell",
@@ -119,20 +95,22 @@
                 @"validValues": @[ @(RABackgroundModeNative), @(RABackgroundModeUnlimitedBackgroundingTime),    @(RABackgroundModeForcedForeground), @(RABackgroundModeForceNone),    @(RABackgroundModeSuspendImmediately)],
                 @"shortTitles": @[ @"Native",                 @"∞",                                             @"Forced",                           @"Disabled",                     @"SmartClose" ],
                 @"default": @(RABackgroundModeNative),
-                @"detail": @"PSListItemsController",
+                @"detail": @"RABackgroundingListItemsController",
                 @"defaults": @"com.efrederickson.reachapp.settings",
                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                 @"staticTextMessage": @"Does not apply to apps enabled with differing options in the “Per App” section."
                 },
              @{
-                @"cell": @"PSSwitchCell",
-                @"label": @"Show Native Mode Indicators",
-                @"default": @YES,
-                @"key": @"showNativeStateIconIndicators",
-                @"defaults": @"com.efrederickson.reachapp.settings",
-                @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-             },
-             @{ },
+                @"cell": @"PSLinkListCell",
+                @"detail": @"RABackgrounderIconIndicatorOptionsListController",
+                @"label": @"Icon Indicator Options",
+            },
+             @{
+                @"cell": @"PSLinkListCell",
+                @"detail": @"RABackgrounderStatusbarOptionsListController",
+                @"label": @"Status Bar Indicator Options",
+            },   
+             @{ @"label": @"Specific" },
              @{
                 @"cell": @"PSLinkCell",
                 @"label": @"Per App",
@@ -155,5 +133,63 @@
         vc.listenerName = @"com.efrederickson.reachapp.backgrounder.togglemode";
         [self.rootController pushViewController:vc animated:YES];
     }
+}
+@end
+
+@interface RABackgrounderIconIndicatorOptionsListController : SKTintedListController<SKListControllerProtocol, UIAlertViewDelegate>
+@end
+
+@implementation RABackgrounderIconIndicatorOptionsListController
+-(UIColor*) navigationTintColor { return [UIColor colorWithRed:248/255.0f green:73/255.0f blue:88/255.0f alpha:1.0f]; }
+-(BOOL) showHeartImage { return NO; }
+-(NSArray*) customSpecifiers 
+{
+    return @[
+             @{
+                @"cell": @"PSSwitchCell",
+                @"label": @"Show Icon Indicators",
+                @"default": @YES,
+                @"key": @"showIconIndicators",
+                @"defaults": @"com.efrederickson.reachapp.settings",
+                @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+             },
+             @{
+                @"cell": @"PSSwitchCell",
+                @"label": @"Show Native Mode Indicators",
+                @"default": @NO,
+                @"key": @"showNativeStateIconIndicators",
+                @"defaults": @"com.efrederickson.reachapp.settings",
+                @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+             },
+                 ];
+}
+@end
+
+@interface RABackgrounderStatusbarOptionsListController : SKTintedListController<SKListControllerProtocol, UIAlertViewDelegate>
+@end
+
+@implementation RABackgrounderStatusbarOptionsListController
+-(UIColor*) navigationTintColor { return [UIColor colorWithRed:248/255.0f green:73/255.0f blue:88/255.0f alpha:1.0f]; }
+-(BOOL) showHeartImage { return NO; }
+-(NSArray*) customSpecifiers 
+{
+    return @[
+             @{
+                @"cell": @"PSSwitchCell",
+                @"label": @"Show on Status Bar",
+                @"default": @YES,
+                @"key": @"shouldShowStatusBarIcons",
+                @"defaults": @"com.efrederickson.reachapp.settings",
+                @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+             },
+             @{
+                @"cell": @"PSSwitchCell",
+                @"label": @"Show Native in Status Bar",
+                @"default": @NO,
+                @"key": @"shouldShowStatusBarNativeIcons",
+                @"defaults": @"com.efrederickson.reachapp.settings",
+                @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+             },        
+                 ];
 }
 @end

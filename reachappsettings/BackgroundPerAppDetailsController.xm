@@ -15,6 +15,7 @@ extern void RA_BGAppsControllerNeedsToReload();
 
 -(NSString*) customTitle { return _appName; }
 -(BOOL) showHeartImage { return NO; }
+-(UIColor*) navigationTintColor { return [UIColor colorWithRed:248/255.0f green:73/255.0f blue:88/255.0f alpha:1.0f]; }
 
 -(id) isBackgroundModeActive:(NSString*)mode withAppInfo:(NSArray*)info
 {
@@ -47,7 +48,7 @@ extern void RA_BGAppsControllerNeedsToReload();
              	@"validValues": @[ @(RABackgroundModeNative), @(RABackgroundModeUnlimitedBackgroundingTime),    @(RABackgroundModeForcedForeground), @(RABackgroundModeForceNone),    @(RABackgroundModeSuspendImmediately)],
                 @"shortTitles": @[ @"Native",                 @"∞",                                             @"Forced",                           @"Disabled",                     @"SmartClose" ],
              	@"default": @(RABackgroundModeNative),
-             	@"detail": @"PSListItemsController"
+             	@"detail": @"RABackgroundingListItemsController"
              	},
              @{
              	@"cell": @"PSSwitchCell",
@@ -79,7 +80,7 @@ extern void RA_BGAppsControllerNeedsToReload();
                 @"enabled": @(!exitsOnSuspend),
                 @"reloadSpecifiersXX": @YES,
             },
-            @{ @"footerText": @"This switch causes applications to completely disable their backgrounding, natively. Apps such as BatteryLife, FinalFantasy2, and a certain Solitaire do this. This switch will not revert upon the uninstallation of Multiplexer. A respring may or may not be required to apply." },
+            @{ @"footerText": @"This switch causes applications to completely disable their backgrounding, natively. Apps such as BatteryLife, FinalFantasy2, and a certain Solitaire do this. This switch will not revert upon the uninstallation of Multiplexer because it actually writes to the app's data. A respring may be required to apply." },
             @{
                 @"cell": @"PSSwitchCell",
                 @"key": @"UIApplicationExitsOnSuspend",
@@ -165,23 +166,23 @@ extern void RA_BGAppsControllerNeedsToReload();
             },
 
          	@{ @"footerText": @"Description of icon letters: \n\
-N - native backgrounding \n\
-F - forced foreground \n\
-D - forced kill on exit \n\
-S - suspend immediately \n\
-U - unkillable \n\
-B - unlimited backgrounding time\n\
+N - Native\n\
+B - Unlimited Backgrounding Time\n\
+F - Force Foreground\n\
+D - Kill on Exit\n\
+S - Suspend Immediately\n\
+U - Unkillable\n\
 \n\
 The status bar icon is simply the app icon.", },
          	@{
          		@"cell": @"PSSwitchCell",
-         		@"label": @"Show Indicator on icon",
+         		@"label": @"Show Icon Indicators",
          		@"key": @"showIndicatorOnIcon",
                  @"default": @YES,
              },
             @{
                 @"cell": @"PSSwitchCell",
-                @"label": @"Show in StatusBar",
+                @"label": @"Show in Status Bar",
                 @"key": @"showStatusBarIcon",
                  @"default": @YES,
              },

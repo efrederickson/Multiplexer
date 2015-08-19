@@ -33,6 +33,7 @@ enum RAGrabArea {
 -(NSMutableArray*) favoriteApps;
 -(BOOL) unifyStatusBar;
 -(BOOL) flipTopAndBottom;
+-(BOOL) showFavorites;
 
 -(BOOL) NCAppEnabled;
 -(NSString*) NCApp;

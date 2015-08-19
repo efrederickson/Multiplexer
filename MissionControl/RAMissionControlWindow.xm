@@ -85,6 +85,7 @@
 
 		desktopScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y, self.frame.size.width, height * 1.2)];
 		desktopScrollView.backgroundColor = [THEMED(missionControlScrollViewBackgroundColor) colorWithAlphaComponent:THEMED(missionControlScrollViewOpacity)];
+		desktopScrollView.pagingEnabled = [RASettings.sharedInstance missionControlPagingEnabled];
 
 		[self addSubview:desktopScrollView];
 	}

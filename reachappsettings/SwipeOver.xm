@@ -50,7 +50,7 @@
 -(NSArray*) customSpecifiers
 {
     return @[
-             @{ },
+             @{ @"footerText": @"Quickly enable or disable Swipe Over." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
@@ -71,13 +71,13 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
-             @{ @"footerText": @"Even when not in fullscreen, the grabber will show" },
+             @{ @"footerText": @"If enabled, the grabber will always display when invoking Swipe Over." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @NO,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"alwaysShowSOGrabber",
-                 @"label": @"Always Show Grabber",
+                 @"label": @"Always Display Grabber",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
             ];

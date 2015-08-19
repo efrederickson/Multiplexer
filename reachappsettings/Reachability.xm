@@ -54,7 +54,7 @@
 -(NSArray*) customSpecifiers
 {
     return @[
-             @{ @"footerText": @"Enable/disable ReachApp. After any change to the settings, a respring is recommended but not required." },
+             @{ @"footerText": @"Quickly enable or disable ReachApp." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
@@ -64,7 +64,7 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
-             @{ @"footerText": @"Show the Notification Center instead of an app in the Reachability view." },
+             @{ @"footerText": @"If enabled, the Notification Center view is displayed in Reachability." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @NO,
@@ -74,7 +74,7 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
-             @{ @"footerText": @"Disables the default duration that Reachability closes after" },
+             @{ @"footerText": @"Disables the default duration that Reachability closes after." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
@@ -83,7 +83,7 @@
                  @"label": @"Disable Auto-dismiss",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
-
+/*
              @{ @"footerText": @"Forces apps to rotate to the current orientation" },
              @{
                  @"cell": @"PSSwitchCell",
@@ -93,8 +93,9 @@
                  @"label": @"Enable Rotation",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
+*/
 
-             @{ @"footerText": @"Instead of the home button closing Reachability and going to home screen it will just close Reachability." },
+             @{ @"footerText": @"If enabled, the home button will no longer return to the home screen when Reachability is displayed." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
@@ -103,7 +104,7 @@
                  @"label": @"Home Button Closes Reachability",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
-
+/*
              @{ @"footerText": @"Shows the bottom half of the resizing grabber" },
              @{
                  @"cell": @"PSSwitchCell",
@@ -113,7 +114,7 @@
                  @"label": @"Show Bottom Grabber",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
-/*
+
              @{ @"footerText": @"This attempts to hide the lower status bar and force the upper status bar." },
              @{
                  @"cell": @"PSSwitchCell",
@@ -125,19 +126,19 @@
                  },
 */
 
-             @{ @"footerText": @"Shows an app chooser that allows you to choose which app to show. If disabled, the last used app will be shown in Reachability." },
+             @{ @"footerText": @"If enabled, a widget selector will be displayed. If disabled, the last used app will be show in Reachability." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"showAppSelector",
-                 @"label": @"Show Widget Chooser",
+                 @"label": @"Display Widget Selector",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
              @{
                 @"cell": @"PSLinkListCell",
                 @"detail": @"RAAppChooserOptionsListController",
-                @"label": @"Widget Chooser Options",
+                @"label": @"Options",
             },
 
 /*
@@ -173,7 +174,7 @@
 -(NSArray*) customSpecifiers 
 {
     return @[
-             @{ @"footerText": @"Auto-size the app chooser to the size of the available apps... Or not." },
+             @{ @"footerText": @"If enabled, the app selector will scale to the size of available apps." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
@@ -183,40 +184,48 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
              
-             @{ @"footerText": @"Choose whether to show the recents section in the chooser or not." },
+             @{ @"footerText": @"If enabled, a list of your recent apps will display in the app selector." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"showRecents",
-                 @"label": @"Show Recent Apps",
+                 @"label": @"Display Recent Apps",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
-            @{ @"footerText": @"Apps to show in the Favorites section of the app chooser." },
+            @{ @"footerText": @"Apps that will be displayed in the favorites section of the app selector." },
+            @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @YES,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"showFavorites",
+                 @"label": @"Display Favorite Apps",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
             @{
                  @"cell": @"PSLinkListCell",
                  @"detail": @"RAFavoritesAppSelectorView",
                  @"label": @"Favorites",
                  },
 
-             @{ @"footerText": @"Choose whether to show the all apps section in the chooser or not." },
+             @{ @"footerText": @"If enabled, a section with all your apps will display in the app selector." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"showAllAppsInAppChooser",
-                 @"label": @"Show All Apps",
+                 @"label": @"Display All Apps",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
-             @{ @"footerText": @"Choose whether to page the app chooser, allowing for a different experience." },
+             @{ @"footerText": @"If enabled, apps will be divided into discrete pages." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"pagingEnabled",
-                 @"label": @"Paging Enabled",
+                 @"label": @"Pagination",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 

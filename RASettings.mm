@@ -202,7 +202,7 @@ int disableAutoDismiss = -1;
 
 -(BOOL) showNativeStateIconIndicators
 {
-	return BOOL(@"showNativeStateIconIndicators", YES);
+	return BOOL(@"showNativeStateIconIndicators", NO);
 }
 
 -(BOOL) missionControlEnabled
@@ -282,6 +282,7 @@ int disableAutoDismiss = -1;
 -(NSString*) currentThemeIdentifier { return _settings[@"currentThemeIdentifier"] ?: @"com.eljahandandrew.multiplexer.themes.default"; }
 -(NSInteger) missionControlDesktopStyle { return [_settings[@"missionControlDesktopStyle"] ?: @1 intValue]; }
 -(BOOL) missionControlPagingEnabled { return BOOL(@"missionControlPagingEnabled", NO); }
+-(BOOL) showFavorites { return BOOL(@"showFavorites", YES); }
 
 -(RAGrabArea) windowedMultitaskingGrabArea
 {

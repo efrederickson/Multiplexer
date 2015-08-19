@@ -5,7 +5,7 @@
 #import "RASettings.h"
 
 @implementation RAFavoriteAppsWidget
--(BOOL) enabled { return YES; }
+-(BOOL) enabled { return [RASettings.sharedInstance showFavorites]; }
 
 -(NSInteger) sortOrder { return 2; }
 -(NSString*) displayName { return LOCALIZE(@"FAVORITES"); }

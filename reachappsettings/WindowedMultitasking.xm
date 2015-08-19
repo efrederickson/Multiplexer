@@ -55,7 +55,7 @@
 -(NSArray*) customSpecifiers
 {
     return @[
-                 @{ @"footerText": @"" },
+                 @{ @"footerText": @"Quickly enable or disable Empoleon." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
@@ -65,7 +65,7 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
-             @{ @"label": @"Swipe Up From Bottom..."},
+             @{ @"label": @"Swipe Up From Bottom...", @"footerText": @"Launches all apps into windows rather than fullscreen." },
              @{
                  @"cell": @"PSSegmentCell",
                  @"validTitles": @[ @"Left",                      @"Middle",                      @"Right" ],
@@ -75,18 +75,26 @@
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
+             @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @NO,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"launchIntoWindows",
+                 @"label": @"Launch Into Window",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
 
-             @{ @"footerText": @"If this is off, you cannot resize, rotate, etc. windows unless the overlay is showing." },
+             @{ @"footerText": @"If disabled, you will not be able to resize and rotate windows unless the easy-tap-mode overlay is displayed." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
                  @"defaults": @"com.efrederickson.reachapp.settings",
                  @"key": @"alwaysEnableGestures",
-                 @"label": @"Always enable gestures",
+                 @"label": @"Always Enable Gestures",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
-             @{ @"footerText": @"If this is on, tapping an icon on the overlay will be slightly delayed until the bounce animation has completed." },
+             @{ @"footerText": @"If enabled, tapping an icon on the easy-tap-mode overlay will be delayed until the bounce animation is complete." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @NO,
@@ -96,7 +104,7 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
-             @{ @"footerText": @"Unobtrusively snaps windows" },
+             @{ @"label": @"Snapping" },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,
@@ -117,7 +125,7 @@
              @{ @"label": @"Lock button action" },
              @{
                  @"cell": @"PSSegmentCell",
-                 @"validTitles": @[ @"Lock all rotation", @"Lock app rotation" ],
+                 @"validTitles": @[ @"Lock All Rotation", @"Lock App Rotation" ],
                  @"validValues": @[ @0, @1 ],
                  @"default": @0,
                  @"key": @"windowRotationLockMode",
@@ -125,7 +133,7 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
-             @{ },
+             @{ @"label": @"Activator" },
              @{
                 @"cell": @"PSLinkCell",
                 @"action": @"showActivatorAction",
@@ -135,19 +143,10 @@
              @{
                 @"cell": @"PSLinkCell",
                 @"action": @"showActivatorAction2",
-                @"label": @"Show Overlays Activation",
+                @"label": @"Easy-Tap-Mode Activation",
                 //@"enabled": objc_getClass("LAEventSettingsController") != nil,
              },
 
-             @{ @"footerText": @"Launches app into windows instead of fullscreen" },
-             @{
-                 @"cell": @"PSSwitchCell",
-                 @"default": @NO,
-                 @"defaults": @"com.efrederickson.reachapp.settings",
-                 @"key": @"launchIntoWindows",
-                 @"label": @"Launch into Window",
-                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
-                 },
                  /*
              @{
                  @"cell": @"PSSwitchCell",
