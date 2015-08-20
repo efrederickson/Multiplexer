@@ -13,6 +13,7 @@ BOOL isShowingGrabber = NO;
 BOOL isPastGrabber = NO;
 NSDate *lastTouch;
 CGPoint startingPoint;
+BOOL firstSwipe = NO;
 
 CGRect adjustFrameForRotation()
 {
@@ -84,6 +85,7 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
         {
             if (isShowingGrabber == NO && isPastGrabber == NO)
             {
+                firstSwipe = YES;
                 isShowingGrabber = YES;
 
                 grabberView = [[UIView alloc] init];
@@ -128,7 +130,7 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
 
                 return RAGestureCallbackResultSuccess;
             }
-            else if (CGRectContainsPoint(grabberView.frame, location))
+            else if (CGRectContainsPoint(grabberView.frame, location) || (isShowingGrabber && !firstSwipe && [RASettings.sharedInstance swipeOverGrabArea] != RAGrabAreaSideAnywhere && [RASettings.sharedInstance swipeOverGrabArea] != RAGrabAreaSideMiddleThird))
             {
                 [grabberView removeFromSuperview];
                 grabberView = nil;
@@ -137,6 +139,8 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
             }
             else if (isPastGrabber == NO)
             {
+                if (state == UIGestureRecognizerStateEnded)
+                    firstSwipe = NO;
                 startingPoint = CGPointZero;
                 isPastGrabber = NO;
                 return RAGestureCallbackResultSuccess;
@@ -174,6 +178,6 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
                 return NO;
         }
         
-        return [RASettings.sharedInstance swipeOverEnabled] && ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && ![[%c(SBUIController) sharedInstance] isAppSwitcherShowing] && ![[%c(SBNotificationCenterController) sharedInstance] isVisible] && !RAMissionControlManager.sharedInstance.isShowingMissionControl && (swipeOverLocationIsInValidArea(location.y) || grabberView != nil);
+        return [RASettings.sharedInstance swipeOverEnabled] && ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && ![[%c(SBUIController) sharedInstance] isAppSwitcherShowing] && ![[%c(SBNotificationCenterController) sharedInstance] isVisible] && !RAMissionControlManager.sharedInstance.isShowingMissionControl && (swipeOverLocationIsInValidArea(location.y) || isShowingGrabber);
     } forEdge:UIRectEdgeRight identifier:@"com.efrederickson.reachapp.swipeover.systemgesture" priority:RAGesturePriorityDefault];
 }
