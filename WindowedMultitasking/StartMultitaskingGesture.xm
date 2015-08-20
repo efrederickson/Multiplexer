@@ -124,6 +124,7 @@ BOOL locationIsInValidArea(CGFloat x)
                         [transaction begin];
                     }];
                     [(FBWorkspaceEventQueue*)[%c(FBWorkspaceEventQueue) sharedInstance] executeOrAppendEvent:event];
+                [[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"BeautifulAnimation"];
                     // Open in window
                     [RADesktopManager.sharedInstance.currentDesktop createAppWindowForSBApplication:topApp animated:YES];
                 }];
@@ -132,6 +133,7 @@ BOOL locationIsInValidArea(CGFloat x)
             {
                 appView.center = originalCenter;
                 [UIView animateWithDuration:0.2 animations:^{ appView.transform = CGAffineTransformIdentity; }];
+                [[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"BeautifulAnimation"];
             }
 
         }

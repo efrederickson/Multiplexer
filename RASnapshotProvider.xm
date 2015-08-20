@@ -210,6 +210,7 @@
 	MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer.contents = nil;
 	[[[%c(SBUIController) sharedInstance] window] layer].contents = nil;
 	desktop.layer.contents = nil;
+	[[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"BeautifulAnimation"];
 	return image;
 }
 

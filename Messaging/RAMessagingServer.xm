@@ -163,6 +163,7 @@ extern BOOL launchNextOpenIntoWindow;
 		    [UIView animateWithDuration:0.2 animations:^{
 		        appView.transform = CGAffineTransformMakeScale(0.5, 0.5);
 		    } completion:^(BOOL _) {
+	       		[[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"BeautifulAnimation"];
 		        FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
 		            SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
 		            [transaction begin];

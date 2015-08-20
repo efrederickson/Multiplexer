@@ -97,6 +97,11 @@ CGRect swappedForOrientation2(CGRect in)
 
 	if (animated)
 	{
+		if (![NSThread isMainThread])
+		{
+			dispatch_sync(dispatch_get_main_queue(), ^{ [self showMissionControl:animated]; });
+			return;
+		}
 		//[UIView animateWithDuration:0.5 animations:^{ window.alpha = 1; }];
 		[UIView animateWithDuration:0.5 animations:^{ window.frame = CGRectMake(0, 0, window.frame.size.width, window.frame.size.height); } completion:nil];
 

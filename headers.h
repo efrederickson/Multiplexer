@@ -190,6 +190,7 @@ typedef struct {
 @interface SBWallpaperController
 +(id) sharedInstance;
 -(void) beginRequiringWithReason:(NSString*)reason;
+-(void) endRequiringWithReason:(NSString*)reason;
 @end
 
 @interface BBAction
