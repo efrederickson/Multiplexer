@@ -174,6 +174,6 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
                 return NO;
         }
         
-        return [RASettings.sharedInstance swipeOverEnabled] && ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && ![[%c(SBUIController) sharedInstance] isAppSwitcherShowing] && ![[%c(SBNotificationCenterController) sharedInstance] isVisible] && !RAMissionControlManager.sharedInstance.isShowingMissionControl && swipeOverLocationIsInValidArea(location.y);
+        return [RASettings.sharedInstance swipeOverEnabled] && ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && ![[%c(SBUIController) sharedInstance] isAppSwitcherShowing] && ![[%c(SBNotificationCenterController) sharedInstance] isVisible] && !RAMissionControlManager.sharedInstance.isShowingMissionControl && (swipeOverLocationIsInValidArea(location.y) || grabberView != nil);
     } forEdge:UIRectEdgeRight identifier:@"com.efrederickson.reachapp.swipeover.systemgesture" priority:RAGesturePriorityDefault];
 }
