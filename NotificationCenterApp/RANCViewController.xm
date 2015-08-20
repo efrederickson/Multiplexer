@@ -40,15 +40,10 @@ int rotationDegsForOrientation(int o)
 	return 0;
 }
 
--(void) viewWillAppear:(BOOL)animated
-{
-	[super viewWillAppear:animated];
-
-	if (appView)
-	{
-		[appView loadApp];
-	}
-}
+//-(void)hostWillPresent;
+//-(void)hostDidPresent;
+//-(void)hostWillDismiss;
+//-(void)hostDidDismiss;
 
 -(void) viewDidAppear:(BOOL)animated
 {
