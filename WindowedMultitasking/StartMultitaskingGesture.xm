@@ -5,6 +5,7 @@
 #import "RAHostManager.h"
 #import "RABackgrounder.h"
 #import "RASwipeOverManager.h"
+#import "RAWindowStatePreservationSystemManager.h"
 
 BOOL overrideCC = NO;
 
@@ -43,6 +44,7 @@ BOOL locationIsInValidArea(CGFloat x)
 {
     __weak __block UIView *appView = nil;
     __block CGFloat lastY = 0;
+    __block CGPoint originalCenter;
     [[RAGestureManager sharedInstance] addGestureRecognizer:^RAGestureCallbackResult(UIGestureRecognizerState state, CGPoint location, CGPoint velocity) {
 
         SBApplication *topApp = [[UIApplication sharedApplication] _accessibilityFrontMostApplication];
@@ -60,13 +62,40 @@ BOOL locationIsInValidArea(CGFloat x)
 
             // Assign view
             appView = [RAHostManager systemHostViewForApplication:topApp].superview;
+            originalCenter = appView.center;
         }
         else if (state == UIGestureRecognizerStateChanged)
         {
             lastY = location.y;
             CGFloat scale = location.y / UIScreen.mainScreen._interfaceOrientedBounds.size.height;
-            scale = MIN(MAX(scale, 0.3), 1);
-            appView.transform = CGAffineTransformMakeScale(scale, scale);
+            scale = MIN(MAX(scale, 0.3), 1); // .01 for hasWindowInformation
+
+            if (NO && [RAWindowStatePreservationSystemManager.sharedInstance hasWindowInformationForIdentifier:topApp.bundleIdentifier])
+            {
+                CGFloat actualScale = scale;
+                scale = 1 - scale;
+                RAPreservedWindowInformation info = [RAWindowStatePreservationSystemManager.sharedInstance windowInformationForAppIdentifier:topApp.bundleIdentifier];
+
+                CGPoint center = CGPointMake(
+                    originalCenter.x - (info.center.x * scale),
+                    originalCenter.y - (info.center.y * scale)
+                );
+
+                center = CGPointMake(
+                    MAX(originalCenter.x * actualScale, fabs(info.center.x - (originalCenter.x * actualScale))),
+                    MAX(originalCenter.y * actualScale, fabs(info.center.y - (originalCenter.y * actualScale)))
+                );
+
+
+                CGFloat currentRotation = (M_PI * 2) - (atan2(info.transform.b, info.transform.a) * scale);
+                CGFloat currentScale = 1 - (sqrt(info.transform.a * info.transform.a + info.transform.c * info.transform.c) * scale);
+                CGAffineTransform transform = CGAffineTransformRotate(CGAffineTransformMakeScale(currentScale, currentScale), currentRotation);
+
+                appView.center = center;
+                appView.transform = transform;
+            }
+            else
+                appView.transform = CGAffineTransformMakeScale(scale, scale);
         }
         else if (state == UIGestureRecognizerStateEnded)
         {
@@ -74,8 +103,19 @@ BOOL locationIsInValidArea(CGFloat x)
 
             if (lastY <= (UIScreen.mainScreen._interfaceOrientedBounds.size.height / 4) * 3 && lastY != 0) // 75% down, 0 == gesture ended in most situations
             {
-                [UIView animateWithDuration:0.2 animations:^{
-                    appView.transform = CGAffineTransformMakeScale(0.5, 0.5);
+                [UIView animateWithDuration:.3 animations:^{
+
+                    if ([RAWindowStatePreservationSystemManager.sharedInstance hasWindowInformationForIdentifier:topApp.bundleIdentifier])
+                    {
+                        RAPreservedWindowInformation info = [RAWindowStatePreservationSystemManager.sharedInstance windowInformationForAppIdentifier:topApp.bundleIdentifier];
+                        appView.center = info.center;
+                        appView.transform = info.transform;
+                    }
+                    else
+                    {
+                        appView.transform = CGAffineTransformMakeScale(0.5, 0.5);
+                        appView.center = originalCenter;   
+                    }
                 } completion:^(BOOL _) {
                     // Close app
                     //[RABackgrounder.sharedInstance temporarilyApplyBackgroundingMode:RABackgroundModeForcedForeground forApplication:UIApplication.sharedApplication._accessibilityFrontMostApplication andCloseForegroundApp:NO];
@@ -88,8 +128,11 @@ BOOL locationIsInValidArea(CGFloat x)
                     [RADesktopManager.sharedInstance.currentDesktop createAppWindowForSBApplication:topApp animated:YES];
                 }];
             }
-            else            
+            else
+            {
+                appView.center = originalCenter;
                 [UIView animateWithDuration:0.2 animations:^{ appView.transform = CGAffineTransformIdentity; }];
+            }
 
         }
 

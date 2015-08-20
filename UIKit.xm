@@ -78,6 +78,16 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
     }
 }
 
++ (void)_startWindowServerIfNecessary
+{
+    %orig;
+    if (!IS_SPRINGBOARD)
+    {
+        //[RAMessagingClient.sharedInstance requestUpdateFromServer];
+        [RAFakePhoneMode updateAppSizing];
+    }
+}
+
 - (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(unsafe_id)arg2 changeApplicationFlag:(BOOL)arg3
 {
 	//if ([RASettings.sharedInstance unifyStatusBar])

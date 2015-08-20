@@ -252,7 +252,7 @@ CGRect swappedForOrientation2(CGRect in)
 		}
 		else
 		{
-			CGFloat distance = window.frame.size.height + window.frame.origin.y /* origin.y is less than 0 so the + is actually a - operation */;
+			CGFloat distance = window.center.y + window.frame.origin.y /* origin.y is less than 0 so the + is actually a - operation */;
 			CGFloat duration = MIN(distance / velocity.y, 0.3);
 
 			[UIView animateWithDuration:duration animations:^{

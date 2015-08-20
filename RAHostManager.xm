@@ -9,7 +9,7 @@
 	else if ([app respondsToSelector:@selector(mainScreenContextHostManager)])
 		return MSHookIvar<UIView*>([app mainScreenContextHostManager], "_hostView");
 
-	[RACompatibilitySystem showWarning:@"Unable to find valid method for accessing context host views"];
+	[RACompatibilitySystem showWarning:@"Unable to find valid method for accessing system context host views"];
 	return nil;
 }
 
@@ -43,7 +43,7 @@
 	    return (NSObject*)[scene contextHostManager];
 	}
 
-	[RACompatibilitySystem showWarning:@"Unable to find valid method for accessing context host views"];
+	[RACompatibilitySystem showWarning:@"Unable to find valid method for accessing context host view managers"];
 	return nil;
 }
 @end
