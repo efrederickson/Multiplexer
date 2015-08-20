@@ -743,6 +743,16 @@ const int bottomSizeViewTag =  987654320;
 	isBeingTouched = NO;
 }
 
+-(void) resignForemostApp
+{
+    titleLabel.font = [UIFont systemFontOfSize:18];
+}
+
+-(void) becomeForemostApp
+{
+    titleLabel.font = [UIFont boldSystemFontOfSize:20];
+}
+
 -(UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
     NSEnumerator *objects = [self.subviews reverseObjectEnumerator];

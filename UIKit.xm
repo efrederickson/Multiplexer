@@ -58,6 +58,13 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
         return;
     %orig([RAMessagingClient.sharedInstance shouldForceOrientation] && [UIApplication.sharedApplication _isSupportedOrientation:[RAMessagingClient.sharedInstance forcedOrientation]] ? [RAMessagingClient.sharedInstance forcedOrientation] : arg1);
 }
+
+- (void)_sendTouchesForEvent:(id)arg1
+{
+    %orig;
+    if (!IS_SPRINGBOARD)
+        [RAMessagingClient.sharedInstance notifySpringBoardOfFrontAppChangeToSelf];
+}
 %end
 
 %hook UIApplication

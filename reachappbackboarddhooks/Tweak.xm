@@ -35,8 +35,6 @@ void handle_event (void* target, void* refcon, IOHIDServiceRef service, IOHIDEve
 		BOOL isDown = IOHIDEventGetIntegerValue(event2, kIOHIDEventFieldKeyboardDown);
 		int key = IOHIDEventGetIntegerValue(event2, kIOHIDEventFieldKeyboardUsage);
 
-		NSLog(@"[ReachApp] %d", key);
-
 		if (key == CTRL_KEY)
 			isControlKeyDown = isDown;
 		else if (key == CMD_KEY || key == CMD_KEY2)
@@ -77,7 +75,6 @@ void handle_event (void* target, void* refcon, IOHIDServiceRef service, IOHIDEve
 			}
 			else if (isShiftKeyDown && key == EQUALS_OR_PLUS_KEY)
 			{
-				NSLog(@"[ReachApp] NEW DESKTOP");
 				[center sendMessageName:RAMessagingWINSHIFTPlusMessageName userInfo:nil];	
 			}
 		}
@@ -87,12 +84,32 @@ void handle_event (void* target, void* refcon, IOHIDServiceRef service, IOHIDEve
 }
 
 Boolean (*orig$IOHIDEventSystemOpen)(IOHIDEventSystemRef system, IOHIDEventSystemCallback callback, void* target, void* refcon, void* unused);
-
 Boolean hook$IOHIDEventSystemOpen(IOHIDEventSystemRef system, IOHIDEventSystemCallback callback, void* target, void* refcon, void* unused)
 {
 	eventCallback = callback;
 	return orig$IOHIDEventSystemOpen(system, handle_event, target, refcon, unused);	
 }
+
+%hook BKEventFocusManager
+@interface BKEventDestination
+-(id ) initWithPid:(unsigned int)arg1 clientID:(NSString*)arg2;
+@end
+
+-(id) destinationForFocusedEventWithDisplay:(__unsafe_unretained id)arg1 
+{
+	NSDictionary *response = [center sendMessageAndReceiveReplyName:RAMessagingFrontMostAppInfo userInfo:nil];
+
+	if (response)
+	{
+		int pid = [response[@"pid"] unsignedIntValue];
+		NSString *clientId = response[@"bundleIdentifier"];
+
+		return [[[objc_getClass("BKEventDestination") alloc] initWithPid:pid clientID:clientId] autorelease];
+	}
+	return %orig;
+}
+%end
+
 
 %ctor
 {

@@ -134,6 +134,11 @@ extern const char *__progname;
 	return [[serverCenter sendMessageAndReceiveReplyName:RAMessagingOpenURLKMessageName userInfo:dict][@"success"] boolValue];
 }
 
+-(void) notifySpringBoardOfFrontAppChangeToSelf
+{
+	[serverCenter sendMessageName:RAMessagingChangeFrontMostAppToSelf userInfo:@{ @"bundleIdentifier": NSBundle.mainBundle.bundleIdentifier }];
+}
+
 -(BOOL) shouldUseExternalKeyboard { return _currentData.shouldUseExternalKeyboard; }
 -(BOOL) shouldResize { return _currentData.shouldForceSize; }
 -(CGSize) resizeSize { return CGSizeMake(_currentData.wantedClientWidth, _currentData.wantedClientHeight); }

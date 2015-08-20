@@ -19,6 +19,7 @@
 
 -(NSArray*) hostedWindows;
 -(BOOL) isAppOpened:(NSString*)identifier;
+-(RAWindowBar*) windowForIdentifier:(NSString*)identifier;
 
 -(UIInterfaceOrientation) currentOrientation;
 -(CGFloat) baseRotationForOrientation;

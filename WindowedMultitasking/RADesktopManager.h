@@ -15,6 +15,7 @@
 -(void) removeAppWithIdentifier:(NSString*)bundleIdentifier animated:(BOOL)animated forceImmediateUnload:(BOOL)force;
 
 -(BOOL) isAppOpened:(NSString*)identifier;
+-(RAWindowBar*) windowForIdentifier:(NSString*)identifier;
 
 -(NSUInteger) currentDesktopIndex;
 -(NSUInteger) numberOfDesktops;
@@ -29,4 +30,6 @@
 
 -(void) hideDesktop;
 -(void) reshowDesktop;
+
+-(void) findNewForemostApp;
 @end

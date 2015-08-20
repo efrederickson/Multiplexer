@@ -1,5 +1,6 @@
 #import "RADesktopManager.h"
 #import "RAMissionControlWindow.h"
+#import "RAWindowBar.h"
 
 BOOL overrideUIWindow = NO;
 
@@ -90,6 +91,14 @@ BOOL overrideUIWindow = NO;
 	}
 }
 
+-(RAWindowBar*) windowForIdentifier:(NSString*)identifier
+{
+	for (RADesktopWindow *desktop in windows)
+		if ([desktop isAppOpened:identifier])
+			return [desktop windowForIdentifier:identifier];
+	return nil;
+}
+
 -(void) hideDesktop
 {
 	currentDesktop.hidden = YES;
@@ -110,6 +119,30 @@ BOOL overrideUIWindow = NO;
 {
 	for (RADesktopManager *w in windows)
 		[w updateWindowSizeForApplication:identifier];
+}
+
+-(void) setLastUsedWindow:(RAWindowBar*)window
+{
+	if (_lastUsedWindow)
+	{
+		[_lastUsedWindow resignForemostApp];
+	}
+	_lastUsedWindow = window;
+	[_lastUsedWindow becomeForemostApp];
+}
+
+-(void) findNewForemostApp
+{
+	RADesktopWindow *desktop = [self currentDesktop];
+	for (RAHostedAppView *hostedApp in desktop.hostedWindows)
+	{
+		RAWindowBar *bar = [desktop windowForIdentifier:hostedApp.app.bundleIdentifier];
+		if (bar)
+		{
+			self.lastUsedWindow = bar;
+			break;
+		}
+	}
 }
 
 -(RADesktopWindow*) desktopAtIndex:(NSUInteger)index { return windows[index]; }

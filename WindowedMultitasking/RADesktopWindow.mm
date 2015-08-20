@@ -118,6 +118,7 @@
 					view.superview.layer.transform = CATransform3DMakeScale(0.1, 0.1, 1);
 					view.superview.layer.position = CGPointMake(UIScreen.mainScreen.bounds.size.width / 2, UIScreen.mainScreen.bounds.size.height);
 					view.superview.layer.opacity = 0.0f;
+					[RADesktopManager.sharedInstance findNewForemostApp];
 				//view.superview.alpha = 0; 
 				} completion:^(BOOL _) { destructor(); }];
 			else
@@ -195,6 +196,18 @@
 		if ([app.app.bundleIdentifier isEqual:identifier])
 			return YES;
 	return NO;
+}
+
+-(RAWindowBar*) windowForIdentifier:(NSString*)identifier
+{
+	for (UIView *view in self.subviews)
+		if ([view isKindOfClass:[RAWindowBar class]])
+		{
+			RAWindowBar *bar = (RAWindowBar*)view;
+			if ([bar.attachedView.app.bundleIdentifier isEqual:identifier])
+				return bar;
+		}
+	return nil;
 }
 
 -(void) saveInfo

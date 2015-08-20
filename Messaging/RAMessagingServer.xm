@@ -55,6 +55,9 @@ extern BOOL launchNextOpenIntoWindow;
     [messagingCenter registerForMessageName:RAMessagingUpdateKeyboardSizeMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
     [messagingCenter registerForMessageName:RAMessagingOpenURLKMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
 
+    [messagingCenter registerForMessageName:RAMessagingFrontMostAppInfo target:self selector:@selector(handleMessageNamed:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingChangeFrontMostAppToSelf target:self selector:@selector(handleMessageNamed:userInfo:)];
+
     [messagingCenter registerForMessageName:RAMessagingCTRLLeftMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
     [messagingCenter registerForMessageName:RAMessagingCTRLRightMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
     [messagingCenter registerForMessageName:RAMessagingWINLeftMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
@@ -112,6 +115,26 @@ extern BOOL launchNextOpenIntoWindow;
 
 		BOOL success = [UIApplication.sharedApplication openURL:url];
 		return @{ @"success": @(success) };
+	}
+	else if ([identifier isEqual:RAMessagingFrontMostAppInfo])
+	{
+		RAWindowBar *window = RADesktopManager.sharedInstance.lastUsedWindow;
+		if (window)
+		{
+			SBApplication *app = window.attachedView.app;
+			if (app.pid)
+				return @{
+					@"pid": @(app.pid),
+					@"bundleIdentifier": app.bundleIdentifier
+				};
+		}
+	}
+	else if ([identifier isEqual:RAMessagingChangeFrontMostAppToSelf])
+	{
+		NSString *bundleIdentifier = info[@"bundleIdentifier"];
+		RAWindowBar *window = [RADesktopManager.sharedInstance windowForIdentifier:bundleIdentifier];
+		if (window)
+			RADesktopManager.sharedInstance.lastUsedWindow = window;
 	}
 
 	return nil;

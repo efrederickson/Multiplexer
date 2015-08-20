@@ -41,5 +41,7 @@ static NSString *RAMessagingWINRightMessageName = @"winRight";
 static NSString *RAMessagingWINSHIFTPlusMessageName = @"winShiftPlus";
 static NSString *RAMessagingCTRLUpMessageName = @"ctrlUp";
 static NSString *RAMessagingCTRLDownMessageName = @"ctrlDown";
+static NSString *RAMessagingFrontMostAppInfo = @"frontMostApp";
+static NSString *RAMessagingChangeFrontMostAppToSelf = @"yes_another_message";
 
 typedef void (^RAMessageCompletionCallback)(BOOL success);

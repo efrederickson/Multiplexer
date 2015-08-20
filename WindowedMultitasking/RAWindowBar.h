@@ -31,4 +31,7 @@
 
 -(void) disableLongPress;
 -(void) enableLongPress;
+
+-(void) resignForemostApp;
+-(void) becomeForemostApp;
 @end

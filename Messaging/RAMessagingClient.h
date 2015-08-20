@@ -17,6 +17,7 @@
 -(void) notifyServerToShowKeyboard;
 -(void) notifyServerToHideKeyboard;
 -(BOOL) notifyServerToOpenURL:(NSURL*)url openInWindow:(BOOL)openWindow;
+-(void) notifySpringBoardOfFrontAppChangeToSelf;
 
 // Methods to ease the currentData usage
 -(BOOL) shouldResize;
