@@ -21,7 +21,10 @@ static RAActivatorListener *sharedInstance;
 			[RAMissionControlManager.sharedInstance hideMissionControl:YES];
 	}
 	else if ([RASettings.sharedInstance missionControlEnabled])
+	{
+		[[[%c(SBUIController) sharedInstance] _appSwitcherController] forceDismissAnimated:YES];
 	    [RAMissionControlManager.sharedInstance toggleMissionControl:YES];
+	}
     [event setHandled:YES];
 }
 @end
