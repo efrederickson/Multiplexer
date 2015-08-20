@@ -49,7 +49,7 @@ const int bottomSizeViewTag =  987654320;
 	height = 40;
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
-	    height = 50;
+	    height = 45;
 	}
 
 	self.backgroundColor = THEMED(windowedMultitaskingWindowBarBackgroundColor);

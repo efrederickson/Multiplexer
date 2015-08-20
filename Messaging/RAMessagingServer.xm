@@ -11,6 +11,7 @@
 #import "RAAppKiller.h"
 #import "RADesktopManager.h"
 #import "RAWindowSnapDataProvider.h"
+#import "RAHostManager.h"
 
 extern BOOL launchNextOpenIntoWindow;
 
@@ -65,6 +66,7 @@ extern BOOL launchNextOpenIntoWindow;
     [messagingCenter registerForMessageName:RAMessagingCTRLUpMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
     [messagingCenter registerForMessageName:RAMessagingWINSHIFTPlusMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
     [messagingCenter registerForMessageName:RAMessagingCTRLDownMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingBackspaceKeyMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
 }
 
 -(NSDictionary*) handleMessageNamed:(NSString*)identifier userInfo:(NSDictionary*)info
@@ -118,6 +120,8 @@ extern BOOL launchNextOpenIntoWindow;
 	}
 	else if ([identifier isEqual:RAMessagingFrontMostAppInfo])
 	{
+		if (UIApplication.sharedApplication._accessibilityFrontMostApplication)
+			return nil;
 		RAWindowBar *window = RADesktopManager.sharedInstance.lastUsedWindow;
 		if (window)
 		{
@@ -142,6 +146,30 @@ extern BOOL launchNextOpenIntoWindow;
 
 -(void) handleKeyboardEvent:(NSString*)identifier userInfo:(NSDictionary*)info
 {
+	if ([identifier isEqual:RAMessagingBackspaceKeyMessageName])
+	{
+        SBApplication *topApp = [[UIApplication sharedApplication] _accessibilityFrontMostApplication];
+
+        if (topApp)
+        {
+	        [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"BeautifulAnimation"];
+	        [[%c(SBUIController) sharedInstance] restoreContentAndUnscatterIconsAnimated:NO];
+
+	        UIView *appView = [RAHostManager systemHostViewForApplication:topApp].superview;
+
+		    [UIView animateWithDuration:0.2 animations:^{
+		        appView.transform = CGAffineTransformMakeScale(0.5, 0.5);
+		    } completion:^(BOOL _) {
+		        FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
+		            SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
+		            [transaction begin];
+		        }];
+		        [(FBWorkspaceEventQueue*)[%c(FBWorkspaceEventQueue) sharedInstance] executeOrAppendEvent:event];
+		        [RADesktopManager.sharedInstance.currentDesktop createAppWindowForSBApplication:topApp animated:YES];
+		    }];
+        }
+	}
+
 	RAWindowBar *window = RADesktopManager.sharedInstance.lastUsedWindow;
 	if (!window)
 		return;

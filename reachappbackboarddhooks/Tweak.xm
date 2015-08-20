@@ -12,6 +12,7 @@
 #define ALT_KEY 226 
 #define ALT_KEY2 230
 
+#define BKSPCE_KEY 42
 #define ARROW_RIGHT_KEY 79
 #define ARROW_LEFT_KEY 80
 #define ARROW_UP_KEY 82
@@ -63,6 +64,13 @@ void handle_event (void* target, void* refcon, IOHIDServiceRef service, IOHIDEve
 				[center sendMessageName:RAMessagingCTRLDownMessageName userInfo:nil];	
 			}
 		}
+		else if (isDown && isControlKeyDown)
+		{
+			if (key == BKSPCE_KEY)
+			{
+				[center sendMessageName:RAMessagingBackspaceKeyMessageName userInfo:nil];
+			}
+		}
 		else if (isDown && isWindowsKeyDown)
 		{
 			if (key == ARROW_LEFT_KEY)
@@ -104,7 +112,8 @@ Boolean hook$IOHIDEventSystemOpen(IOHIDEventSystemRef system, IOHIDEventSystemCa
 		int pid = [response[@"pid"] unsignedIntValue];
 		NSString *clientId = response[@"bundleIdentifier"];
 
-		return [[[objc_getClass("BKEventDestination") alloc] initWithPid:pid clientID:clientId] autorelease];
+		if (pid && clientId)
+			return [[[objc_getClass("BKEventDestination") alloc] initWithPid:pid clientID:clientId] autorelease];
 	}
 	return %orig;
 }

@@ -43,5 +43,6 @@ static NSString *RAMessagingCTRLUpMessageName = @"ctrlUp";
 static NSString *RAMessagingCTRLDownMessageName = @"ctrlDown";
 static NSString *RAMessagingFrontMostAppInfo = @"frontMostApp";
 static NSString *RAMessagingChangeFrontMostAppToSelf = @"yes_another_message";
+static NSString *RAMessagingBackspaceKeyMessageName = @"the_messages_never_end";
 
 typedef void (^RAMessageCompletionCallback)(BOOL success);
