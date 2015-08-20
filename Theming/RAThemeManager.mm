@@ -35,5 +35,13 @@
 				currentTheme = theme;
 		}
 	}
+	if (!currentTheme)
+	{
+		currentTheme = [allThemes objectForKey:@"com.eljahandandrew.multiplexer.themes.default"];
+		if (!currentTheme && allThemes.allKeys.count > 0)
+		{
+			currentTheme = allThemes[allThemes.allKeys[0]];
+		}
+	}
 }
 @end
