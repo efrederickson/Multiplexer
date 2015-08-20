@@ -80,6 +80,7 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
     startTries++;
     if (startTries > 5)
     {
+        NSLog(@"[ReachApp] maxed out preload attempts for app %@", app.bundleIdentifier);
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:LOCALIZE(@"MULTIPLEXER") message:[NSString stringWithFormat:@"Unable to start app %@", app.displayName] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
         [alert show];
         return;
