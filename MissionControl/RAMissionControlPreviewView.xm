@@ -5,6 +5,7 @@
 @implementation RAMissionControlPreviewView
 -(void) generatePreview
 {
+    [self performSelectorOnMainThread:@selector(setBackgroundColor:) withObject:[[UIColor blackColor] colorWithAlphaComponent:0.5] waitUntilDone:NO];
 	//self.image = [RASnapshotProvider.sharedInstance snapshotForIdentifier:self.application.bundleIdentifier];
     [self performSelectorOnMainThread:@selector(setImage:) withObject:[RASnapshotProvider.sharedInstance snapshotForIdentifier:self.application.bundleIdentifier] waitUntilDone:NO];
 

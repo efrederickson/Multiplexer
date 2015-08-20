@@ -273,9 +273,9 @@
 			[UIView animateWithDuration:duration animations:^{
 				fakeView.frame = UIScreen.mainScreen._interfaceOrientedBounds;
 			} completion:^(BOOL _) {
-				[[[%c(SBUIController) sharedInstance] _appSwitcherController] forceDismissAnimated:NO];
 				[[%c(SBUIController) sharedInstance] restoreContentUpdatingStatusBar:YES];
 				[RAMissionControlManager.sharedInstance showMissionControl:NO];
+				[[[%c(SBUIController) sharedInstance] _appSwitcherController] forceDismissAnimated:NO];
 				[fakeView removeFromSuperview];
 				fakeView = nil;
 			}];
