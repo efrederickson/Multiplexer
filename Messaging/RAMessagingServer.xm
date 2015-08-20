@@ -138,7 +138,10 @@ extern BOOL launchNextOpenIntoWindow;
 		NSString *bundleIdentifier = info[@"bundleIdentifier"];
 		RAWindowBar *window = [RADesktopManager.sharedInstance windowForIdentifier:bundleIdentifier];
 		if (window)
+		{
 			RADesktopManager.sharedInstance.lastUsedWindow = window;
+			CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.frontmostAppDidUpdate"), NULL, (__bridge CFDictionaryRef)@{ @"bundleIdentifier": bundleIdentifier }, YES);
+		}
 	}
 
 	return nil;

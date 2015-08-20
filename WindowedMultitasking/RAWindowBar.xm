@@ -751,6 +751,7 @@ const int bottomSizeViewTag =  987654320;
 -(void) becomeForemostApp
 {
     titleLabel.font = [UIFont boldSystemFontOfSize:20];
+	[self.superview bringSubviewToFront:self];
 }
 
 -(UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event

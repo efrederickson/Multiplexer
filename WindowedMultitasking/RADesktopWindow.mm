@@ -131,7 +131,8 @@
 
 -(void) updateWindowSizeForApplication:(NSString*)identifier
 {
-	for (RAHostedAppView *view in appViews)
+	NSArray *tempArrayToAvoidMutationCrash = [appViews copy];
+	for (RAHostedAppView *view in tempArrayToAvoidMutationCrash)
 	{
 		if ([view.bundleIdentifier isEqual:identifier])
 		{

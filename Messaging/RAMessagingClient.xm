@@ -136,7 +136,8 @@ extern const char *__progname;
 
 -(void) notifySpringBoardOfFrontAppChangeToSelf
 {
-	[serverCenter sendMessageName:RAMessagingChangeFrontMostAppToSelf userInfo:@{ @"bundleIdentifier": NSBundle.mainBundle.bundleIdentifier }];
+	if ([self isBeingHosted] && (self.knownFrontmostApp == nil || [self.knownFrontmostApp isEqualToString:NSBundle.mainBundle.bundleIdentifier] == NO))
+		[serverCenter sendMessageName:RAMessagingChangeFrontMostAppToSelf userInfo:@{ @"bundleIdentifier": NSBundle.mainBundle.bundleIdentifier }];
 }
 
 -(BOOL) shouldUseExternalKeyboard { return _currentData.shouldUseExternalKeyboard; }
@@ -158,6 +159,15 @@ void reloadClientData(CFNotificationCenterRef center,
 	[[RAMessagingClient sharedInstance] requestUpdateFromServer];
 }
 
+void updateFrontmostApp(CFNotificationCenterRef center,
+                    void *observer,
+                    CFStringRef name,
+                    const void *object,
+                    CFDictionaryRef userInfo)
+{
+	RAMessagingClient.sharedInstance.knownFrontmostApp = ((__bridge NSDictionary*)userInfo)[@"bundleIdentifier"];
+}
+
 %ctor
 {
 	IF_SPRINGBOARD {
@@ -167,5 +177,6 @@ void reloadClientData(CFNotificationCenterRef center,
 	{
 		[RAMessagingClient sharedInstance];
     	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &reloadClientData, (__bridge CFStringRef)[NSString stringWithFormat:@"com.efrederickson.reachapp.clientupdate-%@",NSBundle.mainBundle.bundleIdentifier], NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
+    	CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, &updateFrontmostApp, CFSTR("com.efrederickson.reachapp.frontmostAppDidUpdate"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
 	}
 }
