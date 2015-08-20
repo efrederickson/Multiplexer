@@ -38,6 +38,8 @@ const int bottomSizeViewTag =  987654320;
 
 	RAInsetLabel *titleLabel;
 	UIButton *closeButton, *maximizeButton, *minimizeButton, *sizingLockButton;
+
+	UIView *snapShadowView;
 }
 @end
 
@@ -609,6 +611,7 @@ const int bottomSizeViewTag =  987654320;
 	{
 		enableLongPress = YES;
 		[self saveWindowInfo];
+		[self removePotentialSnapShadow];
 
 		if ([RASettings.sharedInstance snapWindows] && [RAWindowSnapDataProvider shouldSnapWindow:self])
 		{
@@ -619,6 +622,7 @@ const int bottomSizeViewTag =  987654320;
 			tapGesture.enabled = YES;
 			return;
 		}
+		return;
 	}
 
 	isSnapped = NO;
@@ -627,6 +631,8 @@ const int bottomSizeViewTag =  987654320;
 
     CGPoint translatedPoint = CGPointMake(initialPoint.x + point.x, initialPoint.y + point.y);
     view.center = translatedPoint;
+
+    [self updatePotentialSnapShadow];
 }
 
 - (void)handlePinch:(UIPinchGestureRecognizer *)gesture
@@ -698,9 +704,38 @@ const int bottomSizeViewTag =  987654320;
 	}
 }
 
+-(void) updatePotentialSnapShadow
+{
+	if (!snapShadowView)
+	{
+		snapShadowView = [[UIView alloc] initWithFrame:self.bounds];
+		snapShadowView.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.5];
+
+		[self.superview insertSubview:snapShadowView belowSubview:self];
+	}
+
+	if ([RAWindowSnapDataProvider shouldSnapWindow:self])
+	{
+		snapShadowView.hidden = NO;
+		snapShadowView.transform = self.transform;
+		snapShadowView.center = [RAWindowSnapDataProvider snapCenterForWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindow:self]];
+	}
+	else
+	{
+		snapShadowView.hidden = YES;
+	}
+}
+
+-(void) removePotentialSnapShadow
+{
+	[snapShadowView removeFromSuperview];
+	snapShadowView = nil;
+}
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
 	isBeingTouched = YES;
+	RADesktopManager.sharedInstance.lastUsedWindow = self;
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event

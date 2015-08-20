@@ -34,5 +34,12 @@ static NSString *RAMessagingUpdateKeyboardContextIdMessageName = @"updateKBConte
 static NSString *RAMessagingRetrieveKeyboardContextIdMessageName = @"getKBContextId";
 static NSString *RAMessagingUpdateKeyboardSizeMessageName = @"updateKBSize";
 static NSString *RAMessagingOpenURLKMessageName = @"openURL";
+static NSString *RAMessagingCTRLLeftMessageName = @"ctrlLeft";
+static NSString *RAMessagingCTRLRightMessageName = @"ctrlRight";
+static NSString *RAMessagingWINLeftMessageName = @"winLeft";
+static NSString *RAMessagingWINRightMessageName = @"winRight";
+static NSString *RAMessagingWINSHIFTPlusMessageName = @"winShiftPlus";
+static NSString *RAMessagingCTRLUpMessageName = @"ctrlUp";
+static NSString *RAMessagingCTRLDownMessageName = @"ctrlDown";
 
 typedef void (^RAMessageCompletionCallback)(BOOL success);

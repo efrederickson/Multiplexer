@@ -62,6 +62,7 @@
 			windowBar.transform = info.transform;
 		} completion:^(BOOL _) {
 			[windowBar updateClientRotation];	
+			RADesktopManager.sharedInstance.lastUsedWindow = windowBar;
 		}];
 	}
 
@@ -307,6 +308,8 @@
     {
     	if (self.rootViewController && [self.rootViewController.view isEqual:subview])
     		continue;
+    	if (subview.hidden)
+    		continue;
         UIView *success = [subview hitTest:[self convertPoint:point toView:subview] withEvent:event];
         if (success)
             return success;
@@ -320,6 +323,8 @@
 	for (UIView *view in self.subviews)
 	{
     	if (self.rootViewController && [self.rootViewController.view isEqual:view])
+    		continue;
+    	if (view.hidden)
     		continue;
 		if (CGRectContainsPoint(view.frame, point) || CGRectContainsPoint(view.frame, [view convertPoint:point fromView:self])) // [self convertPoint:point toView:view]))
 			isContained = YES;

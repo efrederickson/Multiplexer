@@ -27,5 +27,9 @@ enum RAWindowSnapLocation {
 @interface RAWindowSnapDataProvider : NSObject
 +(BOOL) shouldSnapWindow:(RAWindowBar*)bar;
 +(RAWindowSnapLocation) snapLocationForWindow:(RAWindowBar*)windowBar;
++(CGPoint) snapCenterForWindow:(RAWindowBar*)window toLocation:(RAWindowSnapLocation)location;
 +(void) snapWindow:(RAWindowBar*)window toLocation:(RAWindowSnapLocation)location animated:(BOOL)animated;
 @end
+
+RAWindowSnapLocation RAWindowSnapLocationGetLeftOfScreen();
+RAWindowSnapLocation RAWindowSnapLocationGetRightOfScreen();

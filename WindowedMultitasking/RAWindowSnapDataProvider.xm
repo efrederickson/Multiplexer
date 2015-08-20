@@ -101,62 +101,8 @@ try_bottom:
 	return RAWindowSnapLocationNone;
 }
 
-+(void) snapWindow:(RAWindowBar*)window toLocation:(RAWindowSnapLocation)location animated:(BOOL)animated
++(CGPoint) snapCenterForWindow:(RAWindowBar*)window toLocation:(RAWindowSnapLocation)location
 {
-	/*
-	// Convienence values
-	CGFloat width = UIScreen.mainScreen.bounds.size.width;
-	CGFloat height = UIScreen.mainScreen.bounds.size.height;
-
-	// Target frame values
-	CGRect frame = window.frame;
-	CGPoint adjustedOrigin = window.frame.origin;
-
-	switch (location)
-	{
-		case RAWindowSnapLocationLeftTop:
-			adjustedOrigin = CGPointMake(0, 20);
-			break;
-		case RAWindowSnapLocationLeftMiddle:
-			adjustedOrigin.x = 0;
-			break;
-		case RAWindowSnapLocationLeftBottom:
-			adjustedOrigin = CGPointMake(0, height - frame.size.height);
-			break;
-
-		case RAWindowSnapLocationRightTop:
-			adjustedOrigin = CGPointMake(width - frame.size.width, 20);
-			break;
-		case RAWindowSnapLocationRightMiddle:
-			adjustedOrigin.x = width - frame.size.width;
-			break;
-		case RAWindowSnapLocationRightBottom:
-			adjustedOrigin = CGPointMake(width - frame.size.width, height - frame.size.height);
-			break;
-
-		case RAWindowSnapLocationTop:
-			adjustedOrigin.y = 20;
-			break;
-		case RAWindowSnapLocationBottom:
-			adjustedOrigin.y = height - frame.size.height;
-			break;
-
-		case RAWindowSnapLocationInvalid:
-		default:
-			break;
-	}
-
-	if (animated)
-	{
-		[UIView animateWithDuration:0.2 animations:^{
-			window.frame = (CGRect) { adjustedOrigin, frame.size };
-		}];
-	}
-	else
-		window.frame = (CGRect) { adjustedOrigin, frame.size };
-	*/
-
-
 	// Convienence values
 	CGFloat width = UIScreen.mainScreen.bounds.size.width;
 	CGFloat height = UIScreen.mainScreen.bounds.size.height;
@@ -226,6 +172,67 @@ try_bottom:
 		newCenter.x += 20;
 	}
 
+	return newCenter;
+}
+
++(void) snapWindow:(RAWindowBar*)window toLocation:(RAWindowSnapLocation)location animated:(BOOL)animated
+{
+	/*
+	// Convienence values
+	CGFloat width = UIScreen.mainScreen.bounds.size.width;
+	CGFloat height = UIScreen.mainScreen.bounds.size.height;
+
+	// Target frame values
+	CGRect frame = window.frame;
+	CGPoint adjustedOrigin = window.frame.origin;
+
+	switch (location)
+	{
+		case RAWindowSnapLocationLeftTop:
+			adjustedOrigin = CGPointMake(0, 20);
+			break;
+		case RAWindowSnapLocationLeftMiddle:
+			adjustedOrigin.x = 0;
+			break;
+		case RAWindowSnapLocationLeftBottom:
+			adjustedOrigin = CGPointMake(0, height - frame.size.height);
+			break;
+
+		case RAWindowSnapLocationRightTop:
+			adjustedOrigin = CGPointMake(width - frame.size.width, 20);
+			break;
+		case RAWindowSnapLocationRightMiddle:
+			adjustedOrigin.x = width - frame.size.width;
+			break;
+		case RAWindowSnapLocationRightBottom:
+			adjustedOrigin = CGPointMake(width - frame.size.width, height - frame.size.height);
+			break;
+
+		case RAWindowSnapLocationTop:
+			adjustedOrigin.y = 20;
+			break;
+		case RAWindowSnapLocationBottom:
+			adjustedOrigin.y = height - frame.size.height;
+			break;
+
+		case RAWindowSnapLocationInvalid:
+		default:
+			break;
+	}
+
+	if (animated)
+	{
+		[UIView animateWithDuration:0.2 animations:^{
+			window.frame = (CGRect) { adjustedOrigin, frame.size };
+		}];
+	}
+	else
+		window.frame = (CGRect) { adjustedOrigin, frame.size };
+	*/
+
+
+	CGPoint newCenter = [RAWindowSnapDataProvider snapCenterForWindow:window toLocation:location];
+
 	if (animated)
 	{
 		[UIView animateWithDuration:0.2 animations:^{
@@ -236,3 +243,36 @@ try_bottom:
 		window.center = newCenter;
 }
 @end
+
+RAWindowSnapLocation RAWindowSnapLocationGetLeftOfScreen()
+{
+	switch (UIApplication.sharedApplication.statusBarOrientation)
+	{
+		case UIInterfaceOrientationPortrait:
+			return RAWindowSnapLocationLeft;
+		case UIInterfaceOrientationLandscapeRight:
+			return RAWindowSnapLocationTop;
+		case UIInterfaceOrientationLandscapeLeft:
+			return RAWindowSnapLocationBottom;
+		case UIInterfaceOrientationPortraitUpsideDown:
+			return RAWindowSnapLocationRight;
+	}
+	return RAWindowSnapLocationLeft;
+}
+
+RAWindowSnapLocation RAWindowSnapLocationGetRightOfScreen()
+{
+	switch (UIApplication.sharedApplication.statusBarOrientation)
+	{
+		case UIInterfaceOrientationPortrait:
+			return RAWindowSnapLocationRight;
+		case UIInterfaceOrientationLandscapeRight:
+			return RAWindowSnapLocationBottom;
+		case UIInterfaceOrientationLandscapeLeft:
+			return RAWindowSnapLocationTop;
+		case UIInterfaceOrientationPortraitUpsideDown:
+			return RAWindowSnapLocationLeft;
+	}
+	return RAWindowSnapLocationRight;
+}
+

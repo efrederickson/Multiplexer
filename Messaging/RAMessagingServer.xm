@@ -10,6 +10,7 @@
 #import "RASettings.h"
 #import "RAAppKiller.h"
 #import "RADesktopManager.h"
+#import "RAWindowSnapDataProvider.h"
 
 extern BOOL launchNextOpenIntoWindow;
 
@@ -53,6 +54,14 @@ extern BOOL launchNextOpenIntoWindow;
 
     [messagingCenter registerForMessageName:RAMessagingUpdateKeyboardSizeMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
     [messagingCenter registerForMessageName:RAMessagingOpenURLKMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
+
+    [messagingCenter registerForMessageName:RAMessagingCTRLLeftMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingCTRLRightMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingWINLeftMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingWINRightMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingCTRLUpMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingWINSHIFTPlusMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingCTRLDownMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
 }
 
 -(NSDictionary*) handleMessageNamed:(NSString*)identifier userInfo:(NSDictionary*)info
@@ -106,6 +115,47 @@ extern BOOL launchNextOpenIntoWindow;
 	}
 
 	return nil;
+}
+
+-(void) handleKeyboardEvent:(NSString*)identifier userInfo:(NSDictionary*)info
+{
+	RAWindowBar *window = RADesktopManager.sharedInstance.lastUsedWindow;
+	if (!window)
+		return;
+	if ([identifier isEqual:RAMessagingCTRLLeftMessageName])
+	{
+		[RAWindowSnapDataProvider snapWindow:window toLocation:RAWindowSnapLocationGetLeftOfScreen() animated:YES];
+	}
+	else if ([identifier isEqual:RAMessagingCTRLRightMessageName])
+	{
+		[RAWindowSnapDataProvider snapWindow:window toLocation:RAWindowSnapLocationGetRightOfScreen() animated:YES];
+	}
+	else if ([identifier isEqual:RAMessagingCTRLUpMessageName])
+	{
+		[window maximize];
+	}
+	else if ([identifier isEqual:RAMessagingCTRLDownMessageName])
+	{
+		[window close];
+	}
+	else if ([identifier isEqual:RAMessagingWINLeftMessageName])
+	{
+		int newIndex = RADesktopManager.sharedInstance.currentDesktopIndex - 1;
+		BOOL isValid = newIndex >= 0 && newIndex <= RADesktopManager.sharedInstance.numberOfDesktops;
+		if (isValid)
+			[RADesktopManager.sharedInstance switchToDesktop:newIndex];
+	}
+	else if ([identifier isEqual:RAMessagingWINRightMessageName])
+	{
+		int newIndex = RADesktopManager.sharedInstance.currentDesktopIndex + 1;
+		BOOL isValid = newIndex >= 0 && newIndex < RADesktopManager.sharedInstance.numberOfDesktops;
+		if (isValid)
+			[RADesktopManager.sharedInstance switchToDesktop:newIndex];
+	}
+	else if ([identifier isEqual:RAMessagingWINSHIFTPlusMessageName])
+	{
+		[RADesktopManager.sharedInstance addDesktop:YES];
+	}
 }
 
 -(void) alertUser:(NSString*)description
