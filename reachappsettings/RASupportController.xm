@@ -127,6 +127,7 @@ This code thanks: \n\
 ForceReach, Reference, MessageBox \n\
 Previous research done by @b3ll and @freerunnering \n\
 Pastie 8684110 \n\
+OS Experience & Lamo\n\
 \n\
 A special thanks goes to those who contributed ideas, feature enhancements, bug reports, and who showed support. \n\
 \n\
