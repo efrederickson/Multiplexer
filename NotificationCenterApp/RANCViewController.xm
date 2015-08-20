@@ -116,19 +116,22 @@ int rotationDegsForOrientation(int o)
 
 - (void)hostDidDismiss
 {
-	//if ([super respondsToSelector:@selector(hostDidDismiss)])
-	//	[super performSelector:@selector(hostDidDismiss)];
-
-	appView.hideStatusBar = NO;
-	[appView unloadApp];
+	if (appView.isCurrentlyHosting)
+	{
+		appView.hideStatusBar = NO;
+		[appView unloadApp];	
+	}
 }
 
 -(void) viewDidDisappear:(BOOL)animated
 {
 	[super viewDidDisappear:animated];
 
-	appView.hideStatusBar = NO;
-	[appView unloadApp];
+	if (appView.isCurrentlyHosting)
+	{
+		appView.hideStatusBar = NO;
+		[appView unloadApp];	
+	}
 }
 
 -(RAHostedAppView*) hostedApp { return appView; }
