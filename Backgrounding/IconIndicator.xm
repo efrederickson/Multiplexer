@@ -4,6 +4,7 @@
 #import <libstatusbar/LSStatusBarItem.h>
 #import <applist/ALApplicationList.h>
 #import "ColorBadges.h"
+#import "Anemone.h"
 
 NSMutableDictionary *indicatorStateDict = [NSMutableDictionary dictionary];
 #define SET_INFO_(x, y)    indicatorStateDict[x] = [NSNumber numberWithInt:y]
@@ -84,6 +85,11 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 
 		// Note that my macros for this deal with the situation where ColorBadges is not installed
 		badge.backgroundColor = GET_COLORBADGES_COLOR(self.icon, THEMED(backgroundingIndicatorBackgroundColor));
+		if (HAS_ANEMONE)
+		{
+			badge.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"SBBadgeBG.png"]];
+		}
+
 		//badge.textColor = GET_ACCEPTABLE_TEXT_COLOR(badge.backgroundColor, THEMED(backgroundingIndicatorTextColor));
 		if (HAS_COLORBADGES && [%c(ColorBadges) isEnabled])
 		{
@@ -120,7 +126,9 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 			}
 		}
 		else
+		{
 			badge.textColor = THEMED(backgroundingIndicatorTextColor);
+		}
 
 		[self addSubview:badge];
 
