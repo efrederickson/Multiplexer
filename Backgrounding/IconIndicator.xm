@@ -3,6 +3,7 @@
 #import "RAIconBadgeView.h"
 #import <libstatusbar/LSStatusBarItem.h>
 #import <applist/ALApplicationList.h>
+#import "ColorBadges.h"
 
 NSMutableDictionary *indicatorStateDict = [NSMutableDictionary dictionary];
 #define SET_INFO_(x, y)    indicatorStateDict[x] = [NSNumber numberWithInt:y]
@@ -75,11 +76,52 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 		badge = [[RAIconBadgeView alloc] init];
 		badge.tag = 9962;
 
-		badge.textColor = THEMED(backgroundingIndicatorTextColor);
+		//badge.textColor = THEMED(backgroundingIndicatorTextColor);
 		badge.textAlignment = NSTextAlignmentCenter;
 		badge.clipsToBounds = YES;
 		badge.layer.cornerRadius = 12;
-		badge.backgroundColor = THEMED(backgroundingIndicatorBackgroundColor);
+		//badge.backgroundColor = THEMED(backgroundingIndicatorBackgroundColor);
+
+		// Note that my macros for this deal with the situation where ColorBadges is not installed
+		badge.backgroundColor = GET_COLORBADGES_COLOR(self.icon, THEMED(backgroundingIndicatorBackgroundColor));
+		//badge.textColor = GET_ACCEPTABLE_TEXT_COLOR(badge.backgroundColor, THEMED(backgroundingIndicatorTextColor));
+		if (HAS_COLORBADGES)
+		{
+			int bgColor = RGBFromUIColor(badge.backgroundColor);
+			int txtColor = RGBFromUIColor(THEMED(backgroundingIndicatorTextColor));
+
+			if ([%c(ColorBadges) isDarkColor:bgColor])
+			{
+				// dark color
+				if ([%c(ColorBadges) isDarkColor:txtColor])
+				{
+					// dark + dark
+					badge.textColor = [UIColor whiteColor];
+				}
+				else
+				{
+					// dark + light
+					badge.textColor = THEMED(backgroundingIndicatorTextColor);
+				}
+			}
+			else
+			{
+				// light color
+				if ([%c(ColorBadges) isDarkColor:txtColor])
+				{
+					// light + dark
+					badge.textColor = THEMED(backgroundingIndicatorTextColor);
+				}
+				else
+				{
+					//light + light
+					badge.textColor = [UIColor blackColor];
+				}
+			}
+		}
+		else
+			badge.textColor = THEMED(backgroundingIndicatorTextColor);
+
 		[self addSubview:badge];
 
 		CGPoint overhang = [%c(SBIconBadgeView) _overhang];
