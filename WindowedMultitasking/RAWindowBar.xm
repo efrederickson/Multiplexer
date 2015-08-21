@@ -706,6 +706,9 @@ const int bottomSizeViewTag =  987654320;
 
 -(void) updatePotentialSnapShadow
 {
+	if (![RASettings.sharedInstance snapWindows])
+		return;
+		
 	if (!snapShadowView)
 	{
 		snapShadowView = [[UIView alloc] initWithFrame:self.bounds];
