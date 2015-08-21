@@ -85,7 +85,7 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 		// Note that my macros for this deal with the situation where ColorBadges is not installed
 		badge.backgroundColor = GET_COLORBADGES_COLOR(self.icon, THEMED(backgroundingIndicatorBackgroundColor));
 		//badge.textColor = GET_ACCEPTABLE_TEXT_COLOR(badge.backgroundColor, THEMED(backgroundingIndicatorTextColor));
-		if (HAS_COLORBADGES)
+		if (HAS_COLORBADGES && [%c(ColorBadges) isEnabled])
 		{
 			int bgColor = RGBFromUIColor(badge.backgroundColor);
 			int txtColor = RGBFromUIColor(THEMED(backgroundingIndicatorTextColor));
