@@ -67,7 +67,7 @@
 	}*/
 
 	// DESKTOP
-	CGFloat y = 27;
+	CGFloat y = 20;
 
 	if (desktopScrollView)
 	{
@@ -83,7 +83,7 @@
 
 		y = y + desktopLabel.frame.size.height;
 
-		desktopScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y, self.frame.size.width, height * 1.2)];
+		desktopScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y, self.frame.size.width, height * 1.15)];
 		desktopScrollView.backgroundColor = [THEMED(missionControlScrollViewBackgroundColor) colorWithAlphaComponent:THEMED(missionControlScrollViewOpacity)];
 		desktopScrollView.pagingEnabled = [RASettings.sharedInstance missionControlPagingEnabled];
 
@@ -94,7 +94,7 @@
 	int desktopIndex = 0;
 	for (RADesktopWindow *desktop in RADesktopManager.sharedInstance.availableDesktops)
 	{
-		RAMissionControlPreviewView *preview = [[RAMissionControlPreviewView alloc] initWithFrame:CGRectMake(x, 20, width, height)];
+		RAMissionControlPreviewView *preview = [[RAMissionControlPreviewView alloc] initWithFrame:CGRectMake(x, (desktopScrollView.frame.size.height - height) / 2.0, width, height)];
 		x += panePadding + preview.frame.size.width;
 
 		[desktopScrollView addSubview:preview];
@@ -142,7 +142,7 @@
 	[desktopScrollView addSubview:newDesktopButton];
 	x += 20 + newDesktopButton.frame.size.width;
 
-	desktopScrollView.contentSize = CGSizeMake(MAX(x, self.frame.size.width + 1), height * 1.2); // make slightly scrollable
+	desktopScrollView.contentSize = CGSizeMake(MAX(x, self.frame.size.width + 1), height * 1.15); // make slightly scrollable
 
 	// We do this AFTER rendering the desktop
 	//[RADesktopManager.sharedInstance hideDesktop];
@@ -195,7 +195,7 @@
 		[otherKillAllButton addTarget:self action:@selector(killAllWindowed) forControlEvents:UIControlEventTouchUpInside];
 		[self addSubview:otherKillAllButton];
 
-		windowedAppScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + windowedLabel.frame.size.height, self.frame.size.width, height * 1.2)];
+		windowedAppScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + windowedLabel.frame.size.height, self.frame.size.width, height * 1.15)];
 		windowedAppScrollView.backgroundColor = [THEMED(missionControlScrollViewBackgroundColor) colorWithAlphaComponent:THEMED(missionControlScrollViewOpacity)];
 		windowedAppScrollView.pagingEnabled = [RASettings.sharedInstance missionControlPagingEnabled];
 
@@ -237,7 +237,7 @@
 		[windowedAppScrollView addSubview:emptyLabel];
 	}
 
-	windowedAppScrollView.contentSize = CGSizeMake(MAX(x, self.frame.size.width + (empty ? 0 : 1)), height * 1.2); // make slightly scrollable
+	windowedAppScrollView.contentSize = CGSizeMake(MAX(x, self.frame.size.width + (empty ? 0 : 1)), height * 1.15); // make slightly scrollable
 }
 
 -(void) reloadOtherAppsSection
@@ -265,7 +265,7 @@
 		[otherKillAllButton addTarget:self action:@selector(killAllOther) forControlEvents:UIControlEventTouchUpInside];
 		[self addSubview:otherKillAllButton];
 
-		otherRunningAppsScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + otherLabel.frame.size.height, self.frame.size.width, height * 1.2)];
+		otherRunningAppsScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + otherLabel.frame.size.height, self.frame.size.width, height * 1.15)];
 		otherRunningAppsScrollView.backgroundColor = [THEMED(missionControlScrollViewBackgroundColor) colorWithAlphaComponent:THEMED(missionControlScrollViewOpacity)];
 		otherRunningAppsScrollView.pagingEnabled = [RASettings.sharedInstance missionControlPagingEnabled];
 
@@ -305,7 +305,7 @@
 		[otherRunningAppsScrollView addSubview:emptyLabel];
 	}
 
-	otherRunningAppsScrollView.contentSize = CGSizeMake(MAX(x, self.frame.size.width + (empty ? 0 : 1)), height * 1.2); // make slightly scrollable
+	otherRunningAppsScrollView.contentSize = CGSizeMake(MAX(x, self.frame.size.width + (empty ? 0 : 1)), height * 1.15); // make slightly scrollable
 }
 
 -(void) createNewDesktop
