@@ -81,6 +81,7 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 		badge.textAlignment = NSTextAlignmentCenter;
 		badge.clipsToBounds = YES;
 		badge.layer.cornerRadius = 12;
+		badge.font = [%c(SBIconBadgeView) _textFont];
 		//badge.backgroundColor = THEMED(backgroundingIndicatorBackgroundColor);
 
 		// Note that my macros for this deal with the situation where ColorBadges is not installed
@@ -129,11 +130,13 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 		{
 			badge.textColor = THEMED(backgroundingIndicatorTextColor);
 		}
+		UIImage *bgImage = [%c(SBIconBadgeView) _checkoutBackgroundImage];
+		//badge.backgroundColor = [UIColor colorWithPatternImage:[%c(SBIconBadgeView) _checkoutBackgroundImage]];
 
 		[self addSubview:badge];
 
 		CGPoint overhang = [%c(SBIconBadgeView) _overhang];
-		badge.frame = CGRectMake(-overhang.x, -overhang.y, badge.frame.size.width, badge.frame.size.height);
+		badge.frame = CGRectMake(-overhang.x, -overhang.y, bgImage.size.width, bgImage.size.height);
 	}
 
 	[badge performSelectorOnMainThread:@selector(setText:) withObject:text waitUntilDone:YES];
