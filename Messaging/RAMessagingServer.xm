@@ -56,17 +56,17 @@ extern BOOL launchNextOpenIntoWindow;
     [messagingCenter registerForMessageName:RAMessagingUpdateKeyboardSizeMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
     [messagingCenter registerForMessageName:RAMessagingOpenURLKMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
 
-    [messagingCenter registerForMessageName:RAMessagingFrontMostAppInfo target:self selector:@selector(handleMessageNamed:userInfo:)];
-    [messagingCenter registerForMessageName:RAMessagingChangeFrontMostAppToSelf target:self selector:@selector(handleMessageNamed:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingGetFrontMostAppInfoMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingChangeFrontMostAppMessageName target:self selector:@selector(handleMessageNamed:userInfo:)];
 
-    [messagingCenter registerForMessageName:RAMessagingCTRLLeftMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
-    [messagingCenter registerForMessageName:RAMessagingCTRLRightMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
-    [messagingCenter registerForMessageName:RAMessagingWINLeftMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
-    [messagingCenter registerForMessageName:RAMessagingWINRightMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
-    [messagingCenter registerForMessageName:RAMessagingCTRLUpMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
-    [messagingCenter registerForMessageName:RAMessagingWINSHIFTPlusMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
-    [messagingCenter registerForMessageName:RAMessagingCTRLDownMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
-    [messagingCenter registerForMessageName:RAMessagingBackspaceKeyMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingSnapFrontMostWindowLeftMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingSnapFrontMostWindowRightMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingGoToDesktopOnTheLeftMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingGoToDesktopOnTheRightMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingMaximizeAppMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingAddNewDesktopMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingCloseAppMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
+    [messagingCenter registerForMessageName:RAMessagingDetachCurrentAppMessageName target:self selector:@selector(handleKeyboardEvent:userInfo:)];
 }
 
 -(NSDictionary*) handleMessageNamed:(NSString*)identifier userInfo:(NSDictionary*)info
@@ -118,7 +118,7 @@ extern BOOL launchNextOpenIntoWindow;
 		BOOL success = [UIApplication.sharedApplication openURL:url];
 		return @{ @"success": @(success) };
 	}
-	else if ([identifier isEqual:RAMessagingFrontMostAppInfo])
+	else if ([identifier isEqual:RAMessagingGetFrontMostAppInfoMessageName])
 	{
 		if (UIApplication.sharedApplication._accessibilityFrontMostApplication)
 			return nil;
@@ -133,7 +133,7 @@ extern BOOL launchNextOpenIntoWindow;
 				};
 		}
 	}
-	else if ([identifier isEqual:RAMessagingChangeFrontMostAppToSelf])
+	else if ([identifier isEqual:RAMessagingChangeFrontMostAppMessageName])
 	{
 		NSString *bundleIdentifier = info[@"bundleIdentifier"];
 		RAWindowBar *window = [RADesktopManager.sharedInstance windowForIdentifier:bundleIdentifier];
@@ -149,7 +149,7 @@ extern BOOL launchNextOpenIntoWindow;
 
 -(void) handleKeyboardEvent:(NSString*)identifier userInfo:(NSDictionary*)info
 {
-	if ([identifier isEqual:RAMessagingBackspaceKeyMessageName])
+	if ([identifier isEqual:RAMessagingDetachCurrentAppMessageName])
 	{
         SBApplication *topApp = [[UIApplication sharedApplication] _accessibilityFrontMostApplication];
 
@@ -173,43 +173,43 @@ extern BOOL launchNextOpenIntoWindow;
 		    }];
         }
 	}
-
-	RAWindowBar *window = RADesktopManager.sharedInstance.lastUsedWindow;
-	if (!window)
-		return;
-	if ([identifier isEqual:RAMessagingCTRLLeftMessageName])
-	{
-		[RAWindowSnapDataProvider snapWindow:window toLocation:RAWindowSnapLocationGetLeftOfScreen() animated:YES];
-	}
-	else if ([identifier isEqual:RAMessagingCTRLRightMessageName])
-	{
-		[RAWindowSnapDataProvider snapWindow:window toLocation:RAWindowSnapLocationGetRightOfScreen() animated:YES];
-	}
-	else if ([identifier isEqual:RAMessagingCTRLUpMessageName])
-	{
-		[window maximize];
-	}
-	else if ([identifier isEqual:RAMessagingCTRLDownMessageName])
-	{
-		[window close];
-	}
-	else if ([identifier isEqual:RAMessagingWINLeftMessageName])
+	else if ([identifier isEqual:RAMessagingGoToDesktopOnTheLeftMessageName])
 	{
 		int newIndex = RADesktopManager.sharedInstance.currentDesktopIndex - 1;
 		BOOL isValid = newIndex >= 0 && newIndex <= RADesktopManager.sharedInstance.numberOfDesktops;
 		if (isValid)
 			[RADesktopManager.sharedInstance switchToDesktop:newIndex];
 	}
-	else if ([identifier isEqual:RAMessagingWINRightMessageName])
+	else if ([identifier isEqual:RAMessagingGoToDesktopOnTheRightMessageName])
 	{
 		int newIndex = RADesktopManager.sharedInstance.currentDesktopIndex + 1;
 		BOOL isValid = newIndex >= 0 && newIndex < RADesktopManager.sharedInstance.numberOfDesktops;
 		if (isValid)
 			[RADesktopManager.sharedInstance switchToDesktop:newIndex];
 	}
-	else if ([identifier isEqual:RAMessagingWINSHIFTPlusMessageName])
+	else if ([identifier isEqual:RAMessagingAddNewDesktopMessageName])
 	{
 		[RADesktopManager.sharedInstance addDesktop:YES];
+	}
+
+	RAWindowBar *window = RADesktopManager.sharedInstance.lastUsedWindow;
+	if (!window)
+		return;
+	if ([identifier isEqual:RAMessagingSnapFrontMostWindowLeftMessageName])
+	{
+		[RAWindowSnapDataProvider snapWindow:window toLocation:RAWindowSnapLocationGetLeftOfScreen() animated:YES];
+	}
+	else if ([identifier isEqual:RAMessagingSnapFrontMostWindowRightMessageName])
+	{
+		[RAWindowSnapDataProvider snapWindow:window toLocation:RAWindowSnapLocationGetRightOfScreen() animated:YES];
+	}
+	else if ([identifier isEqual:RAMessagingMaximizeAppMessageName])
+	{
+		[window maximize];
+	}
+	else if ([identifier isEqual:RAMessagingCloseAppMessageName])
+	{
+		[window close];
 	}
 }
 

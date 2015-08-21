@@ -137,7 +137,7 @@ extern const char *__progname;
 -(void) notifySpringBoardOfFrontAppChangeToSelf
 {
 	if ([self isBeingHosted] && (self.knownFrontmostApp == nil || [self.knownFrontmostApp isEqualToString:NSBundle.mainBundle.bundleIdentifier] == NO))
-		[serverCenter sendMessageName:RAMessagingChangeFrontMostAppToSelf userInfo:@{ @"bundleIdentifier": NSBundle.mainBundle.bundleIdentifier }];
+		[serverCenter sendMessageName:RAMessagingChangeFrontMostAppMessageName userInfo:@{ @"bundleIdentifier": NSBundle.mainBundle.bundleIdentifier }];
 }
 
 -(BOOL) shouldUseExternalKeyboard { return _currentData.shouldUseExternalKeyboard; }

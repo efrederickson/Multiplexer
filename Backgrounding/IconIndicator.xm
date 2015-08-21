@@ -86,10 +86,6 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 
 		// Note that my macros for this deal with the situation where ColorBadges is not installed
 		badge.backgroundColor = GET_COLORBADGES_COLOR(self.icon, THEMED(backgroundingIndicatorBackgroundColor));
-		if (HAS_ANEMONE)
-		{
-			badge.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"SBBadgeBG.png"]];
-		}
 
 		//badge.textColor = GET_ACCEPTABLE_TEXT_COLOR(badge.backgroundColor, THEMED(backgroundingIndicatorTextColor));
 		if (HAS_COLORBADGES && [%c(ColorBadges) isEnabled])
@@ -131,6 +127,11 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 			badge.textColor = THEMED(backgroundingIndicatorTextColor);
 		}
 		UIImage *bgImage = [%c(SBIconBadgeView) _checkoutBackgroundImage];
+		if (HAS_ANEMONE)
+		{
+			//badge.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"SBBadgeBG.png"]];
+			badge.backgroundColor = [UIColor colorWithPatternImage:bgImage];
+		}
 		//badge.backgroundColor = [UIColor colorWithPatternImage:[%c(SBIconBadgeView) _checkoutBackgroundImage]];
 
 		[self addSubview:badge];

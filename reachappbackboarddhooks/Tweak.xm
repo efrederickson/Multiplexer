@@ -11,7 +11,8 @@
 #define SHIFT_KEY2 225
 #define ALT_KEY 226 
 #define ALT_KEY2 230
-
+#define D_KEY 7
+#define P_KEY 19
 #define BKSPCE_KEY 42
 #define ARROW_RIGHT_KEY 79
 #define ARROW_LEFT_KEY 80
@@ -26,6 +27,9 @@ BOOL isShiftKeyDown = NO;
 BOOL isAltKeyDown = NO;
 
 CPDistributedMessagingCenter *center;
+
+// TODO: Ensure all keyboard commands do not conflict with
+// https://support.apple.com/en-us/HT201236
 
 void handle_event (void* target, void* refcon, IOHIDServiceRef service, IOHIDEventRef event) 
 {
@@ -44,46 +48,43 @@ void handle_event (void* target, void* refcon, IOHIDServiceRef service, IOHIDEve
 			isShiftKeyDown = isDown;
 		else if (key == ALT_KEY || key == ALT_KEY2)
 			isAltKeyDown = isDown;
-		else if (isDown && isControlKeyDown && isAltKeyDown)
+		else if (isDown && isWindowsKeyDown && isControlKeyDown)
 		{
-			// Snap
 			if (key == ARROW_LEFT_KEY)
 			{
-				[center sendMessageName:RAMessagingCTRLLeftMessageName userInfo:nil];
+				[center sendMessageName:RAMessagingGoToDesktopOnTheLeftMessageName userInfo:nil];
 			}
 			else if (key == ARROW_RIGHT_KEY)
 			{
-				[center sendMessageName:RAMessagingCTRLRightMessageName userInfo:nil];
+				[center sendMessageName:RAMessagingGoToDesktopOnTheRightMessageName userInfo:nil];
+			}
+			else if (key == BKSPCE_KEY)
+			{
+				[center sendMessageName:RAMessagingDetachCurrentAppMessageName userInfo:nil];
+			}
+			else if (key == D_KEY || key == EQUALS_OR_PLUS_KEY)
+			{
+
+				[center sendMessageName:RAMessagingAddNewDesktopMessageName userInfo:nil];
+			}
+		}
+		else if (isDown && isWindowsKeyDown && isAltKeyDown)
+		{
+			if (key == ARROW_LEFT_KEY)
+			{
+				[center sendMessageName:RAMessagingSnapFrontMostWindowLeftMessageName userInfo:nil];
+			}
+			else if (key == ARROW_RIGHT_KEY)
+			{
+				[center sendMessageName:RAMessagingSnapFrontMostWindowRightMessageName userInfo:nil];
 			}
 			else if (key == ARROW_UP_KEY)
 			{
-				[center sendMessageName:RAMessagingCTRLUpMessageName userInfo:nil];
+				[center sendMessageName:RAMessagingMaximizeAppMessageName userInfo:nil];
 			}
 			else if (key == ARROW_DOWN_KEY)
 			{
-				[center sendMessageName:RAMessagingCTRLDownMessageName userInfo:nil];	
-			}
-		}
-		else if (isDown && isControlKeyDown)
-		{
-			if (key == BKSPCE_KEY)
-			{
-				[center sendMessageName:RAMessagingBackspaceKeyMessageName userInfo:nil];
-			}
-		}
-		else if (isDown && isWindowsKeyDown)
-		{
-			if (key == ARROW_LEFT_KEY)
-			{
-				[center sendMessageName:RAMessagingWINLeftMessageName userInfo:nil];
-			}
-			else if (key == ARROW_RIGHT_KEY)
-			{
-				[center sendMessageName:RAMessagingWINRightMessageName userInfo:nil];
-			}
-			else if (isShiftKeyDown && key == EQUALS_OR_PLUS_KEY)
-			{
-				[center sendMessageName:RAMessagingWINSHIFTPlusMessageName userInfo:nil];	
+				[center sendMessageName:RAMessagingCloseAppMessageName userInfo:nil];	
 			}
 		}
 	}
@@ -105,7 +106,7 @@ Boolean hook$IOHIDEventSystemOpen(IOHIDEventSystemRef system, IOHIDEventSystemCa
 
 -(id) destinationForFocusedEventWithDisplay:(__unsafe_unretained id)arg1 
 {
-	NSDictionary *response = [center sendMessageAndReceiveReplyName:RAMessagingFrontMostAppInfo userInfo:nil];
+	NSDictionary *response = [center sendMessageAndReceiveReplyName:RAMessagingGetFrontMostAppInfoMessageName userInfo:nil];
 
 	if (response)
 	{
