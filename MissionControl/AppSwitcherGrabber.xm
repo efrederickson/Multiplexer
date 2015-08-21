@@ -29,6 +29,10 @@
 {
 	if ([[[%c(SBUIController) sharedInstance] switcherWindow] isKeyWindow] && CGRectContainsPoint([[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999].frame, arg1))
 		return;
+
+	if ([RASettings.sharedInstance missionControlEnabled] && self.isAppSwitcherShowing)
+		return;
+
 	%orig;
 }
 
@@ -62,8 +66,31 @@
 	}
 	return s;
 }
-%end
 
+- (void)_hideNotificationsGestureCancelled
+{
+	%orig;
+	RAMissionControlManager.sharedInstance.inhibitDismissalGesture = NO;
+}
+
+- (void)_hideNotificationsGestureEndedWithCompletionType:(long long)arg1 velocity:(CGPoint)arg2
+{
+	%orig;
+	RAMissionControlManager.sharedInstance.inhibitDismissalGesture = NO;
+}
+
+- (void)_hideNotificationsGestureBegan:(CGFloat)arg1
+{
+	RAMissionControlManager.sharedInstance.inhibitDismissalGesture = YES;
+	%orig;
+}
+
+- (void)handleHideNotificationsSystemGesture:(unsafe_id)arg1
+{
+	RAMissionControlManager.sharedInstance.inhibitDismissalGesture = YES;
+	%orig;
+}
+%end
 
 @interface SBAppSwitcherController ()
 -(UIView*) view;

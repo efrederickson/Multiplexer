@@ -23,6 +23,7 @@ extern BOOL overrideCC;
 	BOOL lastStatusBarHidden, updateStatusBar;
 	__block UIView *originalAppView;
 	__block CGRect originalAppFrame;
+	BOOL hasMoved;
 }
 @end
 
@@ -67,6 +68,8 @@ CGRect swappedForOrientation2(CGRect in)
 {
 	SHARED_INSTANCE2(RAMissionControlManager, 
 		sharedInstance->originalAppView = nil;
+		sharedInstance.inhibitDismissalGesture = NO;
+		sharedInstance->hasMoved = NO;
 	);
 }
 
@@ -230,7 +233,7 @@ CGRect swappedForOrientation2(CGRect in)
 
 -(BOOL) RAGestureCallback_canHandle:(CGPoint)point velocity:(CGPoint)velocity
 {
-	return self.isShowingMissionControl;
+	return self.isShowingMissionControl && self.inhibitDismissalGesture == NO;
 }
 
 -(RAGestureCallbackResult) RAGestureCallback_handle:(UIGestureRecognizerState)state withPoint:(CGPoint)location velocity:(CGPoint)velocity forEdge:(UIRectEdge)edge
@@ -240,6 +243,7 @@ CGRect swappedForOrientation2(CGRect in)
 
 	if (state == UIGestureRecognizerStateEnded)
 	{
+		hasMoved = NO;
 		overrideCC = NO;
 		if (window.frame.origin.y + window.frame.size.height + velocity.y < UIScreen.mainScreen._interfaceOrientedBounds.size.height / 2)
 		{
@@ -269,6 +273,7 @@ CGRect swappedForOrientation2(CGRect in)
 	}
 	else if (state == UIGestureRecognizerStateBegan)
 	{
+		hasMoved = YES;
 		overrideCC = YES;
 		initialCenter = window.center;
 		if (originalAppView)
@@ -284,6 +289,15 @@ CGRect swappedForOrientation2(CGRect in)
 }
 
 -(RAMissionControlWindow*) missionControlWindow { if (!window) [self createWindow]; return window; }
+
+-(void) setInhibitDismissalGesture:(BOOL)value
+{
+	_inhibitDismissalGesture = value;
+	if (value && hasMoved)
+	{
+		[self RAGestureCallback_handle:UIGestureRecognizerStateEnded withPoint:CGPointZero velocity:CGPointZero forEdge:UIRectEdgeBottom];
+	}
+}
 @end
 
 %hook SBLockStateAggregator
