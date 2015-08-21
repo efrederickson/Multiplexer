@@ -77,12 +77,9 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 		badge = [[RAIconBadgeView alloc] init];
 		badge.tag = 9962;
 
-		//badge.textColor = THEMED(backgroundingIndicatorTextColor);
 		badge.textAlignment = NSTextAlignmentCenter;
 		badge.clipsToBounds = YES;
-		badge.layer.cornerRadius = 12;
 		badge.font = [%c(SBIconBadgeView) _textFont];
-		//badge.backgroundColor = THEMED(backgroundingIndicatorBackgroundColor);
 
 		// Note that my macros for this deal with the situation where ColorBadges is not installed
 		badge.backgroundColor = GET_COLORBADGES_COLOR(self.icon, THEMED(backgroundingIndicatorBackgroundColor));
@@ -127,21 +124,37 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 			badge.textColor = THEMED(backgroundingIndicatorTextColor);
 		}
 		UIImage *bgImage = [%c(SBIconBadgeView) _checkoutBackgroundImage];
-		if (HAS_ANEMONE)
+		if (HAS_ANEMONE && [[[%c(ANEMSettingsManager) sharedManager] themeSettings] containsObject:@"ModernBadges"])
 		{
-			//badge.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"SBBadgeBG.png"]];
 			badge.backgroundColor = [UIColor colorWithPatternImage:bgImage];
 		}
-		//badge.backgroundColor = [UIColor colorWithPatternImage:[%c(SBIconBadgeView) _checkoutBackgroundImage]];
 
 		[self addSubview:badge];
 
 		CGPoint overhang = [%c(SBIconBadgeView) _overhang];
 		badge.frame = CGRectMake(-overhang.x, -overhang.y, bgImage.size.width, bgImage.size.height);
+		badge.layer.cornerRadius = MAX(badge.frame.size.width, badge.frame.size.height) / 2.0;
 	}
 
-	[badge performSelectorOnMainThread:@selector(setText:) withObject:text waitUntilDone:YES];
-	//badge.text = text;
+	if (HAS_ANEMONE && [[[%c(ANEMSettingsManager) sharedManager] themeSettings] containsObject:@"ModernBadges"])
+	{
+		UIImageView *textImageView = (UIImageView*)[badge viewWithTag:42];
+		if (!textImageView)
+		{
+			CGFloat padding = [objc_getClass("SBIconBadgeView") _textPadding];
+			
+			textImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, badge.frame.size.width - padding, badge.frame.size.height - padding)];
+			textImageView.center = CGPointMake((badge.frame.size.width / 2.0) + [%c(SBIconBadgeView) _textOffset].x, (badge.frame.size.height / 2.0) + [%c(SBIconBadgeView) _textOffset].y);
+			textImageView.tag = 42;
+			[badge addSubview:textImageView];
+		}
+
+		UIImage *textImage = [%c(SBIconBadgeView) _checkoutImageForText:text highlighted:NO];
+		textImageView.image = textImage;
+	}
+	else
+		[badge performSelectorOnMainThread:@selector(setText:) withObject:text waitUntilDone:YES];
+
 	SET_INFO(info);
 }
 

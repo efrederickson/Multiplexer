@@ -7,15 +7,14 @@
 {
 	[super setText:text];
 
-	//CGFloat height = self.frame.size.height;
-	[self sizeToFit];
-	CGRect f = self.frame;
-	f.size.width += [objc_getClass("SBIconBadgeView") _textPadding];
-	f.size.height = f.size.width;
+	//[self sizeToFit];
+	//CGRect f = self.frame;
+	//f.size.width += [objc_getClass("SBIconBadgeView") _textPadding];
+	//f.size.height = f.size.width;
 	//f.size.height = 24;
-	self.frame = f;
+	//self.frame = f;
 
-	self.layer.cornerRadius = MAX(f.size.width, f.size.height) / 2;
+	//self.layer.cornerRadius = MAX(f.size.width, f.size.height) / 2;
 
 	//UIImage *img = [objc_getClass("SBIconBadgeView") _createImageForText:text highlighted:NO];
 	//self.backgroundColor = [UIColor colorWithPatternImage:img];
