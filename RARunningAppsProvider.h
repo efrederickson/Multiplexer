@@ -1,6 +1,7 @@
 #import "headers.h"
 
 @protocol RARunningAppsProviderDelegate
+@optional
 -(void) appDidStart:(SBApplication*)app;
 -(void) appDidDie:(SBApplication*)app;
 @end

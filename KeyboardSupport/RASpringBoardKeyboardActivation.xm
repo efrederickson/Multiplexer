@@ -12,7 +12,9 @@ RAKeyboardWindow *keyboardWindow;
 @implementation RASpringBoardKeyboardActivation
 +(id) sharedInstance
 {
-    SHARED_INSTANCE(RASpringBoardKeyboardActivation);
+    SHARED_INSTANCE2(RASpringBoardKeyboardActivation,
+        [RARunningAppsProvider.sharedInstance addTarget:self]
+    );
 }
 
 -(void) showKeyboardForAppWithIdentifier:(NSString*)identifier
@@ -37,5 +39,11 @@ RAKeyboardWindow *keyboardWindow;
     [keyboardWindow removeKeyboard];
     keyboardWindow = nil;
     _currentIdentifier = nil;
+}
+
+-(void) appDidDie:(SBApplication*)app
+{
+    if ([_currentIdentifier isEqual:app.bundleIdentifier])
+        [self hideKeyboard];
 }
 @end
