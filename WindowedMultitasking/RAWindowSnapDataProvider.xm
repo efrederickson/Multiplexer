@@ -159,7 +159,7 @@ try_bottom:
 	{
 		newCenter.y -= 20;
 	}
-	else if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeRight && (location == RAWindowSnapLocationRightMiddle || location == RAWindowSnapLocationRightBottom || location == RAWindowSnapLocationRightTop))
+	if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeRight && (location == RAWindowSnapLocationRightMiddle || location == RAWindowSnapLocationRightBottom || location == RAWindowSnapLocationRightTop))
 	{
 		newCenter.x -= 20;
 	}
