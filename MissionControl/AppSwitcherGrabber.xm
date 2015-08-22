@@ -84,12 +84,6 @@
 	RAMissionControlManager.sharedInstance.inhibitDismissalGesture = YES;
 	%orig;
 }
-
-- (void)handleHideNotificationsSystemGesture:(unsafe_id)arg1
-{
-	RAMissionControlManager.sharedInstance.inhibitDismissalGesture = YES;
-	%orig;
-}
 %end
 
 @interface SBAppSwitcherController ()

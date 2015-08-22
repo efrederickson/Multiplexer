@@ -134,7 +134,7 @@
 	}
 
 	UIButton *newDesktopButton = [[UIButton alloc] init];
-	newDesktopButton.frame = CGRectMake(x, 20, width, height);
+	newDesktopButton.frame = CGRectMake(x, (desktopScrollView.frame.size.height - height) / 2.0, width, height);
 	newDesktopButton.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.2]; //[UIColor darkGrayColor];
 	[newDesktopButton setTitle:@"+" forState:UIControlStateNormal];
 	newDesktopButton.titleLabel.font = [UIFont systemFontOfSize:36];
