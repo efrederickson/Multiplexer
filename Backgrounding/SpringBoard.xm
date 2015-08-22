@@ -124,4 +124,12 @@
     }
     return %orig;   
 }
+-(BOOL) isNowPlayingWithAudio
+{
+    if ([RABackgrounder.sharedInstance shouldSuspendImmediately:self.bundleIdentifier])
+    {
+        return NO;
+    }
+    return %orig;
+}
 %end

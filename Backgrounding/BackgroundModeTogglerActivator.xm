@@ -30,27 +30,29 @@ static RAActivatorBackgrounderToggleModeListener *sharedInstance$RAActivatorBack
 
     BOOL dismissApp = [RASettings.sharedInstance exitAppAfterUsingActivatorAction];
 
+    NSLog(@"[ReachApp] %ld", (long)buttonIndex);
+
     if (buttonIndex == [alertView cancelButtonIndex])
     {
         return;
     }
-    if (buttonIndex == 0)
+    if (buttonIndex == 1)
     {
         // Force foreground
         [RABackgrounder.sharedInstance temporarilyApplyBackgroundingMode:RABackgroundModeForcedForeground forApplication:app andCloseForegroundApp:dismissApp];
     }
-    else if (buttonIndex == 1)
+    else if (buttonIndex == 2)
     {
         // Native
         [RABackgrounder.sharedInstance temporarilyApplyBackgroundingMode:RABackgroundModeNative forApplication:app andCloseForegroundApp:dismissApp];
     }
-    else if (buttonIndex == 2)
+    else if (buttonIndex == 3)
     {
-        [RABackgrounder.sharedInstance temporarilyApplyBackgroundingMode:RABackgroundModeForceNone forApplication:app andCloseForegroundApp:dismissApp];
+        [RABackgrounder.sharedInstance temporarilyApplyBackgroundingMode:RABackgroundModeSuspendImmediately forApplication:app andCloseForegroundApp:dismissApp];
     }
     else// if (buttonIndex == 3)
     {
-        [RABackgrounder.sharedInstance temporarilyApplyBackgroundingMode:RABackgroundModeSuspendImmediately forApplication:app andCloseForegroundApp:dismissApp];
+        [RABackgrounder.sharedInstance temporarilyApplyBackgroundingMode:RABackgroundModeForceNone forApplication:app andCloseForegroundApp:dismissApp];
     }
 }
 @end

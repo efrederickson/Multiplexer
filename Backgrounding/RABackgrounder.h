@@ -47,7 +47,7 @@ NSString *FriendlyNameForBackgroundMode(RABackgroundMode mode);
 -(void) queueRemoveTemporaryOverrideForIdentifier:(NSString*)identifier;
 -(void) removeTemporaryOverrideForIdentifier:(NSString*)identifier;
 
--(BOOL) application:(NSString*)identifier overrideBackgroundMode:(NSString*)mode;
+-(NSInteger) application:(NSString*)identifier overrideBackgroundMode:(NSString*)mode;
 
 -(RAIconIndicatorViewInfo) allAggregatedIndicatorInfoForIdentifier:(NSString*)identifier;
 -(void) updateIconIndicatorForIdentifier:(NSString*)identifier withInfo:(RAIconIndicatorViewInfo)info;

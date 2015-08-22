@@ -148,12 +148,12 @@ NSMutableDictionary *temporaryShouldPop = [NSMutableDictionary dictionary];
 	}
 }
 
--(BOOL) application:(NSString*)identifier overrideBackgroundMode:(NSString*)mode
+-(NSInteger) application:(NSString*)identifier overrideBackgroundMode:(NSString*)mode
 {
 	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
 	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
 	id val = dict[@"backgroundModes"][mode];
-	return [RASettings.sharedInstance backgrounderEnabled] && enabled && [val boolValue];
+	return [RASettings.sharedInstance backgrounderEnabled] && enabled ? (val ? [val boolValue] : -1) : -1;
 }
 
 -(RAIconIndicatorViewInfo) allAggregatedIndicatorInfoForIdentifier:(NSString*)identifier

@@ -12,8 +12,10 @@
 %hook FBApplicationInfo
 - (BOOL)supportsBackgroundMode:(__unsafe_unretained NSString *)mode
 {
-	BOOL override = [RABackgrounder.sharedInstance application:self.bundleIdentifier overrideBackgroundMode:mode];
-	return override ?: %orig;
+	int override = [RABackgrounder.sharedInstance application:self.bundleIdentifier overrideBackgroundMode:mode];
+    if (override == -1)
+        return %orig;
+	return override;
 }
 %end
 
