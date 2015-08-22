@@ -2,7 +2,8 @@
 #import "UIColor+HexString.h"
 #import "headers.h"
 
-#define COLOR(name) [UIColor RA_colorWithHexString:dict[name]]
+#define COLOR(name) ([RAThemeLoader tryGetColorFromThemeImageName:name] ?: [UIColor RA_colorWithHexString:dict[name]])
+//#define COLOR(name) [UIColor RA_colorWithHexString:dict[name]]
 
 @implementation RAThemeLoader
 +(RATheme*)loadFromFile:(NSString*)baseName
@@ -95,5 +96,17 @@
 			return NSTextAlignmentNatural;
 	}
 	return NSTextAlignmentCenter;
+}
+
++(UIColor*) tryGetColorFromThemeImageName:(NSString*)name
+{
+	NSString *expandedPath = [NSString stringWithFormat:@"%@/ThemingImages/%@.png",RA_BASE_PATH,[[name lastPathComponent] stringByDeletingPathExtension]];
+	BOOL exists = [NSFileManager.defaultManager fileExistsAtPath:expandedPath];
+	if (!exists)
+		return nil;
+	UIImage *image = [UIImage imageWithContentsOfFile:expandedPath];
+	if (image)
+		return [UIColor colorWithPatternImage:image];
+	return nil;
 }
 @end
