@@ -16,12 +16,10 @@
 
 	SBDisplayItem *item = [%c(SBDisplayItem) displayItemWithType:@"App" displayIdentifier:identifier];
 	SBAppSwitcherSnapshotView *view = [[[%c(SBUIController) sharedInstance] switcherController] performSelector:@selector(_snapshotViewForDisplayItem:) withObject:item];
-	dispatch_sync(dispatch_get_main_queue(), ^{
-		[view setOrientation:orientation orientationBehavior:0];
-	});
+	[view setOrientation:orientation orientationBehavior:0];
 	if (view)
 	{
-		[view performSelectorOnMainThread:@selector(_loadSnapshotSync) withObject:nil waitUntilDone:YES];
+		[view _loadSnapshotSync];
 		image = MSHookIvar<UIImageView*>(view, "_snapshotImageView").image;	
 	}
 

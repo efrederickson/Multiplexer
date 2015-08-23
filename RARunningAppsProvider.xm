@@ -11,39 +11,31 @@
 
 -(void) addRunningApp:(SBApplication*)app
 {
-	@synchronized(apps) { @synchronized(targets) {
-		[apps addObject:app];
+	[apps addObject:app];
 
-		for (NSObject<RARunningAppsProviderDelegate>* target in targets)
-			if ([target respondsToSelector:@selector(appDidStart:)])
-				[target appDidStart:app];
-	}}
+	for (NSObject<RARunningAppsProviderDelegate>* target in targets)
+		if ([target respondsToSelector:@selector(appDidStart:)])
+			[target appDidStart:app];
 }
 
 -(void) removeRunningApp:(SBApplication*)app
 {
-	@synchronized(apps) { @synchronized(targets) {
-		[apps removeObject:app];
+	[apps removeObject:app];
 
-		for (NSObject<RARunningAppsProviderDelegate>* target in targets)
-			if ([target respondsToSelector:@selector(appDidDie:)])
-				[target appDidDie:app];
-	}}
+	for (NSObject<RARunningAppsProviderDelegate>* target in targets)
+		if ([target respondsToSelector:@selector(appDidDie:)])
+			[target appDidDie:app];
 }
 
 -(void) addTarget:(__weak NSObject<RARunningAppsProviderDelegate>*)target
 {
-	@synchronized(apps) { @synchronized(targets) {
-		if ([targets containsObject:target] == NO)
-			[targets addObject:target];
-	}}
+	if ([targets containsObject:target] == NO)
+		[targets addObject:target];
 }
 
 -(void) removeTarget:(__weak NSObject<RARunningAppsProviderDelegate>*)target
 {
-	@synchronized(apps) { @synchronized(targets) {
-		[targets removeObject:target];
-	}}
+	[targets removeObject:target];
 }
 
 -(NSArray*) runningApplications { return apps; }

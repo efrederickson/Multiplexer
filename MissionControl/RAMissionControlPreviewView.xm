@@ -20,17 +20,16 @@
           icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:self.application.bundleIdentifier];
         if (icon && !iconView)
             iconView = [[%c(SBIconViewMap) homescreenMap] _iconViewForIcon:icon];
-
-        iconView.layer.shadowRadius = THEMED(missionControlIconPreviewShadowRadius); // iconView.layer.cornerRadius;
-        iconView.layer.shadowOpacity = 0.8;
-        iconView.layer.shadowOffset = CGSizeMake(0, 0);
-        iconView.layer.shouldRasterize = YES;
-        iconView.layer.rasterizationScale = UIScreen.mainScreen.scale;
-        iconView.userInteractionEnabled = NO;
-        iconView.iconLabelAlpha = 0;
     }];
     [targetQueue waitUntilAllOperationsAreFinished];
 
+    iconView.layer.shadowRadius = THEMED(missionControlIconPreviewShadowRadius); // iconView.layer.cornerRadius;
+    iconView.layer.shadowOpacity = 0.8;
+    iconView.layer.shadowOffset = CGSizeMake(0, 0);
+    iconView.layer.shouldRasterize = YES;
+    iconView.layer.rasterizationScale = UIScreen.mainScreen.scale;
+    iconView.userInteractionEnabled = NO;
+	iconView.iconLabelAlpha = 0;
 
     [self performSelectorOnMainThread:@selector(addSubview:) withObject:iconView waitUntilDone:NO];
     [self performSelectorOnMainThread:@selector(updateIconViewFrame) withObject:nil waitUntilDone:NO];

@@ -44,14 +44,6 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 %hook SBIconView
 %new -(void) RA_updateIndicatorView:(RAIconIndicatorViewInfo)info
 {
-	if (![[NSThread currentThread] isEqual:[NSThread mainThread]])
-	{
-		dispatch_sync(dispatch_get_main_queue(), ^{
-			[self RA_updateIndicatorView:info];
-		});
-		return;
-	}
-
 	if (info == RAIconIndicatorViewInfoTemporarilyInhibit || info == RAIconIndicatorViewInfoInhibit)
 	{
 		[[self viewWithTag:9962] removeFromSuperview];
@@ -161,7 +153,7 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 		textImageView.image = textImage;
 	}
 	else
-		badge.text = text;
+		[badge performSelectorOnMainThread:@selector(setText:) withObject:text waitUntilDone:YES];
 
 	SET_INFO(info);
 }
