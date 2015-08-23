@@ -35,7 +35,7 @@ extern "C" void BKSTerminateApplicationForReasonAndReportWithDescription(NSStrin
 	}
 	else 
 	{
-		//if (tries == 0)
+		if (tries == 0)
 		{
 			// Try nicely
 			FBApplicationProcess *process = [[%c(FBProcessManager) sharedInstance] createApplicationProcessForBundleID:app.bundleIdentifier];
