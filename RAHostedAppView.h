@@ -1,8 +1,9 @@
 #import "headers.h"
+#import "RARunningAppsProvider.h"
 
 @class RAAppSliderProvider;
 
-@interface RAHostedAppView : UIView {
+@interface RAHostedAppView : UIView <RARunningAppsProviderDelegate> {
 	SBApplication *app;
 	FBWindowContextHostWrapperView *view;
 }

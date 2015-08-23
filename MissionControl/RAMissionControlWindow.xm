@@ -344,9 +344,15 @@
 			}];
 		}
 		else if (view.frame.origin.x > originX)
+		{
+			CGRect frame = view.frame;
+			frame.origin.x -= width;
+			frame.origin.x -= panePadding;
+			
 			[UIView animateWithDuration:0.4 animations:^{
-				view.frame = CGRectOffset(view.frame, -view.frame.size.width - panePadding, 0);
+				view.frame = frame;
 			}];
+		}
 	}
 
 	if (parentView.contentSize.width - 1 <= UIScreen.mainScreen._interfaceOrientedBounds.size.width)
@@ -428,9 +434,9 @@
 					[self performSelectorOnMainThread:@selector(reloadDesktopSection) withObject:nil waitUntilDone:NO];
 					//[self performSelectorOnMainThread:@selector(reloadWindowedAppsSection) withObject:nil waitUntilDone:YES];
 					//[self performSelectorOnMainThread:@selector(reloadOtherAppsSection) withObject:nil waitUntilDone:YES];
-					dispatch_async(dispatch_get_main_queue(), ^{
-						[self removeCardForApplication:app];
-					});
+					//dispatch_async(dispatch_get_main_queue(), ^{
+					//	[self removeCardForApplication:app];
+					//});
 				}];
 
 			didKill = YES;
@@ -578,13 +584,17 @@
 
 -(void) appDidStart:(SBApplication*)app
 {
-	[self reloadWindowedAppsSection:RARunningAppsProvider.sharedInstance.runningApplications];
-	[self reloadOtherAppsSection];
+	if (![runningApplications containsObject:app])
+	{
+		[self reloadWindowedAppsSection:RARunningAppsProvider.sharedInstance.runningApplications];
+		[self reloadOtherAppsSection];	
+	}
 }
 
 -(void) appDidDie:(SBApplication*)app
 {
 	[self removeCardForApplication:app];
+	[self.manager forceStatusBarToShowOnExit];
 }
 
 -(void) deconstructComponents

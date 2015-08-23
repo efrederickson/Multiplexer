@@ -10,7 +10,7 @@
 NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
 @interface RAHostedAppView () {
-    NSTimer *verifyTimer;
+    //NSTimer *verifyTimer;
     BOOL isPreloading;
     FBWindowContextHostManager *contextHostManager;
 
@@ -80,6 +80,7 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
     startTries++;
     if (startTries > 5)
     {
+        isPreloading = NO;
         NSLog(@"[ReachApp] maxed out preload attempts for app %@", app.bundleIdentifier);
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:LOCALIZE(@"MULTIPLEXER") message:[NSString stringWithFormat:@"Unable to start app %@", app.displayName] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
         [alert show];
@@ -106,6 +107,12 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
 -(void) _actualLoadApp
 {
+    if (isPreloading)
+    {
+        [self performSelector:@selector(_actualLoadApp) withObject:nil afterDelay:0.3];
+        return;
+    }
+
     if (_isCurrentlyHosting)
         return;
     _isCurrentlyHosting = YES;
@@ -123,11 +130,12 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
     [RAMessagingServer.sharedInstance setHosted:YES forIdentifier:app.bundleIdentifier completion:nil];
 
-    if (verifyTimer)
-        [verifyTimer invalidate];
+    [RARunningAppsProvider.sharedInstance addTarget:self];
+    //if (verifyTimer)
+    //    [verifyTimer invalidate];
 
-    verifyTimer = [NSTimer timerWithTimeInterval:1 target:self selector:@selector(verifyHostingAndRehostIfNecessary) userInfo:nil repeats:YES];
-    [NSRunLoop.currentRunLoop addTimer:verifyTimer forMode:NSRunLoopCommonModes];
+    //verifyTimer = [NSTimer timerWithTimeInterval:1 target:self selector:@selector(verifyHostingAndRehostIfNecessary) userInfo:nil repeats:YES];
+    //[NSRunLoop.currentRunLoop addTimer:verifyTimer forMode:NSRunLoopCommonModes];
 }
 
 -(void) loadApp
@@ -242,7 +250,7 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 {
     if (!isPreloading && _isCurrentlyHosting && (app.isRunning == NO || view.contextHosted == NO)) // && (app.pid == 0 || view == nil || view.manager == nil)) // || view._isReallyHosting == NO))
     {
-        [activityView startAnimating];
+        //[activityView startAnimating];
         [self unloadApp];
         [self loadApp];
     }
@@ -252,6 +260,22 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
     }
 }
 
+-(void) appDidStart:(SBApplication*)app_
+{
+    if (app_ != self.app)
+        return;
+
+    [self verifyHostingAndRehostIfNecessary];
+}
+
+-(void) appDidDie:(SBApplication*)app_
+{
+    if (app_ != self.app)
+        return;
+
+    [self verifyHostingAndRehostIfNecessary];
+}
+
 -(void) removeLoadingIndicator
 {
     if (self.showSplashscreenInsteadOfSpinner)
@@ -259,7 +283,7 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
         [splashScreenImageView removeFromSuperview];
         splashScreenImageView = nil;
     }
-    else
+    else if (activityView)
         [activityView stopAnimating];
 }
 
@@ -302,11 +326,10 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
 -(void) unloadApp:(BOOL)forceImmediate
 {
-    if (activityView)
-        [activityView stopAnimating];
+    [self removeLoadingIndicator];
 
-    [verifyTimer invalidate];
-    verifyTimer = nil;
+    //[verifyTimer invalidate];
+    //verifyTimer = nil;
 
     disablePreload = YES;
 
@@ -364,6 +387,7 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
         didRun = YES;
     };
 
+    [RARunningAppsProvider.sharedInstance removeTarget:self];
     [RAMessagingServer.sharedInstance setHosted:NO forIdentifier:app.bundleIdentifier completion:nil];
     [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:self.bundleIdentifier completion:nil];
     [RAMessagingServer.sharedInstance unRotateApp:self.bundleIdentifier completion:nil];

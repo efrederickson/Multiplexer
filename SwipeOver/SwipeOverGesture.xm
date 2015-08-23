@@ -26,16 +26,16 @@ CGRect adjustFrameForRotation()
     switch ([[UIApplication.sharedApplication _accessibilityFrontMostApplication] statusBarOrientation])
     {
         case UIInterfaceOrientationPortrait:
-            NSLog(@"[ReachApp] portrait");
+            NSLog(@"[ReachApp] SwipeOver: portrait");
             return (CGRect){ { width - portraitWidth + 5, (height - portraitHeight) / 2 }, { portraitWidth, portraitHeight } };
         case UIInterfaceOrientationPortraitUpsideDown:
-            NSLog(@"[ReachApp] portrait upside down");
+            NSLog(@"[ReachApp] SwipeOver: portrait upside down");
             return (CGRect){ { 0, 0}, { 50, 50 } };
         case UIInterfaceOrientationLandscapeLeft:
-            NSLog(@"[ReachApp] landscape left");
+            NSLog(@"[ReachApp] SwipeOver: landscape left");
             return (CGRect){ { ((height - portraitWidth) / 2), -(portraitWidth / 2) }, { portraitWidth, portraitHeight } };
         case UIInterfaceOrientationLandscapeRight:
-            NSLog(@"[ReachApp] landscape right");
+            NSLog(@"[ReachApp] SwipeOver: landscape right");
             return (CGRect){ { (height - portraitHeight) / 2, width - portraitWidth - 5 }, { portraitWidth, portraitHeight } };
     }
     return CGRectZero;
@@ -130,7 +130,7 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
 
                 return RAGestureCallbackResultSuccess;
             }
-            else if (CGRectContainsPoint(grabberView.frame, location) || (isShowingGrabber && !firstSwipe && [RASettings.sharedInstance swipeOverGrabArea] != RAGrabAreaSideAnywhere && [RASettings.sharedInstance swipeOverGrabArea] != RAGrabAreaSideMiddleThird))
+            else if (CGRectContainsPoint((CGRect){ [grabberView convertPoint:grabberView.frame.origin toView:nil], grabberView.frame.size }, location) || (isShowingGrabber && !firstSwipe && [RASettings.sharedInstance swipeOverGrabArea] != RAGrabAreaSideAnywhere && [RASettings.sharedInstance swipeOverGrabArea] != RAGrabAreaSideMiddleThird))
             {
                 [grabberView removeFromSuperview];
                 grabberView = nil;
