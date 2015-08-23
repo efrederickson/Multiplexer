@@ -332,6 +332,12 @@ CGRect swappedForOrientation2(CGRect in)
 
 -(RAMissionControlWindow*) missionControlWindow { if (!window) [self createWindow]; return window; }
 
+-(void) forceStatusBarToShowOnExit
+{
+       lastStatusBarHidden = NO;
+       updateStatusBar = YES;
+}
+
 -(void) setInhibitDismissalGesture:(BOOL)value
 {
 	_inhibitDismissalGesture = value;

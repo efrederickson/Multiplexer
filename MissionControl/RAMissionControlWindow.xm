@@ -428,9 +428,9 @@
 					[self performSelectorOnMainThread:@selector(reloadDesktopSection) withObject:nil waitUntilDone:NO];
 					//[self performSelectorOnMainThread:@selector(reloadWindowedAppsSection) withObject:nil waitUntilDone:YES];
 					//[self performSelectorOnMainThread:@selector(reloadOtherAppsSection) withObject:nil waitUntilDone:YES];
-					dispatch_async(dispatch_get_main_queue(), ^{
-						[self removeCardForApplication:app];
-					});
+					//dispatch_async(dispatch_get_main_queue(), ^{
+					//	[self removeCardForApplication:app];
+					//});
 				}];
 
 			didKill = YES;
@@ -585,6 +585,7 @@
 -(void) appDidDie:(SBApplication*)app
 {
 	[self removeCardForApplication:app];
+	[self.manager forceStatusBarToShowOnExit];
 }
 
 -(void) deconstructComponents

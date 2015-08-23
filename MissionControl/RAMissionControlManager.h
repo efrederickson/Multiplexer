@@ -15,5 +15,7 @@
 -(void) hideMissionControl:(BOOL)animated;
 -(void) toggleMissionControl:(BOOL)animated;
 
+-(void) forceStatusBarToShowOnExit;
+
 -(RAMissionControlWindow*) missionControlWindow;
 @end

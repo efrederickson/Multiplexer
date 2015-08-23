@@ -19,7 +19,7 @@
 	[view setOrientation:orientation orientationBehavior:0];
 	if (view)
 	{
-		[view _loadSnapshotSync];
+		[view performSelectorOnMainThread:@selector(_loadSnapshotSync) withObject:nil waitUntilDone:YES];
 		image = MSHookIvar<UIImageView*>(view, "_snapshotImageView").image;	
 	}
 
