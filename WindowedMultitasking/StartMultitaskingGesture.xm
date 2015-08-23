@@ -42,6 +42,8 @@ BOOL locationIsInValidArea(CGFloat x)
 
 %ctor
 {
+    if (!IS_SPRINGBOARD)
+        return;
     __weak __block UIView *appView = nil;
     __block CGFloat lastY = 0;
     __block CGPoint originalCenter;
@@ -68,34 +70,36 @@ BOOL locationIsInValidArea(CGFloat x)
         {
             lastY = location.y;
             CGFloat scale = location.y / UIScreen.mainScreen._interfaceOrientedBounds.size.height;
-            scale = MIN(MAX(scale, 0.3), 1); // .01 for hasWindowInformation
 
-            if (NO && [RAWindowStatePreservationSystemManager.sharedInstance hasWindowInformationForIdentifier:topApp.bundleIdentifier])
+            if ([RAWindowStatePreservationSystemManager.sharedInstance hasWindowInformationForIdentifier:topApp.bundleIdentifier])
             {
+                scale = MIN(MAX(scale, 0.01), 1); 
                 CGFloat actualScale = scale;
                 scale = 1 - scale;
                 RAPreservedWindowInformation info = [RAWindowStatePreservationSystemManager.sharedInstance windowInformationForAppIdentifier:topApp.bundleIdentifier];
 
+                CGFloat (^interpolate)(CGFloat, CGFloat, CGFloat) = ^CGFloat(CGFloat a, CGFloat b, CGFloat t){
+                    return a + (b - a) * t;
+                };
+
                 CGPoint center = CGPointMake(
-                    originalCenter.x - (info.center.x * scale),
-                    originalCenter.y - (info.center.y * scale)
+                    interpolate(info.center.x, originalCenter.x, actualScale),
+                    interpolate(info.center.y, originalCenter.y, actualScale)
                 );
 
-                center = CGPointMake(
-                    MAX(originalCenter.x * actualScale, fabs(info.center.x - (originalCenter.x * actualScale))),
-                    MAX(originalCenter.y * actualScale, fabs(info.center.y - (originalCenter.y * actualScale)))
-                );
-
-
-                CGFloat currentRotation = (M_PI * 2) - (atan2(info.transform.b, info.transform.a) * scale);
-                CGFloat currentScale = 1 - (sqrt(info.transform.a * info.transform.a + info.transform.c * info.transform.c) * scale);
+                CGFloat currentRotation = (atan2(info.transform.b, info.transform.a) * scale);
+                //CGFloat currentScale = 1 - (sqrt(info.transform.a * info.transform.a + info.transform.c * info.transform.c) * scale);
+                CGFloat currentScale = interpolate(1, sqrt(info.transform.a * info.transform.a + info.transform.c * info.transform.c), scale);
                 CGAffineTransform transform = CGAffineTransformRotate(CGAffineTransformMakeScale(currentScale, currentScale), currentRotation);
 
                 appView.center = center;
                 appView.transform = transform;
             }
             else
+            {
+                scale = MIN(MAX(scale, 0.3), 1);
                 appView.transform = CGAffineTransformMakeScale(scale, scale);
+            }
         }
         else if (state == UIGestureRecognizerStateEnded)
         {
@@ -117,16 +121,22 @@ BOOL locationIsInValidArea(CGFloat x)
                         appView.center = originalCenter;   
                     }
                 } completion:^(BOOL _) {
+                    RAIconIndicatorViewInfo indicatorInfo = [RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:topApp.bundleIdentifier];
+
                     // Close app
-                    //[RABackgrounder.sharedInstance temporarilyApplyBackgroundingMode:RABackgroundModeForcedForeground forApplication:UIApplication.sharedApplication._accessibilityFrontMostApplication andCloseForegroundApp:NO];
+                    [RABackgrounder.sharedInstance temporarilyApplyBackgroundingMode:RABackgroundModeForcedForeground forApplication:topApp andCloseForegroundApp:NO];
                     FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
-                        SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:UIApplication.sharedApplication._accessibilityFrontMostApplication];
+                        SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:topApp];
                         [transaction begin];
                     }];
                     [(FBWorkspaceEventQueue*)[%c(FBWorkspaceEventQueue) sharedInstance] executeOrAppendEvent:event];
                     [[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"BeautifulAnimation"];
                     // Open in window
                     [RADesktopManager.sharedInstance.currentDesktop createAppWindowForSBApplication:topApp animated:YES];
+                    // Pop forced foreground backgrounding
+                    [RABackgrounder.sharedInstance queueRemoveTemporaryOverrideForIdentifier:topApp.bundleIdentifier];
+                    [RABackgrounder.sharedInstance removeTemporaryOverrideForIdentifier:topApp.bundleIdentifier];
+                    [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:topApp.bundleIdentifier withInfo:indicatorInfo];
                 }];
             }
             else
@@ -140,6 +150,6 @@ BOOL locationIsInValidArea(CGFloat x)
 
         return RAGestureCallbackResultSuccess;
     } withCondition:^BOOL(CGPoint location, CGPoint velocity) {
-        return [RASettings.sharedInstance windowedMultitaskingEnabled] && locationIsInValidArea(location.x) && ![RASwipeOverManager.sharedInstance isUsingSwipeOver] && ![[%c(SBUIController) sharedInstance] isAppSwitcherShowing] && ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && [UIApplication.sharedApplication _accessibilityFrontMostApplication] != nil;
+        return [RASettings.sharedInstance windowedMultitaskingEnabled] && (locationIsInValidArea(location.x) || appView) && ![RASwipeOverManager.sharedInstance isUsingSwipeOver] && ![[%c(SBUIController) sharedInstance] isAppSwitcherShowing] && ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && [UIApplication.sharedApplication _accessibilityFrontMostApplication] != nil;
     } forEdge:UIRectEdgeBottom identifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture" priority:RAGesturePriorityDefault];
 }

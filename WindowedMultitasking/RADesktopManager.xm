@@ -140,9 +140,10 @@ BOOL overrideUIWindow = NO;
 		if (bar)
 		{
 			self.lastUsedWindow = bar;
-			break;
+			return;
 		}
 	}
+	//self.lastUsedWindow = nil;
 }
 
 -(RADesktopWindow*) desktopAtIndex:(NSUInteger)index { return windows[index]; }

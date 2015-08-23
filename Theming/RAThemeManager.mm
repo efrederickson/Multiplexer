@@ -14,6 +14,11 @@
 
 -(void) invalidateCurrentThemeAndReload:(NSString*)currentIdentifier
 {
+#if DEBUG
+	NSLog(@"[ReachApp] loading themes...");
+	NSDate *startTime = [NSDate date];
+#endif
+
 	currentTheme = nil;
 	allThemes = [NSMutableDictionary dictionary];
 
@@ -43,5 +48,10 @@
 			currentTheme = allThemes[allThemes.allKeys[0]];
 		}
 	}
+
+#if DEBUG
+	NSDate *endTime = [NSDate date];
+	NSLog(@"[ReachApp] loaded %ld themes in %f seconds.", (long)allThemes.count, [endTime timeIntervalSinceDate:startTime]);
+#endif
 }
 @end

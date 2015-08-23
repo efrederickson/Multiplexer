@@ -58,6 +58,8 @@
 	{
 		RAPreservedWindowInformation info = [RAWindowStatePreservationSystemManager.sharedInstance windowInformationForAppIdentifier:view.app.bundleIdentifier];
 
+		windowBar.center = info.center;
+		windowBar.transform = info.transform;
 		[UIView animateWithDuration:0.3 animations:^{
 			windowBar.center = info.center;
 			windowBar.transform = info.transform;
