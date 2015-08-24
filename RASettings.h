@@ -67,6 +67,8 @@ enum RAGrabArea {
 
 -(BOOL) exitAppAfterUsingActivatorAction;
 
+-(BOOL) quickAccessUseGenericTabLabel;
+
 #if DEBUG
 -(BOOL) debug_showIPCMessages;
 #endif

@@ -284,6 +284,7 @@ int disableAutoDismiss = -1;
 -(BOOL) missionControlPagingEnabled { return BOOL(@"missionControlPagingEnabled", NO); }
 -(BOOL) showFavorites { return BOOL(@"showFavorites", YES); }
 -(BOOL) onlyShowWindowBarIconsOnOverlay { return BOOL(@"onlyShowWindowBarIconsOnOverlay", NO); }
+-(BOOL) quickAccessUseGenericTabLabel { return BOOL(@"quickAccessUseGenericTabLabel", NO); }
 
 -(RAGrabArea) windowedMultitaskingGrabArea
 {

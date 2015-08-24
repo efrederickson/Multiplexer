@@ -63,7 +63,16 @@
                  @"label": @"Enabled",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
-             @{ },
+             @{ @"footerText": @"Instead of using the app's name, the tab label will simply show \"App\"." },
+             @{ 
+                 @"cell": @"PSSwitchCell",
+                 @"default": @NO,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"quickAccessUseGenericTabLabel",
+                 @"label": @"Use Generic Tab Label",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
+                 @{ },
             @{
                  @"cell": @"PSLinkListCell",
                  @"detail": @"RANCAppSelectorView",

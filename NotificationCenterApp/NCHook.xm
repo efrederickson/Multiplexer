@@ -35,7 +35,7 @@ RANCViewController *ncAppViewController;
 {
 	if (aClass == [RANCViewController class]) 
 	{
-		BOOL useGenericLabel = THEMED(quickAccessUseGenericTabLabel);
+		BOOL useGenericLabel = THEMED(quickAccessUseGenericTabLabel) || [RASettings.sharedInstance quickAccessUseGenericTabLabel];
 		if (useGenericLabel)
 			return LOCALIZE(@"APP");
 		return ncAppViewController.hostedApp.displayName ?: getAppName() ?: LOCALIZE(@"APP");
