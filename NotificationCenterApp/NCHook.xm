@@ -1,6 +1,7 @@
 #import "RANCViewController.h"
 #import "RAHostedAppView.h"
 #import "RASettings.h"
+#import "headers.h"
 
 @interface SBNotificationCenterViewController <UITextFieldDelegate>
 -(id)_newBulletinObserverViewControllerOfClass:(Class)aClass;
@@ -33,7 +34,12 @@ RANCViewController *ncAppViewController;
 + (NSString *)_localizableTitleForBulletinViewControllerOfClass:(__unsafe_unretained Class)aClass
 {
 	if (aClass == [RANCViewController class]) 
+	{
+		BOOL useGenericLabel = THEMED(quickAccessUseGenericTabLabel);
+		if (useGenericLabel)
+			return LOCALIZE(@"APP");
 		return ncAppViewController.hostedApp.displayName ?: getAppName() ?: LOCALIZE(@"APP");
+	}
 	else 
 		return %orig;
 }

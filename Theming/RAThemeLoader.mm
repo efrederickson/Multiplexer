@@ -63,6 +63,8 @@
 
 	ret.swipeOverDetachBarColor = COLOR(@"swipeOverDetachBarColor");
 
+	ret.quickAccessUseGenericTabLabel = [dict objectForKey:@"quickAccessUseGenericTabLabel"] == nil ? NO : [dict[@"quickAccessUseGenericTabLabel"] boolValue];
+
 	return ret;
 }
 

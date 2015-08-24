@@ -49,6 +49,9 @@
 @property (nonatomic) int windowedMultitaskingBlurStyle;
 @property (nonatomic, retain) UIColor *windowedMultitaskingOverlayColor;
 
+// Quick Access
+@property (nonatomic) BOOL quickAccessUseGenericTabLabel;
+
 // SwipeOver
 
 @property (nonatomic, retain) UIColor *swipeOverDetachBarColor;
