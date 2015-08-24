@@ -611,17 +611,20 @@ const int bottomSizeViewTag =  987654320;
 	{
 		enableLongPress = YES;
 		[self saveWindowInfo];
-		[self removePotentialSnapShadow];
 
 		if ([RASettings.sharedInstance snapWindows] && [RAWindowSnapDataProvider shouldSnapWindow:self])
 		{
-			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindow:self] animated:YES];
+			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindow:self] animated:YES completion:^{
+				[self removePotentialSnapShadow];
+			}];
 			isSnapped = YES;
 			// Force tap to fail
 			tapGesture.enabled = NO;
 			tapGesture.enabled = YES;
 			return;
 		}
+		else
+			[self removePotentialSnapShadow];
 		return;
 	}
 
@@ -712,7 +715,15 @@ const int bottomSizeViewTag =  987654320;
 	if (!snapShadowView)
 	{
 		snapShadowView = [[UIView alloc] initWithFrame:self.bounds];
-		snapShadowView.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.5];
+		snapShadowView.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.1]; // [UIColor.blackColor colorWithAlphaComponent:0.5];
+		snapShadowView.layer.borderColor = [UIColor whiteColor].CGColor;
+		snapShadowView.layer.shadowRadius = 20;
+		snapShadowView.layer.shadowOpacity = 0.8;
+		snapShadowView.layer.shadowOffset = CGSizeMake(0, 0);
+  		snapShadowView.layer.borderWidth = 1.5f;
+  		snapShadowView.layer.cornerRadius = 6;
+  		snapShadowView.clipsToBounds = YES;
+  		snapShadowView.layer.masksToBounds = YES;
 
 		[self.superview insertSubview:snapShadowView belowSubview:self];
 	}

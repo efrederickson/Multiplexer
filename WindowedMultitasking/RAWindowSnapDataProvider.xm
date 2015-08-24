@@ -230,17 +230,28 @@ try_bottom:
 		window.frame = (CGRect) { adjustedOrigin, frame.size };
 	*/
 
+	[self snapWindow:window toLocation:location animated:animated completion:nil];
+}
 
++(void) snapWindow:(RAWindowBar*)window toLocation:(RAWindowSnapLocation)location animated:(BOOL)animated completion:(dispatch_block_t)completionBlock
+{
 	CGPoint newCenter = [RAWindowSnapDataProvider snapCenterForWindow:window toLocation:location];
 
 	if (animated)
 	{
 		[UIView animateWithDuration:0.2 animations:^{
 			window.center = newCenter;
+		} completion:^(BOOL _) {
+			if (completionBlock)
+				completionBlock();
 		}];
 	}
 	else
+	{
 		window.center = newCenter;
+		if (completionBlock)
+			completionBlock();
+	}
 }
 @end
 
