@@ -57,7 +57,7 @@ int rotationDegsForOrientation(int o)
 			isLockedLabel.numberOfLines = 2;
 			isLockedLabel.textAlignment = NSTextAlignmentCenter;
 			isLockedLabel.textColor = [UIColor whiteColor];
-			isLockedLabel.font = [UIFont systemFontOfSize:36];
+			isLockedLabel.font = [UIFont systemFontOfSize:UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 36 : 30];
 			[self.view addSubview:isLockedLabel];
 		}
 
