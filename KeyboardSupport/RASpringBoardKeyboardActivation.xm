@@ -25,6 +25,7 @@ RAKeyboardWindow *keyboardWindow;
         return;
     }
 
+    NSLog(@"[ReachApp] showing kb window");
     keyboardWindow = [[RAKeyboardWindow alloc] init];   
     overrideDisableForStatusBar = YES;
     [keyboardWindow setupForKeyboardAndShow:identifier];

@@ -5,6 +5,9 @@
 
 @interface SBNotificationCenterViewController <UITextFieldDelegate>
 -(id)_newBulletinObserverViewControllerOfClass:(Class)aClass;
+@end
+
+@interface SBModeViewController
 -(void) _addBulletinObserverViewController:(id)arg1;
 @end
 
@@ -22,9 +25,11 @@ RANCViewController *ncAppViewController;
 {
    	%orig;
 
-   	if ([RASettings.sharedInstance NCAppEnabled])
+   	BOOL hideBecauseLS = [[%c(SBLockScreenManager) sharedInstance] isUILocked] ? [RASettings.sharedInstance ncAppHideOnLS] : NO;
+
+   	if ([RASettings.sharedInstance NCAppEnabled] && !hideBecauseLS)
    	{
-		SBNotificationCenterViewController* modeVC = MSHookIvar<id>(self, "_modeController");
+		SBModeViewController* modeVC = MSHookIvar<id>(self, "_modeController");
 		if (ncAppViewController == nil) 
 			ncAppViewController = [self _newBulletinObserverViewControllerOfClass:[RANCViewController class]];
 		[modeVC _addBulletinObserverViewController:ncAppViewController];

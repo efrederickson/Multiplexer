@@ -37,6 +37,7 @@ enum RAGrabArea {
 
 -(BOOL) NCAppEnabled;
 -(NSString*) NCApp;
+-(BOOL) ncAppHideOnLS;
 
 -(BOOL) alwaysEnableGestures;
 -(BOOL) snapWindows;

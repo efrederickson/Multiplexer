@@ -285,6 +285,7 @@ int disableAutoDismiss = -1;
 -(BOOL) showFavorites { return BOOL(@"showFavorites", YES); }
 -(BOOL) onlyShowWindowBarIconsOnOverlay { return BOOL(@"onlyShowWindowBarIconsOnOverlay", NO); }
 -(BOOL) quickAccessUseGenericTabLabel { return BOOL(@"quickAccessUseGenericTabLabel", NO); }
+-(BOOL) ncAppHideOnLS { return BOOL(@"ncAppHideOnLS", NO); }
 
 -(RAGrabArea) windowedMultitaskingGrabArea
 {

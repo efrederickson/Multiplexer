@@ -72,6 +72,15 @@
                  @"label": @"Use Generic Tab Label",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
+             @{ @"footerText": @"Instead of displaying a label, this will completely hide the Quick Access tab on the Lock Screen." },
+             @{ 
+                 @"cell": @"PSSwitchCell",
+                 @"default": @NO,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"ncAppHideOnLS",
+                 @"label": @"Hide on Lock Screen",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 },
                  @{ },
             @{
                  @"cell": @"PSLinkListCell",
