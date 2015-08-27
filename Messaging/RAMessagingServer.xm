@@ -37,7 +37,7 @@ extern BOOL launchNextOpenIntoWindow;
     messagingCenter = [objc_getClass("CPDistributedMessagingCenter") centerNamed:@"com.efrederickson.reachapp.messaging.server"];
 
     void* handle = dlopen("/usr/lib/librocketbootstrap.dylib", RTLD_LAZY);
-    if(handle)
+    if (handle)
     {
         void (*rocketbootstrap_distributedmessagingcenter_apply)(CPDistributedMessagingCenter*);
         rocketbootstrap_distributedmessagingcenter_apply = (void(*)(CPDistributedMessagingCenter*))dlsym(handle, "rocketbootstrap_distributedmessagingcenter_apply");
@@ -243,6 +243,7 @@ extern BOOL launchNextOpenIntoWindow;
 		ret.forcedOrientation = UIInterfaceOrientationPortrait;
 		ret.shouldForceOrientation = NO;
 		ret.forcePhoneMode = NO;
+		ret.shouldUseExternalKeyboard = NO;
 	}
 	return ret;
 }
