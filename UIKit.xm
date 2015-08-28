@@ -63,7 +63,11 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
 {
     %orig;
     if (!IS_SPRINGBOARD)
-        [RAMessagingClient.sharedInstance notifySpringBoardOfFrontAppChangeToSelf];
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [RAMessagingClient.sharedInstance notifySpringBoardOfFrontAppChangeToSelf];
+        });
+    }
 }
 %end
 

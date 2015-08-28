@@ -83,27 +83,21 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
     // 2 = 5/5s?
     // 3 - 6 = standard
 }
-
--(UIInterfaceOrientation) statusBarOrientation { return UIInterfaceOrientationPortrait; }
-- (int)_currentExpectedInterfaceOrientation { return UIInterfaceOrientationPortrait; }
-- (int)_expectedViewOrientation { return UIInterfaceOrientationPortrait; }
-- (int)_frontMostAppOrientation { return UIInterfaceOrientationPortrait; }
-- (int)_getSpringBoardOrientation { return UIInterfaceOrientationPortrait; }
-- (int)activeInterfaceOrientation { return UIInterfaceOrientationPortrait; }
-- (int)alertInterfaceOrientation { return UIInterfaceOrientationPortrait; }
 %end
 */
 
 %hook UIDevice
 -(UIUserInterfaceIdiom) userInterfaceIdiom
 {
-    if (IS_SPRINGBOARD || ignorePhoneMode)
-        return %orig;
+    UIUserInterfaceIdiom origIdiom = %orig;
 
-    if ([RAFakePhoneMode shouldFakeForThisProcess])
+    if (IS_SPRINGBOARD || ignorePhoneMode)
+        return origIdiom;
+
+    if (origIdiom != UIUserInterfaceIdiomPhone && [RAFakePhoneMode shouldFakeForThisProcess])
         return UIUserInterfaceIdiomPhone;
 
-    return %orig;
+    return origIdiom;
 }
 %end
 

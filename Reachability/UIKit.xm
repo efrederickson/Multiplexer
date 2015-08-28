@@ -1,16 +1,17 @@
 #import "headers.h"
 
-BOOL overrideViewControllerDismissal = NO;
+//BOOL overrideViewControllerDismissal = NO;
 
 %hook UIApplication
 - (void)_deactivateReachability
 {
-    if (overrideViewControllerDismissal)
+    //if (overrideViewControllerDismissal)
         return;
-    %orig;
+    //%orig;
 }
 %end
 
+/*
 %hook UIWindow
 - (void)makeKeyAndVisible
 {
@@ -68,3 +69,4 @@ BOOL overrideViewControllerDismissal = NO;
     overrideViewControllerDismissal = NO;
 }
 %end
+*/

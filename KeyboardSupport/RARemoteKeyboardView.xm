@@ -4,8 +4,6 @@
 #import <Foundation/Foundation.h>
 #import "RAMessagingServer.h"
 
-CPDistributedMessagingCenter *messagingCenter;
-
 @implementation RARemoteKeyboardView
 @synthesize layerHost = _layerHost;
 

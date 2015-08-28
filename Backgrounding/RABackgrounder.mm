@@ -180,7 +180,7 @@ NSMutableDictionary *temporaryShouldPop = [NSMutableDictionary dictionary];
 
 -(void) updateIconIndicatorForIdentifier:(NSString*)identifier withInfo:(RAIconIndicatorViewInfo)info
 {
-	SBIconView *ret = nil;
+	__weak SBIconView *ret = nil;
     if ([[[objc_getClass("SBIconViewMap") homescreenMap] iconModel] respondsToSelector:@selector(applicationIconForBundleIdentifier:)])
     {
         // iOS 8.0+

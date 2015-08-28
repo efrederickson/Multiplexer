@@ -164,10 +164,11 @@ BOOL overrideUIWindow = NO;
 
 		if ([self isKindOfClass:c1] || [self isKindOfClass:c2])
 			return;
-		if (self != RADesktopManager.sharedInstance.currentDesktop)
+		__weak RADesktopWindow *currentDesktop = RADesktopManager.sharedInstance.currentDesktop;
+		if (currentDesktop && self != currentDesktop && currentDesktop.hidden == NO)
 		{
 			//[RADesktopManager.sharedInstance.currentDesktop performSelector:@selector(_orderFrontWithoutMakingKey)];
-			[RADesktopManager.sharedInstance.currentDesktop makeKeyAndVisible];
+			[currentDesktop makeKeyAndVisible];
 		}
 	}
 }

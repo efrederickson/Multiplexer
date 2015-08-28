@@ -61,7 +61,8 @@
 	if (s && [RASettings.sharedInstance missionControlEnabled] && [[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999] != nil)
 	{
 		[UIView animateWithDuration:0.3 animations:^{
-			[[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999].alpha = 1;
+			if (![RAMissionControlManager.sharedInstance isShowingMissionControl])
+				[[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999].alpha = 1;
 		}];
 	}
 	return s;

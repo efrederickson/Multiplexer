@@ -10,6 +10,17 @@
 
 -(UIImage*) snapshotForIdentifier:(NSString*)identifier orientation:(UIInterfaceOrientation)orientation
 {
+	if (![NSThread isMainThread])
+	{
+		__block id result = nil;
+		NSOperationQueue* targetQueue = [NSOperationQueue mainQueue];
+		[targetQueue addOperationWithBlock:^{
+		    result = [self snapshotForIdentifier:identifier orientation:orientation];
+		}];
+		[targetQueue waitUntilAllOperationsAreFinished];
+		return result;
+	}
+
 	if ([imageCache objectForKey:identifier] != nil) return [imageCache objectForKey:identifier];
 	
 	UIImage *image = nil;
@@ -120,13 +131,17 @@
 
 	// https://stackoverflow.com/questions/20764623/rotate-newly-created-ios-image-90-degrees-prior-to-saving-as-png
 
-	//Calculate the size of the rotated view's containing box for our drawing space
-	static UIView *rotatedViewBox = [[UIView alloc] init];
-	rotatedViewBox.frame = CGRectMake(0,0,oldImage.size.width, oldImage.size.height);
-	CGAffineTransform t = CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(degrees));
-	rotatedViewBox.transform = t;
+	__block CGSize rotatedSize;
+	dispatch_sync(dispatch_get_main_queue(), ^{
+		//Calculate the size of the rotated view's containing box for our drawing space
+		static UIView *rotatedViewBox = [[UIView alloc] init];
+		rotatedViewBox.frame = CGRectMake(0,0,oldImage.size.width, oldImage.size.height);
+		CGAffineTransform t = CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(degrees));
+		rotatedViewBox.transform = t;
+		rotatedSize = rotatedViewBox.frame.size;
+	});
 
-	CGSize rotatedSize = rotatedViewBox.frame.size;
+	//CGSize rotatedSize = rotatedViewBox.frame.size;
 	//CGSize rotatedSize = CGSizeApplyAffineTransform(oldImage.size, CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(degrees)));
 
 	//Create the bitmap context
@@ -150,15 +165,13 @@
 
 -(UIImage*) renderPreviewForDesktop:(RADesktopWindow*)desktop
 {
-	UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].bounds.size, YES, [UIScreen mainScreen].scale);
+	UIGraphicsBeginImageContextWithOptions(UIScreen.mainScreen.bounds.size, YES, UIScreen.mainScreen.scale);
 	CGContextRef c = UIGraphicsGetCurrentContext();
 
-	//[MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer renderInContext:c]; // Wallpaper
-	//[[[[%c(SBUIController) sharedInstance] window] layer] renderInContext:c]; // Icons
-	//[desktop.layer renderInContext:c]; // Desktop windows
-
-    [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"BeautifulAnimation"];
-    [[%c(SBUIController) sharedInstance] restoreContentAndUnscatterIconsAnimated:NO];
+	dispatch_sync(dispatch_get_main_queue(), ^{
+	    [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"BeautifulAnimation"];
+	    [[%c(SBUIController) sharedInstance] restoreContentAndUnscatterIconsAnimated:NO];
+	});
 
 	[MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Wallpaper
 	[[[[%c(SBUIController) sharedInstance] window] layer] performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Icons
@@ -178,32 +191,10 @@
 			coreImage = [coreImage imageByApplyingTransform:CGAffineTransformInvert(view.transform)];
 			image = [UIImage imageWithCIImage:coreImage];
 			[image drawInRect:view.frame];
-
-			//[image drawInRect:CGRectMake([hostedView convertPoint:hostedView.frame.origin toView:nil].x, [hostedView convertPoint:hostedView.frame.origin toView:nil].y, view.frame.size.width, view.frame.size.height)];
-    		//CGContextConcatCTM(c, view.transform);
-
-			/*SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:hostedView.bundleIdentifier];
-			FBScene *scene = [app mainScene];
-    		FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
-    		UIView *snapshotView = [contextHostManager snapshotViewWithFrame:hostedView.frame excludingContexts:@[] opaque:NO];
-    		
-			UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].bounds.size, YES, [UIScreen mainScreen].scale);
-			CGContextRef c2 = UIGraphicsGetCurrentContext();
-			//CGContextSetRGBFillColor(c2, 0, 0, 0, 0); // CGContextSetGrayFillColor
-    		//snapshotView.layer.frame = (CGRect) { [desktop convertPoint:view.frame.origin toView:nil], view.frame.size };
-    		//snapshotView.transform = view.transform;
-    		[snapshotView.layer renderInContext:c2];
-    		UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-    		UIGraphicsEndImageContext();
-
-    		// TODO: needs to be improved, no status bar + it's slightly off
-			//CGContextDrawImage(c, CGRectMake(view.frame.origin.x + hostedView.frame.origin.x, view.frame.origin.y + hostedView.frame.origin.y, hostedView.frame.size.width, hostedView.frame.size.height), image.CGImage);
-			[image drawInRect:CGRectMake(view.frame.origin.x, [hostedView convertPoint:hostedView.frame.origin toView:nil].y, view.frame.size.width, view.frame.size.height)];
-			*/
 		}
 	}
-	if (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation))
-		CGContextRotateCTM(c, DEGREES_TO_RADIANS(90));
+	//if (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation))
+	//	CGContextRotateCTM(c, DEGREES_TO_RADIANS(90));
 	UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
 	UIGraphicsEndImageContext();
 	image = [self rotateImageToMatchOrientation:image];

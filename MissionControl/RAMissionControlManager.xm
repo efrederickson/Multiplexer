@@ -10,7 +10,6 @@
 #import "RAAppKiller.h"
 #import "RAGestureManager.h"
 #import "RAWindowStatePreservationSystemManager.h"
-#import "RALockStateUpdater.h"
 #import "RAHostManager.h"
 #import "RARunningAppsProvider.h"
 
@@ -75,6 +74,12 @@ CGRect swappedForOrientation2(CGRect in)
 
 -(void) showMissionControl:(BOOL)animated
 {
+	if (![NSThread isMainThread])
+	{
+		dispatch_sync(dispatch_get_main_queue(), ^{ [self showMissionControl:animated]; });
+		return;
+	}
+	
 	_isShowingMissionControl = YES;
 
 	SBApplication *app = UIApplication.sharedApplication._accessibilityFrontMostApplication;
@@ -100,11 +105,6 @@ CGRect swappedForOrientation2(CGRect in)
 
 	if (animated)
 	{
-		if (![NSThread isMainThread])
-		{
-			dispatch_sync(dispatch_get_main_queue(), ^{ [self showMissionControl:animated]; });
-			return;
-		}
 		//[UIView animateWithDuration:0.5 animations:^{ window.alpha = 1; }];
 		[UIView animateWithDuration:0.5 animations:^{ window.frame = CGRectMake(0, 0, window.frame.size.width, window.frame.size.height); } completion:nil];
 
@@ -129,6 +129,7 @@ CGRect swappedForOrientation2(CGRect in)
 	[RAGestureManager.sharedInstance ignoreSwipesBeginningInRect:UIScreen.mainScreen.bounds forIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
 	[RARunningAppsProvider.sharedInstance addTarget:window];
 	[[%c(SBUIController) sharedInstance] _lockOrientationForSwitcher];
+    [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"RAMissionControlManager"];
 	self.inhibitDismissalGesture = NO;
 	overrideCC = YES;
 }
@@ -210,6 +211,7 @@ CGRect swappedForOrientation2(CGRect in)
 	[RAGestureManager.sharedInstance removeGestureWithIdentifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture"];
 	[RAGestureManager.sharedInstance stopIgnoringSwipesForIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
 	[[%c(SBUIController) sharedInstance] releaseSwitcherOrientationLock];
+    [[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"RAMissionControlManager"];
 	if (updateStatusBar)
 		UIApplication.sharedApplication.statusBarHidden = lastStatusBarHidden;
 	overrideCC = NO;

@@ -6,44 +6,56 @@
 	SHARED_INSTANCE2(RARunningAppsProvider, 
 		sharedInstance->apps = [NSMutableArray array]; 
 		sharedInstance->targets = [NSMutableArray array];
+		sharedInstance->lock = [[NSLock alloc] init];
 	);
 }
 
--(void) addRunningApp:(SBApplication*)app
+-(void) addRunningApp:(__unsafe_unretained SBApplication*)app
 {
-	@synchronized(apps) { @synchronized(targets) {
-		[apps addObject:app];
+	[lock lock];
 
-		for (NSObject<RARunningAppsProviderDelegate>* target in targets)
-			if ([target respondsToSelector:@selector(appDidStart:)])
+	[apps addObject:app];
+	for (NSObject<RARunningAppsProviderDelegate>* target in targets)
+		if ([target respondsToSelector:@selector(appDidStart:)])
+    		dispatch_async(dispatch_get_main_queue(), ^{
 				[target appDidStart:app];
-	}}
+			});
+
+	[lock unlock];
 }
 
--(void) removeRunningApp:(SBApplication*)app
+-(void) removeRunningApp:(__unsafe_unretained SBApplication*)app
 {
-	@synchronized(apps) { @synchronized(targets) {
-		[apps removeObject:app];
+	[lock lock];
 
-		for (NSObject<RARunningAppsProviderDelegate>* target in targets)
-			if ([target respondsToSelector:@selector(appDidDie:)])
+	[apps removeObject:app];
+
+	for (NSObject<RARunningAppsProviderDelegate>* target in targets)
+		if ([target respondsToSelector:@selector(appDidDie:)])
+ 	   		dispatch_async(dispatch_get_main_queue(), ^{
 				[target appDidDie:app];
-	}}
+			});
+
+	[lock unlock];
 }
 
 -(void) addTarget:(__weak NSObject<RARunningAppsProviderDelegate>*)target
 {
-	@synchronized(apps) { @synchronized(targets) {
-		if ([targets containsObject:target] == NO)
-			[targets addObject:target];
-	}}
+	[lock lock];
+
+	if ([targets containsObject:target] == NO)
+		[targets addObject:target];
+
+	[lock unlock];
 }
 
 -(void) removeTarget:(__weak NSObject<RARunningAppsProviderDelegate>*)target
 {
-	@synchronized(apps) { @synchronized(targets) {
-		[targets removeObject:target];
-	}}
+	[lock lock];
+
+	[targets removeObject:target];
+
+	[lock unlock];
 }
 
 -(NSArray*) runningApplications { return apps; }

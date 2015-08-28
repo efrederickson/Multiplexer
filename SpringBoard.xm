@@ -87,7 +87,9 @@
     NSArray *apps = MSHookIvar<NSArray*>(self, "_toApplications");
     for (SBApplication *app in apps)
     {
-        [RADesktopManager.sharedInstance removeAppWithIdentifier:app.bundleIdentifier animated:NO forceImmediateUnload:YES];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [RADesktopManager.sharedInstance removeAppWithIdentifier:app.bundleIdentifier animated:NO forceImmediateUnload:YES];
+        });
     }
     %orig;
 }

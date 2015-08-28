@@ -14,7 +14,7 @@
     NSString *substring = [string substringWithRange: NSMakeRange(start, length)];
     NSString *fullHex = length == 2 ? substring : [NSString stringWithFormat: @"%@%@", substring, substring];
     unsigned hexComponent;
-    [[NSScanner scannerWithString: fullHex] scanHexInt: &hexComponent];
+    [[NSScanner scannerWithString:fullHex] scanHexInt:&hexComponent];
     return hexComponent / 255.0;
 }
 

@@ -74,6 +74,74 @@ return sharedInstance;
 
 extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+@interface BKSProcess : NSObject { //BSBaseXPCClient  {
+    int _pid;
+    NSString *_bundlePath;
+    NSObject<OS_dispatch_queue> *_clientQueue;
+    bool _workspaceLocked;
+    bool _connectedToExternalAccessories;
+    bool _nowPlayingWithAudio;
+    bool _recordingAudio;
+    bool _supportsTaskSuspension;
+    int _visibility;
+    int _taskState;
+    NSObject *_delegate;
+    long long _terminationReason;
+    long long _exitStatus;
+}
+
+@property (nonatomic, weak) NSObject * delegate;
+@property int visibility;
+@property long long terminationReason;
+@property long long exitStatus;
+@property bool workspaceLocked;
+@property bool connectedToExternalAccessories;
+@property bool nowPlayingWithAudio;
+@property bool recordingAudio;
+@property bool supportsTaskSuspension;
+@property int taskState;
+@property(readonly) double backgroundTimeRemaining;
+
++ (id)busyExtensionInstances:(id)arg1;
++ (void)setTheSystemApp:(int)arg1 identifier:(id)arg2;
++ (double)backgroundTimeRemaining;
+
+- (void)setVisibility:(int)arg1;
+- (int)visibility;
+- (void)_sendMessageType:(int)arg1 withMessage:(id)arg2 withReplyHandler:(id)arg3 waitForReply:(bool)arg4;
+- (long long)exitStatus;
+- (id)initWithPID:(int)arg1 bundlePath:(id)arg2 visibility:(int)arg3 workspaceLocked:(bool)arg4 queue:(id)arg5;
+- (bool)supportsTaskSuspension;
+- (void)setTerminationReason:(long long)arg1;
+- (void)setConnectedToExternalAccessories:(bool)arg1;
+- (void)setNowPlayingWithAudio:(bool)arg1;
+- (void)setRecordingAudio:(bool)arg1;
+- (void)setWorkspaceLocked:(bool)arg1;
+- (void)setTaskState:(int)arg1;
+- (void)queue_connectionWasCreated;
+- (void)queue_connectionWasInterrupted;
+- (void)queue_handleMessage:(id)arg1;
+- (bool)recordingAudio;
+- (bool)nowPlayingWithAudio;
+- (bool)connectedToExternalAccessories;
+- (bool)workspaceLocked;
+- (void)setExitStatus:(long long)arg1;
+- (void)_handleDebuggingStateChanged:(id)arg1;
+- (void)_handleExpirationWarning:(id)arg1;
+- (void)_handleSuspendedStateChanged:(id)arg1;
+- (void)_sendMessageType:(int)arg1 withMessage:(id)arg2;
+- (int)taskState;
+- (double)backgroundTimeRemaining;
+- (void)setSupportsTaskSuspension:(bool)arg1;
+- (id)delegate;
+- (id)init;
+- (void)setDelegate:(NSObject*)arg1;
+- (void)dealloc;
+- (long long)terminationReason;
+@end
+
 @interface SBAppSwitcherSnapshotView : UIView
 - (void)setOrientation:(long long)arg1 orientationBehavior:(int)arg2;
 - (void)_loadSnapshotAsync;
