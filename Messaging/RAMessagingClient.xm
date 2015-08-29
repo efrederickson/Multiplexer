@@ -51,7 +51,7 @@ extern const char *__progname;
 
 -(void) _requestUpdateFromServerWithTries:(int)tries
 {
-	if (!NSBundle.mainBundle.bundleIdentifier || strcmp(__progname, "assertiond") == 0)
+	if (!NSBundle.mainBundle.bundleIdentifier || strcmp(__progname, "assertiond") == 0 || strcmp(__progname, "searchd") == 0)
 		return;
 	NSDictionary *dict = @{ @"bundleIdentifier": NSBundle.mainBundle.bundleIdentifier };
 	NSDictionary *data = [serverCenter sendMessageAndReceiveReplyName:RAMessagingUpdateAppInfoMessageName userInfo:dict];
