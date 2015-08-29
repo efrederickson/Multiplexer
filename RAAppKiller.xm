@@ -10,7 +10,7 @@ extern "C" void BKSTerminateApplicationForReasonAndReportWithDescription(NSStrin
 
 +(void) killAppWithIdentifier:(NSString*)identifier completion:(void(^)())handler
 {
-	return [RAAppKiller killAppWithSBApplication:[[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:identifier] completion:handler];
+	return [RAAppKiller killAppWithSBApplication:[[%c(SBApplicationController) sharedInstance] RA_applicationWithBundleIdentifier:identifier] completion:handler];
 }
 
 +(void) killAppWithSBApplication:(SBApplication*)app
