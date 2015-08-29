@@ -54,7 +54,6 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
 
 /*
 %hook UIApplication
-/*
 -(BOOL) _isClassic
 {
     return %orig;
@@ -62,14 +61,7 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
     if (IS_SPRINGBOARD || ignorePhoneMode)
         return %orig;
 
-    if (!RAMessagingClient.sharedInstance.hasRecievedData)
-    {
-        ignorePhoneMode = YES;
-        [RAMessagingClient.sharedInstance requestUpdateFromServer];
-        ignorePhoneMode = NO;
-    }
-
-    if (RAMessagingClient.sharedInstance.currentData.forcePhoneMode)
+    if ([RAFakePhoneMode shouldFakeForThisProcess])
         return YES;
 
     return %orig;
@@ -77,7 +69,7 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
 
 - (void)_setClassicMode:(int)arg1
 {
-    %orig;
+    %orig([RAFakePhoneMode shouldFakeForThisProcess] ? 2 : arg1);
     // 0 = no classic
     // 1 = standard
     // 2 = 5/5s?

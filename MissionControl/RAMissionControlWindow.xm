@@ -187,14 +187,6 @@
 		windowedLabel.text = LOCALIZE(@"ON_THIS_DESKTOP");
 		[self addSubview:windowedLabel];
 
-		otherKillAllButton = [UIButton buttonWithType:UIButtonTypeCustom];
-		[otherKillAllButton setTitle:LOCALIZE(@"KILL_ALL") forState:UIControlStateNormal];
-		otherKillAllButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
-		otherKillAllButton.titleLabel.textColor = [UIColor whiteColor];
-		otherKillAllButton.frame = CGRectMake(self.frame.size.width - 100, y, 100 - panePadding, 25);
-		[otherKillAllButton addTarget:self action:@selector(killAllWindowed) forControlEvents:UIControlEventTouchUpInside];
-		[self addSubview:otherKillAllButton];
-
 		windowedAppScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + windowedLabel.frame.size.height, self.frame.size.width, height * 1.15)];
 		windowedAppScrollView.backgroundColor = [THEMED(missionControlScrollViewBackgroundColor) colorWithAlphaComponent:THEMED(missionControlScrollViewOpacity)];
 		windowedAppScrollView.pagingEnabled = [RASettings.sharedInstance missionControlPagingEnabled];
@@ -236,7 +228,16 @@
 		emptyLabel.alpha = 0.7;
 		[windowedAppScrollView addSubview:emptyLabel];
 	}
-
+	else
+	{
+		windowedKillAllButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		[windowedKillAllButton setTitle:LOCALIZE(@"KILL_ALL") forState:UIControlStateNormal];
+		windowedKillAllButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
+		windowedKillAllButton.titleLabel.textColor = [UIColor whiteColor];
+		windowedKillAllButton.frame = CGRectMake(self.frame.size.width - 100, y, 100 - panePadding, 25);
+		[windowedKillAllButton addTarget:self action:@selector(killAllWindowed) forControlEvents:UIControlEventTouchUpInside];
+		[self addSubview:windowedKillAllButton];
+	}
 	windowedAppScrollView.contentSize = CGSizeMake(MAX(x, self.frame.size.width + (empty ? 0 : 1)), height * 1.15); // make slightly scrollable
 }
 
@@ -256,14 +257,6 @@
 		otherLabel.textColor = UIColor.whiteColor;
 		otherLabel.text = LOCALIZE(@"RUNNING_ELSEWHERE");
 		[self addSubview:otherLabel];
-
-		otherKillAllButton = [UIButton buttonWithType:UIButtonTypeCustom];
-		[otherKillAllButton setTitle:LOCALIZE(@"KILL_ALL") forState:UIControlStateNormal];
-		otherKillAllButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
-		otherKillAllButton.titleLabel.textColor = [UIColor whiteColor];
-		otherKillAllButton.frame = CGRectMake(self.frame.size.width - 100, y, 100 - panePadding, 25);
-		[otherKillAllButton addTarget:self action:@selector(killAllOther) forControlEvents:UIControlEventTouchUpInside];
-		[self addSubview:otherKillAllButton];
 
 		otherRunningAppsScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, y + otherLabel.frame.size.height, self.frame.size.width, height * 1.15)];
 		otherRunningAppsScrollView.backgroundColor = [THEMED(missionControlScrollViewBackgroundColor) colorWithAlphaComponent:THEMED(missionControlScrollViewOpacity)];
@@ -303,6 +296,16 @@
 		emptyLabel.textColor = [UIColor whiteColor];
 		emptyLabel.alpha = 0.7;
 		[otherRunningAppsScrollView addSubview:emptyLabel];
+	}
+	else
+	{
+		otherKillAllButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		[otherKillAllButton setTitle:LOCALIZE(@"KILL_ALL") forState:UIControlStateNormal];
+		otherKillAllButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
+		otherKillAllButton.titleLabel.textColor = [UIColor whiteColor];
+		otherKillAllButton.frame = CGRectMake(self.frame.size.width - 100, y, 100 - panePadding, 25);
+		[otherKillAllButton addTarget:self action:@selector(killAllOther) forControlEvents:UIControlEventTouchUpInside];
+		[self addSubview:otherKillAllButton];
 	}
 
 	otherRunningAppsScrollView.contentSize = CGSizeMake(MAX(x, self.frame.size.width + (empty ? 0 : 1)), height * 1.15); // make slightly scrollable

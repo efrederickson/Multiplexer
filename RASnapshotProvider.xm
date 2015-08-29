@@ -171,8 +171,8 @@
 	UIGraphicsBeginImageContextWithOptions(UIScreen.mainScreen.bounds.size, YES, UIScreen.mainScreen.scale);
 	CGContextRef c = UIGraphicsGetCurrentContext();
 
+    [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"BeautifulAnimation"];
 	dispatch_sync(dispatch_get_main_queue(), ^{
-	    [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"BeautifulAnimation"];
 	    [[%c(SBUIController) sharedInstance] restoreContentAndUnscatterIconsAnimated:NO];
 	});
 
