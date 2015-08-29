@@ -62,6 +62,7 @@
 	ret.windowedMultitaskingOverlayColor = COLOR(@"windowedMultitaskingOverlayColor");
 
 	ret.swipeOverDetachBarColor = COLOR(@"swipeOverDetachBarColor");
+	ret.swipeOverDetachImageColor = COLOR(@"swipeOverDetachImageColor") ?: [UIColor RA_colorWithHexString:@"swipeOverDetachImageColor"];
 
 	ret.quickAccessUseGenericTabLabel = [dict objectForKey:@"quickAccessUseGenericTabLabel"] == nil ? NO : [dict[@"quickAccessUseGenericTabLabel"] boolValue];
 

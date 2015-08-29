@@ -55,4 +55,5 @@
 // SwipeOver
 
 @property (nonatomic, retain) UIColor *swipeOverDetachBarColor;
+@property (nonatomic, retain) UIColor *swipeOverDetachImageColor;
 @end
