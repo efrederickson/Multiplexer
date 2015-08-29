@@ -244,6 +244,7 @@ extern BOOL launchNextOpenIntoWindow;
 		ret.shouldForceOrientation = NO;
 		ret.forcePhoneMode = NO;
 		ret.shouldUseExternalKeyboard = NO;
+		ret.isBeingHosted = NO;
 	}
 	return ret;
 }

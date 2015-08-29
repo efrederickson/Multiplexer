@@ -27,6 +27,7 @@ extern const char *__progname;
 	data.shouldForceOrientation = NO;
 	data.shouldUseExternalKeyboard = NO;
 	data.forcePhoneMode = NO;
+	data.isBeingHosted = NO;
 
 	_currentData = data; // Initialize data
 

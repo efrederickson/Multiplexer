@@ -1,4 +1,5 @@
 #import "headers.h"
+#import "RAMessagingClient.h"
 
 //BOOL overrideViewControllerDismissal = NO;
 
@@ -6,8 +7,11 @@
 - (void)_deactivateReachability
 {
     //if (overrideViewControllerDismissal)
+    if ([RAMessagingClient.sharedInstance isBeingHosted])
+    {
         return;
-    //%orig;
+    }
+    %orig;
 }
 %end
 

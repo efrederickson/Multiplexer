@@ -140,7 +140,8 @@ id SBWorkspace$sharedInstance;
     {
         [RAMessagingServer.sharedInstance endResizingApp:lastBundleIdentifier completion:nil];
         [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:NO forApp:lastBundleIdentifier completion:nil];
-    [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:lastBundleIdentifier completion:nil];
+        [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:lastBundleIdentifier completion:nil];
+        [RAMessagingServer.sharedInstance setHosted:NO forIdentifier:lastBundleIdentifier completion:nil];
     }
     if (currentBundleIdentifier)
         [RAMessagingServer.sharedInstance endResizingApp:currentBundleIdentifier completion:nil];
@@ -579,6 +580,7 @@ CGFloat startingY = -1;
         [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:YES forApp:targetIdentifier completion:nil];
         [RAMessagingServer.sharedInstance rotateApp:targetIdentifier toOrientation:[UIApplication sharedApplication].statusBarOrientation completion:nil];
         [RAMessagingServer.sharedInstance forceStatusBarVisibility:YES forApp:targetIdentifier completion:nil];
+        [RAMessagingServer.sharedInstance setHosted:YES forIdentifier:targetIdentifier completion:nil];
     }
 
     if ([view isKindOfClass:[%c(FBWindowContextHostWrapperView) class]] == NO && [view isKindOfClass:[RAAppSliderProviderView class]] == NO)
@@ -608,6 +610,7 @@ CGFloat startingY = -1;
     }
     [RAMessagingServer.sharedInstance resizeApp:currentBundleIdentifier toSize:CGSizeMake(width, height) completion:nil];
     [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:YES forApp:currentBundleIdentifier completion:nil];
+    [RAMessagingServer.sharedInstance setHosted:YES forIdentifier:currentBundleIdentifier completion:nil];
 
     if ([RASettings.sharedInstance unifyStatusBar])
         [RAMessagingServer.sharedInstance forceStatusBarVisibility:NO forApp:currentBundleIdentifier completion:nil];
