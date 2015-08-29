@@ -7,8 +7,6 @@
 #define BOOL(key, default) ([_settings objectForKey:key] != nil ? [_settings[key] boolValue] : default) 
 
 NSDictionary *_settings = nil;
-int enabled = -1;
-int disableAutoDismiss = -1;
 
 @implementation RASettings
 +(instancetype)sharedInstance
@@ -27,47 +25,56 @@ int disableAutoDismiss = -1;
 
 -(void) reloadSettings
 {
-	// Prepare specialized setting change cases
-	NSString *previousNCAppSetting = self.NCApp;
+	@autoreleasepool {
+		//NSLog(@"[ReachApp] reloading settings");
+		// Prepare specialized setting change cases
+		NSString *previousNCAppSetting = self.NCApp;
 
-	// Reload Settings
-	if (_settings)
-		_settings = nil;
-	CFPreferencesAppSynchronize(CFSTR("com.efrederickson.reachapp.settings"));
-	CFStringRef appID = CFSTR("com.efrederickson.reachapp.settings");
-	CFArrayRef keyList = CFPreferencesCopyKeyList(appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+		// Reload Settings
+		if (_settings)
+		{
+			//CFRelease((__bridge CFDictionaryRef)_settings);
+			_settings = nil;
+		}
+		CFPreferencesAppSynchronize(CFSTR("com.efrederickson.reachapp.settings"));
+		CFStringRef appID = CFSTR("com.efrederickson.reachapp.settings");
+		CFArrayRef keyList = CFPreferencesCopyKeyList(appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
 
-	BOOL failed = NO;
+		BOOL failed = NO;
 
-	if (keyList) {
-		_settings = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-		CFRelease(keyList);
-		if (!_settings) {
-			//NSLog(@"[ReachApp] failure loading from CFPreferences");
+		if (keyList) 
+		{
+			//_settings = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+			_settings = (NSDictionary*)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost));
+			CFRelease(keyList);
+
+			if (!_settings) 
+			{
+				//NSLog(@"[ReachApp] failure loading from CFPreferences");
+				failed = YES;
+			}
+		}
+		else 
+		{
+			//NSLog(@"[ReachApp] failure loading keyList");
 			failed = YES;
 		}
+		CFRelease(appID);
+
+		if (failed)
+		{
+			_settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"];
+			//NSLog(@"[ReachApp] settings sandbox load: %@", _settings == nil ? @"failed" : @"succeed");
+		}
+
+		if ([previousNCAppSetting isEqual:self.NCApp] == NO)
+			[[objc_getClass("RANCViewController") sharedViewController] forceReloadAppLikelyBecauseTheSettingChanged]; // using objc_getClass allows RASettings to be used in reachappsettings
+
+		if ([self shouldShowStatusBarIcons] == NO && [objc_getClass("SBApplication") respondsToSelector:@selector(RA_clearAllStatusBarIcons)])
+			[objc_getClass("SBApplication") performSelector:@selector(RA_clearAllStatusBarIcons)];
+
+		[RAThemeManager.sharedInstance invalidateCurrentThemeAndReload:[self currentThemeIdentifier]];
 	}
-	else 
-	{
-		//NSLog(@"[ReachApp] failure loading keyList");
-		failed = YES;
-	}
-
-	if (failed)
-	{
-		_settings = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.efrederickson.reachapp.settings.plist"];
-		//NSLog(@"[ReachApp] settings sandbox load: %@", _settings == nil ? @"failed" : @"succeed");
-	}
-
-	enabled = -1;
-
-	if ([previousNCAppSetting isEqual:self.NCApp] == NO)
-		[[objc_getClass("RANCViewController") sharedViewController] forceReloadAppLikelyBecauseTheSettingChanged]; // using objc_getClass allows RASettings to be used in reachappsettings
-
-	if ([self shouldShowStatusBarIcons] == NO && [objc_getClass("SBApplication") respondsToSelector:@selector(RA_clearAllStatusBarIcons)])
-		[objc_getClass("SBApplication") performSelector:@selector(RA_clearAllStatusBarIcons)];
-
-	[RAThemeManager.sharedInstance invalidateCurrentThemeAndReload:[self currentThemeIdentifier]];
 }
 
 -(BOOL) enabled

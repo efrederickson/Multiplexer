@@ -21,49 +21,52 @@
 		return result;
 	}
 
-	if ([imageCache objectForKey:identifier] != nil) return [imageCache objectForKey:identifier];
-	
-	UIImage *image = nil;
+	@autoreleasepool {
 
-	SBDisplayItem *item = [%c(SBDisplayItem) displayItemWithType:@"App" displayIdentifier:identifier];
-	SBAppSwitcherSnapshotView *view = [[[%c(SBUIController) sharedInstance] switcherController] performSelector:@selector(_snapshotViewForDisplayItem:) withObject:item];
-	[view setOrientation:orientation orientationBehavior:0];
-	if (view)
-	{
-		[view performSelectorOnMainThread:@selector(_loadSnapshotSync) withObject:nil waitUntilDone:YES];
-		image = MSHookIvar<UIImageView*>(view, "_snapshotImageView").image;	
-	}
+		if ([imageCache objectForKey:identifier] != nil) return [imageCache objectForKey:identifier];
+		
+		UIImage *image = nil;
 
-	if (!image)
-	{
-		SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:identifier];
-
-		if (app && app.mainSceneID)
+		SBDisplayItem *item = [%c(SBDisplayItem) displayItemWithType:@"App" displayIdentifier:identifier];
+		SBAppSwitcherSnapshotView *view = [[[%c(SBUIController) sharedInstance] switcherController] performSelector:@selector(_snapshotViewForDisplayItem:) withObject:item];
+		[view setOrientation:orientation orientationBehavior:0];
+		if (view)
 		{
-			CGRect frame = CGRectMake(0, 0, 0, 0);
-			UIView *view = [%c(SBUIController) _zoomViewWithSplashboardLaunchImageForApplication:app sceneID:app.mainSceneID screen:UIScreen.mainScreen interfaceOrientation:0 includeStatusBar:YES snapshotFrame:&frame];
-
-			if (view)
-			{
-				UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].bounds.size, YES, [UIScreen mainScreen].scale);
-				CGContextRef c = UIGraphicsGetCurrentContext();
-				//CGContextSetAllowsAntialiasing(c, YES);
-				[view.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES];
-				image = UIGraphicsGetImageFromCurrentImageContext();
-				UIGraphicsEndImageContext();
-				view.layer.contents = nil;
-			}
+			[view performSelectorOnMainThread:@selector(_loadSnapshotSync) withObject:nil waitUntilDone:YES];
+			image = MSHookIvar<UIImageView*>(view, "_snapshotImageView").image;	
 		}
-		if (!image) // we can only hope it does not reach this point of desperation
-			image = [UIImage imageWithContentsOfFile:[NSString stringWithFormat:@"%@/Default.png", app.path]];
-	}
 
-	if (image)
-	{
-		[imageCache setObject:image forKey:identifier];
-	}
+		if (!image)
+		{
+			SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:identifier];
 
-	return image;
+			if (app && app.mainSceneID)
+			{
+				CGRect frame = CGRectMake(0, 0, 0, 0);
+				UIView *view = [%c(SBUIController) _zoomViewWithSplashboardLaunchImageForApplication:app sceneID:app.mainSceneID screen:UIScreen.mainScreen interfaceOrientation:0 includeStatusBar:YES snapshotFrame:&frame];
+
+				if (view)
+				{
+					UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].bounds.size, YES, [UIScreen mainScreen].scale);
+					CGContextRef c = UIGraphicsGetCurrentContext();
+					//CGContextSetAllowsAntialiasing(c, YES);
+					[view.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES];
+					image = UIGraphicsGetImageFromCurrentImageContext();
+					UIGraphicsEndImageContext();
+					view.layer.contents = nil;
+				}
+			}
+			if (!image) // we can only hope it does not reach this point of desperation
+				image = [UIImage imageWithContentsOfFile:[NSString stringWithFormat:@"%@/Default.png", app.path]];
+		}
+
+		if (image)
+		{
+			[imageCache setObject:image forKey:identifier];
+		}
+
+		return image;
+	}
 }
 
 -(UIImage*) snapshotForIdentifier:(NSString*)identifier

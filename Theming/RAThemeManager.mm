@@ -20,6 +20,7 @@
 #endif
 
 	currentTheme = nil;
+	[allThemes removeAllObjects];
 	allThemes = [NSMutableDictionary dictionary];
 
 	NSString *folderName = [NSString stringWithFormat:@"%@/Themes/", RA_BASE_PATH];

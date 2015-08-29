@@ -110,18 +110,20 @@ NSMutableDictionary *temporaryShouldPop = [NSMutableDictionary dictionary];
 
 -(NSInteger) backgroundModeForIdentifier:(NSString*)identifier
 {
-	if (!identifier || [RASettings.sharedInstance backgrounderEnabled] == NO)
-		return RABackgroundModeNative;
+	@autoreleasepool {
+		if (!identifier || [RASettings.sharedInstance backgrounderEnabled] == NO)
+			return RABackgroundModeNative;
 
-	NSInteger temporaryOverride = [self popTemporaryOverrideForApplication:identifier];
-	if (temporaryOverride != -1)
-		return temporaryOverride;
+		NSInteger temporaryOverride = [self popTemporaryOverrideForApplication:identifier];
+		if (temporaryOverride != -1)
+			return temporaryOverride;
 
-	NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
-	BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
-	if (!enabled)
-		return [self globalBackgroundMode];
-	return [dict[@"backgroundMode"] intValue];
+		NSDictionary *dict = [RASettings.sharedInstance rawCompiledBackgrounderSettingsForIdentifier:identifier];
+		BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
+		if (!enabled)
+			return [self globalBackgroundMode];
+		return [dict[@"backgroundMode"] intValue];
+	}
 }
 
 -(BOOL) hasUnlimitedBackgroundTime:(NSString*)identifier
@@ -180,22 +182,24 @@ NSMutableDictionary *temporaryShouldPop = [NSMutableDictionary dictionary];
 
 -(void) updateIconIndicatorForIdentifier:(NSString*)identifier withInfo:(RAIconIndicatorViewInfo)info
 {
-	__weak SBIconView *ret = nil;
-    if ([[[objc_getClass("SBIconViewMap") homescreenMap] iconModel] respondsToSelector:@selector(applicationIconForBundleIdentifier:)])
-    {
-        // iOS 8.0+
+	@autoreleasepool {
+		SBIconView *ret = nil;
+	    if ([[[objc_getClass("SBIconViewMap") homescreenMap] iconModel] respondsToSelector:@selector(applicationIconForBundleIdentifier:)])
+	    {
+	        // iOS 8.0+
 
-        SBIcon *icon = [[[objc_getClass("SBIconViewMap") homescreenMap] iconModel] applicationIconForBundleIdentifier:identifier];
-        ret = [[objc_getClass("SBIconViewMap") homescreenMap] mappedIconViewForIcon:icon];
-    }
-    else
-    {
-        // iOS 7.X
-        SBIcon *icon = [[[objc_getClass("SBIconViewMap") homescreenMap] iconModel] applicationIconForDisplayIdentifier:identifier];
-        ret = [[objc_getClass("SBIconViewMap") homescreenMap] mappedIconViewForIcon:icon];
-    }
+	        SBIcon *icon = [[[objc_getClass("SBIconViewMap") homescreenMap] iconModel] applicationIconForBundleIdentifier:identifier];
+	        ret = [[objc_getClass("SBIconViewMap") homescreenMap] mappedIconViewForIcon:icon];
+	    }
+	    else
+	    {
+	        // iOS 7.X
+	        SBIcon *icon = [[[objc_getClass("SBIconViewMap") homescreenMap] iconModel] applicationIconForDisplayIdentifier:identifier];
+	        ret = [[objc_getClass("SBIconViewMap") homescreenMap] mappedIconViewForIcon:icon];
+	    }
 
-    [ret RA_updateIndicatorView:info];
+	    [ret RA_updateIndicatorView:info];
+	}
 }
 
 -(BOOL) shouldShowIndicatorForIdentifier:(NSString*)identifier
