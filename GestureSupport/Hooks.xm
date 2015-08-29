@@ -2,7 +2,7 @@
 #import "RAGestureManager.h"
 
 /*
-Some code modified or adapted or based off of MultitaskingGestures by HamzaSood. 
+Some code modified/adapted/based off of MultitaskingGestures by HamzaSood. 
 MultitaskingGestures source code: https://github.com/hamzasood/MultitaskingGestures/
 License (GPL): https://github.com/hamzasood/MultitaskingGestures/blob/master/License.md
 */
@@ -32,6 +32,9 @@ struct VelocityData {
 
     [objc_getAssociatedObject(self, @selector(RA_velocityData)) getValue:&oldData];
     
+    // this is really quite simple, it calculates a velocity based off of
+    // (current location - last location) / (time taken to move from last location to current location)
+    // which effectively gives you a CGPoint of where it would end if the user continued the gesture.
     CGPoint velocity = CGPointMake((location.x - oldData.location.x) / (timestamp - oldData.timestamp), (location.y - oldData.location.y) / (timestamp - oldData.timestamp));
     newData.velocity = velocity;
     newData.location = location;
@@ -120,7 +123,7 @@ struct VelocityData {
             if ([RAGestureManager.sharedInstance handleMovementOrStateUpdate:UIGestureRecognizerStateBegan withPoint:location velocity:screenEdgePanRecognizer.RA_velocity forEdge:screenEdgePanRecognizer.targetEdges])
             {
                 currentEdge = screenEdgePanRecognizer.targetEdges;
-                BKSHIDServicesCancelTouchesOnMainDisplay();
+                BKSHIDServicesCancelTouchesOnMainDisplay(); // This is needed or open apps, etc will still get touch events. For example open settings app + swipeover without this line and you can still scroll up/down through the settings
             }
         }
     }
@@ -133,7 +136,7 @@ struct VelocityData {
             _UIScreenEdgePanRecognizer *targetRecognizer = nil;
             for (_UIScreenEdgePanRecognizer *recognizer in gestureRecognizers)
             {
-                if (recognizer.targetEdges & currentEdge) // TODO: verify
+                if (recognizer.targetEdges & currentEdge)
                     targetRecognizer = recognizer;
             }
 
