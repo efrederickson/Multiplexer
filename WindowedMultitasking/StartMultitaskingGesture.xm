@@ -145,6 +145,7 @@ BOOL locationIsInValidArea(CGFloat x)
                 [UIView animateWithDuration:0.2 animations:^{ appView.transform = CGAffineTransformIdentity; }];
                 [[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"BeautifulAnimation"];
             }
+            appView = nil;
 
         }
 
