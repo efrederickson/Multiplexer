@@ -44,7 +44,11 @@ extern int rotationDegsForOrientation(int o);
 -(void) stopUsingSwipeOver
 {
 	[overlayWindow removeOverlayFromUnderlyingAppImmediately];
-	[RAMessagingServer.sharedInstance endResizingApp:currentAppIdentifier completion:nil];
+	if (currentAppIdentifier)
+	{
+		[RAMessagingServer.sharedInstance endResizingApp:currentAppIdentifier completion:nil];
+		[RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:YES forApp:currentAppIdentifier completion:nil];	
+	}
 	[[%c(SBUIController) sharedInstance] releaseSwitcherOrientationLock];
 
 	isUsingSwipeOver = NO;
@@ -174,6 +178,8 @@ extern int rotationDegsForOrientation(int o);
 		[alert show];
 		return;
 	}
+
+	[RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:YES forApp:currentAppIdentifier completion:nil];
 
 	if ([[overlayWindow currentView] isKindOfClass:[RAHostedAppView class]])
 		((RAHostedAppView*)[overlayWindow currentView]).autosizesApp = YES;
