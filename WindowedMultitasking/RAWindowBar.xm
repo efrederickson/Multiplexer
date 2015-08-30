@@ -596,7 +596,10 @@ const int bottomSizeViewTag =  987654320;
 	}
 
 	if (!enableDrag || didSize)
+	{
+		[self removePotentialSnapShadow];
 		return;
+	}
 
 	if (sender.state == UIGestureRecognizerStateBegan)
 	{

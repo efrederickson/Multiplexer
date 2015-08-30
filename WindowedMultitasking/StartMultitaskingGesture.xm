@@ -132,7 +132,9 @@ BOOL locationIsInValidArea(CGFloat x)
                     [(FBWorkspaceEventQueue*)[%c(FBWorkspaceEventQueue) sharedInstance] executeOrAppendEvent:event];
                     [[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"BeautifulAnimation"];
                     // Open in window
-                    [RADesktopManager.sharedInstance.currentDesktop createAppWindowForSBApplication:topApp animated:YES];
+                    RAWindowBar *windowBar = [RADesktopManager.sharedInstance.currentDesktop createAppWindowForSBApplication:topApp animated:YES];
+                    if (RADesktopManager.sharedInstance.lastUsedWindow == nil)
+                        RADesktopManager.sharedInstance.lastUsedWindow = windowBar;
                     // Pop forced foreground backgrounding
                     [RABackgrounder.sharedInstance queueRemoveTemporaryOverrideForIdentifier:topApp.bundleIdentifier];
                     [RABackgrounder.sharedInstance removeTemporaryOverrideForIdentifier:topApp.bundleIdentifier];

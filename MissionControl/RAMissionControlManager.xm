@@ -106,17 +106,14 @@ CGRect swappedForOrientation2(CGRect in)
 	if (animated)
 	{
 		//[UIView animateWithDuration:0.5 animations:^{ window.alpha = 1; }];
-		[UIView animateWithDuration:0.5 animations:^{ window.frame = CGRectMake(0, 0, window.frame.size.width, window.frame.size.height); } completion:nil];
+		[UIView animateWithDuration:0.5 animations:^{ 
+			window.frame = CGRectMake(0, 0, window.frame.size.width, window.frame.size.height); 
 
-		if (originalAppView)
-			[UIView animateWithDuration:0.5 animations:^{
-				originalAppView.frame = swappedForOrientation2(CGRectMake(originalAppFrame.origin.x, originalAppView.frame.size.height, originalAppFrame.size.width, originalAppFrame.size.height));
-			} completion:^(BOOL _) {
-				//originalAppView.frame = originalAppFrame;
-				//dismissApp();
-			}];
+			if (originalAppView)
+					originalAppView.frame = swappedForOrientation2(CGRectMake(originalAppFrame.origin.x, originalAppView.frame.size.height, originalAppFrame.size.width, originalAppFrame.size.height));
+		} completion:nil];
 	}
-	else if (lastOpenedApp) // dismiss even if not animating open
+	else if (originalAppView) // dismiss even if not animating open
 	{
 		originalAppView.frame = swappedForOrientation2(CGRectMake(originalAppFrame.origin.x, originalAppView.frame.size.height, originalAppFrame.size.width, originalAppFrame.size.height));
 	}
@@ -193,11 +190,12 @@ CGRect swappedForOrientation2(CGRect in)
 
 	if (animated)
 	{
-		if (originalAppView)
-			[UIView animateWithDuration:0.5 animations:^{
-				originalAppView.frame = originalAppFrame;
-			}];
-		[UIView animateWithDuration:0.5 animations:^{ window.frame = swappedForOrientation(CGRectMake(0, -window.frame.size.height, window.frame.size.width, window.frame.size.height)); } completion:^(BOOL _) { destructor(); }];
+		[UIView animateWithDuration:0.5 animations:^{
+			window.frame = swappedForOrientation(CGRectMake(0, -window.frame.size.height, window.frame.size.width, window.frame.size.height)); 
+
+			if (originalAppView)
+					originalAppView.frame = originalAppFrame;
+		} completion:^(BOOL _) { destructor(); }];
 	}
 	else
 	{

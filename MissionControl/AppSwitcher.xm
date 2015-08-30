@@ -5,6 +5,8 @@
 #import "RASettings.h"
 #import "RASnapshotProvider.h"
 
+BOOL allowMissionControlActivationFromSwitcher = YES;
+
 %hook SBAppSwitcherController
 - (void)forceDismissAnimated:(_Bool)arg1
 {
@@ -62,7 +64,12 @@
 	{
 		[UIView animateWithDuration:0.3 animations:^{
 			if (![RAMissionControlManager.sharedInstance isShowingMissionControl])
+			{
+				allowMissionControlActivationFromSwitcher = YES;
 				[[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999].alpha = 1;
+			}
+			else
+				allowMissionControlActivationFromSwitcher = NO;
 		}];
 	}
 	return s;
@@ -179,7 +186,7 @@
 
 %new -(BOOL) RAGestureCallback_canHandle:(CGPoint)point velocity:(CGPoint)velocity
 {
-	return [RASettings.sharedInstance missionControlEnabled] && self.view.window.isKeyWindow;
+	return allowMissionControlActivationFromSwitcher && [RASettings.sharedInstance missionControlEnabled] && self.view.window.isKeyWindow;
 }
 
 %new -(RAGestureCallbackResult) RAGestureCallback_handle:(UIGestureRecognizerState)state withPoint:(CGPoint)location velocity:(CGPoint)velocity forEdge:(UIRectEdge)edge
@@ -296,8 +303,8 @@
 				fakeView.frame = UIScreen.mainScreen._interfaceOrientedBounds;
 			} completion:^(BOOL _) {
 				[[%c(SBUIController) sharedInstance] restoreContentUpdatingStatusBar:YES];
-				[RAMissionControlManager.sharedInstance showMissionControl:NO];
 				[[[%c(SBUIController) sharedInstance] _appSwitcherController] forceDismissAnimated:NO];
+				[RAMissionControlManager.sharedInstance showMissionControl:NO];
 				[fakeView removeFromSuperview];
 				fakeView = nil;
 			}];

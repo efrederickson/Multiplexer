@@ -17,6 +17,7 @@
 	UIButton *windowedKillAllButton, *otherKillAllButton;
 	
 	UIImageView *trashImageView;
+	UIView *shadowView;
 	UIImage *trashIcon;
 
 	NSMutableArray *runningApplications;
@@ -227,16 +228,26 @@
 		emptyLabel.textColor = [UIColor whiteColor];
 		emptyLabel.alpha = 0.7;
 		[windowedAppScrollView addSubview:emptyLabel];
+
+		if (windowedKillAllButton)
+		{
+			[windowedKillAllButton removeFromSuperview];
+			windowedKillAllButton = nil;
+		}
 	}
 	else
 	{
-		windowedKillAllButton = [UIButton buttonWithType:UIButtonTypeCustom];
-		[windowedKillAllButton setTitle:LOCALIZE(@"KILL_ALL") forState:UIControlStateNormal];
-		windowedKillAllButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
-		windowedKillAllButton.titleLabel.textColor = [UIColor whiteColor];
-		windowedKillAllButton.frame = CGRectMake(self.frame.size.width - 100, y, 100 - panePadding, 25);
-		[windowedKillAllButton addTarget:self action:@selector(killAllWindowed) forControlEvents:UIControlEventTouchUpInside];
-		[self addSubview:windowedKillAllButton];
+		if (!windowedKillAllButton)
+		{
+			windowedKillAllButton = [UIButton buttonWithType:UIButtonTypeCustom];
+			[windowedKillAllButton setTitle:LOCALIZE(@"KILL_ALL") forState:UIControlStateNormal];
+			windowedKillAllButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
+			windowedKillAllButton.titleLabel.textColor = [UIColor whiteColor];
+			[windowedKillAllButton sizeToFit];
+			windowedKillAllButton.frame = CGRectMake(self.frame.size.width - panePadding - windowedKillAllButton.frame.size.width, y, windowedKillAllButton.frame.size.width, windowedKillAllButton.frame.size.height);
+			[windowedKillAllButton addTarget:self action:@selector(killAllWindowed) forControlEvents:UIControlEventTouchUpInside];
+			[self addSubview:windowedKillAllButton];
+		}
 	}
 	windowedAppScrollView.contentSize = CGSizeMake(MAX(x, self.frame.size.width + (empty ? 0 : 1)), height * 1.15); // make slightly scrollable
 }
@@ -296,16 +307,26 @@
 		emptyLabel.textColor = [UIColor whiteColor];
 		emptyLabel.alpha = 0.7;
 		[otherRunningAppsScrollView addSubview:emptyLabel];
+
+		if (otherKillAllButton)
+		{
+			[otherKillAllButton removeFromSuperview];
+			otherKillAllButton = nil;
+		}
 	}
 	else
 	{
-		otherKillAllButton = [UIButton buttonWithType:UIButtonTypeCustom];
-		[otherKillAllButton setTitle:LOCALIZE(@"KILL_ALL") forState:UIControlStateNormal];
-		otherKillAllButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
-		otherKillAllButton.titleLabel.textColor = [UIColor whiteColor];
-		otherKillAllButton.frame = CGRectMake(self.frame.size.width - 100, y, 100 - panePadding, 25);
-		[otherKillAllButton addTarget:self action:@selector(killAllOther) forControlEvents:UIControlEventTouchUpInside];
-		[self addSubview:otherKillAllButton];
+		if (!otherKillAllButton)
+		{
+			otherKillAllButton = [UIButton buttonWithType:UIButtonTypeCustom];
+			[otherKillAllButton setTitle:LOCALIZE(@"KILL_ALL") forState:UIControlStateNormal];
+			otherKillAllButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:14];
+			otherKillAllButton.titleLabel.textColor = [UIColor whiteColor];
+			[otherKillAllButton sizeToFit];
+			otherKillAllButton.frame = CGRectMake(self.frame.size.width - panePadding - otherKillAllButton.frame.size.width, y, otherKillAllButton.frame.size.width, otherKillAllButton.frame.size.height);
+			[otherKillAllButton addTarget:self action:@selector(killAllOther) forControlEvents:UIControlEventTouchUpInside];
+			[self addSubview:otherKillAllButton];
+		}
 	}
 
 	otherRunningAppsScrollView.contentSize = CGSizeMake(MAX(x, self.frame.size.width + (empty ? 0 : 1)), height * 1.15); // make slightly scrollable
@@ -373,10 +394,20 @@
 			trashImageView = [[UIImageView alloc] initWithFrame:CGRectMake((UIScreen.mainScreen._interfaceOrientedBounds.size.width / 2) - (75/2), UIScreen.mainScreen._interfaceOrientedBounds.size.height + 75, 75, 75)];
 			trashImageView.image = trashIcon;
 			[self addSubview:trashImageView];
+
+			shadowView = [[UIView alloc] initWithFrame:CGRectMake(0, UIScreen.mainScreen._interfaceOrientedBounds.size.height, UIScreen.mainScreen._interfaceOrientedBounds.size.width, 75)];
+			shadowView.backgroundColor = [UIColor blackColor];
+			shadowView.layer.shadowColor = [UIColor blackColor].CGColor;
+			shadowView.layer.shadowRadius = 75/2;
+		    shadowView.layer.shadowOpacity = 0.9;
+		    shadowView.layer.shadowOffset = CGSizeMake(0, -((75 / 2)));
+		    shadowView.alpha = 0;
+		    [self addSubview:shadowView];
 		}
 		[UIView animateWithDuration:0.4 animations:^{
+			shadowView.alpha = 1;
 			trashImageView.alpha = 1;
-			trashImageView.frame = CGRectMake((UIScreen.mainScreen._interfaceOrientedBounds.size.width / 2) - (75/2), UIScreen.mainScreen._interfaceOrientedBounds.size.height - (75+50), 75, 75);
+			trashImageView.frame = CGRectMake((UIScreen.mainScreen._interfaceOrientedBounds.size.width / 2) - (75/2), UIScreen.mainScreen._interfaceOrientedBounds.size.height - (75+45), 75, 75);
 		}];
 
 		if (draggedView == nil)
@@ -419,7 +450,7 @@
 
 		BOOL didKill = NO;
 
-		if (CGRectContainsPoint(trashImageView.frame, center))
+		if (CGRectContainsPoint(trashImageView.frame, center) || CGRectContainsPoint(CGRectOffset(shadowView.frame, 0, -(75/2)), center))
 		{
 			SBApplication *app = ((RAMissionControlPreviewView*)gesture.view).application;
 			[RADesktopManager.sharedInstance removeAppWithIdentifier:app.bundleIdentifier animated:NO];
@@ -439,8 +470,10 @@
 			didKill = YES;
 		}
 		[UIView animateWithDuration:0.4 animations:^{
+			shadowView.alpha = 0;
 			trashImageView.alpha = 0;
 			trashImageView.frame = CGRectMake((UIScreen.mainScreen._interfaceOrientedBounds.size.width / 2) - (75/2), UIScreen.mainScreen._interfaceOrientedBounds.size.height + 75, 75, 75);
+		} completion:^(BOOL _) {
 		}];
 
 		if (!didKill)

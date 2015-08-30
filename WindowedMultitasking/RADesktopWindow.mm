@@ -54,6 +54,8 @@
 
 	lastKnownOrientation = -1;
 
+	//view.shouldUseExternalKeyboard = YES;
+
 	if ([RAWindowStatePreservationSystemManager.sharedInstance hasWindowInformationForIdentifier:view.app.bundleIdentifier])
 	{
 		RAPreservedWindowInformation info = [RAWindowStatePreservationSystemManager.sharedInstance windowInformationForAppIdentifier:view.app.bundleIdentifier];
@@ -107,6 +109,7 @@
 		if ([view.bundleIdentifier isEqual:identifier])
 		{
 			void (^destructor)() = ^{
+				//view.shouldUseExternalKeyboard = NO;
 				[view unloadApp:force];
 				[view.superview removeFromSuperview];
 				[view removeFromSuperview];
