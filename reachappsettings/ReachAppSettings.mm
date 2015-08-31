@@ -188,7 +188,29 @@
                  @"action": @"openThemingDocumentation",
                  @"icon": @"tutorial.png",
                  },
+             @{
+                 @"cell": @"PSButtonCell",
+                 @"action": @"resetData",
+                 @"label": @"Reset All Settings & Respring",
+                 @"icon": @"Reset.png"
+                 }
              ];
+}
+
+-(void) resetData
+{
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Multiplexer" message:@"Please confirm your choice to reset all settings & respring." delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:nil];
+    [alert addButtonWithTitle:@"Yes"];
+    [alert show];
+}
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex 
+{
+    if (buttonIndex == 1) 
+    {
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.resetSettings"), nil, nil, YES);
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.respring"), nil, nil, YES);
+    }
 }
 
 -(void) openThemingDocumentation

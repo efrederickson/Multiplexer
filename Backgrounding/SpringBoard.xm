@@ -25,11 +25,12 @@
 %hook FBUIApplicationResignActiveManager
 -(void) _sendResignActiveForReason:(int)arg1 toProcess:(__unsafe_unretained FBApplicationProcess*)arg2
 {
-    /*if ([RABackgrounder.sharedInstance shouldSuspendImmediately:arg2.bundleIdentifier])
+    if ([RABackgrounder.sharedInstance shouldSuspendImmediately:arg2.bundleIdentifier])
     {
         __weak BKSProcess *bkProcess = MSHookIvar<BKSProcess*>(arg2, "_bksProcess");
-        [bkProcess _handleExpirationWarning:nil];
-    }*/
+        //[bkProcess _handleExpirationWarning:nil];
+        [arg2 processWillExpire:bkProcess];
+    }
     
     if ([RABackgrounder.sharedInstance shouldKeepInForeground:arg2.bundleIdentifier] == NO)
         %orig;
@@ -114,6 +115,7 @@
     %orig;
 }
 
+/*
 -(BOOL) _queue_supportsBackgroundTaskAssertions
 {
     if ([RABackgrounder.sharedInstance shouldSuspendImmediately:self.bundleIdentifier])
@@ -138,4 +140,5 @@
     }
     return %orig;
 }
+*/
 %end

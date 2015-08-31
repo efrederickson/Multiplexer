@@ -42,20 +42,28 @@
 
 			if (app && app.mainSceneID)
 			{
-				CGRect frame = CGRectMake(0, 0, 0, 0);
-				UIView *view = [%c(SBUIController) _zoomViewWithSplashboardLaunchImageForApplication:app sceneID:app.mainSceneID screen:UIScreen.mainScreen interfaceOrientation:0 includeStatusBar:YES snapshotFrame:&frame];
-
-				if (view)
+				@try
 				{
-					UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].bounds.size, YES, [UIScreen mainScreen].scale);
-					CGContextRef c = UIGraphicsGetCurrentContext();
-					//CGContextSetAllowsAntialiasing(c, YES);
-					[view.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES];
-					image = UIGraphicsGetImageFromCurrentImageContext();
-					UIGraphicsEndImageContext();
-					view.layer.contents = nil;
+					CGRect frame = CGRectMake(0, 0, 0, 0);
+					UIView *view = [%c(SBUIController) _zoomViewWithSplashboardLaunchImageForApplication:app sceneID:app.mainSceneID screen:UIScreen.mainScreen interfaceOrientation:0 includeStatusBar:YES snapshotFrame:&frame];
+
+					if (view)
+					{
+						UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].bounds.size, YES, [UIScreen mainScreen].scale);
+						CGContextRef c = UIGraphicsGetCurrentContext();
+						//CGContextSetAllowsAntialiasing(c, YES);
+						[view.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES];
+						image = UIGraphicsGetImageFromCurrentImageContext();
+						UIGraphicsEndImageContext();
+						view.layer.contents = nil;
+					}
+				}
+				@catch (NSException *ex)
+				{
+					NSLog(@"[ReachApp] error generating snapshot: %@", ex);
 				}
 			}
+
 			if (!image) // we can only hope it does not reach this point of desperation
 				image = [UIImage imageWithContentsOfFile:[NSString stringWithFormat:@"%@/Default.png", app.path]];
 		}

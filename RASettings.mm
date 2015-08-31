@@ -77,6 +77,20 @@ NSDictionary *_settings = nil;
 	}
 }
 
+-(void) resetSettings
+{
+	CFPreferencesAppSynchronize(CFSTR("com.efrederickson.reachapp.settings"));
+	CFStringRef appID = CFSTR("com.efrederickson.reachapp.settings");
+	CFArrayRef keyList = CFPreferencesCopyKeyList(appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+
+	if (keyList) 
+	{
+		CFPreferencesSetMultiple(NULL, keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+		CFRelease(keyList);
+	}
+	CFRelease(appID);
+}
+
 -(BOOL) enabled
 {
 	return BOOL(@"enabled", YES);

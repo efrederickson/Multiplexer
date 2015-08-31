@@ -121,6 +121,11 @@ void respring_notification(CFNotificationCenterRef center, void *observer, CFStr
     [[UIApplication sharedApplication] _relaunchSpringBoardNow];
 }
 
+void reset_settings_notification(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
+{
+    [RASettings.sharedInstance resetSettings];
+}
+
 %ctor
 {
     if (SPRINGBOARD)
@@ -129,5 +134,6 @@ void respring_notification(CFNotificationCenterRef center, void *observer, CFStr
         LOAD_ASPHALEIA;
 
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, respring_notification, CFSTR("com.efrederickson.reachapp.respring"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
+        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, reset_settings_notification, CFSTR("com.efrederickson.reachapp.reset_settings"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
     }
 }

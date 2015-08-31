@@ -801,7 +801,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 - (void)killForReason:(int)arg1 andReport:(BOOL)arg2 withDescription:(id)arg3 completion:(id/*block*/)arg4;
 - (void)killForReason:(int)arg1 andReport:(BOOL)arg2 withDescription:(id)arg3;
 @property(readonly, copy, nonatomic) NSString *bundleIdentifier;
-
+- (void)processWillExpire:(id)arg1;
 @end
 
 @interface UITextEffectsWindow : UIWindow

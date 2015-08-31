@@ -15,6 +15,7 @@ enum RAGrabArea {
 +(instancetype)sharedInstance;
 
 -(void) reloadSettings;
+-(void) resetSettings;
 
 -(BOOL) enabled;
 
