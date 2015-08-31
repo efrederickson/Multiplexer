@@ -63,13 +63,7 @@ BOOL allowMissionControlActivationFromSwitcher = YES;
 	if (s && [RASettings.sharedInstance missionControlEnabled] && [[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999] != nil)
 	{
 		[UIView animateWithDuration:0.3 animations:^{
-			if (![RAMissionControlManager.sharedInstance isShowingMissionControl])
-			{
-				allowMissionControlActivationFromSwitcher = YES;
-				[[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999].alpha = 1;
-			}
-			else
-				allowMissionControlActivationFromSwitcher = NO;
+			[[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999].alpha = 1;
 		}];
 	}
 	return s;

@@ -86,9 +86,6 @@ CGRect swappedForOrientation2(CGRect in)
 	if (app)
 		lastOpenedApp = app;
 
-	if (window)
-		window = nil;
-
 	[self createWindow];
 
 	if (animated)
@@ -119,12 +116,8 @@ CGRect swappedForOrientation2(CGRect in)
 	}
 
 	[window updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
-	updateStatusBar = ![[%c(SBUIController) sharedInstance] isAppSwitcherShowing];
+	updateStatusBar = YES;
 	lastStatusBarHidden = UIApplication.sharedApplication.statusBarHidden;
-	if (!originalAppView)
-	{
-		[self forceStatusBarToShowOnExit];
-	}
 	UIApplication.sharedApplication.statusBarHidden = NO;
 	[RAGestureManager.sharedInstance addGestureRecognizerWithTarget:self forEdge:UIRectEdgeBottom identifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture" priority:RAGesturePriorityHigh];
 	[RAGestureManager.sharedInstance ignoreSwipesBeginningInRect:UIScreen.mainScreen.bounds forIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
@@ -139,6 +132,8 @@ CGRect swappedForOrientation2(CGRect in)
 {
 	if (window)
 	{
+		if (originalAppView)
+			originalAppView.frame = originalAppFrame;
 		window.hidden = YES;
 		window = nil;
 	}
@@ -186,7 +181,6 @@ CGRect swappedForOrientation2(CGRect in)
 
 	void (^destructor)() = ^{
 		originalAppView = nil;
-		_isShowingMissionControl = NO;
 		[window deconstructComponents];
 		window.hidden = YES;
 		window = nil;
@@ -208,6 +202,7 @@ CGRect swappedForOrientation2(CGRect in)
 		destructor();
 	}
 
+	_isShowingMissionControl = NO;
 	[RADesktopManager.sharedInstance reshowDesktop];
 	[RADesktopManager.sharedInstance.currentDesktop loadApps];
 	[RAGestureManager.sharedInstance removeGestureWithIdentifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture"];

@@ -714,6 +714,9 @@ const int bottomSizeViewTag =  987654320;
 {
 	if (![RASettings.sharedInstance snapWindows])
 		return;
+
+	if (![RASettings.sharedInstance showSnapHelper])
+		return;
 		
 	if (!snapShadowView)
 	{

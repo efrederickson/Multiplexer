@@ -88,6 +88,10 @@ NSDictionary *_settings = nil;
 		CFPreferencesSetMultiple(NULL, keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
 		CFRelease(keyList);
 	}
+	else
+	{
+		NSLog(@"[ReachApp] unable to get keyList to reset settings");
+	}
 	CFRelease(appID);
 }
 
@@ -307,6 +311,7 @@ NSDictionary *_settings = nil;
 -(BOOL) onlyShowWindowBarIconsOnOverlay { return BOOL(@"onlyShowWindowBarIconsOnOverlay", NO); }
 -(BOOL) quickAccessUseGenericTabLabel { return BOOL(@"quickAccessUseGenericTabLabel", NO); }
 -(BOOL) ncAppHideOnLS { return BOOL(@"ncAppHideOnLS", NO); }
+-(BOOL) showSnapHelper { return BOOL(@"showSnapHelper", NO); }
 
 -(RAGrabArea) windowedMultitaskingGrabArea
 {

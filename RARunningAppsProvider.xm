@@ -12,6 +12,7 @@
 
 -(void) addRunningApp:(__unsafe_unretained SBApplication*)app
 {
+	NSLog(@"[ReachApp] Running Apps :: add [lock]");
 	[lock lock];
 
 	[apps addObject:app];
@@ -22,10 +23,12 @@
 			});
 
 	[lock unlock];
+	NSLog(@"[ReachApp] Running Apps :: add [UNlock]");
 }
 
 -(void) removeRunningApp:(__unsafe_unretained SBApplication*)app
 {
+	NSLog(@"[ReachApp] Running Apps :: remove [lock]");
 	[lock lock];
 
 	[apps removeObject:app];
@@ -37,6 +40,7 @@
 			});
 
 	[lock unlock];
+	NSLog(@"[ReachApp] Running Apps :: remove [UNlock]");
 }
 
 -(void) addTarget:(__weak NSObject<RARunningAppsProviderDelegate>*)target

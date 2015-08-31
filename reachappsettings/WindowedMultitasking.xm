@@ -129,6 +129,14 @@
                  @"label": @"Rotation Snapping",
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
+                 @{
+                 @"cell": @"PSSwitchCell",
+                 @"default": @NO,
+                 @"defaults": @"com.efrederickson.reachapp.settings",
+                 @"key": @"showSnapHelper",
+                 @"label": @"Show Snap Helper",
+                 @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
+                 }
 
              @{ @"label": @"Lock button action" },
              @{

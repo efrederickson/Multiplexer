@@ -46,6 +46,7 @@ enum RAGrabArea {
 -(BOOL) launchIntoWindows;
 -(BOOL) windowedMultitaskingCompleteAnimations;
 -(BOOL) openLinksInWindows;
+-(BOOL) showSnapHelper;
 
 -(NSInteger) globalBackgroundMode;
 -(BOOL) shouldShowStatusBarIcons;
