@@ -181,13 +181,13 @@
                  @"action": @"showTutorial",
                  @"icon": @"tutorial.png",
                  @"enabled": @NO,
-                 },
+                 },/*
              @{
                  @"cell": @"PSLinkCell",
                  @"label": @"Theming Documentation",
                  @"action": @"openThemingDocumentation",
                  @"icon": @"tutorial.png",
-                 },
+                 },*/
              @{
                  @"cell": @"PSButtonCell",
                  @"action": @"resetData",
@@ -209,7 +209,6 @@
     if (buttonIndex == 1) 
     {
         CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.resetSettings"), nil, nil, YES);
-        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.respring"), nil, nil, YES);
     }
 }
 

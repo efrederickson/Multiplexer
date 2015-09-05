@@ -23,9 +23,9 @@
 %hook SBUIController
 - (_Bool)clickedMenuButton
 {
-	if ([RASwipeOverManager.sharedInstance isUsingSwipeOver])
+	if ([[%c(RASwipeOverManager) sharedInstance] isUsingSwipeOver])
 	{
-		[RASwipeOverManager.sharedInstance stopUsingSwipeOver];
+		[[%c(RASwipeOverManager) sharedInstance] stopUsingSwipeOver];
 		return YES;
 	}
 
@@ -35,9 +35,9 @@
         return YES;
     }
 
-    if (RAMissionControlManager.sharedInstance.isShowingMissionControl)
+    if ([[%c(RAMissionControlManager) sharedInstance] isShowingMissionControl])
     {
-        [RAMissionControlManager.sharedInstance hideMissionControl:YES];
+        [[%c(RAMissionControlManager) sharedInstance] hideMissionControl:YES];
         return YES;
     }
 
@@ -46,9 +46,9 @@
 
 - (_Bool)handleMenuDoubleTap
 {
-    if ([RASwipeOverManager.sharedInstance isUsingSwipeOver])
+    if ([[%c(RASwipeOverManager) sharedInstance] isUsingSwipeOver])
     {
-        [RASwipeOverManager.sharedInstance stopUsingSwipeOver];
+        [[%c(RASwipeOverManager) sharedInstance] stopUsingSwipeOver];
     }
 
     //if (RAMissionControlManager.sharedInstance.isShowingMissionControl)
@@ -65,11 +65,13 @@
 {
     %orig;
     [RADesktopManager sharedInstance]; // load desktop (and previous windows!)
+
+    [[%c(RAMissionControlManager) sharedInstance] setInhibitedApplications:[[[%c(SBIconViewMap) homescreenMap] iconModel] visibleIconIdentifiers]];
 }
 %end
 
 %hook SBApplicationController
-%new -(SBApplication*) RA_applicationWithBundleIdentifier:(NSString*)bundleIdentifier
+%new -(SBApplication*) RA_applicationWithBundleIdentifier:(__unsafe_unretained NSString*)bundleIdentifier
 {
     if ([self respondsToSelector:@selector(applicationWithBundleIdentifier:)])
         return [self applicationWithBundleIdentifier:bundleIdentifier];
@@ -84,7 +86,7 @@
 %hook SBToAppsWorkspaceTransaction
 - (void)_willBegin
 {
-    NSArray *apps = MSHookIvar<NSArray*>(self, "_toApplications");
+    NSArray *apps = [MSHookIvar<NSArray*>(self, "_toApplications") copy];
     for (SBApplication *app in apps)
     {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -116,6 +118,18 @@
 }
 %end
 
+%hook SBApplication
+- (void)didActivateWithTransactionID:(unsigned long long)arg1
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[%c(RAMissionControlManager) sharedInstance] uninhibitApplication:self.bundleIdentifier];
+        [RASnapshotProvider.sharedInstance forceReloadOfSnapshotForIdentifier:self.bundleIdentifier];
+    });
+        
+    %orig;
+}
+%end
+
 void respring_notification(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
 {
     [[UIApplication sharedApplication] _relaunchSpringBoardNow];
@@ -134,6 +148,6 @@ void reset_settings_notification(CFNotificationCenterRef center, void *observer,
         LOAD_ASPHALEIA;
 
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, respring_notification, CFSTR("com.efrederickson.reachapp.respring"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
-        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, reset_settings_notification, CFSTR("com.efrederickson.reachapp.reset_settings"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
+        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, reset_settings_notification, CFSTR("com.efrederickson.reachapp.resetSettings"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
     }
 }
