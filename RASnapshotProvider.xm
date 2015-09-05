@@ -10,7 +10,7 @@
 
 -(UIImage*) snapshotForIdentifier:(NSString*)identifier orientation:(UIInterfaceOrientation)orientation
 {
-	if (![NSThread isMainThread])
+	/*if (![NSThread isMainThread])
 	{
 		__block id result = nil;
 		NSOperationQueue* targetQueue = [NSOperationQueue mainQueue];
@@ -19,7 +19,7 @@
 		}];
 		[targetQueue waitUntilAllOperationsAreFinished];
 		return result;
-	}
+	}*/
 
 	@autoreleasepool {
 
@@ -28,8 +28,18 @@
 		UIImage *image = nil;
 
 		SBDisplayItem *item = [%c(SBDisplayItem) displayItemWithType:@"App" displayIdentifier:identifier];
-		SBAppSwitcherSnapshotView *view = [[[%c(SBUIController) sharedInstance] switcherController] performSelector:@selector(_snapshotViewForDisplayItem:) withObject:item];
-		[view setOrientation:orientation orientationBehavior:0];
+		__block SBAppSwitcherSnapshotView *view = nil;
+
+		void (^block)() = ^{
+			view = [[[%c(SBUIController) sharedInstance] switcherController] performSelector:@selector(_snapshotViewForDisplayItem:) withObject:item];
+			[view setOrientation:orientation orientationBehavior:0];
+		};
+
+		if (NSThread.isMainThread)
+			block();
+		else
+			dispatch_sync(dispatch_get_main_queue(), block);
+		
 		if (view)
 		{
 			[view performSelectorOnMainThread:@selector(_loadSnapshotSync) withObject:nil waitUntilDone:YES];
@@ -143,14 +153,20 @@
 	// https://stackoverflow.com/questions/20764623/rotate-newly-created-ios-image-90-degrees-prior-to-saving-as-png
 
 	__block CGSize rotatedSize;
-	dispatch_sync(dispatch_get_main_queue(), ^{
+
+	void (^block)() =  ^{
 		//Calculate the size of the rotated view's containing box for our drawing space
 		static UIView *rotatedViewBox = [[UIView alloc] init];
 		rotatedViewBox.frame = CGRectMake(0,0,oldImage.size.width, oldImage.size.height);
 		CGAffineTransform t = CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(degrees));
 		rotatedViewBox.transform = t;
 		rotatedSize = rotatedViewBox.frame.size;
-	});
+	};
+
+	if (NSThread.isMainThread)
+		block();
+	else
+		dispatch_sync(dispatch_get_main_queue(), block);
 
 	//CGSize rotatedSize = rotatedViewBox.frame.size;
 	//CGSize rotatedSize = CGSizeApplyAffineTransform(oldImage.size, CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(degrees)));
@@ -176,44 +192,52 @@
 
 -(UIImage*) renderPreviewForDesktop:(RADesktopWindow*)desktop
 {
-	UIGraphicsBeginImageContextWithOptions(UIScreen.mainScreen.bounds.size, YES, UIScreen.mainScreen.scale);
-	CGContextRef c = UIGraphicsGetCurrentContext();
+	@autoreleasepool {
+		UIGraphicsBeginImageContextWithOptions(UIScreen.mainScreen.bounds.size, YES, UIScreen.mainScreen.scale);
+		CGContextRef c = UIGraphicsGetCurrentContext();
 
-    [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"BeautifulAnimation"];
-	dispatch_sync(dispatch_get_main_queue(), ^{
-	    [[%c(SBUIController) sharedInstance] restoreContentAndUnscatterIconsAnimated:NO];
-	});
+	    [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"BeautifulAnimation"];
 
-	[MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Wallpaper
-	[[[[%c(SBUIController) sharedInstance] window] layer] performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Icons
-	[desktop.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Desktop windows
-	
-	for (UIView *view in desktop.subviews) // Application views
-	{
-		if ([view isKindOfClass:[RAWindowBar class]])
+	    void (^block)() = ^{
+		    [[%c(SBUIController) sharedInstance] restoreContentAndUnscatterIconsAnimated:NO];
+		};
+		
+		if (NSThread.isMainThread)
+			block();
+		else
+			dispatch_sync(dispatch_get_main_queue(), block);
+
+		[MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Wallpaper
+		[[[[%c(SBUIController) sharedInstance] window] layer] performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Icons
+		[desktop.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Desktop windows
+		
+		for (UIView *view in desktop.subviews) // Application views
 		{
-			RAHostedAppView *hostedView = [((RAWindowBar*)view) attachedView];
+			if ([view isKindOfClass:[RAWindowBar class]])
+			{
+				RAHostedAppView *hostedView = [((RAWindowBar*)view) attachedView];
 
-			UIImage *image = [self snapshotForIdentifier:hostedView.bundleIdentifier orientation:hostedView.orientation];
-			CIImage *coreImage = image.CIImage;
-			if (!coreImage)
-			    coreImage = [CIImage imageWithCGImage:image.CGImage];
+				UIImage *image = [self snapshotForIdentifier:hostedView.bundleIdentifier orientation:hostedView.orientation];
+				CIImage *coreImage = image.CIImage;
+				if (!coreImage)
+				    coreImage = [CIImage imageWithCGImage:image.CGImage];
 
-			coreImage = [coreImage imageByApplyingTransform:CGAffineTransformInvert(view.transform)];
-			image = [UIImage imageWithCIImage:coreImage];
-			[image drawInRect:view.frame];
+				coreImage = [coreImage imageByApplyingTransform:CGAffineTransformInvert(view.transform)];
+				image = [UIImage imageWithCIImage:coreImage];
+				[image drawInRect:view.frame];
+			}
 		}
+		//if (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation))
+		//	CGContextRotateCTM(c, DEGREES_TO_RADIANS(90));
+		UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+		UIGraphicsEndImageContext();
+		image = [self rotateImageToMatchOrientation:image];
+		MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer.contents = nil;
+		[[[%c(SBUIController) sharedInstance] window] layer].contents = nil;
+		desktop.layer.contents = nil;
+		[[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"BeautifulAnimation"];
+		return image;
 	}
-	//if (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation))
-	//	CGContextRotateCTM(c, DEGREES_TO_RADIANS(90));
-	UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-	UIGraphicsEndImageContext();
-	image = [self rotateImageToMatchOrientation:image];
-	MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer.contents = nil;
-	[[[%c(SBUIController) sharedInstance] window] layer].contents = nil;
-	desktop.layer.contents = nil;
-	[[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"BeautifulAnimation"];
-	return image;
 }
 
 -(void) forceReloadEverything
