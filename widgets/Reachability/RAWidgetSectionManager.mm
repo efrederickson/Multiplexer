@@ -7,10 +7,7 @@
 
 +(instancetype) sharedInstance
 {
-	static RAWidgetSectionManager *man = nil;
-	if (man == nil)
-		man = [[RAWidgetSectionManager alloc] init];
-	return man;
+	SHARED_INSTANCE(RAWidgetSectionManager);
 }
 
 -(id) init
