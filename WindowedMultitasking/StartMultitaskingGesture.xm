@@ -113,13 +113,15 @@ BOOL locationIsInValidArea(CGFloat x)
                     FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
                         SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:topApp];
                         [transaction begin];
+
+                        // Open in window
+                        RAWindowBar *windowBar = [RADesktopManager.sharedInstance.currentDesktop createAppWindowForSBApplication:topApp animated:YES];
+                        if (RADesktopManager.sharedInstance.lastUsedWindow == nil)
+                            RADesktopManager.sharedInstance.lastUsedWindow = windowBar;
                     }];
                     [(FBWorkspaceEventQueue*)[%c(FBWorkspaceEventQueue) sharedInstance] executeOrAppendEvent:event];
                     [[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"BeautifulAnimation"];
-                    // Open in window
-                    RAWindowBar *windowBar = [RADesktopManager.sharedInstance.currentDesktop createAppWindowForSBApplication:topApp animated:YES];
-                    if (RADesktopManager.sharedInstance.lastUsedWindow == nil)
-                        RADesktopManager.sharedInstance.lastUsedWindow = windowBar;
+
                     // Pop forced foreground backgrounding
                     [[%c(RABackgrounder) sharedInstance] queueRemoveTemporaryOverrideForIdentifier:topApp.bundleIdentifier];
                     [[%c(RABackgrounder) sharedInstance] removeTemporaryOverrideForIdentifier:topApp.bundleIdentifier];
@@ -133,7 +135,6 @@ BOOL locationIsInValidArea(CGFloat x)
                 [[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"BeautifulAnimation"];
             }
             appView = nil;
-
         }
 
         return RAGestureCallbackResultSuccess;

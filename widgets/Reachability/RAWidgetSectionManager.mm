@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import "RAWidgetSectionManager.h"
+#import "headers.h"
 
 #define VERTICAL_PADDING (5)
 
