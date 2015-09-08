@@ -142,6 +142,19 @@
 }
 %end
 
+%hook SBLockStateAggregator
+-(void) _updateLockState
+{
+    %orig;
+    
+    if ([self hasAnyLockState])
+    {
+        if ([[%c(RASwipeOverManager) sharedInstance] isUsingSwipeOver])
+            [[%c(RASwipeOverManager) sharedInstance] stopUsingSwipeOver];
+    }
+}
+%end
+
 void respring_notification(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
 {
     [[UIApplication sharedApplication] _relaunchSpringBoardNow];

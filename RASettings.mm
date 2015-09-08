@@ -115,6 +115,9 @@
 
 -(void) resetSettings
 {
+	IF_NOT_SPRINGBOARD {
+		@throw [NSException exceptionWithName:@"NotSpringBoardException" reason:@"Cannot reset settings outside of SpringBoard" userInfo:nil];
+	}
 	CFPreferencesAppSynchronize(CFSTR("com.efrederickson.reachapp.settings"));
 	CFStringRef appID = CFSTR("com.efrederickson.reachapp.settings");
 	CFArrayRef keyList = CFPreferencesCopyKeyList(appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);

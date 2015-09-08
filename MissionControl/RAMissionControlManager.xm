@@ -125,6 +125,9 @@ CGRect swappedForOrientation2(CGRect in)
     [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"RAMissionControlManager"];
 	self.inhibitDismissalGesture = NO;
 	[%c(RAControlCenterInhibitor) setInhibited:YES];
+
+	if ([[%c(SBControlCenterController) sharedInstance] isVisible])
+		[[%c(SBControlCenterController) sharedInstance] dismissAnimated:YES];
 }
 
 -(void) createWindow

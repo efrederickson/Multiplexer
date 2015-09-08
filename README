@@ -1,11 +1,20 @@
-True multitasking. How you want it.
+Multitasking enhancer blah blah blah
 
 Depiction (and some more info): http://elijahandandrew.com/repo/depictions/ReachApp/
+See the /wiki for some code tutorials.
 
 Features:
-- Multitasking in Reachability
-- iOS 9-like SwipeOver
-- MissionControl with multiple desktops
-- Windowed multitasking
-- NC app
-- backgrounder like features
+- Multitasking in Reachability (ReachApp)
+- iOS 9-like "slide over" (SwipeOver)
+- MissionControl with multiple desktops (Mission Control)
+- Windowed multitasking (Empoleon)
+- NC app (Quick Access)
+- backgrounder-like features (Aura)
+
+
+There is a full public api (as opposed to the private/interval api and headers) that allows anyone to create addons, widgets, and tweaks (Tweakception!) for Multiplexer. 
+The public api can be found in public_api. This api is less likely to change or be removed as opposed to the other headers and stuff.
+For the end user's ease of use, please register your extensions with -[Multiplexer registerExtension:forMultiplexerVersion:]. I hope to also provide api requirements, etc at some point.
+
+Currently it is only compatible with iOS 8, however some measures have been taken to ease the process of making it compatible with other iOS editions (whether future or past).
+There are some "options" or features that are in here but are disabled or otherwise removed because either they don't work or there's no point having them. 

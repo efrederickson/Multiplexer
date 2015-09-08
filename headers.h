@@ -35,9 +35,13 @@
 #define NSLog(...)
 #endif
 
+#if MULTIPLEXER_CORE
 extern BOOL $__IS_SPRINGBOARD;
-//#define IS_SPRINGBOARD [NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"]
 #define IS_SPRINGBOARD $__IS_SPRINGBOARD
+#else
+#define IS_SPRINGBOARD [NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"]
+#endif
+
 #define IF_SPRINGBOARD if (IS_SPRINGBOARD)
 #define IF_NOT_SPRINGBOARD if (!IS_SPRINGBOARD)
 #define IF_THIS_PROCESS(x) if ([[x objectForKey:@"bundleIdentifier"] isEqual:NSBundle.mainBundle.bundleIdentifier])
@@ -78,6 +82,31 @@ return sharedInstance;
 extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
+
+@interface SBControlCenterController : UIViewController
++ (id)sharedInstance;
+@property(nonatomic, getter=isPresented) _Bool presented; // @synthesize presented=_presented;
+@property(nonatomic, getter=isUILocked) _Bool UILocked; // @synthesize UILocked=_uiLocked;
+- (void)dismissAnimated:(_Bool)arg1;
+- (void)presentAnimated:(_Bool)arg1;
+- (void)presentAnimated:(_Bool)arg1 completion:(id)arg2;
+- (void)hideGrabberAnimated:(_Bool)arg1 completion:(id)arg2;
+- (void)hideGrabberAnimated:(_Bool)arg1;
+- (void)showGrabberAnimated:(_Bool)arg1;
+- (void)preventDismissalOnLock:(_Bool)arg1 forReason:(id)arg2;
+- (void)_dismissOnLock;
+- (void)_uiRelockedNotification:(id)arg1;
+- (void)_lockStateChangedNotification:(id)arg1;
+- (_Bool)isGrabberVisible;
+- (_Bool)isPresentingControllerTransitioning;
+- (_Bool)isVisible;
+- (void)loadView;
+- (_Bool)handleMenuButtonTap;
+- (void)removeObserver:(id)arg1;
+- (void)addObserver:(id)arg1;
+- (_Bool)isAvailableWhileLocked;
+
+@end
 
 @interface BKSProcess : NSObject { //BSBaseXPCClient  {
     int _pid;

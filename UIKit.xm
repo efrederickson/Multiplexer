@@ -13,6 +13,8 @@ NSInteger wasStatusBarHidden = -1;
 
 NSMutableDictionary *oldFrames = [NSMutableDictionary new];
 
+extern BOOL ignorePhoneMode;
+
 %hook UIWindow
 -(void) setFrame:(CGRect)frame
 {

@@ -8,7 +8,7 @@ TARGET = :clang:8.0
 include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = ReachApp
-ReachApp_FILES = $(wildcard *.xm) $(wildcard *.mm) $(wildcard *.m) \
+ReachApp_FILES = Tweak.xm $(wildcard *.xm) $(wildcard *.mm) $(wildcard *.m) \
 	$(wildcard Reachability/*.xm) $(wildcard Reachability/*.mm) $(wildcard Reachability/*.m) \
 	$(wildcard widgets/*.xm) $(wildcard widgets/*.mm) $(wildcard widgets/*.m) \
 	$(wildcard widgets/Core/*.xm) $(wildcard widgets/Core/*.mm) $(wildcard widgets/Core/*.m) \
@@ -38,6 +38,8 @@ after-install::
 SUBPROJECTS += Backgrounding
 SUBPROJECTS += MissionControl
 SUBPROJECTS += SwipeOver
+
+SUBPROJECTS += reachappfakephonemode
 
 SUBPROJECTS += reachappassertiondhooks
 SUBPROJECTS += reachappbackboarddhooks

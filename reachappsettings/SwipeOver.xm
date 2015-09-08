@@ -60,7 +60,7 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
-             @{ @"label": @"Swipe In From..."},
+             @{ @"label": @"Swipe In From Left..."},
              @{
                  @"cell": @"PSSegmentCell",
                  @"validTitles": @[ @"Anywhere",               @"Top",                      @"Middle",           @"Bottom" ],
