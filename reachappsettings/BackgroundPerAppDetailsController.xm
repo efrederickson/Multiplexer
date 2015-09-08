@@ -167,10 +167,10 @@ extern void RA_BGAppsControllerNeedsToReload();
 
          	@{ @"footerText": @"Description of icon letters: \n\
 N - Native\n\
-B - Unlimited Backgrounding Time\n\
-F - Force Foreground\n\
-D - Kill on Exit\n\
-S - Suspend Immediately\n\
+∞ - Unlimited Backgrounding Time\n\
+F - Force Foreground\n"
+//D - Kill on Exit\n\
+"ll - Suspend Immediately\n\
 U - Unkillable\n\
 \n\
 The status bar icon is simply the app icon.", },
@@ -233,18 +233,11 @@ The status bar icon is simply the app icon.", },
 -(id) getActualPrefValue:(NSString*)basename
 {
     CFStringRef appID = CFSTR("com.efrederickson.reachapp.settings");
-    CFArrayRef keyList = CFPreferencesCopyKeyList(appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-    if (!keyList) {
-        return nil;
-    }
-    NSDictionary *_settings = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-    CFRelease(keyList);
-    if (!_settings) {
-        return nil;
-    }
-
     NSString *key = [NSString stringWithFormat:@"backgrounder-%@-%@",_identifier,basename];
-    return [_settings objectForKey:key] == nil ? nil : _settings[key];
+
+    CFPropertyListRef value = CFPreferencesCopyValue((__bridge CFStringRef)key, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+
+    return (__bridge id)value;
 }
 
 -(id)readPreferenceValue:(PSSpecifier*)specifier

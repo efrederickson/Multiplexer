@@ -6,8 +6,9 @@
 -(void) generatePreview
 {
     [self performSelectorOnMainThread:@selector(setBackgroundColor:) withObject:[[UIColor blackColor] colorWithAlphaComponent:0.5] waitUntilDone:NO];
-	//self.image = [RASnapshotProvider.sharedInstance snapshotForIdentifier:self.application.bundleIdentifier];
-    [self performSelectorOnMainThread:@selector(setImage:) withObject:[RASnapshotProvider.sharedInstance snapshotForIdentifier:self.application.bundleIdentifier] waitUntilDone:NO];
+	//self.image = [[%c(RASnapshotProvider) sharedInstance] snapshotForIdentifier:self.application.bundleIdentifier];
+    UIImage *img = [[%c(RASnapshotProvider) sharedInstance] snapshotForIdentifier:self.application.bundleIdentifier];
+    [self performSelectorOnMainThread:@selector(setImage:) withObject:img waitUntilDone:NO];
 
     //if (!icon)
     //  icon = [[[%c(SBIconViewMap) homescreenMap] iconModel] applicationIconForBundleIdentifier:self.application.bundleIdentifier];
@@ -46,7 +47,7 @@
 {
     RADesktopWindow *desktop = (RADesktopWindow*)desktop_;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
-        UIImage *image = [RASnapshotProvider.sharedInstance snapshotForDesktop:desktop];
+        UIImage *image = [[%c(RASnapshotProvider) sharedInstance] snapshotForDesktop:desktop];
         [self performSelectorOnMainThread:@selector(setImage:) withObject:image waitUntilDone:YES];
         if (completionBlock)
             completionBlock();

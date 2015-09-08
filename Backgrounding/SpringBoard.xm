@@ -5,17 +5,17 @@
 #include <stdlib.h>
 
 %hook SBApplication
-- (BOOL)shouldAutoRelaunchAfterExit
+-(BOOL) shouldAutoRelaunchAfterExit
 {
     return [RABackgrounder.sharedInstance shouldAutoRelaunchApplication:self.bundleIdentifier] || %orig;
 }
 
-- (BOOL)shouldAutoLaunchOnBootOrInstall
+-(BOOL) shouldAutoLaunchOnBootOrInstall
 {
     return [RABackgrounder.sharedInstance shouldAutoLaunchApplication:self.bundleIdentifier] || %orig;
 }
 
-- (BOOL)_shouldAutoLaunchOnBootOrInstall:(BOOL)arg1
+-(BOOL) _shouldAutoLaunchOnBootOrInstall:(BOOL)arg1
 {
     return [RABackgrounder.sharedInstance shouldAutoLaunchApplication:self.bundleIdentifier] || %orig;
 }
@@ -27,13 +27,15 @@
 {
     if ([RABackgrounder.sharedInstance shouldSuspendImmediately:arg2.bundleIdentifier])
     {
-        __weak BKSProcess *bkProcess = MSHookIvar<BKSProcess*>(arg2, "_bksProcess");
+        BKSProcess *bkProcess = MSHookIvar<BKSProcess*>(arg2, "_bksProcess");
         //[bkProcess _handleExpirationWarning:nil];
         [arg2 processWillExpire:bkProcess];
     }
     
-    if ([RABackgrounder.sharedInstance shouldKeepInForeground:arg2.bundleIdentifier] == NO)
-        %orig;
+    if ([RABackgrounder.sharedInstance shouldKeepInForeground:arg2.bundleIdentifier])
+        return;
+
+    %orig;
 }
 %end
 
@@ -42,6 +44,7 @@
 {
     if ([RABackgrounder.sharedInstance shouldKeepInForeground:arg3])
     {
+        // what?
         if (!arg5)
         {
             UIMutableApplicationSceneSettings *fakeSettings = [[%c(UIMutableApplicationSceneSettings) alloc] init];
@@ -114,31 +117,12 @@
     }
     %orig;
 }
+%end
 
-/*
--(BOOL) _queue_supportsBackgroundTaskAssertions
+%hook SBUIController
+-(void) _noteAppDidActivate:(SBApplication*)application
 {
-    if ([RABackgrounder.sharedInstance shouldSuspendImmediately:self.bundleIdentifier])
-    {
-        return NO;
-    }
-    return %orig;
+    [application clearDeactivationSettings];
+    %orig;
 }
--(BOOL) _queue_supportsContinuousBackgroundMode
-{
-    if ([RABackgrounder.sharedInstance shouldSuspendImmediately:self.bundleIdentifier])
-    {
-        return NO;
-    }
-    return %orig;   
-}
--(BOOL) isNowPlayingWithAudio
-{
-    if ([RABackgrounder.sharedInstance shouldSuspendImmediately:self.bundleIdentifier])
-    {
-        return NO;
-    }
-    return %orig;
-}
-*/
 %end

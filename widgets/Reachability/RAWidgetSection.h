@@ -11,6 +11,7 @@
 -(BOOL) showTitle;
 -(NSString*) displayName;
 -(NSString*) identifier;
+-(CGFloat) titleOffset;
 
 // The view should cache, if possible, to speed up loading times. 
 // It should NOT show the title view. 

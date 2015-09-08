@@ -4,12 +4,18 @@
 #import "RAWidgetSectionManager.h"
 #import "RASettings.h"
 
+@interface RAFavoriteAppsWidget () {
+	CGFloat savedX;
+}
+@end
+
 @implementation RAFavoriteAppsWidget
 -(BOOL) enabled { return [RASettings.sharedInstance showFavorites]; }
 
 -(NSInteger) sortOrder { return 2; }
 -(NSString*) displayName { return LOCALIZE(@"FAVORITES"); }
 -(NSString*) identifier { return @"com.efrederickson.reachapp.widgets.sections.favoriteapps"; }
+-(CGFloat) titleOffset { return savedX; }
 
 -(UIView*) viewForFrame:(CGRect)frame preferredIconSize:(CGSize)size_ iconsThatFitPerLine:(NSInteger)iconsPerLine spacing:(CGFloat)spacing
 {
@@ -18,13 +24,14 @@
 	NSString *currentBundleIdentifier = [[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier;
 	if (!currentBundleIdentifier)
 		return nil;
-	CGSize contentSize = CGSizeMake(10, 10);
+	CGSize contentSize = CGSizeMake(spacing / 2.0, 10);
 	CGFloat interval = (size.width + spacing) * iconsPerLine;
 	NSInteger intervalCount = 1;
 	BOOL isTop = YES;
 	BOOL hasSecondRow = NO;
 	SBApplication *app = nil;
 	CGFloat width = interval;
+	savedX = spacing / 2.0;
 
 	NSMutableArray *favorites = [RASettings.sharedInstance favoriteApps];
 	[favorites removeObject:currentBundleIdentifier];

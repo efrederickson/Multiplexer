@@ -14,6 +14,10 @@ enum RAGrabArea {
 @interface RASettings : NSObject
 +(instancetype)sharedInstance;
 
++(BOOL) isParagonInstalled;
++(BOOL) isActivatorInstalled;
++(BOOL) isLibStatusBarInstalled;
+
 -(void) reloadSettings;
 -(void) resetSettings;
 

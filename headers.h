@@ -23,11 +23,11 @@
 #define RA_BASE_PATH @"/Library/Multiplexer"
 
 #import "RALocalizer.h"
-#define LOCALIZE(x) [RALocalizer.sharedInstance localizedStringForKey:x]
+#define LOCALIZE(x) [[objc_getClass("RALocalizer") sharedInstance] localizedStringForKey:x]
 
 #import "RAThemeManager.h"
 // Note that "x" expands into the passed variable
-#define THEMED(x) RAThemeManager.sharedInstance.currentTheme.x
+#define THEMED(x) [[objc_getClass("RAThemeManager") sharedInstance] currentTheme].x
 
 #if DEBUG
 #define NSLog NSLog
@@ -37,6 +37,7 @@
 
 #define IS_SPRINGBOARD [NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"]
 #define IF_SPRINGBOARD if (IS_SPRINGBOARD)
+#define IF_NOT_SPRINGBOARD if (!IS_SPRINGBOARD)
 #define IF_THIS_PROCESS(x) if ([[x objectForKey:@"bundleIdentifier"] isEqual:NSBundle.mainBundle.bundleIdentifier])
 
 // ugh, i got so tired of typing this in by hand, plus it expands method declarations by a LOT.
@@ -214,6 +215,9 @@ typedef struct {
 } StatusBarData;
 
 @interface UIStatusBar : UIView
++ (CGFloat)heightForStyle:(int)arg1 orientation:(int)arg2;
+- (void)setOrientation:(int)arg1;
+- (void)requestStyle:(int)arg1;
 -(void) forceUpdateToData:(StatusBarData*)arg1 animated:(BOOL)arg2;
 @end
 
@@ -325,6 +329,10 @@ typedef enum
 
 @interface SBAppSwitcherController
 - (void)forceDismissAnimated:(_Bool)arg1;
+- (void)animateDismissalToDisplayLayout:(id)arg1 withCompletion:(id/*block*/)arg2;
+- (void)animatePresentationFromDisplayLayout:(id)arg1 withViews:(id)arg2 withCompletion:(id/*block*/)arg3;
+@property(nonatomic, copy) NSObject *startingDisplayLayout; // @synthesize startingDisplayLayout=_startingDisplayLayout;
+- (void)switcherWasPresented:(_Bool)arg1;
 @end
 
 @interface SBUIController : NSObject
@@ -712,6 +720,7 @@ typedef NS_ENUM(NSUInteger, ProcessAssertionFlags)
 
 @interface SBApplication ()
 -(void) _setDeactivationSettings:(SBDeactivationSettings*)arg1;
+-(void) clearDeactivationSettings;
 -(FBScene*) mainScene;
 -(id) mainScreenContextHostManager;
 -(id) mainSceneID;

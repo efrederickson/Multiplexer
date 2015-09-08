@@ -28,7 +28,7 @@ static RAActivatorBackgrounderToggleModeListener *sharedInstance$RAActivatorBack
     if (!app)
         return;
 
-    BOOL dismissApp = [RASettings.sharedInstance exitAppAfterUsingActivatorAction];
+    BOOL dismissApp = [[%c(RASettings) sharedInstance] exitAppAfterUsingActivatorAction];
 
     if (buttonIndex == [alertView cancelButtonIndex])
     {

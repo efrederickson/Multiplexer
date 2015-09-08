@@ -9,6 +9,44 @@
 NSDictionary *_settings = nil;
 
 @implementation RASettings
++(BOOL) isParagonInstalled
+{
+	static BOOL installed = NO;
+	static dispatch_once_t onceToken = 0;
+	dispatch_once(&onceToken, ^{
+	    installed = [NSFileManager.defaultManager fileExistsAtPath:@"/Library/MobileSubstrate/DynamicLibraries/ParagonPlus.dylib"];
+	});
+	return installed;
+}
+
++(BOOL) isActivatorInstalled
+{
+	static BOOL installed = NO;
+	static dispatch_once_t onceToken = 0;
+	dispatch_once(&onceToken, ^{
+		if ([NSFileManager.defaultManager fileExistsAtPath:@"/Library/MobileSubstrate/DynamicLibraries/libactivator.dylib"])
+		{
+			installed = YES;
+	        dlopen("/Library/MobileSubstrate/DynamicLibraries/libactivator.dylib", RTLD_LAZY);
+		}
+	});
+	return installed;
+}
+
++(BOOL) isLibStatusBarInstalled
+{	
+	static BOOL installed = NO;
+	static dispatch_once_t onceToken = 0;
+	dispatch_once(&onceToken, ^{
+		if ([NSFileManager.defaultManager fileExistsAtPath:@"/Library/MobileSubstrate/DynamicLibraries/libstatusbar.dylib"])
+		{
+			installed = YES;
+	        dlopen("/Library/MobileSubstrate/DynamicLibraries/libstatusbar.dylib", RTLD_LAZY);
+		}
+	});
+	return installed;
+}
+
 +(instancetype)sharedInstance
 {
 	SHARED_INSTANCE(RASettings);
@@ -93,6 +131,8 @@ NSDictionary *_settings = nil;
 		NSLog(@"[ReachApp] unable to get keyList to reset settings");
 	}
 	CFRelease(appID);
+
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.respring"), nil, nil, YES);
 }
 
 -(BOOL) enabled

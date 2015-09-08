@@ -12,14 +12,15 @@
 #import "RAWindowStatePreservationSystemManager.h"
 #import "RAHostManager.h"
 #import "RARunningAppsProvider.h"
-
-extern BOOL overrideCC;
+#import "RAControlCenterInhibitor.h"
+#import "RASettings.h"
 
 @interface RAMissionControlManager () {
 	SBApplication *lastOpenedApp;
 	NSMutableArray *appsWithoutWindows;
 
-	BOOL lastStatusBarHidden, updateStatusBar;
+	UIStatusBar *statusBar;
+
 	__block UIView *originalAppView;
 	__block CGRect originalAppFrame;
 	BOOL hasMoved;
@@ -69,6 +70,7 @@ CGRect swappedForOrientation2(CGRect in)
 		sharedInstance->originalAppView = nil;
 		sharedInstance.inhibitDismissalGesture = NO;
 		sharedInstance->hasMoved = NO;
+		sharedInstance->inhibitedApplications = [NSMutableArray array];
 	);
 }
 
@@ -96,7 +98,7 @@ CGRect swappedForOrientation2(CGRect in)
 
 	if (lastOpenedApp && lastOpenedApp.isRunning)
 	{
-		originalAppView = [RAHostManager systemHostViewForApplication:lastOpenedApp].superview;
+		originalAppView = [%c(RAHostManager) systemHostViewForApplication:lastOpenedApp].superview;
 		originalAppFrame = originalAppView.frame;
 	}
 
@@ -116,16 +118,13 @@ CGRect swappedForOrientation2(CGRect in)
 	}
 
 	[window updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
-	updateStatusBar = YES;
-	lastStatusBarHidden = UIApplication.sharedApplication.statusBarHidden;
-	UIApplication.sharedApplication.statusBarHidden = NO;
-	[RAGestureManager.sharedInstance addGestureRecognizerWithTarget:self forEdge:UIRectEdgeBottom identifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture" priority:RAGesturePriorityHigh];
-	[RAGestureManager.sharedInstance ignoreSwipesBeginningInRect:UIScreen.mainScreen.bounds forIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
-	[RARunningAppsProvider.sharedInstance addTarget:window];
+	[[%c(RAGestureManager) sharedInstance] addGestureRecognizerWithTarget:self forEdge:UIRectEdgeBottom identifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture" priority:RAGesturePriorityHigh];
+	[[%c(RAGestureManager) sharedInstance] ignoreSwipesBeginningInRect:UIScreen.mainScreen.bounds forIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
+	[[%c(RARunningAppsProvider) sharedInstance] addTarget:window];
 	[[%c(SBUIController) sharedInstance] _lockOrientationForSwitcher];
     [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"RAMissionControlManager"];
 	self.inhibitDismissalGesture = NO;
-	overrideCC = YES;
+	[%c(RAControlCenterInhibitor) setInhibited:YES];
 }
 
 -(void) createWindow
@@ -149,6 +148,14 @@ CGRect swappedForOrientation2(CGRect in)
 	blurView.frame = window.frame;
 	[window addSubview:blurView];
 
+	int statusBarStyle = 0x12F; //Normal notification center style
+	UIInterfaceOrientation orientation = UIApplication.sharedApplication.statusBarOrientation;
+	statusBar = [[UIStatusBar alloc] initWithFrame:CGRectMake(0, 0, UIApplication.sharedApplication.statusBar.bounds.size.width, [UIStatusBar heightForStyle:statusBarStyle orientation:orientation])];
+	[statusBar requestStyle:statusBarStyle];
+	statusBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+	[window addSubview:statusBar];
+	[statusBar setOrientation:UIApplication.sharedApplication.statusBarOrientation];
+
 	// DESKTOPS
 	[self reloadDesktopSection];
 
@@ -166,7 +173,7 @@ CGRect swappedForOrientation2(CGRect in)
 
 -(void) reloadWindowedAppsSection
 {
-	[window reloadWindowedAppsSection:RARunningAppsProvider.sharedInstance.runningApplications];
+	[window reloadWindowedAppsSection:[[%c(RARunningAppsProvider) sharedInstance] runningApplications]];
 }
 
 -(void) reloadOtherAppsSection
@@ -176,14 +183,16 @@ CGRect swappedForOrientation2(CGRect in)
 
 -(void) hideMissionControl:(BOOL)animated
 {
-	[RASnapshotProvider.sharedInstance storeSnapshotOfMissionControl:window];
-	[RARunningAppsProvider.sharedInstance removeTarget:window];
+	[[%c(RASnapshotProvider) sharedInstance] storeSnapshotOfMissionControl:window];
+	[[%c(RARunningAppsProvider) sharedInstance] removeTarget:window];
 
 	void (^destructor)() = ^{
 		originalAppView = nil;
-		[window deconstructComponents];
 		window.hidden = YES;
 		window = nil;
+
+		// This goes here to prevent the wallpaper from appearing black when dismissing
+	    [[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"RAMissionControlManager"];
 	};
 
 	if (animated)
@@ -203,19 +212,16 @@ CGRect swappedForOrientation2(CGRect in)
 	}
 
 	_isShowingMissionControl = NO;
-	[RADesktopManager.sharedInstance reshowDesktop];
-	[RADesktopManager.sharedInstance.currentDesktop loadApps];
-	[RAGestureManager.sharedInstance removeGestureWithIdentifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture"];
-	[RAGestureManager.sharedInstance stopIgnoringSwipesForIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
+	[[%c(RADesktopManager) sharedInstance] reshowDesktop];
+	[[[%c(RADesktopManager) sharedInstance] currentDesktop] loadApps];
+	[[%c(RAGestureManager) sharedInstance] removeGestureWithIdentifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture"];
+	[[%c(RAGestureManager) sharedInstance] stopIgnoringSwipesForIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
 	[[%c(SBUIController) sharedInstance] releaseSwitcherOrientationLock];
-    [[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"RAMissionControlManager"];
-	if (updateStatusBar)
-		UIApplication.sharedApplication.statusBarHidden = lastStatusBarHidden;
-	overrideCC = NO;
+    [%c(RAControlCenterInhibitor) setInhibited:NO];
 
 	//if (lastOpenedApp && lastOpenedApp.isRunning && UIApplication.sharedApplication._accessibilityFrontMostApplication != lastOpenedApp)
 	//{
-	//	if ([RADesktopManager.sharedInstance isAppOpened:lastOpenedApp.bundleIdentifier] == NO)
+	//	if ([[%c(RADesktopManager) sharedInstance] isAppOpened:lastOpenedApp.bundleIdentifier] == NO)
 	//	{
 	//		[[%c(SBUIController) sharedInstance] activateApplicationAnimated:lastOpenedApp];
 	//	}
@@ -244,7 +250,7 @@ CGRect swappedForOrientation2(CGRect in)
 	if (state == UIGestureRecognizerStateEnded)
 	{
 		hasMoved = NO;
-		overrideCC = NO;
+		[%c(RAControlCenterInhibitor) setInhibited:NO];
 
 		BOOL dismiss = NO;
 		if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeRight)
@@ -301,7 +307,7 @@ CGRect swappedForOrientation2(CGRect in)
 	else if (state == UIGestureRecognizerStateBegan)
 	{
 		hasMoved = YES;
-		overrideCC = YES;
+		[%c(RAControlCenterInhibitor) setInhibited:YES];
 		initialCenter = window.center;
 		if (originalAppView)
 			initialAppFrame = initialAppFrame;
@@ -329,13 +335,22 @@ CGRect swappedForOrientation2(CGRect in)
 	return RAGestureCallbackResultSuccess;
 }
 
--(RAMissionControlWindow*) missionControlWindow { if (!window) [self createWindow]; return window; }
-
--(void) forceStatusBarToShowOnExit
+-(void) inhibitApplication:(NSString*)identifer 
 {
-       lastStatusBarHidden = NO;
-       updateStatusBar = YES;
+	if ([inhibitedApplications containsObject:identifer] == NO)
+		[inhibitedApplications addObject:identifer];
 }
+
+-(void) uninhibitApplication:(NSString*)identifer
+{
+	if ([inhibitedApplications containsObject:identifer])
+		[inhibitedApplications removeObject:identifer];
+}
+
+-(NSArray*) inhibitedApplications { return inhibitedApplications; }
+-(void) setInhibitedApplications:(NSArray*)icons { inhibitedApplications = [icons mutableCopy]; }
+
+-(RAMissionControlWindow*) missionControlWindow { if (!window) [self createWindow]; return window; }
 
 -(void) setInhibitDismissalGesture:(BOOL)value
 {

@@ -30,8 +30,19 @@
 
 -(void) addGesture:(RAGestureCallback*)callback
 {
-	[gestures addObject:callback];
-	[self sortGestureRecognizers];
+	BOOL found = NO;
+	for (RAGestureCallback *callback_ in gestures)
+		if ([callback_.identifier isEqual:callback.identifier])
+		{
+			found = YES;
+			break;
+		}
+
+	if (!found)
+	{
+		[gestures addObject:callback];
+		[self sortGestureRecognizers];	
+	}
 }
 
 -(void) addGestureRecognizer:(RAGestureCallbackBlock)callbackBlock withCondition:(RAGestureConditionBlock)conditionBlock forEdge:(UIRectEdge)screenEdge identifier:(NSString*)identifier priority:(NSUInteger)priority

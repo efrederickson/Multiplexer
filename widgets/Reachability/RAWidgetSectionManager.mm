@@ -84,7 +84,8 @@
 			{
 				if (section.showTitle)
 				{
-					UILabel *titleView = [[UILabel alloc] initWithFrame:CGRectMake(10, currentY, 300, 20)];
+					CGFloat x = [section respondsToSelector:@selector(titleOffset)] ? section.titleOffset : 10;
+					UILabel *titleView = [[UILabel alloc] initWithFrame:CGRectMake(x, currentY, 300, 20)];
 					titleView.text = section.displayName;
 					titleView.textColor = [UIColor whiteColor];
 					titleView.font = [UIFont fontWithName:@"HelveticaNeue" size:16];

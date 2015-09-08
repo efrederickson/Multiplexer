@@ -6,22 +6,7 @@
 #import "RABackgrounder.h"
 #import "RASwipeOverManager.h"
 #import "RAWindowStatePreservationSystemManager.h"
-
-BOOL overrideCC = NO;
-
-%hook SBUIController
-- (void)_showControlCenterGestureBeganWithLocation:(CGPoint)arg1
-{
-    if (!overrideCC)
-        %orig;
-}
-
-- (void)handleShowControlCenterSystemGesture:(unsafe_id)arg1
-{
-    if (!overrideCC)
-        %orig;
-}
-%end
+#import "RAControlCenterInhibitor.h"
 
 BOOL locationIsInValidArea(CGFloat x)
 {
@@ -56,7 +41,7 @@ BOOL locationIsInValidArea(CGFloat x)
 
         if (state == UIGestureRecognizerStateBegan)
         {
-            overrideCC = YES;
+            [RAControlCenterInhibitor setInhibited:YES];
 
             // Show HS/Wallpaper
             [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"BeautifulAnimation"];
@@ -103,7 +88,7 @@ BOOL locationIsInValidArea(CGFloat x)
         }
         else if (state == UIGestureRecognizerStateEnded)
         {
-            overrideCC = NO;
+            [RAControlCenterInhibitor setInhibited:NO];
 
             if (lastY <= (UIScreen.mainScreen._interfaceOrientedBounds.size.height / 4) * 3 && lastY != 0) // 75% down, 0 == gesture ended in most situations
             {
@@ -121,10 +106,10 @@ BOOL locationIsInValidArea(CGFloat x)
                         appView.center = originalCenter;   
                     }
                 } completion:^(BOOL _) {
-                    RAIconIndicatorViewInfo indicatorInfo = [RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:topApp.bundleIdentifier];
+                    RAIconIndicatorViewInfo indicatorInfo = [[%c(RABackgrounder) sharedInstance] allAggregatedIndicatorInfoForIdentifier:topApp.bundleIdentifier];
 
                     // Close app
-                    [RABackgrounder.sharedInstance temporarilyApplyBackgroundingMode:RABackgroundModeForcedForeground forApplication:topApp andCloseForegroundApp:NO];
+                    [[%c(RABackgrounder) sharedInstance] temporarilyApplyBackgroundingMode:RABackgroundModeForcedForeground forApplication:topApp andCloseForegroundApp:NO];
                     FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
                         SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:topApp];
                         [transaction begin];
@@ -136,9 +121,9 @@ BOOL locationIsInValidArea(CGFloat x)
                     if (RADesktopManager.sharedInstance.lastUsedWindow == nil)
                         RADesktopManager.sharedInstance.lastUsedWindow = windowBar;
                     // Pop forced foreground backgrounding
-                    [RABackgrounder.sharedInstance queueRemoveTemporaryOverrideForIdentifier:topApp.bundleIdentifier];
-                    [RABackgrounder.sharedInstance removeTemporaryOverrideForIdentifier:topApp.bundleIdentifier];
-                    [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:topApp.bundleIdentifier withInfo:indicatorInfo];
+                    [[%c(RABackgrounder) sharedInstance] queueRemoveTemporaryOverrideForIdentifier:topApp.bundleIdentifier];
+                    [[%c(RABackgrounder) sharedInstance] removeTemporaryOverrideForIdentifier:topApp.bundleIdentifier];
+                    [[%c(RABackgrounder) sharedInstance] updateIconIndicatorForIdentifier:topApp.bundleIdentifier withInfo:indicatorInfo];
                 }];
             }
             else
@@ -153,6 +138,6 @@ BOOL locationIsInValidArea(CGFloat x)
 
         return RAGestureCallbackResultSuccess;
     } withCondition:^BOOL(CGPoint location, CGPoint velocity) {
-        return [RASettings.sharedInstance windowedMultitaskingEnabled] && (locationIsInValidArea(location.x) || appView) && ![RASwipeOverManager.sharedInstance isUsingSwipeOver] && ![[%c(SBUIController) sharedInstance] isAppSwitcherShowing] && ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && [UIApplication.sharedApplication _accessibilityFrontMostApplication] != nil && ![[%c(SBNotificationCenterController) sharedInstance] isVisible];
+        return [RASettings.sharedInstance windowedMultitaskingEnabled] && (locationIsInValidArea(location.x) || appView) && ![[%c(RASwipeOverManager) sharedInstance] isUsingSwipeOver] && ![[%c(SBUIController) sharedInstance] isAppSwitcherShowing] && ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && [UIApplication.sharedApplication _accessibilityFrontMostApplication] != nil && ![[%c(SBNotificationCenterController) sharedInstance] isVisible];
     } forEdge:UIRectEdgeBottom identifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture" priority:RAGesturePriorityDefault];
 }

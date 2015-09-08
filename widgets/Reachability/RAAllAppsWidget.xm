@@ -4,6 +4,11 @@
 #import "RAWidgetSectionManager.h"
 #import "RASettings.h"
 
+@interface RAAllAppsWidget () {
+	CGFloat savedX;
+}
+@end
+
 @implementation RAAllAppsWidget
 -(BOOL) enabled { return [RASettings.sharedInstance showAllAppsInWidgetSelector]; }
 
@@ -11,23 +16,25 @@
 
 -(NSString*) displayName { return LOCALIZE(@"ALL_APPS"); }
 -(NSString*) identifier { return @"com.efrederickson.reachapp.widgets.sections.allapps"; }
+-(CGFloat) titleOffset { return savedX; }
 
 -(UIView*) viewForFrame:(CGRect)frame preferredIconSize:(CGSize)size_ iconsThatFitPerLine:(NSInteger)iconsPerLine spacing:(CGFloat)spacing
 {
 	UIScrollView *allAppsView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 200)];
 
 	CGSize size = [%c(SBIconView) defaultIconSize];
-	spacing = (frame.size.width - (iconsPerLine * size.width)) / iconsPerLine;
+	spacing = (frame.size.width - (iconsPerLine * size.width)) / (iconsPerLine + 0);
 	//NSString *currentBundleIdentifier = [[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier;
 	//if (!currentBundleIdentifier)
 	//	return nil;
-	CGSize contentSize = CGSizeMake(10, 10);
-	CGFloat interval = (size.width + spacing) * iconsPerLine;
+	CGSize contentSize = CGSizeMake((spacing / 2.0), 10);
+	CGFloat interval = ((size.width + spacing) * iconsPerLine);
 	NSInteger intervalCount = 1;
 	BOOL isTop = YES;
 	BOOL hasSecondRow = NO;
 	SBApplication *app = nil;
 	CGFloat width = interval;
+	savedX = spacing / 2.0;
 
 	allAppsView.backgroundColor = [UIColor clearColor];
 	allAppsView.pagingEnabled = [RASettings.sharedInstance pagingEnabled];
@@ -44,7 +51,6 @@
 		//[allApps removeObject:currentBundleIdentifier];
 	}
 
-	width = interval;
 	isTop = YES;
 	intervalCount = 1;
 	hasSecondRow = NO;

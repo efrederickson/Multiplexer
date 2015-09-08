@@ -59,40 +59,32 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
     %orig([RAMessagingClient.sharedInstance shouldForceOrientation] && [UIApplication.sharedApplication _isSupportedOrientation:[RAMessagingClient.sharedInstance forcedOrientation]] ? [RAMessagingClient.sharedInstance forcedOrientation] : arg1);
 }
 
-- (void)_sendTouchesForEvent:(id)arg1
+- (void)_sendTouchesForEvent:(unsafe_id)arg1
 {
     %orig;
-    if (!IS_SPRINGBOARD)
-    {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [RAMessagingClient.sharedInstance notifySpringBoardOfFrontAppChangeToSelf];
-        });
-    }
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [RAMessagingClient.sharedInstance notifySpringBoardOfFrontAppChangeToSelf];
+    });
 }
 %end
 
 %hook UIApplication
-- (void)applicationDidResume
+-(void) applicationDidResume
 {
     %orig;
-    if (!IS_SPRINGBOARD)
-    {
-        [RAMessagingClient.sharedInstance requestUpdateFromServer];
-        [RAFakePhoneMode updateAppSizing];
-    }
+    [RAMessagingClient.sharedInstance requestUpdateFromServer];
+    [RAFakePhoneMode updateAppSizing];
 }
 
-+ (void)_startWindowServerIfNecessary
++(void) _startWindowServerIfNecessary
 {
     %orig;
-    if (!IS_SPRINGBOARD)
-    {
-        //[RAMessagingClient.sharedInstance requestUpdateFromServer];
-        [RAFakePhoneMode updateAppSizing];
-    }
+    //[RAMessagingClient.sharedInstance requestUpdateFromServer];
+    [RAFakePhoneMode updateAppSizing];
 }
 
-- (void)_setStatusBarHidden:(BOOL)arg1 animationParameters:(unsafe_id)arg2 changeApplicationFlag:(BOOL)arg3
+-(void) _setStatusBarHidden:(BOOL)arg1 animationParameters:(unsafe_id)arg2 changeApplicationFlag:(BOOL)arg3
 {
 	//if ([RASettings.sharedInstance unifyStatusBar])
     if ([RAMessagingClient.sharedInstance shouldHideStatusBar])
@@ -227,7 +219,7 @@ NSMutableDictionary *oldFrames = [NSMutableDictionary new];
     }
 }
 
--(BOOL) openURL:(NSURL*)url
+-(BOOL) openURL:(__unsafe_unretained NSURL*)url
 {
     if ([RAMessagingClient.sharedInstance isBeingHosted] || [RASettings.sharedInstance openLinksInWindows])
     {
@@ -257,7 +249,9 @@ void reloadSettings(CFNotificationCenterRef center,
 
 %ctor
 {
-    %init;
+    IF_NOT_SPRINGBOARD {
+        %init;
+    }
 
     CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &reloadSettings, CFSTR("com.efrederickson.reachapp.settings/reloadSettings"), NULL, 0);
     reloadSettings(NULL, NULL, NULL, NULL, NULL);

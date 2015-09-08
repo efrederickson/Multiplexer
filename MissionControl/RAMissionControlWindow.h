@@ -10,6 +10,4 @@
 -(void) reloadWindowedAppsSection;
 -(void) reloadWindowedAppsSection:(NSArray*)runningApplications;
 -(void) reloadOtherAppsSection;
-
--(void) deconstructComponents;
 @end

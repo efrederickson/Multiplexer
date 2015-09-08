@@ -1,4 +1,11 @@
 #import <Preferences/Preferences.h>
+#import <SettingsKit/SKTintedListController.h>
+
+@interface PSListItemsController (tableView)
+- (void)tableView:(id)arg1 didSelectRowAtIndexPath:(id)arg2;
+- (void)listItemSelected:(id)arg1;
+- (id)tableView:(id)arg1 cellForRowAtIndexPath:(id)arg2;
+@end
 
 @interface RAListItemsController : PSListItemsController
 
@@ -21,6 +28,41 @@
     
     [[UIApplication sharedApplication] keyWindow].tintColor = nil;
     self.navigationController.navigationBar.tintColor = nil;
+}
+
+-(NSArray*) specifiers
+{
+    if (!_specifiers) {
+        PSSpecifier* themeSpecifier = [PSSpecifier preferenceSpecifierNamed:@"Documentation"
+                                        target:self
+                                           set:NULL
+                                           get:NULL
+                                        detail:Nil
+                                          cell:PSButtonCell
+                                          edit:Nil];
+        [themeSpecifier setProperty:RSIMG(@"tutorial.png") forKey:@"iconImage"];
+        [themeSpecifier setProperty:@"poop" forKey:@"isTheming"];
+        _specifiers = [super specifiers];
+        [(NSMutableArray*)_specifiers addObject:[PSSpecifier emptyGroupSpecifier]];
+        [(NSMutableArray*)_specifiers addObject:themeSpecifier];
+    }
+    return _specifiers;
+}
+
+-(void) openThemingDocumentation
+{
+    [UIApplication.sharedApplication openURL:[NSURL URLWithString:@"https://elijahandandrew.com/multiplexer/ThemingDocumentation.html"]];
+}
+
+-(void) tableView:(id)arg1 didSelectRowAtIndexPath:(id)arg2
+{
+    [super tableView:arg1 didSelectRowAtIndexPath:arg2];
+
+    PSTableCell *cell = [self tableView:arg1 cellForRowAtIndexPath:arg2];
+    if ([cell.specifier propertyForKey:@"isTheming"] != nil)
+    {
+        [self openThemingDocumentation];
+    }
 }
 @end
 

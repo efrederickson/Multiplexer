@@ -61,7 +61,7 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
 {
     if (y == 0) return YES; // more than likely, UIGestureRecognizerStateEnded
 
-    switch ([RASettings.sharedInstance swipeOverGrabArea])
+    switch ([[%c(RASettings) sharedInstance] swipeOverGrabArea])
     {
         case RAGrabAreaSideAnywhere:
             return YES;
@@ -78,10 +78,10 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
 
 %ctor
 {
-    [[RAGestureManager sharedInstance] addGestureRecognizer:^RAGestureCallbackResult(UIGestureRecognizerState state, CGPoint location, CGPoint velocity) {
+    [[%c(RAGestureManager) sharedInstance] addGestureRecognizer:^RAGestureCallbackResult(UIGestureRecognizerState state, CGPoint location, CGPoint velocity) {
         lastTouch = [NSDate date];
 
-        if ([[%c(SBUIController) sharedInstance] shouldShowControlCenterTabControlOnFirstSwipe] || [RASettings.sharedInstance alwaysShowSOGrabber])
+        if ([[%c(SBUIController) sharedInstance] shouldShowControlCenterTabControlOnFirstSwipe] || [[%c(RASettings) sharedInstance] alwaysShowSOGrabber])
         {
             if (isShowingGrabber == NO && isPastGrabber == NO)
             {
@@ -98,14 +98,14 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
                 grabberView.frame = adjustFrameForRotation();
 
                 UIImageView *imgView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, grabberView.frame.size.width - 20, grabberView.frame.size.height - 20)];
-                imgView.image = [RAResourceImageProvider imageForFilename:@"Grabber" constrainedToSize:CGSizeMake(grabberView.frame.size.width - 20, grabberView.frame.size.height - 20)];
+                imgView.image = [%c(RAResourceImageProvider) imageForFilename:@"Grabber" constrainedToSize:CGSizeMake(grabberView.frame.size.width - 20, grabberView.frame.size.height - 20)];
                 [grabberView addSubview:imgView];
                 grabberView.layer.cornerRadius = 5;
                 grabberView.clipsToBounds = YES;
 
                 grabberView.transform = adjustTransformRotation();
                 //[UIWindow.keyWindow addSubview:grabberView]; // The desktop view most likely
-                [[[RAHostManager systemHostViewForApplication:UIApplication.sharedApplication._accessibilityFrontMostApplication] superview] addSubview:grabberView];
+                [[[%c(RAHostManager) systemHostViewForApplication:UIApplication.sharedApplication._accessibilityFrontMostApplication] superview] addSubview:grabberView];
 
                 static void (^dismisser)() = ^{ // top kek, needs "static" so it's not a local, self-retaining block
                     if ([[NSDate date] timeIntervalSinceDate:lastTouch] > 2)
@@ -130,7 +130,7 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
 
                 return RAGestureCallbackResultSuccess;
             }
-            else if (CGRectContainsPoint(grabberView.frame, location) || (isShowingGrabber && !firstSwipe && [RASettings.sharedInstance swipeOverGrabArea] != RAGrabAreaSideAnywhere && [RASettings.sharedInstance swipeOverGrabArea] != RAGrabAreaSideMiddleThird))
+            else if (CGRectContainsPoint(grabberView.frame, location) || (isShowingGrabber && !firstSwipe && [[%c(RASettings) sharedInstance] swipeOverGrabArea] != RAGrabAreaSideAnywhere && [[%c(RASettings) sharedInstance] swipeOverGrabArea] != RAGrabAreaSideMiddleThird))
             {
                 [grabberView removeFromSuperview];
                 grabberView = nil;
@@ -169,15 +169,15 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
 
         return RAGestureCallbackResultSuccess;
     } withCondition:^BOOL(CGPoint location, CGPoint velocity) {
-        if (RAKeyboardStateListener.sharedInstance.visible)
+        if ([[%c(RAKeyboardStateListener) sharedInstance] visible])
         {
-            CGRect realKBFrame = CGRectMake(0, UIScreen.mainScreen._interfaceOrientedBounds.size.height, RAKeyboardStateListener.sharedInstance.size.width, RAKeyboardStateListener.sharedInstance.size.height);
+            CGRect realKBFrame = CGRectMake(0, UIScreen.mainScreen._interfaceOrientedBounds.size.height, [[%c(RAKeyboardStateListener) sharedInstance] size].width, [[%c(RAKeyboardStateListener) sharedInstance] size].height);
             realKBFrame = CGRectOffset(realKBFrame, 0, -realKBFrame.size.height);
 
             if (CGRectContainsPoint(realKBFrame, location))
                 return NO;
         }
         
-        return [RASettings.sharedInstance swipeOverEnabled] && ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && ![[%c(SBUIController) sharedInstance] isAppSwitcherShowing] && ![[%c(SBNotificationCenterController) sharedInstance] isVisible] && !RAMissionControlManager.sharedInstance.isShowingMissionControl && (swipeOverLocationIsInValidArea(location.y) || isShowingGrabber);
+        return [[%c(RASettings) sharedInstance] swipeOverEnabled] && ![[%c(SBLockScreenManager) sharedInstance] isUILocked] && ![[%c(SBUIController) sharedInstance] isAppSwitcherShowing] && ![[%c(SBNotificationCenterController) sharedInstance] isVisible] && ![[%c(RAMissionControlManager) sharedInstance] isShowingMissionControl] && (swipeOverLocationIsInValidArea(location.y) || isShowingGrabber);
     } forEdge:UIRectEdgeRight identifier:@"com.efrederickson.reachapp.swipeover.systemgesture" priority:RAGesturePriorityDefault];
 }

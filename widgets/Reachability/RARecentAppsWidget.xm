@@ -9,6 +9,7 @@
 
 @interface RARecentAppsWidget () {
 	CGRect viewFrame;
+	CGFloat savedX;
 }
 @end
 
@@ -18,32 +19,36 @@
 -(NSInteger) sortOrder { return 1; }
 -(NSString*) displayName { return LOCALIZE(@"RECENTS"); }
 -(NSString*) identifier { return @"com.efrederickson.reachapp.widgets.sections.recentapps"; }
+-(CGFloat) titleOffset { return savedX; }
 
 -(UIView*) viewForFrame:(CGRect)frame preferredIconSize:(CGSize)size_ iconsThatFitPerLine:(NSInteger)iconsPerLine spacing:(CGFloat)spacing
 {
 	viewFrame = frame;
 	CGSize size = [%c(SBIconView) defaultIconSize];
-	spacing = (frame.size.width - (iconsPerLine * size.width)) / iconsPerLine;
+	spacing = (frame.size.width - (iconsPerLine * size.width)) / (iconsPerLine + 0);
 	NSString *currentBundleIdentifier = [[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier;
 	if (!currentBundleIdentifier)
 		return nil;
-	CGSize contentSize = CGSizeMake(10, 10);
-	CGFloat interval = (size.width + spacing) * iconsPerLine;
+	CGSize contentSize = CGSizeMake((spacing / 2.0), 10);
+	CGFloat interval = ((size.width + spacing) * iconsPerLine);
 	NSInteger intervalCount = 1;
 	BOOL isTop = YES;
-	BOOL hasSecondRow = NO;
 	SBApplication *app = nil;
 	CGFloat width = interval;
 	NSInteger index = 0;
+	savedX = spacing / 2.0;
 
 	NSMutableArray *recents = [[[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary] mutableCopy];
 	[recents removeObject:currentBundleIdentifier];
 	if (recents.count == 0)
 		return nil;
 
+	BOOL hasSecondRow = recents.count >= iconsPerLine;
+
 	UIScrollView *recentsView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 200)];
 	recentsView.backgroundColor = [UIColor clearColor];
 	recentsView.pagingEnabled = [RASettings.sharedInstance pagingEnabled];
+
 	for (NSString *str in recents)
 	{
 		app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:str];
@@ -65,7 +70,6 @@
 				contentSize.height -= (size.height + 10);
 				width += interval;
 			}
-			hasSecondRow = YES;
 			isTop = !isTop;
 		}
 

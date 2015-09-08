@@ -66,4 +66,9 @@
 	NSInteger widgetIndex = gesture.view.tag;
 	[[RAReachabilityManager sharedInstance] launchWidget:_widgets[widgetIndex]];
 }
+
+-(CGFloat) titleOffset
+{
+	return 10;
+}
 @end

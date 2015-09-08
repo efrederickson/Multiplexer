@@ -7,6 +7,9 @@
 	SBApplication *app;
 	FBWindowContextHostWrapperView *view;
 }
+
++(void) iPad_iOS83_fixHosting;
+
 -(id) initWithBundleIdentifier:(NSString*)bundleIdentifier;
 
 @property (nonatomic) BOOL showSplashscreenInsteadOfSpinner;

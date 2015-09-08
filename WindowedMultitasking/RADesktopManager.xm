@@ -152,6 +152,7 @@ BOOL overrideUIWindow = NO;
 -(RADesktopWindow*) currentDesktop { return currentDesktop; }
 @end
 
+/*
 %hook UIWindow
 -(void) makeKeyAndVisible
 {
@@ -159,7 +160,7 @@ BOOL overrideUIWindow = NO;
 
 	if (overrideUIWindow)
 	{
-		static Class c1 = [RAMissionControlWindow class];
+		static Class c1 = [%c(RAMissionControlWindow) class];
 		static Class c2 = [%c(SBAppSwitcherWindow) class];
 
 		if ([self isKindOfClass:c1] || [self isKindOfClass:c2])
@@ -173,6 +174,7 @@ BOOL overrideUIWindow = NO;
 	}
 }
 %end
+*/
 
 %hook SpringBoard
 -(void)noteInterfaceOrientationChanged:(UIInterfaceOrientation)arg1 duration:(CGFloat)arg2

@@ -93,7 +93,7 @@
                  @"PostNotification": @"com.efrederickson.reachapp.settings/reloadSettings",
                  },
 
-                 @{ },
+                 @{ @"footerText": @"If enabled, using the trash can icon to remove an app will also kill it." },
              @{
                  @"cell": @"PSSwitchCell",
                  @"default": @YES,

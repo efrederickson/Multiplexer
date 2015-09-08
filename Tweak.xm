@@ -30,10 +30,12 @@ void SET_BACKGROUNDED(id settings, BOOL value)
 
 /*
 #if DEBUG
-extern "C" void _CFEnableZombies(void);
+//extern "C" void _CFEnableZombies(void);
 %ctor
 {
-	_CFEnableZombies();	
+    IF_SPRINGBOARD {
+        _CFEnableZombies();
+    }
 }
 #endif
 */

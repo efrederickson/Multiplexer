@@ -5,6 +5,10 @@ extern const char *__progname;
 @implementation RAMessagingClient
 +(instancetype) sharedInstance
 {
+	IF_SPRINGBOARD {
+		@throw [NSException exceptionWithName:@"IsSpringBoardException" reason:@"Cannot use RAMessagingClient in SpringBoard" userInfo:nil];
+	}
+
 	SHARED_INSTANCE2(RAMessagingClient, 
 		[sharedInstance loadMessagingCenter];
 		sharedInstance.hasRecievedData = NO;

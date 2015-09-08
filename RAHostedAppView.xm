@@ -129,6 +129,8 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
     [self addSubview:view];
 
     [RAMessagingServer.sharedInstance setHosted:YES forIdentifier:app.bundleIdentifier completion:nil];
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+        [RAHostedAppView iPad_iOS83_fixHosting];
 
     [RARunningAppsProvider.sharedInstance addTarget:self];
 }
@@ -235,7 +237,7 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
         }
 
         CGFloat size = 50;
-        activityView.frame = CGRectMake((self.frame.size.width - size) / 2, (self.frame.size.height - size) / 2, size, size);
+        activityView.frame = CGRectMake((self.bounds.size.width - size) / 2, (self.bounds.size.height - size) / 2, size, size);
 
         [activityView startAnimating];
     }
@@ -255,20 +257,12 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
     }
 }
 
--(void) appDidStart:(SBApplication*)app_
-{
-    if (app_ != self.app)
-        return;
-
-    [self verifyHostingAndRehostIfNecessary];
-}
-
 -(void) appDidDie:(SBApplication*)app_
 {
-    if (app_ != self.app)
-        return;
-
-    [self verifyHostingAndRehostIfNecessary];
+    if (app_ == self.app)
+    {
+        [self verifyHostingAndRehostIfNecessary];
+    }
 }
 
 -(void) removeLoadingIndicator
@@ -413,7 +407,26 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
     [RAMessagingServer.sharedInstance rotateApp:self.bundleIdentifier toOrientation:o completion:nil];
 }
 
-// This allows for any subviews with gestures (e.g. the SwipeOver bar with a negative y origin) to recieve touch events.
++(void) iPad_iOS83_fixHosting
+{
+    for (NSString *bundleIdentifier in appsBeingHosted.allKeys)
+    {
+        NSNumber *num = appsBeingHosted[bundleIdentifier];
+        if (num.intValue > 0)
+        {
+            SBApplication *app_ = [[%c(SBApplicationController) sharedInstance] RA_applicationWithBundleIdentifier:bundleIdentifier];
+            FBWindowContextHostManager *manager = (FBWindowContextHostManager*)[RAHostManager hostManagerForApp:app_];
+            if (manager)
+            {
+                NSLog(@"[ReachApp] rehosting for iPad: %@", bundleIdentifier);
+                [manager enableHostingForRequester:@"reachapp" priority:1];
+            }
+        }
+    }
+    
+}
+
+// This allows for any subviews (with gestures) (e.g. the SwipeOver bar with a negative y origin) to recieve touch events.
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event 
 {
     BOOL isContained = NO;
