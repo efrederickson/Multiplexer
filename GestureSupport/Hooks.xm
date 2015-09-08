@@ -13,7 +13,6 @@ License (GPL): https://github.com/hamzasood/MultitaskingGestures/blob/master/Lic
 
 static BOOL isTracking = NO;
 static NSMutableSet *gestureRecognizers;
-BOOL shouldBeOverridingForRecognizer;
 UIRectEdge currentEdge;
 
 struct VelocityData {
@@ -68,7 +67,7 @@ struct VelocityData {
 {
     %orig;
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (count) {
+        if (count > 0) {
             SBActiveTouch touch = activeTouches[0];
             if (touch.type == 0) // Begin
             {
@@ -95,7 +94,7 @@ struct VelocityData {
 
 %new -(void) screenEdgePanRecognizerStateDidChange:(_UIScreenEdgePanRecognizer*) screenEdgePanRecognizer 
 {
-    if (screenEdgePanRecognizer.state == 1)
+    if (screenEdgePanRecognizer.state == UIGestureRecognizerStateBegan)
     {
         CGPoint location = MSHookIvar<CGPoint>(screenEdgePanRecognizer, "_lastTouchLocation");
 
@@ -115,21 +114,16 @@ struct VelocityData {
             location.x = t;
         }
 
-        if (shouldBeOverridingForRecognizer == NO)
-            shouldBeOverridingForRecognizer = [RAGestureManager.sharedInstance canHandleMovementWithPoint:location velocity:screenEdgePanRecognizer.RA_velocity forEdge:screenEdgePanRecognizer.targetEdges];
-
-        if (shouldBeOverridingForRecognizer) 
+        if ([RAGestureManager.sharedInstance handleMovementOrStateUpdate:UIGestureRecognizerStateBegan withPoint:location velocity:screenEdgePanRecognizer.RA_velocity forEdge:screenEdgePanRecognizer.targetEdges])
         {
-            if ([RAGestureManager.sharedInstance handleMovementOrStateUpdate:UIGestureRecognizerStateBegan withPoint:location velocity:screenEdgePanRecognizer.RA_velocity forEdge:screenEdgePanRecognizer.targetEdges])
-            {
-                currentEdge = screenEdgePanRecognizer.targetEdges;
-                BKSHIDServicesCancelTouchesOnMainDisplay(); // This is needed or open apps, etc will still get touch events. For example open settings app + swipeover without this line and you can still scroll up/down through the settings
-            }
+            currentEdge = screenEdgePanRecognizer.targetEdges;
+            BKSHIDServicesCancelTouchesOnMainDisplay(); // This is needed or open apps, etc will still get touch events. For example open settings app + swipeover without this line and you can still scroll up/down through the settings
         }
     }
 }
 
--(void) clear {
+-(void) clear
+{
     dispatch_async(dispatch_get_main_queue(), ^{
         if (isTracking) // Ended
         {
@@ -143,14 +137,12 @@ struct VelocityData {
             [RAGestureManager.sharedInstance handleMovementOrStateUpdate:UIGestureRecognizerStateEnded withPoint:CGPointZero velocity:targetRecognizer.RA_velocity forEdge:currentEdge];
             for (_UIScreenEdgePanRecognizer *recognizer in gestureRecognizers)
                 [recognizer reset]; // remove current touches it's "incorporated"
-            shouldBeOverridingForRecognizer = NO;
             currentEdge = UIRectEdgeNone;
             isTracking = NO;
         }
     });
     %orig;
 }
-
 %end
 
 %ctor 
@@ -162,7 +154,7 @@ struct VelocityData {
         UIRectEdge edgesToWatch[] = { UIRectEdgeBottom, UIRectEdgeLeft, UIRectEdgeRight, UIRectEdgeTop };
         int edgeCount = sizeof(edgesToWatch) / sizeof(UIRectEdge);
         gestureRecognizers = [[NSMutableSet alloc] initWithCapacity:edgeCount];
-        for (int i = 0; i < edgeCount; i++) 
+        for (int i = 0; i < edgeCount; i++)
         {
             _UIScreenEdgePanRecognizer *recognizer = [[_UIScreenEdgePanRecognizer alloc] initWithType:2];
             recognizer.targetEdges = edgesToWatch[i];

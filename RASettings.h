@@ -5,13 +5,15 @@ enum RAGrabArea {
 	RAGrabAreaBottomMiddleThird = 2,
 	RAGrabAreaBottomRightThird = 3,
 
-	RAGrabAreaSideAnywhere,
-	RAGrabAreaSideTopThird,
-	RAGrabAreaSideMiddleThird,
-	RAGrabAreaSideBottomThird,
+	RAGrabAreaSideAnywhere = 6,
+	RAGrabAreaSideTopThird = 7,
+	RAGrabAreaSideMiddleThird = 8,
+	RAGrabAreaSideBottomThird = 9,
 };
 
-@interface RASettings : NSObject
+@interface RASettings : NSObject {
+	NSDictionary *_settings;
+}
 +(instancetype)sharedInstance;
 
 +(BOOL) isParagonInstalled;

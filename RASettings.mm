@@ -6,8 +6,6 @@
 
 #define BOOL(key, default) ([_settings objectForKey:key] != nil ? [_settings[key] boolValue] : default) 
 
-NSDictionary *_settings = nil;
-
 @implementation RASettings
 +(BOOL) isParagonInstalled
 {
@@ -47,7 +45,7 @@ NSDictionary *_settings = nil;
 	return installed;
 }
 
-+(instancetype)sharedInstance
++(instancetype) sharedInstance
 {
 	SHARED_INSTANCE(RASettings);
 }

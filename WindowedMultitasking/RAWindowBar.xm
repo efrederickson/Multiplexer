@@ -18,15 +18,13 @@
 @end
 
 extern BOOL allowOpenApp;
-const int rightSizeViewTag = 987654321;
-const int bottomSizeViewTag =  987654320;
 
 @interface RAWindowBar () {
 	CGPoint initialPoint;
 	BOOL enableDrag, enableLongPress;
 	BOOL sizingLocked, appRotationLocked;
 	BOOL isSnapped;
-	BOOL isBeingTouched; // this name sounds... really inappropriate.
+	BOOL isBeingTouched; // the windows like being touched
 
 	CGFloat height, buttonSize, spacing;
 
@@ -553,49 +551,7 @@ const int bottomSizeViewTag =  987654320;
 
 -(void) handlePan:(UIPanGestureRecognizer*)sender
 {
-	static void (^adjustFrames)(CGRect selfTarget) = ^(CGRect selfTarget) {
-		self.bounds = selfTarget;
-		[self viewWithTag:bottomSizeViewTag].bounds = CGRectMake(0, self.bounds.size.height, self.bounds.size.width, 20);
-		[self viewWithTag:rightSizeViewTag].bounds = CGRectMake(self.bounds.size.width, 30, 20, self.bounds.size.height - 20);
-		self.attachedView.bounds = CGRectMake(0, 30, self.bounds.size.width, self.bounds.size.height - 30);
-	};
-
-	BOOL didSize = NO;
-
-	if (sender.view.tag == bottomSizeViewTag)
-	{
-		static CGFloat orig;
-
-		if (sender.state == UIGestureRecognizerStateBegan)
-		{
-			orig = self.bounds.size.height;
-		}
-		else if (sender.state == UIGestureRecognizerStateChanged)
-		{
-			CGRect f = self.bounds;
-			f.size.height = orig + [sender translationInView:self].y;
-			adjustFrames(f);
-		}
-		didSize = YES;
-	}
-	if (sender.view.tag == rightSizeViewTag)
-	{
-		static CGFloat orig;
-
-		if (sender.state == UIGestureRecognizerStateBegan)
-		{
-			orig = self.bounds.size.width;
-		}
-		else if (sender.state == UIGestureRecognizerStateChanged)
-		{
-			CGRect f = self.bounds;
-			f.size.width = orig + [sender translationInView:self].x;
-			adjustFrames(f);
-		}
-		didSize = YES;
-	}
-
-	if (!enableDrag || didSize)
+	if (!enableDrag)
 	{
 		[self removePotentialSnapShadow];
 		return;
@@ -778,7 +734,7 @@ const int bottomSizeViewTag =  987654320;
 {
     NSEnumerator *objects = [self.subviews reverseObjectEnumerator];
     UIView *subview;
-    while ((subview = [objects nextObject])) 
+    while ((subview = [objects nextObject]))
     {
         UIView *success = [subview hitTest:[self convertPoint:point toView:subview] withEvent:event];
         if (success)

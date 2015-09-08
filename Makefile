@@ -33,14 +33,18 @@ after-install::
 #	install.exec "killall -9 SpringBoard"
 #	install.exec "killall -9 Preferences"
 	install.exec "killall -9 backboardd"
-SUBPROJECTS += reachappsettings
-SUBPROJECTS += reachappflipswitch
-SUBPROJECTS += reachappfsdaemon
 
-SUBPROJECTS += reachappassertiondhooks
-SUBPROJECTS += reachappbackboarddhooks
 
 SUBPROJECTS += Backgrounding
 SUBPROJECTS += MissionControl
 SUBPROJECTS += SwipeOver
+
+SUBPROJECTS += reachappassertiondhooks
+SUBPROJECTS += reachappbackboarddhooks
+
+SUBPROJECTS += reachappsettings
+SUBPROJECTS += reachappflipswitch
+SUBPROJECTS += reachappfsdaemon
+
+
 include $(THEOS_MAKE_PATH)/aggregate.mk

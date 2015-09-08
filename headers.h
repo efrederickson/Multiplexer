@@ -35,7 +35,9 @@
 #define NSLog(...)
 #endif
 
-#define IS_SPRINGBOARD [NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"]
+extern BOOL $__IS_SPRINGBOARD;
+//#define IS_SPRINGBOARD [NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"]
+#define IS_SPRINGBOARD $__IS_SPRINGBOARD
 #define IF_SPRINGBOARD if (IS_SPRINGBOARD)
 #define IF_NOT_SPRINGBOARD if (!IS_SPRINGBOARD)
 #define IF_THIS_PROCESS(x) if ([[x objectForKey:@"bundleIdentifier"] isEqual:NSBundle.mainBundle.bundleIdentifier])

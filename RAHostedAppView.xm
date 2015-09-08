@@ -123,7 +123,7 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
     view.backgroundColorWhileNotHosting = [UIColor clearColor];
     view.backgroundColorWhileHosting = [UIColor clearColor];
 
-    view.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height);
+    view.frame = CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height);
     //view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
     [self addSubview:view];

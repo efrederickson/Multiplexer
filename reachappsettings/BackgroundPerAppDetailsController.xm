@@ -206,7 +206,7 @@ The status bar icon is simply the app icon.", },
             NSMutableDictionary *daemonDict = [NSMutableDictionary dictionary];
             daemonDict[@"bundleIdentifier"] = _identifier;
             daemonDict[@"UIApplicationExitsOnSuspend"] = value;
-            [daemonDict writeToFile:@"/User/Library/.reachapp.uiappexitsonsuspend.wantstochangerootapp" atomically:YES];
+            [daemonDict writeToFile:@"/var/mobile/Library/.reachapp.uiappexitsonsuspend.wantstochangerootapp" atomically:YES];
         }
 
         if ([[specifier propertyForKey:@"reloadSpecifiers"] boolValue])

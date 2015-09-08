@@ -22,13 +22,16 @@ BOOL isShowing = NO;
     NSLog(@"[ReachApp] keyboard didShow");
     _visible = YES;
     _size = [[notif.userInfo objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.keyboard.didShow"), NULL, NULL, true);
-    [RAMessagingClient.sharedInstance notifyServerOfKeyboardSizeUpdate:_size];
 
-    if ([RAMessagingClient.sharedInstance shouldUseExternalKeyboard])
-    {
-        [RAMessagingClient.sharedInstance notifyServerToShowKeyboard];
-        isShowing = YES;
+    IF_NOT_SPRINGBOARD {
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("com.efrederickson.reachapp.keyboard.didShow"), NULL, NULL, true);
+        [RAMessagingClient.sharedInstance notifyServerOfKeyboardSizeUpdate:_size];
+
+        if ([RAMessagingClient.sharedInstance shouldUseExternalKeyboard])
+        {
+            [RAMessagingClient.sharedInstance notifyServerToShowKeyboard];
+            isShowing = YES;
+        }
     }
 }
 
@@ -36,12 +39,14 @@ BOOL isShowing = NO;
 {
     NSLog(@"[ReachApp] keyboard didHide");
     _visible = NO;
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.keyboard.didHide"), NULL, NULL, true);
 
-    if ([RAMessagingClient.sharedInstance shouldUseExternalKeyboard] || isShowing)
-    {
-        isShowing = NO;
-        [RAMessagingClient.sharedInstance notifyServerToHideKeyboard];
+    IF_NOT_SPRINGBOARD {
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.keyboard.didHide"), NULL, NULL, true);
+        if ([RAMessagingClient.sharedInstance shouldUseExternalKeyboard] || isShowing)
+        {
+            isShowing = NO;
+            [RAMessagingClient.sharedInstance notifyServerToHideKeyboard];
+        }
     }
 }
 
@@ -77,8 +82,10 @@ void externalKeyboardDidHide(CFNotificationCenterRef center, void *observer, CFS
 {
     %orig;
 
-    unsigned int contextID = UITextEffectsWindow.sharedTextEffectsWindow._contextId;
-    [RAMessagingClient.sharedInstance notifyServerWithKeyboardContextId:contextID];
+    IF_NOT_SPRINGBOARD {
+        unsigned int contextID = UITextEffectsWindow.sharedTextEffectsWindow._contextId;
+        [RAMessagingClient.sharedInstance notifyServerWithKeyboardContextId:contextID];
+    }
 }
 %end
 
