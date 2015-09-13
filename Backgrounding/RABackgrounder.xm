@@ -142,6 +142,7 @@ NSMutableDictionary *temporaryShouldPop = [NSMutableDictionary dictionary];
 -(void) temporarilyApplyBackgroundingMode:(RABackgroundMode)mode forApplication:(SBApplication*)app andCloseForegroundApp:(BOOL)close
 {
 	temporaryOverrides[app.bundleIdentifier] = @(mode);
+	[temporaryShouldPop removeObjectForKey:app.bundleIdentifier];
 
 	if (close)
 	{

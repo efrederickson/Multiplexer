@@ -144,7 +144,7 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 			{
 				CGFloat padding = [objc_getClass("SBIconBadgeView") _textPadding];
 				
-				textImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, badge.frame.size.width - padding, badge.frame.size.height - padding)];
+				textImageView = [[UIImageView alloc] initWithFrame:CGRectMake(padding, padding, badge.frame.size.width - (padding * 2.0), badge.frame.size.height - (padding * 2.0))];
 				textImageView.center = CGPointMake((badge.frame.size.width / 2.0) + [%c(SBIconBadgeView) _textOffset].x, (badge.frame.size.height / 2.0) + [%c(SBIconBadgeView) _textOffset].y);
 				textImageView.tag = 42;
 				[badge addSubview:textImageView];
