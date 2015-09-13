@@ -13,6 +13,7 @@
 -(id) initWithBundleIdentifier:(NSString*)bundleIdentifier;
 
 @property (nonatomic) BOOL showSplashscreenInsteadOfSpinner;
+@property (nonatomic) BOOL renderWallpaper;
 
 @property (nonatomic, retain) NSString *bundleIdentifier;
 @property (nonatomic) BOOL autosizesApp;

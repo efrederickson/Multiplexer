@@ -1,12 +1,14 @@
 #import "headers.h"
 #import "RAMessagingClient.h"
 
-//BOOL overrideViewControllerDismissal = NO;
+BOOL allowClosingReachabilityNatively = NO;
 
 %hook UIApplication
 - (void)_deactivateReachability
 {
-    //if (overrideViewControllerDismissal)
+    if (allowClosingReachabilityNatively == NO)
+        return;
+        
     if ([RAMessagingClient.sharedInstance isBeingHosted])
     {
         return;

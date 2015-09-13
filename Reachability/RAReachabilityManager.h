@@ -7,7 +7,7 @@
 
 -(void) launchTopAppWithIdentifier:(NSString*)identifier;
 -(void) launchWidget:(RAWidget*)widget;
--(void) showAppWithSliderProvider:(RAAppSliderProviderView*)view;
+-(void) showAppWithSliderProvider:(__weak RAAppSliderProviderView*)view;
 
 -(void) showWidgetSelector;
 @end

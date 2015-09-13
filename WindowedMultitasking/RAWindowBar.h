@@ -26,6 +26,7 @@
 -(void) updateClientRotation:(UIInterfaceOrientation)orientation;
 
 -(void) scaleTo:(CGFloat)scale animated:(BOOL)animate;
+-(void) scaleTo:(CGFloat)scale animated:(BOOL)animate derotate:(BOOL)derotate;
 
 -(void) saveWindowInfo;
 

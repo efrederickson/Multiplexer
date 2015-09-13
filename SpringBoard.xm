@@ -58,6 +58,13 @@
 
     return %orig;
 }
+
+// This should help fix the problems where closing an app with Tage or the iPad Gesture would cause the app to suspend(?) and lock up the device.
+- (void)_suspendGestureBegan
+{
+    %orig;
+    [UIApplication.sharedApplication._accessibilityFrontMostApplication clearDeactivationSettings];
+}
 %end
 
 %hook SpringBoard
@@ -100,6 +107,8 @@
     %orig;
 }
 
+// On iOS 8.3 and above, on the iPad, if a FBWindowContextWhatever creates a hosting context / enabled hosting, all the other hosted windows stop. 
+// This fixes that. 
 -(void)_didComplete
 {
     %orig;
@@ -142,12 +151,12 @@
 }
 %end
 
-%hook SBLockStateAggregator
--(void) _updateLockState
+%hook SBLockScreenManager
+- (void)_postLockCompletedNotification:(_Bool)arg1
 {
     %orig;
     
-    if ([self hasAnyLockState])
+    if (arg1)
     {
         if ([[%c(RASwipeOverManager) sharedInstance] isUsingSwipeOver])
             [[%c(RASwipeOverManager) sharedInstance] stopUsingSwipeOver];

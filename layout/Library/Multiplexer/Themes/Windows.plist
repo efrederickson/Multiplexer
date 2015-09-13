@@ -56,6 +56,8 @@
 
 	<key>swipeOverDetachBarColor</key>
 	<string>6aacf6</string>
+	<key>swipeOverDetachImageColor</key>
+	<string>FFFFFF</string>
 
 	<key>windowedMultitaskingCloseButtonAlignment</key>
 	<integer>1</integer>

@@ -33,12 +33,31 @@ CGRect adjustFrameForRotation()
             return (CGRect){ { 0, 0}, { 50, 50 } };
         case UIInterfaceOrientationLandscapeLeft:
             NSLog(@"[ReachApp] landscape left");
-            return (CGRect){ { ((height - portraitWidth) / 2), -(portraitWidth / 2) }, { portraitWidth, portraitHeight } };
+            return (CGRect){ { ((width - portraitWidth) / 2), -(portraitWidth / 2) }, { portraitWidth, portraitHeight } };
         case UIInterfaceOrientationLandscapeRight:
             NSLog(@"[ReachApp] landscape right");
             return (CGRect){ { (height - portraitHeight) / 2, width - portraitWidth - 5 }, { portraitWidth, portraitHeight } };
     }
     return CGRectZero;
+}
+
+CGPoint adjustCenterForOffscreenSlide(CGPoint center)
+{
+    CGFloat portraitWidth = 30;
+    //CGFloat portraitHeight = 50;
+
+    switch ([[UIApplication.sharedApplication _accessibilityFrontMostApplication] statusBarOrientation])
+    {
+        case UIInterfaceOrientationPortrait:
+            return (CGPoint) { center.x + portraitWidth, center.y };
+        case UIInterfaceOrientationPortraitUpsideDown:
+            return (CGPoint) { center.x - portraitWidth, center.y };
+        case UIInterfaceOrientationLandscapeLeft:
+            return (CGPoint) { center.x, center.y - portraitWidth };
+        case UIInterfaceOrientationLandscapeRight:
+            return (CGPoint) { center.x, center.y + portraitWidth };
+    }
+    return CGPointZero;
 }
 
 CGAffineTransform adjustTransformRotation()
@@ -111,7 +130,8 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
                     if ([[NSDate date] timeIntervalSinceDate:lastTouch] > 2)
                     {
                         [UIView animateWithDuration:0.2 animations:^{
-                            grabberView.frame = CGRectOffset(grabberView.frame, 40, 0);
+                            //grabberView.frame = CGRectOffset(grabberView.frame, 40, 0);
+                            grabberView.center = adjustCenterForOffscreenSlide(grabberView.center);
                         } completion:^(BOOL _) {
                             [grabberView removeFromSuperview];
                             grabberView = nil;
@@ -169,12 +189,12 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
 
         return RAGestureCallbackResultSuccess;
     } withCondition:^BOOL(CGPoint location, CGPoint velocity) {
-        if ([[%c(RAKeyboardStateListener) sharedInstance] visible])
+        if ([[%c(RAKeyboardStateListener) sharedInstance] visible] && ![RASwipeOverManager.sharedInstance isUsingSwipeOver])
         {
             CGRect realKBFrame = CGRectMake(0, UIScreen.mainScreen._interfaceOrientedBounds.size.height, [[%c(RAKeyboardStateListener) sharedInstance] size].width, [[%c(RAKeyboardStateListener) sharedInstance] size].height);
             realKBFrame = CGRectOffset(realKBFrame, 0, -realKBFrame.size.height);
 
-            if (CGRectContainsPoint(realKBFrame, location))
+            if (CGRectContainsPoint(realKBFrame, location) || realKBFrame.size.height > 50)
                 return NO;
         }
         

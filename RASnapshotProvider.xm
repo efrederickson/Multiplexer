@@ -240,6 +240,45 @@
 	}
 }
 
+-(UIImage*) wallpaperImage
+{
+	if ([imageCache objectForKey:@"wallpaperImage"])
+		return [imageCache objectForKey:@"wallpaperImage"];
+
+
+	UIGraphicsBeginImageContextWithOptions(UIScreen.mainScreen.bounds.size, YES, UIScreen.mainScreen.scale);
+	CGContextRef c = UIGraphicsGetCurrentContext();
+
+    [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"BeautifulAnimation"];
+
+    [MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Wallpaper
+
+	UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
+	MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer.contents = nil;
+	[[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"BeautifulAnimation"];
+
+	UIImageView *imgView = [[UIImageView alloc] initWithImage:image];//Frame:(CGRect){CGPointZero,image.size}];
+	imgView.image = image;
+
+	CIFilter *gaussianBlurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];
+	[gaussianBlurFilter setDefaults];
+	CIImage *inputImage = [CIImage imageWithCGImage:[image CGImage]];
+	[gaussianBlurFilter setValue:inputImage forKey:kCIInputImageKey];
+	[gaussianBlurFilter setValue:@25 forKey:kCIInputRadiusKey];
+
+	CIImage *outputImage = [gaussianBlurFilter outputImage];
+	outputImage = [outputImage imageByCroppingToRect:CGRectMake(0, 0, image.size.width * UIScreen.mainScreen.scale, image.size.height * UIScreen.mainScreen.scale)];
+	CIContext *context = [CIContext contextWithOptions:nil];
+	CGImageRef cgimg = [context createCGImage:outputImage fromRect:[inputImage extent]];  // note, use input image extent if you want it the same size, the output image extent is larger
+	image = [UIImage imageWithCGImage:cgimg];
+	CGImageRelease(cgimg);
+
+	[imageCache setObject:image forKey:@"wallpaperImage"];
+
+	return image;
+}
+
 -(void) forceReloadEverything
 {
 	[imageCache removeAllObjects];

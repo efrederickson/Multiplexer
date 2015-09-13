@@ -44,6 +44,8 @@
 	<string>99000000</string>
 	<key>swipeOverDetachBarColor</key>
 	<string>5a6168</string>
+	<key>swipeOverDetachImageColor</key>
+	<string>FFFFFF</string>
 	<key>windowedMultitaskingBarTitleColor</key>
 	<string>ffffff</string>
 

@@ -62,41 +62,44 @@
     [RABackgrounder.sharedInstance removeTemporaryOverrideForIdentifier:arg1.identifier]; 
     if (arg1 && arg1.identifier && arg2 && arg1.clientProcess) // TODO: sanity check to prevent NC App crash. untested/not working.
     {
-        if ([RABackgrounder.sharedInstance killProcessOnExit:arg1.identifier] && arg2.backgrounded == YES)
+        if (arg2.backgrounded)
         {
-            FBProcess *proc = arg1.clientProcess;
-
-            if ([proc isKindOfClass:[%c(FBApplicationProcess) class]])
+            if ([RABackgrounder.sharedInstance killProcessOnExit:arg1.identifier])
             {
-                FBApplicationProcess *proc2 = (FBApplicationProcess*)proc;
-                [proc2 killForReason:1 andReport:NO withDescription:@"ReachApp.Backgrounder.killOnExit" completion:nil];
-                [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:RAIconIndicatorViewInfoForceDeath];
-                if ([RABackgrounder.sharedInstance shouldRemoveFromSwitcherWhenKilledOnExit:arg1.identifier])
-                {
-                    SBDisplayItem *item = [%c(SBDisplayItem) displayItemWithType:@"App" displayIdentifier:arg1.identifier];
-                    [[%c(SBAppSwitcherModel) sharedInstance] removeDisplayItem:item];
-                }
-            }
-            [RABackgrounder.sharedInstance queueRemoveTemporaryOverrideForIdentifier:arg1.identifier]; 
-        }
+                FBProcess *proc = arg1.clientProcess;
 
-        if ([RABackgrounder.sharedInstance shouldKeepInForeground:arg1.identifier] && arg2.backgrounded == YES)
-        {
-            [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
-            [RABackgrounder.sharedInstance queueRemoveTemporaryOverrideForIdentifier:arg1.identifier]; 
-            return;
+                if ([proc isKindOfClass:[%c(FBApplicationProcess) class]])
+                {
+                    FBApplicationProcess *proc2 = (FBApplicationProcess*)proc;
+                    [proc2 killForReason:1 andReport:NO withDescription:@"ReachApp.Backgrounder.killOnExit" completion:nil];
+                    [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:RAIconIndicatorViewInfoForceDeath];
+                    if ([RABackgrounder.sharedInstance shouldRemoveFromSwitcherWhenKilledOnExit:arg1.identifier])
+                    {
+                        SBDisplayItem *item = [%c(SBDisplayItem) displayItemWithType:@"App" displayIdentifier:arg1.identifier];
+                        [[%c(SBAppSwitcherModel) sharedInstance] removeDisplayItem:item];
+                    }
+                }
+                [RABackgrounder.sharedInstance queueRemoveTemporaryOverrideForIdentifier:arg1.identifier]; 
+            }
+
+            if ([RABackgrounder.sharedInstance shouldKeepInForeground:arg1.identifier])
+            {
+                [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
+                [RABackgrounder.sharedInstance queueRemoveTemporaryOverrideForIdentifier:arg1.identifier]; 
+                return;
+            }
+            else if ([RABackgrounder.sharedInstance backgroundModeForIdentifier:arg1.identifier] == RABackgroundModeNative)
+            {
+                [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
+                [RABackgrounder.sharedInstance queueRemoveTemporaryOverrideForIdentifier:arg1.identifier]; 
+            }
+            else if ([RABackgrounder.sharedInstance shouldSuspendImmediately:arg1.identifier])
+            {
+                [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
+                [RABackgrounder.sharedInstance queueRemoveTemporaryOverrideForIdentifier:arg1.identifier]; 
+            }
         }
-        else if ([RABackgrounder.sharedInstance backgroundModeForIdentifier:arg1.identifier] == RABackgroundModeNative && arg2.backgrounded)
-        {
-            [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
-            [RABackgrounder.sharedInstance queueRemoveTemporaryOverrideForIdentifier:arg1.identifier]; 
-        }
-        else if ([RABackgrounder.sharedInstance shouldSuspendImmediately:arg1.identifier] && arg2.backgrounded)
-        {
-            [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
-            [RABackgrounder.sharedInstance queueRemoveTemporaryOverrideForIdentifier:arg1.identifier]; 
-        }
-        else if ([RABackgrounder.sharedInstance shouldSuspendImmediately:arg1.identifier] && arg2.backgrounded == NO)
+        else if ([RABackgrounder.sharedInstance shouldSuspendImmediately:arg1.identifier])
         {
             [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:arg1.identifier]];
         }
@@ -115,14 +118,6 @@
         [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:self.bundleIdentifier withInfo:[RABackgrounder.sharedInstance allAggregatedIndicatorInfoForIdentifier:self.bundleIdentifier]];
         return;
     }
-    %orig;
-}
-%end
-
-%hook SBUIController
--(void) _noteAppDidActivate:(SBApplication*)application
-{
-    [application clearDeactivationSettings];
     %orig;
 }
 %end

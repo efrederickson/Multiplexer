@@ -55,11 +55,24 @@ extern int rotationDegsForOrientation(int o);
 	isUsingSwipeOver = NO;
 	currentAppIdentifier = nil;
 
+	CGRect newFrame = overlayWindow.frame;
+	switch ([UIApplication.sharedApplication statusBarOrientation])
+	{
+	    case UIInterfaceOrientationPortrait:
+	     	newFrame = (CGRect) { { newFrame.origin.x + newFrame.size.height, newFrame.origin.y }, newFrame.size };
+	    case UIInterfaceOrientationPortraitUpsideDown:
+	     	newFrame = (CGRect) { { newFrame.origin.x - newFrame.size.height, newFrame.origin.y }, newFrame.size };
+	    case UIInterfaceOrientationLandscapeLeft:
+	     	newFrame = (CGRect) { { newFrame.origin.x, newFrame.origin.y - newFrame.size.height }, newFrame.size };
+	    case UIInterfaceOrientationLandscapeRight:
+	     	newFrame = (CGRect) { { newFrame.origin.x, newFrame.origin.y + newFrame.size.height }, newFrame.size };
+	}
+
 	[UIView animateWithDuration:0.3 animations:^{
 		if ([[overlayWindow currentView] isKindOfClass:[%c(RAHostedAppView) class]])
 			[((RAHostedAppView*)overlayWindow.currentView) viewWithTag:9903553].alpha = 0;
 
-		overlayWindow.frame = CGRectMake(SCREEN_WIDTH, overlayWindow.frame.origin.y, overlayWindow.frame.size.width, overlayWindow.frame.size.height);
+		overlayWindow.frame = newFrame;
 	} completion:^(BOOL _) {
 		[self closeCurrentView];
 
@@ -124,6 +137,7 @@ extern int rotationDegsForOrientation(int o);
     view.allowHidingStatusBar = NO;
     view.frame = UIScreen.mainScreen.bounds;
     view.showSplashscreenInsteadOfSpinner = YES;
+	view.renderWallpaper = YES;
     [view rotateToOrientation:UIInterfaceOrientationPortrait];
     [view loadApp];
 

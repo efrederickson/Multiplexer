@@ -19,7 +19,7 @@
 	if (numberOfWindows == 1)
 	{
 		if (resize)
-			[windows[0] scaleTo:0.7 animated:YES];
+			[windows[0] scaleTo:0.7 animated:YES derotate:YES];
 		[RAWindowSnapDataProvider snapWindow:windows[0] toLocation:RAWindowSnapLocationLeftTop animated:YES];
 	}
 	else if (numberOfWindows == 2)
@@ -29,8 +29,8 @@
 
 		if (resize)
 		{
-			[window1 scaleTo:0.5 animated:YES];
-			[window2 scaleTo:0.5 animated:YES];
+			[window1 scaleTo:0.5 animated:YES derotate:YES];
+			[window2 scaleTo:0.5 animated:YES derotate:YES];
 		}
 
 		[RAWindowSnapDataProvider snapWindow:window1 toLocation:RAWindowSnapLocationLeftTop animated:YES];
@@ -44,16 +44,16 @@
 
 		if (resize)
 		{
-			[window1 scaleTo:0.5 animated:YES];
-			[window2 scaleTo:0.5 animated:YES];
-			[window3 scaleTo:0.4 animated:YES];
+			[window1 scaleTo:0.5 animated:YES derotate:YES];
+			[window2 scaleTo:0.5 animated:YES derotate:YES];
+			[window3 scaleTo:0.4 animated:YES derotate:YES];
 		}
 
 		[RAWindowSnapDataProvider snapWindow:window1 toLocation:RAWindowSnapLocationLeftTop animated:YES];
 		[RAWindowSnapDataProvider snapWindow:window2 toLocation:RAWindowSnapLocationRightTop animated:YES];
 		[RAWindowSnapDataProvider snapWindow:window3 toLocation:RAWindowSnapLocationBottomCenter animated:YES];
 	}
-	else if (numberOfWindows == 40000)
+	else if (NO && numberOfWindows == 4)
 	{
 		RAWindowBar *window1 = windows[0];
 		RAWindowBar *window2 = windows[1];
@@ -62,10 +62,10 @@
 
 		if (resize)
 		{
-			[window1 scaleTo:0.45 animated:YES];
-			[window2 scaleTo:0.45 animated:YES];
-			[window3 scaleTo:0.45 animated:YES];
-			[window4 scaleTo:0.45 animated:YES];
+			[window1 scaleTo:0.45 animated:YES derotate:YES];
+			[window2 scaleTo:0.45 animated:YES derotate:YES];
+			[window3 scaleTo:0.45 animated:YES derotate:YES];
+			[window4 scaleTo:0.45 animated:YES derotate:YES];
 		}
 		
 		[RAWindowSnapDataProvider snapWindow:window1 toLocation:RAWindowSnapLocationLeftTop animated:YES];
@@ -88,7 +88,7 @@
 
 			for (RAWindowBar *bar in windows)
 			{
-				[bar scaleTo:maxScale animated:YES];
+				[bar scaleTo:maxScale animated:YES derotate:YES];
 
 				if (y == 0) // 20 = statusbar
 					y = 20 + (bar.frame.size.height / 2.0);

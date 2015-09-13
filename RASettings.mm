@@ -6,6 +6,9 @@
 
 #define BOOL(key, default) ([_settings objectForKey:key] != nil ? [_settings[key] boolValue] : default) 
 
+NSCache *backgrounderSettingsCache = [NSCache new];
+
+
 @implementation RASettings
 +(BOOL) isParagonInstalled
 {
@@ -104,12 +107,13 @@
 		}
 
 		if ([previousNCAppSetting isEqual:self.NCApp] == NO)
-			[[objc_getClass("RANCViewController") sharedViewController] forceReloadAppLikelyBecauseTheSettingChanged]; // using objc_getClass allows RASettings to be used in reachappsettings
+			[[objc_getClass("RANCViewController") sharedViewController] forceReloadAppLikelyBecauseTheSettingChanged]; // using objc_getClass allows RASettings to be used in reachappsettings and other places
 
 		if ([self shouldShowStatusBarIcons] == NO && [objc_getClass("SBApplication") respondsToSelector:@selector(RA_clearAllStatusBarIcons)])
 			[objc_getClass("SBApplication") performSelector:@selector(RA_clearAllStatusBarIcons)];
 
 		[RAThemeManager.sharedInstance invalidateCurrentThemeAndReload:[self currentThemeIdentifier]];
+		[backgrounderSettingsCache removeAllObjects];
 	}
 }
 
@@ -131,6 +135,7 @@
 	{
 		NSLog(@"[ReachApp] unable to get keyList to reset settings");
 	}
+	CFPreferencesAppSynchronize(appID);
 	CFRelease(appID);
 
     CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("com.efrederickson.reachapp.respring"), nil, nil, YES);
@@ -300,7 +305,7 @@
 
 -(BOOL) shouldShowStatusBarIcons { return BOOL(@"shouldShowStatusBarIcons", YES); }
 
--(NSDictionary*) rawCompiledBackgrounderSettingsForIdentifier:(NSString*)identifier
+-(NSDictionary*) _createAndCacheBackgrounderSettingsForIdentifier:(NSString*)identifier
 {
 	NSMutableDictionary *ret = [NSMutableDictionary dictionary];
 
@@ -326,17 +331,27 @@
 	ret[@"backgroundModes"][kBGModeBluetoothCentral] = _settings[[NSString stringWithFormat:@"backgrounder-%@-backgroundmodes-%@",identifier,kBGModeBluetoothCentral]] ?: @NO;
 	ret[@"backgroundModes"][kBGModeBluetoothPeripheral] = _settings[[NSString stringWithFormat:@"backgrounder-%@-backgroundmodes-%@",identifier,kBGModeBluetoothPeripheral]] ?: @NO;
 
+	[backgrounderSettingsCache setObject:ret forKey:identifier];
+
 	return ret;
+}
+
+-(NSDictionary*) rawCompiledBackgrounderSettingsForIdentifier:(NSString*)identifier
+{
+	return [backgrounderSettingsCache objectForKey:identifier] ?: [self _createAndCacheBackgrounderSettingsForIdentifier:identifier];
 }
 
 -(BOOL) isFirstRun
 {
-	return [_settings[@"isFirstRun"] boolValue];
+	NSLog(@"[ReachApp] %d", BOOL(@"isFirstRun", YES));
+	return BOOL(@"isFirstRun", YES);  
 }
 
 -(void) setFirstRun:(BOOL)value
 {
 	CFPreferencesSetAppValue(CFSTR("isFirstRun"), value ? kCFBooleanTrue : kCFBooleanFalse, CFSTR("com.efrederickson.reachapp.settings"));
+	CFPreferencesAppSynchronize(CFSTR("com.efrederickson.reachapp.settings"));
+	[self reloadSettings];
 }
 
 -(BOOL) alwaysShowSOGrabber { return BOOL(@"alwaysShowSOGrabber", NO); }

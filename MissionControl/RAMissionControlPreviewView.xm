@@ -27,10 +27,12 @@
     iconView.layer.shadowRadius = THEMED(missionControlIconPreviewShadowRadius); // iconView.layer.cornerRadius;
     iconView.layer.shadowOpacity = 0.8;
     iconView.layer.shadowOffset = CGSizeMake(0, 0);
-    iconView.layer.shouldRasterize = YES;
-    iconView.layer.rasterizationScale = UIScreen.mainScreen.scale;
+    //iconView.layer.shouldRasterize = YES;
+    //iconView.layer.rasterizationScale = UIScreen.mainScreen.scale;
     iconView.userInteractionEnabled = NO;
 	iconView.iconLabelAlpha = 0;
+    CGFloat scale = (iconView.frame.size.width - 3.0) / iconView.frame.size.width;
+    iconView.transform = CGAffineTransformMakeScale(scale, scale);
 
     [self performSelectorOnMainThread:@selector(addSubview:) withObject:iconView waitUntilDone:NO];
     [self performSelectorOnMainThread:@selector(updateIconViewFrame) withObject:nil waitUntilDone:NO];

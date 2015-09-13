@@ -94,6 +94,7 @@
 -(RAWindowBar*) createAppWindowWithIdentifier:(NSString*)identifier animated:(BOOL)animated
 {
 	RAHostedAppView *view = [[RAHostedAppView alloc] initWithBundleIdentifier:identifier];
+	view.renderWallpaper = YES;
 	return [self addAppWithView:view animated:animated];
 }
 

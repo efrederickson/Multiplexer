@@ -24,6 +24,8 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
     int startTries;
     BOOL disablePreload;
+
+    NSTimer *loadedTimer;
 }
 @end
 
@@ -38,6 +40,8 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
         self.showSplashscreenInsteadOfSpinner = NO;
         startTries = 0;
         disablePreload = NO;
+        self.renderWallpaper = NO;
+        self.backgroundColor = [UIColor clearColor];
 	}
 	return self;
 }
@@ -133,6 +137,10 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
         [RAHostedAppView iPad_iOS83_fixHosting];
 
     [RARunningAppsProvider.sharedInstance addTarget:self];
+
+
+    loadedTimer = [NSTimer timerWithTimeInterval:1 target:self selector:@selector(verifyHostingAndRehostIfNecessary) userInfo:nil repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:loadedTimer forMode:NSRunLoopCommonModes];
 }
 
 -(void) loadApp
@@ -254,6 +262,8 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
     else
     {
         [self removeLoadingIndicator];
+        [loadedTimer invalidate];
+        loadedTimer = nil;
     }
 }
 
@@ -274,6 +284,12 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
     }
     else if (activityView)
         [activityView stopAnimating];
+}
+
+-(void) drawRect:(CGRect)rect
+{
+    if (self.renderWallpaper)
+        [[RASnapshotProvider.sharedInstance wallpaperImage] drawInRect:rect];
 }
 
 -(void) setFrame:(CGRect)frame
@@ -318,10 +334,9 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
     //if (activityView)
     //    [activityView stopAnimating];
     [self removeLoadingIndicator];
+    [loadedTimer invalidate];
+    loadedTimer = nil;
 
-
-    //[verifyTimer invalidate];
-    //verifyTimer = nil;
     [RARunningAppsProvider.sharedInstance removeTarget:self];
 
     disablePreload = YES;

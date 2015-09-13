@@ -7,4 +7,6 @@
 
 -(void) setupForKeyboardAndShow:(NSString*)identifier;
 -(void) removeKeyboard;
+
+-(unsigned int) contextId;
 @end

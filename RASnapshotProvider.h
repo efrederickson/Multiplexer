@@ -14,5 +14,7 @@
 -(UIImage*) snapshotForIdentifier:(NSString*)identifier;
 -(void) forceReloadOfSnapshotForIdentifier:(NSString*)identifier;
 
+-(UIImage*) wallpaperImage;
+
 -(void) forceReloadEverything;
 @end

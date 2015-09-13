@@ -95,18 +95,20 @@
 
 -(void) appViewItemTap:(UIGestureRecognizer*)gesture
 {
-	//[[%c(SBWorkspace) sharedInstance] appViewItemTap:gesture];
-	
-	RAAppSliderProvider *provider = [[RAAppSliderProvider alloc] init];
-	provider.availableIdentifiers = [[[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary] mutableCopy];
-	[((NSMutableArray*)provider.availableIdentifiers) removeObject:[[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier];
-	provider.currentIndex = gesture.view.tag;
+	@autoreleasepool {
+		//[[%c(SBWorkspace) sharedInstance] appViewItemTap:gesture];
+		
+		RAAppSliderProvider *provider = [[RAAppSliderProvider alloc] init];
+		provider.availableIdentifiers = [[[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary] mutableCopy];
+		[((NSMutableArray*)provider.availableIdentifiers) removeObject:[[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier];
+		provider.currentIndex = gesture.view.tag;
 
-	RAAppSliderProviderView *view = [[RAAppSliderProviderView alloc] initWithFrame:CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height / 2)]; // TODO: fix frame
-	view.swipeProvider = provider;
-	view.isSwipeable = YES;
+		RAAppSliderProviderView *view = [[RAAppSliderProviderView alloc] initWithFrame:CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height / 2)];
+		view.swipeProvider = provider;
+		view.isSwipeable = YES;
 
-	[[RAReachabilityManager sharedInstance] showAppWithSliderProvider:view];
+		[[RAReachabilityManager sharedInstance] showAppWithSliderProvider:view];
+	}
 }
 @end
 

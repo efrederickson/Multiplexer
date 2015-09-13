@@ -296,11 +296,16 @@ BOOL allowMissionControlActivationFromSwitcher = YES;
 			[UIView animateWithDuration:duration animations:^{
 				fakeView.frame = UIScreen.mainScreen._interfaceOrientedBounds;
 			} completion:^(BOOL _) {
+				((UIWindow*)[[%c(SBUIController) sharedInstance] switcherWindow]).alpha = 0;
+				[[%c(SBUIController) sharedInstance] dismissSwitcherAnimated:YES];
 				[[%c(SBUIController) sharedInstance] restoreContentUpdatingStatusBar:YES];
-				[[[%c(SBUIController) sharedInstance] _appSwitcherController] forceDismissAnimated:NO];
 				[RAMissionControlManager.sharedInstance showMissionControl:NO];
 				[fakeView removeFromSuperview];
 				fakeView = nil;
+				// avoid status bar hiding
+				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+					((UIWindow*)[[%c(SBUIController) sharedInstance] switcherWindow]).alpha = 1;
+				});
 			}];
 		}
 		else

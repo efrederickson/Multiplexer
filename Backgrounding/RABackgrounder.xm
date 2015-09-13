@@ -118,6 +118,9 @@ NSMutableDictionary *temporaryShouldPop = [NSMutableDictionary dictionary];
 		if (temporaryOverride != -1)
 			return temporaryOverride;
 
+#if __has_feature(objc_arc)
+		__weak // dictionary is cached by RASettings anyway
+#endif
 		NSDictionary *dict = [[%c(RASettings) sharedInstance] rawCompiledBackgrounderSettingsForIdentifier:identifier];
 		BOOL enabled = [dict objectForKey:@"enabled"] ? [dict[@"enabled"] boolValue] : NO;
 		if (!enabled)

@@ -10,20 +10,24 @@ enum {
 } RAMessageType;
 
 struct RAMessageAppData {
-//	NSString *bundleIdentifier;
 	BOOL shouldForceSize;
-	// Can't use CGSize because it uses CGFloats which aren't able to be transferred between 32/64bit processes
+	// Can't use CGSize because it uses CGFloats which aren't able to be transferred between 32/64bit processes (because its float in one and something else (double? i can't remember) in the other).
+	// Also why we can't use CGFloat here
 	float wantedClientOriginX;
 	float wantedClientOriginY;
 	float wantedClientWidth;
 	float wantedClientHeight;
+
 	BOOL statusBarVisibility;
 	BOOL shouldForceStatusBar;
 	BOOL canHideStatusBarIfWanted;
+	
 	UIInterfaceOrientation forcedOrientation;
 	BOOL shouldForceOrientation;
+	
 	BOOL shouldUseExternalKeyboard;
 	BOOL isBeingHosted;
+	// Only applies after the app has been restarted.
 	BOOL forcePhoneMode;
 };
 

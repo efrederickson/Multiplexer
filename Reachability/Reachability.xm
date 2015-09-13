@@ -49,28 +49,28 @@ CGFloat old_grabberCenterY = -1;
 
 - (void)enableExpirationTimerForEndedInteraction
 {
-    if ((view || showingNC) && [RASettings.sharedInstance disableAutoDismiss])
+    if ([RASettings.sharedInstance disableAutoDismiss])
         return;
     %orig;
 }
 
 - (void)_handleSignificantTimeChanged
 {
-    if ((view || showingNC) && [RASettings.sharedInstance disableAutoDismiss])
+    if ([RASettings.sharedInstance disableAutoDismiss])
         return;
     %orig;
 }
 
 - (void)_keepAliveTimerFired:(unsafe_id)arg1
 {
-    if ((view || showingNC) && [RASettings.sharedInstance disableAutoDismiss])
+    if ([RASettings.sharedInstance disableAutoDismiss])
         return;
     %orig;
 }
 
 - (void)_setKeepAliveTimerForDuration:(double)arg1
 {
-    if ((view || showingNC) && [RASettings.sharedInstance disableAutoDismiss])
+    if ([RASettings.sharedInstance disableAutoDismiss])
         return;
     %orig;
 }
@@ -86,6 +86,9 @@ CGFloat old_grabberCenterY = -1;
 {
     if (overrideDisableForStatusBar)
         return;
+
+    [[%c(SBWorkspace) sharedInstance] RA_closeCurrentView];
+
     %orig;
 }
 
@@ -95,6 +98,23 @@ CGFloat old_grabberCenterY = -1;
         return;
     %orig;
 }
+%end
+
+%hook SBReachabilitySettings
+-(CGFloat) reachabilityDefaultKeepAlive
+{
+    if ([RASettings.sharedInstance disableAutoDismiss])
+        return 9999999999;
+    return %orig;
+}
+
+-(CGFloat) reachabilityInteractiveKeepAlive
+{
+    if ([RASettings.sharedInstance disableAutoDismiss])
+        return 9999999999;
+    return %orig;
+}
+
 %end
 
 BOOL wasEnabled = NO;
@@ -135,21 +155,14 @@ id SBWorkspace$sharedInstance;
 
 %new -(void) RA_closeCurrentView
 {
-    // Notify both top and bottom apps Reachability is closing
-    if (lastBundleIdentifier && lastBundleIdentifier.length > 0)
-    {
-        [RAMessagingServer.sharedInstance endResizingApp:lastBundleIdentifier completion:nil];
-        [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:NO forApp:lastBundleIdentifier completion:nil];
-        [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:lastBundleIdentifier completion:nil];
-        [RAMessagingServer.sharedInstance setHosted:NO forIdentifier:lastBundleIdentifier completion:nil];
-    }
-    if (currentBundleIdentifier)
-        [RAMessagingServer.sharedInstance endResizingApp:currentBundleIdentifier completion:nil];
     if ([view isKindOfClass:[RAAppSliderProviderView class]])
     {
         [RAMessagingServer.sharedInstance endResizingApp:[((RAAppSliderProviderView*)view) currentBundleIdentifier] completion:nil];
         [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:NO forApp:[((RAAppSliderProviderView*)view) currentBundleIdentifier] completion:nil];
         [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:[((RAAppSliderProviderView*)view) currentBundleIdentifier] completion:nil];
+        [(RAAppSliderProviderView*)view unload];
+        [view removeFromSuperview];
+        view = nil;
     }
 
     [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:currentBundleIdentifier completion:nil];
@@ -217,7 +230,7 @@ id SBWorkspace$sharedInstance;
 
     %orig;
 
-    if (![RASettings.sharedInstance reachabilityEnabled])
+    if (![RASettings.sharedInstance reachabilityEnabled] && wasEnabled == NO)
     {
         return;
     }
@@ -225,6 +238,19 @@ id SBWorkspace$sharedInstance;
     if (arg1 && wasEnabled)
     {
         wasEnabled = NO;
+
+        // Notify both top and bottom apps Reachability is closing
+        if (lastBundleIdentifier && lastBundleIdentifier.length > 0)
+        {
+            [RAMessagingServer.sharedInstance endResizingApp:lastBundleIdentifier completion:nil];
+            [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:NO forApp:lastBundleIdentifier completion:nil];
+            [RAMessagingServer.sharedInstance unforceStatusBarVisibilityForApp:lastBundleIdentifier completion:nil];
+            [RAMessagingServer.sharedInstance setHosted:NO forIdentifier:lastBundleIdentifier completion:nil];
+        }
+        if (currentBundleIdentifier)
+            [RAMessagingServer.sharedInstance endResizingApp:currentBundleIdentifier completion:nil];
+            
+
         [self RA_closeCurrentView];
         if (draggerView)
             draggerView = nil;
@@ -237,6 +263,16 @@ id SBWorkspace$sharedInstance;
     if (![RASettings.sharedInstance reachabilityEnabled])
         return;
     wasEnabled = YES;
+
+    CGFloat knobWidth = 60;
+    CGFloat knobHeight = 25;
+    draggerView = [[UIView alloc] initWithFrame:CGRectMake(
+        (UIScreen.mainScreen.bounds.size.width / 2) - (knobWidth / 2), 
+        [UIScreen mainScreen].bounds.size.height * .3, 
+        knobWidth, knobHeight)];
+    draggerView.alpha = 0.3;
+    draggerView.layer.cornerRadius = 10;
+    grabberCenter_X = draggerView.center.x;
 
     UIWindow *w = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
     if ([RASettings.sharedInstance showNCInstead])
@@ -263,6 +299,8 @@ id SBWorkspace$sharedInstance;
         currentBundleIdentifier = [[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier;
         if (!currentBundleIdentifier)
             return;
+
+        [RAMessagingServer.sharedInstance setHosted:YES forIdentifier:currentBundleIdentifier completion:nil];
 
         if ([RASettings.sharedInstance showWidgetSelector])
         {
@@ -295,16 +333,6 @@ id SBWorkspace$sharedInstance;
             [self RA_launchTopAppWithIdentifier:lastBundleIdentifier];
         }
     }
-
-    CGFloat knobWidth = 60;
-    CGFloat knobHeight = 25;
-    draggerView = [[UIView alloc] initWithFrame:CGRectMake(
-        (UIScreen.mainScreen.bounds.size.width / 2) - (knobWidth / 2), 
-        [UIScreen mainScreen].bounds.size.height * .3, 
-        knobWidth, knobHeight)];
-    draggerView.alpha = 0.3;
-    draggerView.layer.cornerRadius = 10;
-    grabberCenter_X = draggerView.center.x;
 
     draggerView.backgroundColor = UIColor.lightGrayColor;
     UIPanGestureRecognizer *recognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePan:)];
@@ -346,8 +374,6 @@ id SBWorkspace$sharedInstance;
 
 %new -(void)RA_showWidgetSelector
 {
-    if (view)
-        [self RA_closeCurrentView];
     UIWindow *w = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
     //CGSize iconSize = [%c(SBIconView) defaultIconImageSize];
     static CGSize fullSize = [%c(SBIconView) defaultIconSize];
@@ -383,6 +409,7 @@ id SBWorkspace$sharedInstance;
     }
     CGPoint newCenter = CGPointMake(draggerView.center.x, grabberCenter_Y);
     draggerView.center = newCenter;
+    draggerView.hidden = YES;
     [self updateViewSizes:newCenter animate:YES];
 }
 
@@ -580,7 +607,6 @@ CGFloat startingY = -1;
         [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:YES forApp:targetIdentifier completion:nil];
         [RAMessagingServer.sharedInstance rotateApp:targetIdentifier toOrientation:[UIApplication sharedApplication].statusBarOrientation completion:nil];
         [RAMessagingServer.sharedInstance forceStatusBarVisibility:YES forApp:targetIdentifier completion:nil];
-        [RAMessagingServer.sharedInstance setHosted:YES forIdentifier:targetIdentifier completion:nil];
     }
 
     if ([view isKindOfClass:[%c(FBWindowContextHostWrapperView) class]] == NO && [view isKindOfClass:[RAAppSliderProviderView class]] == NO)
@@ -610,7 +636,6 @@ CGFloat startingY = -1;
     }
     [RAMessagingServer.sharedInstance resizeApp:currentBundleIdentifier toSize:CGSizeMake(width, height) completion:nil];
     [RAMessagingServer.sharedInstance setShouldUseExternalKeyboard:YES forApp:currentBundleIdentifier completion:nil];
-    [RAMessagingServer.sharedInstance setHosted:YES forIdentifier:currentBundleIdentifier completion:nil];
 
     if ([RASettings.sharedInstance unifyStatusBar])
         [RAMessagingServer.sharedInstance forceStatusBarVisibility:NO forApp:currentBundleIdentifier completion:nil];
@@ -623,6 +648,9 @@ CGFloat startingY = -1;
     FBScene *scene = [app mainScene];
     if (app == nil)
         return;
+
+    [RAMessagingServer.sharedInstance setHosted:YES forIdentifier:app.bundleIdentifier completion:nil];
+
     if (![app pid] || [app mainScene] == nil)
     {
         overrideDisableForStatusBar = YES;
@@ -635,7 +663,6 @@ CGFloat startingY = -1;
         });
         return;
     }
-    overrideDisableForStatusBar = NO;
 
     [[%c(SBAppSwitcherModel) sharedInstance] addToFront:[%c(SBDisplayLayout) fullScreenDisplayLayoutForApplication:[[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:bundleIdentifier]]];
 
@@ -689,6 +716,8 @@ CGFloat startingY = -1;
             overrideDisableForStatusBar = NO;
         });
     }*/
+    draggerView.hidden = NO;
+    overrideDisableForStatusBar = NO;
 }
 
 %new -(void) RA_setView:(UIView*)view_ preferredHeight:(CGFloat)pHeight
@@ -696,7 +725,9 @@ CGFloat startingY = -1;
     view_.hidden = NO;
     UIWindow *w = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
     if (view)
-        [view removeFromSuperview];
+    {
+        [self RA_closeCurrentView];
+    }
     view = view_;
     [w addSubview:view];
     if (draggerView && draggerView.superview)
@@ -704,6 +735,7 @@ CGFloat startingY = -1;
 
     CGPoint center = (CGPoint){ draggerView.center.x, pHeight <= 0 ? draggerView.center.y : pHeight };
     [self updateViewSizes:center animate:YES];
+    draggerView.hidden = NO;
     draggerView.center = center;
 }
 

@@ -21,8 +21,9 @@ RAKeyboardWindow *keyboardWindow;
 {
     if (keyboardWindow)
     {
-        NSLog(@"[ReachApp] springboard cancelling - keyboardWindow exists");
-        return;
+        [self hideKeyboard];
+        //NSLog(@"[ReachApp] springboard cancelling - keyboardWindow exists");
+        //return;
     }
 
     NSLog(@"[ReachApp] showing kb window %@", identifier);
@@ -46,5 +47,10 @@ RAKeyboardWindow *keyboardWindow;
 {
     if ([_currentIdentifier isEqual:app.bundleIdentifier])
         [self hideKeyboard];
+}
+
+-(UIWindow*) keyboardWindow
+{
+    return keyboardWindow;
 }
 @end

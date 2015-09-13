@@ -353,7 +353,7 @@ CGRect swappedForOrientation2(CGRect in)
 -(NSArray*) inhibitedApplications { return inhibitedApplications; }
 -(void) setInhibitedApplications:(NSArray*)icons { inhibitedApplications = [icons mutableCopy]; }
 
--(RAMissionControlWindow*) missionControlWindow { if (!window) [self createWindow]; return window; }
+-(RAMissionControlWindow*) missionControlWindow { return window; }
 
 -(void) setInhibitDismissalGesture:(BOOL)value
 {

@@ -47,7 +47,7 @@ RAUnlimitedBackgroundingAppWatcher *sharedInstance$RAUnlimitedBackgroundingAppWa
 
 -(void) appDidDie:(__unsafe_unretained SBApplication*)app
 {
-    if ([RABackgrounder.sharedInstance preventKillingOfIdentifier:app.bundleIdentifier] == NO && [processAssertions objectForKey:app.bundleIdentifier])
+    if (/*W[RABackgrounder.sharedInstance preventKillingOfIdentifier:app.bundleIdentifier] == NO && */[processAssertions objectForKey:app.bundleIdentifier])
     {
         [processAssertions[app.bundleIdentifier] invalidate];
         [processAssertions removeObjectForKey:app.bundleIdentifier];

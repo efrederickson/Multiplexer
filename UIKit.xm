@@ -13,8 +13,6 @@ NSInteger wasStatusBarHidden = -1;
 
 NSMutableDictionary *oldFrames = [NSMutableDictionary new];
 
-extern BOOL ignorePhoneMode;
-
 %hook UIWindow
 -(void) setFrame:(CGRect)frame
 {
@@ -31,13 +29,15 @@ extern BOOL ignorePhoneMode;
             frame.size.width = overrideWidth;
         if (overrideHeight != -1 && overrideHeight != 0)
             frame.size.height = overrideHeight;
+
+        if (self.subviews.count > 0)
+        {
+            ((UIView*)self.subviews[0]).frame = frame;
+        }
+
     }
 
     %orig(frame);
-    if ([RAMessagingClient.sharedInstance shouldResize] && self.subviews.count > 0 && ([self.class isEqual:UITextEffectsWindow.class] == NO))
-    {
-        ((UIView*)self.subviews[0]).frame = frame;
-    }
 }
 
 - (void)_rotateWindowToOrientation:(UIInterfaceOrientation)arg1 updateStatusBar:(BOOL)arg2 duration:(double)arg3 skipCallbacks:(BOOL)arg4
@@ -76,16 +76,16 @@ extern BOOL ignorePhoneMode;
 {
     %orig;
     [RAMessagingClient.sharedInstance requestUpdateFromServer];
-    [RAFakePhoneMode updateAppSizing];
+    //[RAFakePhoneMode updateAppSizing];
 }
-
+/*
 +(void) _startWindowServerIfNecessary
 {
     %orig;
     //[RAMessagingClient.sharedInstance requestUpdateFromServer];
     [RAFakePhoneMode updateAppSizing];
 }
-
+*/
 -(void) _setStatusBarHidden:(BOOL)arg1 animationParameters:(unsafe_id)arg2 changeApplicationFlag:(BOOL)arg3
 {
 	//if ([RASettings.sharedInstance unifyStatusBar])
@@ -137,7 +137,8 @@ extern BOOL ignorePhoneMode;
         return;
     }
 
-    for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
+    for (UIWindow *window in [[UIApplication sharedApplication] windows])
+    {
         [window _setRotatableViewOrientation:orientation updateStatusBar:YES duration:0.25 force:YES];
     }
 }
@@ -223,7 +224,7 @@ extern BOOL ignorePhoneMode;
 
 -(BOOL) openURL:(__unsafe_unretained NSURL*)url
 {
-    if ([RAMessagingClient.sharedInstance isBeingHosted] || [RASettings.sharedInstance openLinksInWindows])
+    if ([RAMessagingClient.sharedInstance isBeingHosted])// || [RASettings.sharedInstance openLinksInWindows])
     {
         return [RAMessagingClient.sharedInstance notifyServerToOpenURL:url openInWindow:[RASettings.sharedInstance openLinksInWindows]];
     }
@@ -256,5 +257,5 @@ void reloadSettings(CFNotificationCenterRef center,
     }
 
     CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &reloadSettings, CFSTR("com.efrederickson.reachapp.settings/reloadSettings"), NULL, 0);
-    reloadSettings(NULL, NULL, NULL, NULL, NULL);
+    [RASettings sharedInstance];
 }

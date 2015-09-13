@@ -11,16 +11,20 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
 @implementation RAFakePhoneMode
 +(void) load
 {
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{ // somehow, this is needed to make sure that both force resizing and Fake Phone Mode work. Without the dispatch_after, even if fake phone mode is disabled, 
-            // force resizing seems to render touches... invalid? ¯\_(ツ)_/¯ 
-        IF_NOT_SPRINGBOARD
-        {
-            if ([RAFakePhoneMode shouldFakeForThisProcess])
+    // Prevent iPhone issue
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+    {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{ // somehow, this is needed to make sure that both force resizing and Fake Phone Mode work. Without the dispatch_after, even if fake phone mode is disabled, 
+                // force resizing seems to render touches incorrectly ¯\_(ツ)_/¯ 
+            IF_NOT_SPRINGBOARD
             {
-                dlopen("/Library/MobileSubstrate/DynamicLibraries/ReachAppFakePhoneMode.dylib", RTLD_NOW);
+                if ([RAFakePhoneMode shouldFakeForThisProcess])
+                {
+                    dlopen("/Library/MobileSubstrate/DynamicLibraries/ReachAppFakePhoneMode.dylib", RTLD_NOW);
+                }
             }
-        }
-    });
+        });
+    }
 }
 
 +(CGSize) fakedSize
@@ -53,12 +57,18 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
 
 +(BOOL) shouldFakeForThisProcess
 {
-    if (!RAMessagingClient.sharedInstance.hasRecievedData)
-    {
-        [RAMessagingClient.sharedInstance requestUpdateFromServer];
-    }
+    static char fakeFlag = 0;
+    static dispatch_once_t onceToken = 0;
+    dispatch_once(&onceToken, ^{
+        if (!RAMessagingClient.sharedInstance.hasRecievedData)
+        {
+            [RAMessagingClient.sharedInstance requestUpdateFromServer];
+        }
 
-    return RAMessagingClient.sharedInstance.currentData.forcePhoneMode;
+        fakeFlag = RAMessagingClient.sharedInstance.currentData.forcePhoneMode;
+    });
+
+    return fakeFlag;
 }
 @end
 

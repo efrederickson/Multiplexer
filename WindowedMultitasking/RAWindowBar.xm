@@ -8,6 +8,7 @@
 #import "RAInsetLabel.h"
 #import "RAMessagingServer.h"
 #import "RAFakePhoneMode.h"
+#import "RASnapshotProvider.h"
 
 @interface RAWindowBarIconInfo : NSObject
 @property (nonatomic) NSInteger alignment;
@@ -38,6 +39,7 @@ extern BOOL allowOpenApp;
 	UIButton *closeButton, *maximizeButton, *minimizeButton, *sizingLockButton;
 
 	UIView *snapShadowView;
+	UIColor *barBackgroundColor;
 }
 @end
 
@@ -50,7 +52,8 @@ extern BOOL allowOpenApp;
 	    height = 45;
 	}
 
-	self.backgroundColor = THEMED(windowedMultitaskingWindowBarBackgroundColor);
+	self.backgroundColor = [UIColor clearColor];
+	barBackgroundColor = THEMED(windowedMultitaskingWindowBarBackgroundColor);
 	attachedView = view;
 
 	CGRect myFrame = view.frame;
@@ -300,6 +303,16 @@ extern BOOL allowOpenApp;
 	self.layer.mask = maskLayer;
 }
 
+-(void) drawRect:(CGRect)rect 
+{ 
+    CGRect topRect = CGRectMake(0, 0, rect.size.width, height);
+    // Fill the rectangle with grey
+    [barBackgroundColor setFill];
+    UIRectFill(topRect);
+
+    [super drawRect:rect];
+}
+
 -(void) close
 {
 	[RADesktopManager.sharedInstance removeAppWithIdentifier:self.attachedView.bundleIdentifier animated:YES];
@@ -378,17 +391,25 @@ extern BOOL allowOpenApp;
 	}
 }
 
-
 -(void) scaleTo:(CGFloat)scale animated:(BOOL)animate
+{
+	[self scaleTo:scale animated:animate derotate:NO];
+}
+
+-(void) scaleTo:(CGFloat)scale animated:(BOOL)animate derotate:(BOOL)derotate
 {
 	CGFloat rotation = atan2(self.transform.b, self.transform.a);
 
+	CGAffineTransform transform = CGAffineTransformMakeScale(scale, scale);
+	if (derotate == NO)
+		transform = CGAffineTransformRotate(transform, rotation);
+
 	if (animate)
 		[UIView animateWithDuration:0.2 animations:^{
-	    	[self setTransform:CGAffineTransformRotate(CGAffineTransformMakeScale(scale, scale), rotation)];
+	    	[self setTransform:transform];
 	    }];
 	else 
-		[self setTransform:CGAffineTransformRotate(CGAffineTransformMakeScale(scale, scale), rotation)];
+		[self setTransform:transform];
 
 	[self saveWindowInfo];
 }
@@ -575,6 +596,7 @@ extern BOOL allowOpenApp;
 		{
 			[RAWindowSnapDataProvider snapWindow:self toLocation:[RAWindowSnapDataProvider snapLocationForWindow:self] animated:YES completion:^{
 				[self removePotentialSnapShadow];
+				[self saveWindowInfo];
 			}];
 			isSnapped = YES;
 			// Force tap to fail

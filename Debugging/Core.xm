@@ -32,7 +32,7 @@
 }
 %end
 
-Class (*orig$objc_getClass)(const char *name);
+/*Class (*orig$objc_getClass)(const char *name);
 Class hook$objc_getClass(const char *name)
 {
 	Class cls = orig$objc_getClass(name);
@@ -41,7 +41,7 @@ Class hook$objc_getClass(const char *name)
 		NSLog(@"[ReachApp] something attempted to access nil class '%s'", name);
 	}
 	return cls;
-}
+}*/
 
 %ctor
 {

@@ -83,6 +83,12 @@ extern "C" void BKSHIDServicesCancelTouchesOnMainDisplay();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+@interface SBFWallpaperView : UIView
+- (void)setGeneratesBlurredImages:(BOOL)arg1;
+- (void)_startGeneratingBlurredImages;
+- (void)prepareToAppear;
+@end
+
 @interface SBControlCenterController : UIViewController
 + (id)sharedInstance;
 @property(nonatomic, getter=isPresented) _Bool presented; // @synthesize presented=_presented;
@@ -390,6 +396,10 @@ typedef enum
 - (void)_lockOrientationForSwitcher;
 - (void)_lockOrientationForSystemGesture;
 - (void)_lockOrientationForTransition;
+- (void)_dismissSwitcherAnimated:(_Bool)arg1;
+- (void)dismissSwitcherAnimated:(_Bool)arg1;
+- (void)_dismissAppSwitcherImmediately;
+- (void)dismissSwitcherForAlert:(id)arg1;
 @end
 
 @interface SBDisplayItem : NSObject <NSCopying>
@@ -464,8 +474,11 @@ typedef NS_ENUM(NSInteger, UIScreenEdgePanRecognizerType) {
 @interface _UIBackdropView : UIView
 @property (retain, nonatomic) _UIBackdropViewSettings *outputSettings;
 @property (retain, nonatomic) _UIBackdropViewSettings *inputSettings;
+@property (nonatomic) int blurHardEdges;
+- (void)setBlursWithHardEdges:(BOOL)arg1;
 -(void) setBlurRadius:(CGFloat)radius;
 -(void) setBlurRadiusSetOnce:(BOOL)v;
+-(id) initWithStyle:(NSInteger)style;
 @end
 
 @interface SBOffscreenSwipeGestureRecognizer : NSObject // SBPanGestureRecognizer <_UIScreenEdgePanRecognizerDelegate>

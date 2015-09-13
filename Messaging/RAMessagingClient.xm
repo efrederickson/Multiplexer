@@ -1,6 +1,7 @@
 #import "RAMessagingClient.h"
 
 extern const char *__progname;
+extern BOOL allowClosingReachabilityNatively;
 
 @implementation RAMessagingClient
 +(instancetype) sharedInstance
@@ -105,6 +106,8 @@ extern const char *__progname;
 		[UIApplication.sharedApplication RA_forceRotationToInterfaceOrientation:data.forcedOrientation isReverting:YES];
 	else if (data.shouldForceOrientation)
 		[UIApplication.sharedApplication RA_forceRotationToInterfaceOrientation:data.forcedOrientation isReverting:NO];
+
+	allowClosingReachabilityNatively = YES;
 }
 
 -(void) notifyServerWithKeyboardContextId:(unsigned int)cid

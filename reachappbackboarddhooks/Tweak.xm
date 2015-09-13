@@ -120,6 +120,39 @@ Boolean hook$IOHIDEventSystemOpen(IOHIDEventSystemRef system, IOHIDEventSystemCa
 }
 %end
 
+/*
+%hook CAWindowServerDisplay
+- (unsigned int)contextIdAtPosition:(CGPoint)point
+{
+    unsigned int cid = %orig;
+
+    if (keyboardWindow)
+    {
+        if (cid == keyboardWindow.contextId)
+        {
+            UIGraphicsBeginImageContextWithOptions(keyboardWindow.bounds.size, keyboardWindow.opaque, 0.0);
+            [keyboardWindow drawViewHierarchyInRect:keyboardWindow.bounds afterScreenUpdates:NO];
+            UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+            UIGraphicsEndImageContext();
+
+            unsigned char pixel[1] = {0};
+            CGContextRef context = CGBitmapContextCreate(pixel,
+                                                         1, 1, 8, 1, NULL,
+                                                         kCGImageAlphaOnly);
+            UIGraphicsPushContext(context);
+            [image drawAtPoint:CGPointMake(-point.x, -point.y)];
+            UIGraphicsPopContext();
+            CGContextRelease(context);
+            CGFloat alpha = pixel[0]/255.0f;
+            BOOL transparent = alpha < 1.f; 
+            if (!transparent)
+                return cid;
+        }
+    }
+    return cid;
+}
+%end
+*/
 
 %ctor
 {

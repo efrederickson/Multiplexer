@@ -8,4 +8,6 @@
 
 -(void) showKeyboardForAppWithIdentifier:(NSString*)identifier;
 -(void) hideKeyboard;
+
+-(UIWindow*) keyboardWindow;
 @end
