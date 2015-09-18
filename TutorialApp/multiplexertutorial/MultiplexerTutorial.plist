@@ -1,0 +1,1 @@
+{ Filter = { Bundles = ( "com.andrewabosh.Multiplexer", "com.apple.springboard" ); }; }
