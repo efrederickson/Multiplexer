@@ -1,0 +1,10 @@
+Package: com.elijahandandrew.MultiplexerTutorial
+Name: Multiplexer Tutorial
+Version: 1.0
+Section: Applications
+Depends: mobilesubstrate
+Architecture: iphoneos-arm
+Description: Tutorial for the tweak Multiplexer.
+Author: Elijah and Andrew <elijahandandrew@gmail.com>
+Sponsor: Elijah and Andrew <https://elijahandandrew.com>
+Maintainer: Elijah and Andrew <elijahandandrew@gmail.com>
