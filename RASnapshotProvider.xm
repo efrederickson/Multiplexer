@@ -222,9 +222,13 @@
 				if (!coreImage)
 				    coreImage = [CIImage imageWithCGImage:image.CGImage];
 
-				coreImage = [coreImage imageByApplyingTransform:CGAffineTransformInvert(view.transform)];
+				//coreImage = [coreImage imageByApplyingTransform:view.transform];
+				CGFloat rotation = atan2(hostedView.transform.b, hostedView.transform.a);
+
+				CGAffineTransform transform = CGAffineTransformMakeRotation(rotation);
+				coreImage = [coreImage imageByApplyingTransform:transform];
 				image = [UIImage imageWithCIImage:coreImage];
-				[image drawInRect:view.frame];
+				[image drawInRect:view.frame]; // by using frame, we take care of scale.
 			}
 		}
 		//if (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation))

@@ -7,10 +7,14 @@ BOOL allowClosingReachabilityNatively = NO;
 - (void)_deactivateReachability
 {
     if (allowClosingReachabilityNatively == NO)
+    {
+        NSLog(@"[ReachApp] attempting to close reachability but not allowed to.");
         return;
+    }
         
     if ([RAMessagingClient.sharedInstance isBeingHosted])
     {
+        NSLog(@"[ReachApp] stopping reachability from closing because hosted");
         return;
     }
     %orig;

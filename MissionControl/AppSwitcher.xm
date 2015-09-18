@@ -4,8 +4,11 @@
 #import "RAMissionControlWindow.h"
 #import "RASettings.h"
 #import "RASnapshotProvider.h"
+#import "RADesktopManager.h"
 
 BOOL allowMissionControlActivationFromSwitcher = YES;
+BOOL statusBarVisibility;
+BOOL willShowMissionControl = NO;
 
 %hook SBUIController
 - (void)_showNotificationsGestureBeganWithLocation:(CGPoint)arg1
@@ -21,6 +24,9 @@ BOOL allowMissionControlActivationFromSwitcher = YES;
 
 - (_Bool)_activateAppSwitcher
 {
+	statusBarVisibility = UIApplication.sharedApplication.statusBarHidden;
+	willShowMissionControl = NO;
+
 	if ([[%c(RASettings) sharedInstance] replaceAppSwitcherWithMC] && [[%c(RASettings) sharedInstance] missionControlEnabled])
 	{
 		if (RAMissionControlManager.sharedInstance.isShowingMissionControl == NO)
@@ -46,6 +52,11 @@ BOOL allowMissionControlActivationFromSwitcher = YES;
 		[UIView animateWithDuration:0.3 animations:^{
 			[[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999].alpha = 1;
 		}];
+	}
+	if (s)
+	{
+		[[%c(RADesktopManager) sharedInstance] performSelectorOnMainThread:@selector(hideDesktop) withObject:nil waitUntilDone:NO];
+		//[[[%c(RADesktopManager) sharedInstance] currentDesktop] unloadApps];
 	}
 	return s;
 }
@@ -79,10 +90,33 @@ BOOL allowMissionControlActivationFromSwitcher = YES;
 	{
 		[RAMissionControlManager.sharedInstance hideMissionControl:arg1];
 	}
+	
+	%orig;
+}
+%end
+
+%hook SBAppSwitcherController
+- (void)switcherWillBeDismissed:(_Bool)arg1
+{
+	if (willShowMissionControl == NO)
+	{
+		[[%c(RADesktopManager) sharedInstance] reshowDesktop];
+		//[[[%c(RADesktopManager) sharedInstance] currentDesktop] loadApps];
+	}
 
 	[UIView animateWithDuration:0.3 animations:^{
 		[[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999].alpha = 0;
 	}];
+
+	%orig;
+}
+
+- (void)switcherScroller:(id)arg1 itemTapped:(__unsafe_unretained SBDisplayLayout*)arg2
+{
+	SBDisplayItem *item = [arg2 displayItems][0];
+	NSString *identifier = item.displayIdentifier;
+
+	[[%c(RADesktopManager) sharedInstance] removeAppWithIdentifier:identifier animated:NO forceImmediateUnload:YES];
 
 	%orig;
 }
@@ -288,6 +322,7 @@ BOOL allowMissionControlActivationFromSwitcher = YES;
 
 		if (fakeView.frame.origin.y + velocity.y > -(UIScreen.mainScreen._interfaceOrientedBounds.size.height / 2))
 		{			
+			willShowMissionControl = YES;
 			CGFloat distance = UIScreen.mainScreen._interfaceOrientedBounds.size.height - (fakeView.frame.origin.y + fakeView.frame.size.height);
 			CGFloat duration = MIN(distance / velocity.y, 0.3);
 
@@ -296,16 +331,17 @@ BOOL allowMissionControlActivationFromSwitcher = YES;
 			[UIView animateWithDuration:duration animations:^{
 				fakeView.frame = UIScreen.mainScreen._interfaceOrientedBounds;
 			} completion:^(BOOL _) {
-				((UIWindow*)[[%c(SBUIController) sharedInstance] switcherWindow]).alpha = 0;
-				[[%c(SBUIController) sharedInstance] dismissSwitcherAnimated:YES];
+				//((UIWindow*)[[%c(SBUIController) sharedInstance] switcherWindow]).alpha = 0;
+				[[%c(SBUIController) sharedInstance] dismissSwitcherAnimated:NO];
 				[[%c(SBUIController) sharedInstance] restoreContentUpdatingStatusBar:YES];
 				[RAMissionControlManager.sharedInstance showMissionControl:NO];
 				[fakeView removeFromSuperview];
 				fakeView = nil;
+				UIApplication.sharedApplication.statusBarHidden = statusBarVisibility;
 				// avoid status bar hiding
-				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-					((UIWindow*)[[%c(SBUIController) sharedInstance] switcherWindow]).alpha = 1;
-				});
+				//dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+				//	((UIWindow*)[[%c(SBUIController) sharedInstance] switcherWindow]).alpha = 1;
+				//});
 			}];
 		}
 		else

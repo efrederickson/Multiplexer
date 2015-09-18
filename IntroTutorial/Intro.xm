@@ -10,7 +10,7 @@
 		BBBulletinRequest *request = [[%c(BBBulletinRequest) alloc] init];
 		request.title = LOCALIZE(@"MULTIPLEXER");
 		request.message = LOCALIZE(@"THANK_YOU_TEXT");
-		request.sectionID = @"com.apple.Preferences";
+		request.sectionID = @"com.andrewabosh.Multiplexer";
 		request.date = [NSDate date];
 		request.defaultAction = [%c(BBAction) actionWithLaunchBundleID:@"com.andrewabosh.Multiplexer" callblock:nil];
 		request.expirationDate = [[NSDate date] dateByAddingTimeInterval:10];

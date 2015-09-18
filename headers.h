@@ -404,6 +404,9 @@ typedef enum
 
 @interface SBDisplayItem : NSObject <NSCopying>
 + (id)displayItemWithType:(NSString *)arg1 displayIdentifier:(id)arg2;
+
+@property(readonly, nonatomic) NSString *displayIdentifier; // @synthesize displayIdentifier=_displayIdentifier;
+@property(readonly, nonatomic) NSString *type; // @synthesize type=_type;
 @end
 
 @interface SBLockScreenManager
@@ -469,16 +472,22 @@ typedef NS_ENUM(NSInteger, UIScreenEdgePanRecognizerType) {
 - (void)setBlurQuality:(id)arg1;
 + (id)settingsForStyle:(int)arg1;
 + (id)settingsForStyle:(int)arg1 graphicsQuality:(int)arg2;
+- (void)setBlurRadius:(CGFloat)arg1;
 @end
 
 @interface _UIBackdropView : UIView
 @property (retain, nonatomic) _UIBackdropViewSettings *outputSettings;
 @property (retain, nonatomic) _UIBackdropViewSettings *inputSettings;
 @property (nonatomic) int blurHardEdges;
-- (void)setBlursWithHardEdges:(BOOL)arg1;
+- (void) setBlursWithHardEdges:(BOOL)arg1;
+- (void)setBlurQuality:(id)arg1;
 -(void) setBlurRadius:(CGFloat)radius;
 -(void) setBlurRadiusSetOnce:(BOOL)v;
 -(id) initWithStyle:(NSInteger)style;
+@property (nonatomic) BOOL autosizesToFitSuperview;
+@property (nonatomic) BOOL blursBackground;
+- (void)_setBlursBackground:(BOOL)arg1;
+- (void)setBlurFilterWithRadius:(float)arg1 blurQuality:(id)arg2 blurHardEdges:(int)arg3;
 @end
 
 @interface SBOffscreenSwipeGestureRecognizer : NSObject // SBPanGestureRecognizer <_UIScreenEdgePanRecognizerDelegate>

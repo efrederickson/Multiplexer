@@ -38,8 +38,6 @@
 	<string>80000000</string>
 	<key>windowedMultitaskingRotationIconBackgroundColor</key>
 	<string>B974F5</string>
-	<key>windowedMultitaskingBlurStyle</key>
-	<integer>2</integer>
 	<key>windowedMultitaskingOverlayColor</key>
 	<string>99000000</string>
 	<key>swipeOverDetachBarColor</key>
@@ -48,6 +46,8 @@
 	<string>FFFFFF</string>
 	<key>windowedMultitaskingBarTitleColor</key>
 	<string>ffffff</string>
+	<key>windowedMultitaskingBlurStyle</key>
+	<integer>2</integer>
 
 	<key>windowedMultitaskingCloseButtonAlignment</key>
 	<integer>0</integer>

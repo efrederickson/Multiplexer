@@ -13,10 +13,12 @@ NSInteger wasStatusBarHidden = -1;
 
 NSMutableDictionary *oldFrames = [NSMutableDictionary new];
 
+static Class $memorized$UITextEffectsWindow$class;
+
 %hook UIWindow
 -(void) setFrame:(CGRect)frame
 {
-    if ([self.class isEqual:UITextEffectsWindow.class] == NO && [RAMessagingClient.sharedInstance shouldResize])
+    if ([self.class isEqual:$memorized$UITextEffectsWindow$class] == NO && [RAMessagingClient.sharedInstance shouldResize])
     {
         if ([oldFrames objectForKey:@(self.hash)] == nil)
             [oldFrames setObject:[NSValue valueWithCGRect:frame] forKey:@(self.hash)];
@@ -254,6 +256,7 @@ void reloadSettings(CFNotificationCenterRef center,
 {
     IF_NOT_SPRINGBOARD {
         %init;
+        $memorized$UITextEffectsWindow$class = UITextEffectsWindow.class;
     }
 
     CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &reloadSettings, CFSTR("com.efrederickson.reachapp.settings/reloadSettings"), NULL, 0);

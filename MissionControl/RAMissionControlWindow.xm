@@ -139,7 +139,7 @@
 	newDesktopButton.backgroundColor = [UIColor.whiteColor colorWithAlphaComponent:0.2]; //[UIColor darkGrayColor];
 	[newDesktopButton setTitle:@"+" forState:UIControlStateNormal];
 	newDesktopButton.titleLabel.font = [UIFont systemFontOfSize:36];
-	[newDesktopButton addTarget:self action:@selector(createNewDesktop) forControlEvents:UIControlEventTouchUpInside];
+	[newDesktopButton addTarget:self action:@selector(createNewDesktop:) forControlEvents:UIControlEventTouchUpInside];
 	[desktopScrollView addSubview:newDesktopButton];
 	x += 20 + newDesktopButton.frame.size.width;
 
@@ -334,10 +334,15 @@
 	otherRunningAppsScrollView.contentSize = CGSizeMake(MAX(x, self.frame.size.width + (empty ? 0 : 1)), height * 1.15); // make slightly scrollable
 }
 
--(void) createNewDesktop
+-(void) createNewDesktop:(UIButton*)view
 {
 	[[%c(RADesktopManager) sharedInstance] addDesktop:NO];
-	[self reloadDesktopSection];
+
+	[UIView animateWithDuration:0.4 animations:^{
+		view.frame = CGRectOffset(view.frame, view.frame.size.width + panePadding, 0);
+	} completion:^(BOOL _) {
+		[self reloadDesktopSection];
+	}];
 }
 
 -(void) removeCardForApplication:(SBApplication*)app
@@ -519,6 +524,32 @@
 	lastPoint = point;
 }
 
+-(void) animateDesktopRemovalForDesktopAtIndexReloadingSectionAfter:(NSInteger)index
+{
+	CGFloat originX = -1;
+	for (UIView *v in desktopScrollView.subviews)
+	{
+		if (v.tag == index)
+		{
+			originX = v.frame.origin.x;
+			[UIView animateWithDuration:0.2 animations:^{
+				v.frame = CGRectOffset(v.frame, 0, -panePadding);
+			} completion:^(BOOL _) {
+				[v removeFromSuperview];
+			}];
+		}
+		else if (v.tag > index || (originX != -1 && originX < v.frame.origin.x))
+		{
+			[UIView animateWithDuration:0.4 animations:^{
+				v.frame = CGRectOffset(v.frame, -v.frame.size.width - panePadding, 0);
+			}];
+		}
+	}
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.4 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+		[self performSelectorOnMainThread:@selector(reloadDesktopSection) withObject:nil waitUntilDone:YES];
+	});
+}
+
 -(void) handleDesktopPan:(UIPanGestureRecognizer*)gesture
 {
 	static CGPoint initialCenter;
@@ -547,7 +578,7 @@
 			[UIView animateWithDuration:0.4 animations:^{
 				gesture.view.center = CGPointMake(gesture.view.center.x, -gesture.view.frame.size.height);
 			} completion:^(BOOL _) {
-				[self reloadDesktopSection];
+				[self animateDesktopRemovalForDesktopAtIndexReloadingSectionAfter:gesture.view.tag];
 			}];
 		}
 		else

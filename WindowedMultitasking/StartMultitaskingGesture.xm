@@ -131,8 +131,9 @@ BOOL locationIsInValidArea(CGFloat x)
             else
             {
                 appView.center = originalCenter;
-                [UIView animateWithDuration:0.2 animations:^{ appView.transform = CGAffineTransformIdentity; }];
-                [[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"BeautifulAnimation"];
+                [UIView animateWithDuration:0.2 animations:^{ appView.transform = CGAffineTransformIdentity; } completion:^(BOOL _) {
+                    [[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"BeautifulAnimation"];
+                }];
             }
             appView = nil;
         }

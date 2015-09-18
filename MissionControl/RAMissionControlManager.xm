@@ -24,6 +24,7 @@
 	__block UIView *originalAppView;
 	__block CGRect originalAppFrame;
 	BOOL hasMoved;
+	BOOL didStoreSnapshot;
 }
 @end
 
@@ -128,6 +129,8 @@ CGRect swappedForOrientation2(CGRect in)
 
 	if ([[%c(SBControlCenterController) sharedInstance] isVisible])
 		[[%c(SBControlCenterController) sharedInstance] dismissAnimated:YES];
+
+	didStoreSnapshot = NO;
 }
 
 -(void) createWindow
@@ -186,7 +189,8 @@ CGRect swappedForOrientation2(CGRect in)
 
 -(void) hideMissionControl:(BOOL)animated
 {
-	[[%c(RASnapshotProvider) sharedInstance] storeSnapshotOfMissionControl:window];
+	if (!didStoreSnapshot)
+		[[%c(RASnapshotProvider) sharedInstance] storeSnapshotOfMissionControl:window];
 	[[%c(RARunningAppsProvider) sharedInstance] removeTarget:window];
 
 	void (^destructor)() = ^{
@@ -309,6 +313,8 @@ CGRect swappedForOrientation2(CGRect in)
 	}
 	else if (state == UIGestureRecognizerStateBegan)
 	{
+		[[%c(RASnapshotProvider) sharedInstance] storeSnapshotOfMissionControl:window];
+		didStoreSnapshot = YES;
 		hasMoved = YES;
 		[%c(RAControlCenterInhibitor) setInhibited:YES];
 		initialCenter = window.center;

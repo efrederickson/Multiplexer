@@ -333,8 +333,6 @@ id SBWorkspace$sharedInstance;
         if (!currentBundleIdentifier)
             return;
 
-        [RAMessagingServer.sharedInstance setHosted:YES forIdentifier:currentBundleIdentifier completion:nil];
-
         if ([RASettings.sharedInstance showWidgetSelector])
         {
             [self RA_showWidgetSelector];
@@ -642,6 +640,8 @@ CGFloat startingY = -1;
 
     if ([view isKindOfClass:[%c(FBWindowContextHostWrapperView) class]] == NO && [view isKindOfClass:[RAAppSliderProviderView class]] == NO)
         return; // only resize when the app is being shown. That way it's more like native Reachability
+
+    [RAMessagingServer.sharedInstance setHosted:YES forIdentifier:currentBundleIdentifier completion:nil];
 
     [RAMessagingServer.sharedInstance rotateApp:lastBundleIdentifier toOrientation:[UIApplication sharedApplication].statusBarOrientation completion:nil];
 

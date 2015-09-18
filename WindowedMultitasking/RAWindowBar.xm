@@ -525,8 +525,8 @@ extern BOOL allowOpenApp;
 	overlay.alpha = 0;
 	overlay.tag = 465982;
 	overlay.appWindow = self;
-	[overlay show];
 	[self addSubview:overlay];
+	[overlay show];
 
 	[UIView animateWithDuration:0.4 animations:^{
 		closeButton.alpha = 0;

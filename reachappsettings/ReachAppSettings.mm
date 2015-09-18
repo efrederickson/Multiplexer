@@ -180,7 +180,7 @@
                  @"label": @"Tutorial",
                  @"action": @"showTutorial",
                  @"icon": @"tutorial.png",
-                 @"enabled": @NO,
+                 //@"enabled": @NO,
                  },/*
              @{
                  @"cell": @"PSLinkCell",
@@ -280,5 +280,10 @@
 
 -(void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error{
     [self dismissViewControllerAnimated:YES completion:NULL];
+}
+
+-(void) showTutorial
+{
+    [UIApplication.sharedApplication launchApplicationWithIdentifier:@"com.andrewabosh.Multiplexer" suspended:NO];
 }
 @end

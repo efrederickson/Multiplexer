@@ -16,11 +16,15 @@
 {
 	probablyAnimating = NO;
 
-	_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:THEMED(windowedMultitaskingBlurStyle)];
-	blurView.frame = self.frame;
+	UIVisualEffect *effect = [UIBlurEffect effectWithStyle:THEMED(windowedMultitaskingBlurStyle)];
+	UIVisualEffectView *blurView = [[UIVisualEffectView alloc] initWithEffect:effect];
+	blurView.frame = (CGRect){ CGPointZero, self.frame.size };
+
+	//_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:THEMED(windowedMultitaskingBlurStyle)];
+	//blurView.autosizesToFitSuperview = YES;
 	blurView.backgroundColor = THEMED(windowedMultitaskingOverlayColor);
-	[blurView setBlurRadiusSetOnce:NO];
-	[blurView setBlurRadius:self.bounds.size.width / 2.0];
+	//[blurView setBlurRadiusSetOnce:NO];
+	//[blurView setBlurRadius:self.bounds.size.width / 2.0];
 
 	UITapGestureRecognizer *dismissGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismiss_)];
 	[blurView addGestureRecognizer:dismissGesture];
