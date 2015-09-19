@@ -288,7 +288,7 @@ NSMutableDictionary *appsBeingHosted = [NSMutableDictionary dictionary];
 
 -(void) drawRect:(CGRect)rect
 {
-    if (self.renderWallpaper)
+    if (_renderWallpaper)
         [[RASnapshotProvider.sharedInstance wallpaperImage] drawInRect:rect];
 }
 

@@ -158,7 +158,7 @@ extern int rotationDegsForOrientation(int o);
 	{
 		view.frame = CGRectMake(SCREEN_WIDTH - 50, 0, view.frame.size.width, view.frame.size.height);
 
-		CGFloat scale = 0.4; // MIN(MAX(scale, 0.1), 0.98);
+		CGFloat scale = 0.1; // MIN(MAX(scale, 0.1), 0.98);
 		view.transform = CGAffineTransformMakeScale(scale, scale);
 		view.center = (CGPoint) { SCREEN_WIDTH - (view.frame.size.width / 2), view.center.y };
 	}
