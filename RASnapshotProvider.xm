@@ -106,9 +106,18 @@
 {
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
 		UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen]._interfaceOrientedBounds.size, YES, [UIScreen mainScreen].scale);
-		CGContextRef c = UIGraphicsGetCurrentContext();
+		//CGContextRef c = UIGraphicsGetCurrentContext();
 		//CGContextSetAllowsAntialiasing(c, YES);
-		[window.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES];
+		//[window.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES];
+		
+		void (^block)() = ^{
+			[window drawViewHierarchyInRect:window.bounds afterScreenUpdates:YES];
+		};
+		if (NSThread.isMainThread == NO)
+			dispatch_sync(dispatch_get_main_queue(), block);
+		else
+			block();
+		
 		UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
 		UIGraphicsEndImageContext();
 		window.layer.contents = nil;

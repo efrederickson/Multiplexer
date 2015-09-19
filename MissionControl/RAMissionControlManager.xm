@@ -313,7 +313,7 @@ CGRect swappedForOrientation2(CGRect in)
 	}
 	else if (state == UIGestureRecognizerStateBegan)
 	{
-		[[%c(RASnapshotProvider) sharedInstance] storeSnapshotOfMissionControl:window];
+		//[[%c(RASnapshotProvider) sharedInstance] storeSnapshotOfMissionControl:window];
 		didStoreSnapshot = YES;
 		hasMoved = YES;
 		[%c(RAControlCenterInhibitor) setInhibited:YES];
