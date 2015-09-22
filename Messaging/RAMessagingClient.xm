@@ -3,6 +3,8 @@
 extern const char *__progname;
 extern BOOL allowClosingReachabilityNatively;
 
+#define IS_PROCESS(x) (strcmp(__progname, x) == 0)
+
 @implementation RAMessagingClient
 +(instancetype) sharedInstance
 {
@@ -56,7 +58,13 @@ extern BOOL allowClosingReachabilityNatively;
 
 -(void) _requestUpdateFromServerWithTries:(int)tries
 {
-	if (!NSBundle.mainBundle.bundleIdentifier || strcmp(__progname, "assertiond") == 0 || strcmp(__progname, "searchd") == 0 || strcmp(__progname, "gputoolsd") == 0 || strcmp(__progname, "filecoordinationd") == 0)
+	if (!NSBundle.mainBundle.bundleIdentifier || 
+		IS_PROCESS("assertiond") ||  // Don't need to load into this anyway
+		IS_PROCESS("searchd") ||  // safe-mode crash fix
+		IS_PROCESS("gputoolsd") || // iMohkles found this crashes (no uikit)
+		IS_PROCESS("filecoordinationd") || // ???
+		IS_PROCESS("backboardd") // Backboardd uses its own messaging center for what it does. 
+		)
 		return;
 	NSDictionary *dict = @{ @"bundleIdentifier": NSBundle.mainBundle.bundleIdentifier };
 	NSDictionary *data = [serverCenter sendMessageAndReceiveReplyName:RAMessagingUpdateAppInfoMessageName userInfo:dict];

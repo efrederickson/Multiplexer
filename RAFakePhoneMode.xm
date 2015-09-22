@@ -2,6 +2,11 @@
 #import "RAMessagingClient.h"
 #import "RAMessagingServer.h"
 
+/*
+This is a wrapper for the ReachAppFakePhoneMode subproject.
+I split them apart when i was trying to find some issue with app resizing/touches.
+*/
+
 #define RA_4S_SIZE CGSizeMake(320, 480)
 #define RA_5S_SIZE CGSizeMake(320, 512)
 #define RA_6P_SIZE CGSizeMake(414, 736)

@@ -269,6 +269,8 @@ Tue Sep  8 12:44:19 2015: SpringBoard (com.apple.springboard): *** Terminating a
 *** First throw call stack:
 (0x273cefef 0x35a72c8b 0x273d4409 0x665540f 0x273d2327 0x27301e78 0x644a257 0x644a8bb 0x360032e3 0x360032cf 0x36006d2f 0x27394609 0x27392d09 0x272df201 0x272df013 0x2edb0201 0x2aaaba09 0x6337fec 0x7f29b 0x36024aaf)
 
+FIXED?: Forgot to -retain the dictionary. (It was autoreleased i believe)
+
 */
 %new -(void) RA_addStatusBarIconForSelfIfOneDoesNotExist
 {

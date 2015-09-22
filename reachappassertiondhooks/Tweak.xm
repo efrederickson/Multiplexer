@@ -9,6 +9,8 @@ static int hax_BSAuditTokenTaskHasEntitlement(__unsafe_unretained id connection,
 {
     if ([entitlement isEqualToString:@"com.apple.multitasking.unlimitedassertions"])
     {
+        // We could check if the connection's pid matches SpringBoard's pid, but at this point I don't think it really matters
+        // I mean, what could be the worst thing a process can do by making BKSProcessAssertions? slaughtering battery? suspending/keeping apps running?
         return true;
     }
 
@@ -17,6 +19,7 @@ static int hax_BSAuditTokenTaskHasEntitlement(__unsafe_unretained id connection,
 
 %ctor
 {
+    // We can never be too sure
 	if (strcmp(__progname, "assertiond") == 0) 
 	{
         dlopen("/System/Library/PrivateFrameworks/XPCObjects.framework/XPCObjects", RTLD_LAZY);
