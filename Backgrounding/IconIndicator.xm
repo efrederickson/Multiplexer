@@ -178,7 +178,7 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 	    [self RA_updateIndicatorViewWithExistingInfo];
 }
 
-/*-(void) dealloc
+-(void) dealloc
 {
 	if (self)
 	{
@@ -190,7 +190,7 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 	}
 
 	%orig;
-}*/
+}
 
 %new -(BOOL) RA_isIconIndicatorInhibited
 {
@@ -222,7 +222,7 @@ NSString *stringFromIndicatorInfo(RAIconIndicatorViewInfo info)
 }
 %end
 
-NSMutableDictionary *lsbitems = [NSMutableDictionary dictionary];
+NSMutableDictionary *lsbitems = [[[NSMutableDictionary alloc] init] retain];
 
 %hook SBApplication
 
@@ -276,7 +276,7 @@ Tue Sep  8 12:44:19 2015: SpringBoard (com.apple.springboard): *** Terminating a
 	if ([lsbitems respondsToSelector:@selector(objectForKey:)] == NO)
 	{
 		NSLog(@"[ReachApp] ERROR: lsbitems is not NSDictionary it is %s", class_getName(lsbitems.class));
-		@throw [NSException exceptionWithName:@"OH POOP" reason:@"Expected NSDictionary" userInfo:nil];
+		//@throw [NSException exceptionWithName:@"OH POOP" reason:@"Expected NSDictionary" userInfo:nil];
 	}
 #endif
 
