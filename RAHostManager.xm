@@ -4,6 +4,8 @@
 @implementation RAHostManager
 +(UIView*) systemHostViewForApplication:(SBApplication*)app
 {
+	if (!app)
+		return nil;
 	if ([app respondsToSelector:@selector(mainScene)]) // iOS 8
 		return MSHookIvar<UIView*>(app.mainScene.contextHostManager, "_hostView");
 	else if ([app respondsToSelector:@selector(mainScreenContextHostManager)])
@@ -15,6 +17,9 @@
 
 +(UIView*) enabledHostViewForApplication:(SBApplication*)app
 {
+	if (!app)
+		return nil;
+
 	if ([app respondsToSelector:@selector(mainScene)])
 	{
 	    FBScene *scene = [app mainScene];
@@ -37,6 +42,9 @@
 
 +(NSObject*) hostManagerForApp:(SBApplication*)app
 {
+	if (!app)
+		return nil;
+		
 	if ([app respondsToSelector:@selector(mainScene)])
 	{
 	    FBScene *scene = [app mainScene];

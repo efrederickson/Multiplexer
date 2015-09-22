@@ -24,7 +24,7 @@ ReachApp_FILES = Tweak.xm $(wildcard *.xm) $(wildcard *.mm) $(wildcard *.m) \
 	$(wildcard Debugging/*.xm) $(wildcard Debugging/*.mm) $(wildcard Debugging/*.m)
 	
 ReachApp_FRAMEWORKS = UIKit QuartzCore CoreGraphics CoreImage
-ReachApp_PRIVATE_FRAMEWORKS = GraphicsServices BackBoardServices
+ReachApp_PRIVATE_FRAMEWORKS = GraphicsServices BackBoardServices AppSupport
 ReachApp_LIBRARIES = applist
 
 include $(THEOS_MAKE_PATH)/tweak.mk

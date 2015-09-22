@@ -127,9 +127,9 @@ int rotationDegsForOrientation(int o)
 {
 	[super viewDidDisappear:animated];
 
+	appView.hideStatusBar = NO;
 	if (appView.isCurrentlyHosting)
 	{
-		appView.hideStatusBar = NO;
 		[appView unloadApp];	
 	}
 }

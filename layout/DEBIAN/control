@@ -1,6 +1,6 @@
 Package: org.thebigboss.multiplexer
 Name: Multiplexer
-Depends: mobilesubstrate, applist, preferenceloader, com.elijahandandrew.MultiplexerTutorial
+Depends: mobilesubstrate, applist, preferenceloader, com.elijahandandrew.MultiplexerTutorial, com.rpetrich.rocketbootstrap
 Conflicts: cc.tweak.statushud
 Replaces: com.efrederickson.reachapp
 Version: 0.1
