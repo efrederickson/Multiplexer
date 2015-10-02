@@ -3,7 +3,7 @@ ARCHS = armv7 armv7s arm64
 CFLAGS = -I./ -Iwidgets/ -Iwidgets/Core/ -Iwidgets/Reachability/ -ISwipeOver/ -IReachability/ -IGestureSupport/ -IKeyboardSupport/ -IMissionControl/ -IWindowedMultitasking/ -INotificationCenterApp/ -IBackgrounding/ -IIntroTutorial/ -IMessaging/ -ITheming/
 CFLAGS += -fobjc-arc
 THEOS_PACKAGE_DIR_NAME = debs
-TARGET = :clang:8.0
+TARGET = :8.0
 
 include $(THEOS)/makefiles/common.mk
 

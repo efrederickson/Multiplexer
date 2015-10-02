@@ -58,14 +58,26 @@ extern BOOL allowClosingReachabilityNatively;
 
 -(void) _requestUpdateFromServerWithTries:(int)tries
 {
-	if (!NSBundle.mainBundle.bundleIdentifier || 
+	/*if (!NSBundle.mainBundle.bundleIdentifier || 
 		IS_PROCESS("assertiond") ||  // Don't need to load into this anyway
 		IS_PROCESS("searchd") ||  // safe-mode crash fix
 		IS_PROCESS("gputoolsd") || // iMohkles found this crashes (no uikit)
 		IS_PROCESS("filecoordinationd") || // ???
 		IS_PROCESS("backboardd") // Backboardd uses its own messaging center for what it does. 
-		)
+		)*/
+
+	if ([NSBundle.mainBundle.executablePath hasPrefix:@"/Applications"] ||
+		[NSBundle.mainBundle.executablePath hasPrefix:@"/private/var/db/stash"] ||
+		[NSBundle.mainBundle.executablePath hasPrefix:@"/var/mobile/Applications"] ||
+		[NSBundle.mainBundle.executablePath hasPrefix:@"/var/mobile/Containers/Bundle/Application"])
+	{
+		// Application, let it run
+	}
+	else
+	{
 		return;
+	}
+
 	NSDictionary *dict = @{ @"bundleIdentifier": NSBundle.mainBundle.bundleIdentifier };
 	NSDictionary *data = [serverCenter sendMessageAndReceiveReplyName:RAMessagingUpdateAppInfoMessageName userInfo:dict];
 	if (data && [data objectForKey:@"data"] != nil)
