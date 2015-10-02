@@ -9,7 +9,7 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.efrederickson.reachapp.flipswitch</string>
 	<key>CFBundleDisplayName</key>
-	<string>ReachApp</string>
+	<string>Multiplexer</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
