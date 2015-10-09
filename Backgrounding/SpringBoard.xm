@@ -25,17 +25,17 @@
 %hook FBUIApplicationResignActiveManager
 -(void) _sendResignActiveForReason:(int)arg1 toProcess:(__unsafe_unretained FBApplicationProcess*)arg2
 {
+    if ([RABackgrounder.sharedInstance shouldKeepInForeground:arg2.bundleIdentifier])
+        return;
+
+    %orig;
+
     if ([RABackgrounder.sharedInstance shouldSuspendImmediately:arg2.bundleIdentifier])
     {
         BKSProcess *bkProcess = MSHookIvar<BKSProcess*>(arg2, "_bksProcess");
         //[bkProcess _handleExpirationWarning:nil];
         [arg2 processWillExpire:bkProcess];
     }
-    
-    if ([RABackgrounder.sharedInstance shouldKeepInForeground:arg2.bundleIdentifier])
-        return;
-
-    %orig;
 }
 %end
 
@@ -60,7 +60,7 @@
 -(void) host:(__unsafe_unretained FBScene*)arg1 didUpdateSettings:(__unsafe_unretained FBSSceneSettings*)arg2 withDiff:(unsafe_id)arg3 transitionContext:(unsafe_id)arg4 completion:(unsafe_id)arg5
 {
     [RABackgrounder.sharedInstance removeTemporaryOverrideForIdentifier:arg1.identifier]; 
-    if (arg1 && arg1.identifier && arg2 && arg1.clientProcess) // TODO: sanity check to prevent NC App crash. untested/not working.
+    if (arg1 && arg1.identifier && arg2 && arg1.clientProcess) // FIX: sanity check to prevent NC App crash. untested/not working.
     {
         if (arg2.backgrounded)
         {
@@ -121,3 +121,11 @@
     %orig;
 }
 %end
+
+%ctor
+{
+    IF_SPRINGBOARD
+    {
+        %init;
+    }
+}

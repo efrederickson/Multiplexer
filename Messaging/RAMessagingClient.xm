@@ -5,7 +5,15 @@ extern BOOL allowClosingReachabilityNatively;
 
 #define IS_PROCESS(x) (strcmp(__progname, x) == 0)
 
+@interface RAMessagingClient () {
+}
+
+@property (nonatomic) BOOL allowedProcess;
+@end
+
 @implementation RAMessagingClient
+@synthesize allowedProcess;
+
 +(instancetype) sharedInstance
 {
 	IF_SPRINGBOARD {
@@ -15,6 +23,17 @@ extern BOOL allowClosingReachabilityNatively;
 	SHARED_INSTANCE2(RAMessagingClient, 
 		[sharedInstance loadMessagingCenter];
 		sharedInstance.hasRecievedData = NO;
+
+		if ([NSBundle.mainBundle.executablePath hasPrefix:@"/Applications"] ||
+			[NSBundle.mainBundle.executablePath hasPrefix:@"/private/var/db/stash"] ||
+			[NSBundle.mainBundle.executablePath hasPrefix:@"/var/mobile/Applications"] ||
+			[NSBundle.mainBundle.executablePath hasPrefix:@"/private/var/mobile/Applications"] ||
+			[NSBundle.mainBundle.executablePath hasPrefix:@"/var/mobile/Containers/Bundle/Application"] ||
+			[NSBundle.mainBundle.executablePath hasPrefix:@"/private/var/mobile/Containers/Bundle/Application"])
+		{
+			NSLog(@"[ReachApp] valid process");
+			sharedInstance->allowedProcess = YES;
+		}
 	);
 }
 
@@ -52,8 +71,10 @@ extern BOOL allowClosingReachabilityNatively;
 
 -(void) alertUser:(NSString*)description
 {
+#if DEBUG
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:LOCALIZE(@"MULTIPLEXER") message:description delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
     [alert show];
+#endif
 }
 
 -(void) _requestUpdateFromServerWithTries:(int)tries
@@ -66,15 +87,14 @@ extern BOOL allowClosingReachabilityNatively;
 		IS_PROCESS("backboardd") // Backboardd uses its own messaging center for what it does. 
 		)*/
 
-	if ([NSBundle.mainBundle.executablePath hasPrefix:@"/Applications"] ||
-		[NSBundle.mainBundle.executablePath hasPrefix:@"/private/var/db/stash"] ||
-		[NSBundle.mainBundle.executablePath hasPrefix:@"/var/mobile/Applications"] ||
-		[NSBundle.mainBundle.executablePath hasPrefix:@"/var/mobile/Containers/Bundle/Application"])
+	if (allowedProcess == NO)
 	{
-		// Application, let it run
-	}
-	else
-	{
+		// Anything that's not a UIApp (system app or user app) doesn't need this messaging client
+		// Attempting to reach out will either:
+		// 1. hang the process
+		// 2. crash after timeout due to no UIKit 
+		// 3. something else bad
+		// so therefore all those are simply blacklisted. simple. 
 		return;
 	}
 
@@ -164,8 +184,12 @@ extern BOOL allowClosingReachabilityNatively;
 
 -(void) notifySpringBoardOfFrontAppChangeToSelf
 {
-	if ([self isBeingHosted] && (self.knownFrontmostApp == nil || [self.knownFrontmostApp isEqualToString:NSBundle.mainBundle.bundleIdentifier] == NO))
-		[serverCenter sendMessageName:RAMessagingChangeFrontMostAppMessageName userInfo:@{ @"bundleIdentifier": NSBundle.mainBundle.bundleIdentifier }];
+	NSString *ident = NSBundle.mainBundle.bundleIdentifier;
+	if (!ident)
+		return;
+
+	if ([self isBeingHosted] && (self.knownFrontmostApp == nil || [self.knownFrontmostApp isEqual:ident] == NO))
+		[serverCenter sendMessageName:RAMessagingChangeFrontMostAppMessageName userInfo:@{ @"bundleIdentifier": ident }];
 }
 
 -(BOOL) shouldUseExternalKeyboard { return _currentData.shouldUseExternalKeyboard; }

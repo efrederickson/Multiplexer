@@ -27,7 +27,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface PDFImageOptions : NSObject
+@interface RAPDFImageOptions : NSObject
 
 @property (nonatomic, assign) CGFloat scale;				 //	screen scale, defaults to 0, the current screen scale
 @property (nonatomic, copy) UIColor *tintColor;				 //	solid color of the image, defaults to nil, original color

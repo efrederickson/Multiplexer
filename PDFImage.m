@@ -31,7 +31,7 @@
 
 static NSCache *sharedPDFImageCache = nil;
 
-@interface PDFImage ()
+@interface RAPDFImage ()
 {
 	NSCache *_imageCache;
 	dispatch_once_t _imageCacheOnceToken;
@@ -42,7 +42,7 @@ static NSCache *sharedPDFImageCache = nil;
 
 @end
 
-@implementation PDFImage
+@implementation RAPDFImage
 
 + (instancetype)imageNamed:(NSString *)name
 {
@@ -91,11 +91,11 @@ static NSCache *sharedPDFImageCache = nil;
 	  sharedPDFImageCache = [NSCache new];
 	});
 
-	PDFImage *result = [sharedPDFImageCache objectForKey:cacheKey];
+	RAPDFImage *result = [sharedPDFImageCache objectForKey:cacheKey];
 
 	if (result == nil)
 	{
-		result = [(PDFImage *)[self alloc] initWithContentsOfFile:filepath];
+		result = [(RAPDFImage *)[self alloc] initWithContentsOfFile:filepath];
 
 		if (result != nil)
 		{
@@ -108,12 +108,12 @@ static NSCache *sharedPDFImageCache = nil;
 
 + (instancetype)imageWithContentsOfFile:(NSString *)path
 {
-	return [(PDFImage *)[self alloc] initWithContentsOfFile:path];
+	return [(RAPDFImage *)[self alloc] initWithContentsOfFile:path];
 }
 
 + (instancetype)imageWithData:(NSData *)data
 {
-	return [(PDFImage *)[self alloc] initWithData:data];
+	return [(RAPDFImage *)[self alloc] initWithData:data];
 }
 
 - (instancetype)initWithContentsOfFile:(NSString *)path
@@ -157,7 +157,7 @@ static NSCache *sharedPDFImageCache = nil;
 #pragma mark -
 #pragma mark Self
 
-- (UIImage *)imageWithOptions:(PDFImageOptions *)options
+- (UIImage *)imageWithOptions:(RAPDFImageOptions *)options
 {
 	//	Where to draw the image
 	const CGRect rect = [options contentBoundsForContentSize:self.size];

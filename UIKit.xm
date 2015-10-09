@@ -36,7 +36,6 @@ static Class $memorized$UITextEffectsWindow$class;
         {
             ((UIView*)self.subviews[0]).frame = frame;
         }
-
     }
 
     %orig(frame);
@@ -256,7 +255,7 @@ void reloadSettings(CFNotificationCenterRef center,
 {
     IF_NOT_SPRINGBOARD {
         %init;
-        $memorized$UITextEffectsWindow$class = UITextEffectsWindow.class;
+        $memorized$UITextEffectsWindow$class = objc_getClass("UITextEffectsWindow");
     }
 
     CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, &reloadSettings, CFSTR("com.efrederickson.reachapp.settings/reloadSettings"), NULL, 0);

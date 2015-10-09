@@ -4,7 +4,6 @@
 
 @interface RAMissionControlManager : NSObject<RAGestureCallbackProtocol> {
 	RAMissionControlWindow *window;
-	NSMutableArray *inhibitedApplications;
 }
 +(instancetype) sharedInstance;
 
@@ -15,11 +14,6 @@
 -(void) showMissionControl:(BOOL)animated;
 -(void) hideMissionControl:(BOOL)animated;
 -(void) toggleMissionControl:(BOOL)animated;
-
--(void) inhibitApplication:(NSString*)identifer;
--(void) uninhibitApplication:(NSString*)identifer;
--(NSArray*) inhibitedApplications;
--(void) setInhibitedApplications:(NSArray*)icons;
 
 -(RAMissionControlWindow*) missionControlWindow;
 @end

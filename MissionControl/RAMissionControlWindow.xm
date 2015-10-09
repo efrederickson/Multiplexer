@@ -104,7 +104,7 @@
 
 		if (desktop == [[%c(RADesktopManager) sharedInstance] currentDesktop] && [[%c(RASettings) sharedInstance] missionControlDesktopStyle] == 0)
 		{
-			preview.backgroundColor = [UIColor clearColor];
+			preview.backgroundColor = [UIColor grayColor];
 			preview.clipsToBounds = YES;
 			preview.layer.borderWidth = 2;
 			preview.layer.cornerRadius = 10;
@@ -171,7 +171,7 @@
 	NSArray *visibleIcons = [[[%c(SBIconViewMap) homescreenMap] iconModel] visibleIconIdentifiers];
 	for (SBApplication *app in runningApplications)
 	{
-		if ([visibleIcons containsObject:app.bundleIdentifier] == NO || [RAMissionControlManager.sharedInstance.inhibitedApplications containsObject:app.bundleIdentifier])
+		if ([visibleIcons containsObject:app.bundleIdentifier] == NO)// || [RAMissionControlManager.sharedInstance.inhibitedApplications containsObject:app.bundleIdentifier])
 			[appsWithoutWindows removeObject:app];
 	}
 
@@ -467,7 +467,7 @@
 					[runningApplications removeObject:app];
 
 					[self performSelectorOnMainThread:@selector(reloadDesktopSection) withObject:nil waitUntilDone:NO];
-					[self.manager inhibitApplication:app.bundleIdentifier];
+					//[self.manager inhibitApplication:app.bundleIdentifier];
 					//[self performSelectorOnMainThread:@selector(reloadWindowedAppsSection) withObject:nil waitUntilDone:YES];
 					//[self performSelectorOnMainThread:@selector(reloadOtherAppsSection) withObject:nil waitUntilDone:YES];
 					//dispatch_async(dispatch_get_main_queue(), ^{

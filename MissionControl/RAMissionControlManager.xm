@@ -71,7 +71,6 @@ CGRect swappedForOrientation2(CGRect in)
 		sharedInstance->originalAppView = nil;
 		sharedInstance.inhibitDismissalGesture = NO;
 		sharedInstance->hasMoved = NO;
-		sharedInstance->inhibitedApplications = [NSMutableArray array];
 	);
 }
 
@@ -343,21 +342,6 @@ CGRect swappedForOrientation2(CGRect in)
 	}
 	return RAGestureCallbackResultSuccess;
 }
-
--(void) inhibitApplication:(NSString*)identifer 
-{
-	if ([inhibitedApplications containsObject:identifer] == NO)
-		[inhibitedApplications addObject:identifer];
-}
-
--(void) uninhibitApplication:(NSString*)identifer
-{
-	if ([inhibitedApplications containsObject:identifer])
-		[inhibitedApplications removeObject:identifer];
-}
-
--(NSArray*) inhibitedApplications { return inhibitedApplications; }
--(void) setInhibitedApplications:(NSArray*)icons { inhibitedApplications = [icons mutableCopy]; }
 
 -(RAMissionControlWindow*) missionControlWindow { return window; }
 

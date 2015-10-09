@@ -102,7 +102,3 @@ CGSize forcePhoneModeSize = RA_6P_SIZE;
 }
 %end
 */
-
-%ctor
-{
-}

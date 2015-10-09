@@ -36,7 +36,7 @@
 //	however note that opening the same bundled file on
 //	two different threads within a short time of each other (microseconds)
 //	may result in a new instance and not the version in NSCache, the same applies to imageWithOptions:
-@interface PDFImage : NSObject
+@interface RAPDFImage : NSObject
 
 @property (nonatomic, readonly) CGSize size; //	original page size
 
@@ -53,7 +53,7 @@
 
 - (instancetype)initWithDocument:(CGPDFDocumentRef)document;
 
-- (UIImage *)imageWithOptions:(PDFImageOptions *)options; //	will NSCache the image if the same options are used again
+- (UIImage *)imageWithOptions:(RAPDFImageOptions *)options; //	will NSCache the image if the same options are used again
 - (void)drawInRect:(CGRect)rect;
 
 @end

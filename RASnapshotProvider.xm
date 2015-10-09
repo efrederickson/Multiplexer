@@ -30,15 +30,10 @@
 		SBDisplayItem *item = [%c(SBDisplayItem) displayItemWithType:@"App" displayIdentifier:identifier];
 		__block SBAppSwitcherSnapshotView *view = nil;
 
-		void (^block)() = ^{
+		ON_MAIN_THREAD(^{
 			view = [[[%c(SBUIController) sharedInstance] switcherController] performSelector:@selector(_snapshotViewForDisplayItem:) withObject:item];
 			[view setOrientation:orientation orientationBehavior:0];
-		};
-
-		if (NSThread.isMainThread)
-			block();
-		else
-			dispatch_sync(dispatch_get_main_queue(), block);
+		});
 		
 		if (view)
 		{
@@ -48,7 +43,7 @@
 
 		if (!image)
 		{
-			SBApplication *app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:identifier];
+			SBApplication *app = [[%c(SBApplicationController) sharedInstance] RA_applicationWithBundleIdentifier:identifier];
 
 			if (app && app.mainSceneID)
 			{
@@ -110,14 +105,10 @@
 		//CGContextSetAllowsAntialiasing(c, YES);
 		//[window.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES];
 		
-		void (^block)() = ^{
+		ON_MAIN_THREAD(^{
 			[window drawViewHierarchyInRect:window.bounds afterScreenUpdates:YES];
-		};
-		if (NSThread.isMainThread == NO)
-			dispatch_sync(dispatch_get_main_queue(), block);
-		else
-			block();
-		
+		});
+
 		UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
 		UIGraphicsEndImageContext();
 		window.layer.contents = nil;
@@ -163,19 +154,14 @@
 
 	__block CGSize rotatedSize;
 
-	void (^block)() =  ^{
+	ON_MAIN_THREAD(^{
 		//Calculate the size of the rotated view's containing box for our drawing space
 		static UIView *rotatedViewBox = [[UIView alloc] init];
 		rotatedViewBox.frame = CGRectMake(0,0,oldImage.size.width, oldImage.size.height);
 		CGAffineTransform t = CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(degrees));
 		rotatedViewBox.transform = t;
 		rotatedSize = rotatedViewBox.frame.size;
-	};
-
-	if (NSThread.isMainThread)
-		block();
-	else
-		dispatch_sync(dispatch_get_main_queue(), block);
+	});
 
 	//CGSize rotatedSize = rotatedViewBox.frame.size;
 	//CGSize rotatedSize = CGSizeApplyAffineTransform(oldImage.size, CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(degrees)));
@@ -207,18 +193,18 @@
 
 	    [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"BeautifulAnimation"];
 
-	    void (^block)() = ^{
+		ON_MAIN_THREAD(^{
 		    [[%c(SBUIController) sharedInstance] restoreContentAndUnscatterIconsAnimated:NO];
-		};
-		
-		if (NSThread.isMainThread)
-			block();
-		else
-			dispatch_sync(dispatch_get_main_queue(), block);
+		//});
 
-		[MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Wallpaper
-		[[[[%c(SBUIController) sharedInstance] window] layer] performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Icons
-		[desktop.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Desktop windows
+			[MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Wallpaper
+		//[[[[%c(SBUIController) sharedInstance] window] layer] performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Icons
+		//ON_MAIN_THREAD(^{
+			//[MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow") drawViewHierarchyInRect:UIScreen.mainScreen.bounds afterScreenUpdates:YES];
+			[[[%c(SBUIController) sharedInstance] window] drawViewHierarchyInRect:UIScreen.mainScreen.bounds afterScreenUpdates:YES];
+			[desktop drawViewHierarchyInRect:UIScreen.mainScreen.bounds afterScreenUpdates:YES];
+		});
+		//[desktop.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Desktop windows
 		
 		for (UIView *view in desktop.subviews) // Application views
 		{
@@ -255,39 +241,47 @@
 
 -(UIImage*) wallpaperImage
 {
-	if ([imageCache objectForKey:@"wallpaperImage"])
-		return [imageCache objectForKey:@"wallpaperImage"];
+	return [self wallpaperImage:YES];
+}
 
+-(UIImage*) wallpaperImage:(BOOL)blurred
+{
+	NSString *key = blurred ? @"wallpaperImageBlurred" : @"wallpaperImage";
+	if ([imageCache objectForKey:key])
+		return [imageCache objectForKey:key];
 
 	UIGraphicsBeginImageContextWithOptions(UIScreen.mainScreen.bounds.size, YES, UIScreen.mainScreen.scale);
 	CGContextRef c = UIGraphicsGetCurrentContext();
 
-    [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"BeautifulAnimation"];
+    [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"RAWallpaperSnapshot"];
 
     [MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Wallpaper
 
 	UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
 	UIGraphicsEndImageContext();
 	MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow").layer.contents = nil;
-	[[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"BeautifulAnimation"];
+	[[%c(SBWallpaperController) sharedInstance] endRequiringWithReason:@"RAWallpaperSnapshot"];
 
-	UIImageView *imgView = [[UIImageView alloc] initWithImage:image];//Frame:(CGRect){CGPointZero,image.size}];
-	imgView.image = image;
+	//UIImageView *imgView = [[UIImageView alloc] initWithImage:image];//Frame:(CGRect){CGPointZero,image.size}];
+	//imgView.image = image;
 
-	CIFilter *gaussianBlurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];
-	[gaussianBlurFilter setDefaults];
-	CIImage *inputImage = [CIImage imageWithCGImage:[image CGImage]];
-	[gaussianBlurFilter setValue:inputImage forKey:kCIInputImageKey];
-	[gaussianBlurFilter setValue:@25 forKey:kCIInputRadiusKey];
+	if (blurred)
+	{
+		CIFilter *gaussianBlurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];
+		[gaussianBlurFilter setDefaults];
+		CIImage *inputImage = [CIImage imageWithCGImage:[image CGImage]];
+		[gaussianBlurFilter setValue:inputImage forKey:kCIInputImageKey];
+		[gaussianBlurFilter setValue:@25 forKey:kCIInputRadiusKey];
 
-	CIImage *outputImage = [gaussianBlurFilter outputImage];
-	outputImage = [outputImage imageByCroppingToRect:CGRectMake(0, 0, image.size.width * UIScreen.mainScreen.scale, image.size.height * UIScreen.mainScreen.scale)];
-	CIContext *context = [CIContext contextWithOptions:nil];
-	CGImageRef cgimg = [context createCGImage:outputImage fromRect:[inputImage extent]];  // note, use input image extent if you want it the same size, the output image extent is larger
-	image = [UIImage imageWithCGImage:cgimg];
-	CGImageRelease(cgimg);
+		CIImage *outputImage = [gaussianBlurFilter outputImage];
+		outputImage = [outputImage imageByCroppingToRect:CGRectMake(0, 0, image.size.width * UIScreen.mainScreen.scale, image.size.height * UIScreen.mainScreen.scale)];
+		CIContext *context = [CIContext contextWithOptions:nil];
+		CGImageRef cgimg = [context createCGImage:outputImage fromRect:[inputImage extent]];  // note, use input image extent if you want it the same size, the output image extent is larger
+		image = [UIImage imageWithCGImage:cgimg];
+		CGImageRelease(cgimg);
+	}
 
-	[imageCache setObject:image forKey:@"wallpaperImage"];
+	[imageCache setObject:image forKey:key];
 
 	return image;
 }

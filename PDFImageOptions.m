@@ -27,11 +27,11 @@
 
 #import "PDFImageOptions.h"
 
-@implementation PDFImageOptions
+@implementation RAPDFImageOptions
 
 + (instancetype)optionsWithSize:(CGSize)size
 {
-	PDFImageOptions *options = [self new];
+	RAPDFImageOptions *options = [self new];
 	options.size = size;
 	return options;
 }

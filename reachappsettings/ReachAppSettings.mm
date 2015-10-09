@@ -50,7 +50,7 @@
         header.title = @"dank memes";
 #endif
     header.blendMode = kCGBlendModeSoftLight;
-    header.image = [[PDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/MainHeader.pdf"] imageWithOptions:[PDFImageOptions optionsWithSize:CGSizeMake(109.33, 41)]];
+    header.image = [[RAPDFImage imageWithContentsOfFile:@"/Library/PreferenceBundles/ReachAppSettings.bundle/MainHeader.pdf"] imageWithOptions:[RAPDFImageOptions optionsWithSize:CGSizeMake(109.33, 41)]];
 
     UIView *notHeader = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 115)];
     [notHeader addSubview:header];

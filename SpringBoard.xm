@@ -18,7 +18,7 @@
 #import "Asphaleia2.h"
 #import "RASnapshotProvider.h"
 
-#define SPRINGBOARD ([NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"])
+extern BOOL overrideDisableForStatusBar;
 
 %hook SBUIController
 - (_Bool)clickedMenuButton
@@ -31,6 +31,7 @@
 
     if ([RASettings.sharedInstance homeButtonClosesReachability] && [[%c(SBWorkspace) sharedInstance] isUsingReachApp] && ((SBReachabilityManager*)[%c(SBReachabilityManager) sharedInstance]).reachabilityModeActive)
     {
+        overrideDisableForStatusBar = NO;
         [[%c(SBReachabilityManager) sharedInstance] _handleReachabilityDeactivated];
         return YES;
     }
@@ -44,7 +45,7 @@
     return %orig;
 }
 
-- (_Bool)handleMenuDoubleTap
+/*- (_Bool)handleMenuDoubleTap
 {
     if ([[%c(RASwipeOverManager) sharedInstance] isUsingSwipeOver])
     {
@@ -57,7 +58,7 @@
     //}
 
     return %orig;
-}
+}*/
 
 // This should help fix the problems where closing an app with Tage or the iPad Gesture would cause the app to suspend(?) and lock up the device.
 - (void)_suspendGestureBegan
@@ -75,7 +76,7 @@
 
     // No applications show in the mission control until they have been launched by the user.
     // This prevents always-running apps like Mail or Pebble from perpetually showing in Mission Control.
-    [[%c(RAMissionControlManager) sharedInstance] setInhibitedApplications:[[[%c(SBIconViewMap) homescreenMap] iconModel] visibleIconIdentifiers]];
+    //[[%c(RAMissionControlManager) sharedInstance] setInhibitedApplications:[[[%c(SBIconViewMap) homescreenMap] iconModel] visibleIconIdentifiers]];
 }
 %end
 
@@ -113,8 +114,10 @@
 {
     %orig;
 
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-        [RAHostedAppView iPad_iOS83_fixHosting];
+    //if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+    // can't hurt to check all devices - especially if it changes/has changed to include phones. 
+    // however this was presumably done in preparation for the iOS 9 multitasking
+    [RAHostedAppView iPad_iOS83_fixHosting];
 }
 %end
 
@@ -143,10 +146,9 @@
 - (void)didActivateWithTransactionID:(unsigned long long)arg1
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [[%c(RAMissionControlManager) sharedInstance] uninhibitApplication:self.bundleIdentifier];
         [RASnapshotProvider.sharedInstance forceReloadOfSnapshotForIdentifier:self.bundleIdentifier];
     });
-        
+    
     %orig;
 }
 %end
@@ -176,7 +178,7 @@ void reset_settings_notification(CFNotificationCenterRef center, void *observer,
 
 %ctor
 {
-    if (SPRINGBOARD)
+    if (IS_SPRINGBOARD)
     {
         %init;
         LOAD_ASPHALEIA;

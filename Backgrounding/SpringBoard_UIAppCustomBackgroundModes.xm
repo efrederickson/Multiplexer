@@ -28,6 +28,9 @@
         [NSBundle.mainBundle.bundleIdentifier isEqualToString:@"com.apple.springboard"] == NO) // FIXME: this is a hack that prevents SpringBoard from not starting
     {
         NSString *identifier = NSBundle.mainBundle.bundleIdentifier;
+
+        if (!identifier)
+            goto ORIGINAL;
         
         //NSLog(@"[ReachApp] BKSProcessAssertion initWithPID:'%d' flags:'%d' reason:'%d' name:'%@' withHandler:'%@' process identifier:'%@'", arg1, arg2, arg3, arg4, arg5, identifier);
 
@@ -51,6 +54,7 @@
             //}
         }
     }
+ORIGINAL:
     return %orig(arg1, arg2, arg3, arg4, arg5);
 }
 %end

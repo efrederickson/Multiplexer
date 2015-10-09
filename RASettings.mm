@@ -106,6 +106,11 @@ NSCache *backgrounderSettingsCache = [NSCache new];
 			//NSLog(@"[ReachApp] settings sandbox load: %@", _settings == nil ? @"failed" : @"succeed");
 		}
 
+		if (_settings == nil)
+		{
+			NSLog(@"[ReachApp] could not load settings from CFPreferences or NSDictionary");
+		}
+
 		if ([previousNCAppSetting isEqual:self.NCApp] == NO)
 			[[objc_getClass("RANCViewController") sharedViewController] forceReloadAppLikelyBecauseTheSettingChanged]; // using objc_getClass allows RASettings to be used in reachappsettings and other places
 

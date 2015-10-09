@@ -42,6 +42,15 @@ extern BOOL $__IS_SPRINGBOARD;
 #define IS_SPRINGBOARD [NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"]
 #endif
 
+#define ON_MAIN_THREAD(block) \
+    { \
+        dispatch_block_t _blk = block; \
+        if (NSThread.isMainThread) \
+            _blk(); \
+        else \
+            dispatch_sync(dispatch_get_main_queue(), _blk); \
+    }
+
 #define IF_SPRINGBOARD if (IS_SPRINGBOARD)
 #define IF_NOT_SPRINGBOARD if (!IS_SPRINGBOARD)
 #define IF_THIS_PROCESS(x) if ([[x objectForKey:@"bundleIdentifier"] isEqual:NSBundle.mainBundle.bundleIdentifier])

@@ -24,7 +24,7 @@ NSCache *_rsImgCache = [NSCache new];
 
 	if ([NSFileManager.defaultManager fileExistsAtPath:pdfPath])
 	{
-		PDFImage *pdf = [PDFImage imageWithContentsOfFile:pdfPath];
+		RAPDFImage *pdf = [RAPDFImage imageWithContentsOfFile:pdfPath];
 
 		if (pdf)
 			[_rsImgCache setObject:pdf forKey:stripped];
@@ -58,9 +58,9 @@ NSCache *_rsImgCache = [NSCache new];
 			return (UIImage*)arg;
 	}
 
-	if ([arg isKindOfClass:[PDFImage class]])
+	if ([arg isKindOfClass:[RAPDFImage class]])
 	{
-		UIImage *image = [arg imageWithOptions:[PDFImageOptions optionsWithSize:size]];
+		UIImage *image = [arg imageWithOptions:[RAPDFImageOptions optionsWithSize:size]];
 		return image;
 	}
 
@@ -87,5 +87,4 @@ NSCache *_rsImgCache = [NSCache new];
 
 	return [self convertToUIImageIfNeeded:img sizeIfNeeded:size forceSizing:YES];
 }
-
 @end
