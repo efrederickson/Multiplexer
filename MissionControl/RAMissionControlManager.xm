@@ -14,6 +14,7 @@
 #import "RARunningAppsProvider.h"
 #import "RAControlCenterInhibitor.h"
 #import "RASettings.h"
+#import "RAOrientationLocker.h"
 
 @interface RAMissionControlManager () {
 	SBApplication *lastOpenedApp;
@@ -121,7 +122,7 @@ CGRect swappedForOrientation2(CGRect in)
 	[[%c(RAGestureManager) sharedInstance] addGestureRecognizerWithTarget:self forEdge:UIRectEdgeBottom identifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture" priority:RAGesturePriorityHigh];
 	[[%c(RAGestureManager) sharedInstance] ignoreSwipesBeginningInRect:UIScreen.mainScreen.bounds forIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
 	[[%c(RARunningAppsProvider) sharedInstance] addTarget:window];
-	[[%c(SBUIController) sharedInstance] _lockOrientationForSwitcher];
+	[%c(RAOrientationLocker) lockOrientation];
     [[%c(SBWallpaperController) sharedInstance] beginRequiringWithReason:@"RAMissionControlManager"];
 	self.inhibitDismissalGesture = NO;
 	[%c(RAControlCenterInhibitor) setInhibited:YES];
@@ -142,7 +143,7 @@ CGRect swappedForOrientation2(CGRect in)
 		window = nil;
 	}
 
-	window = [[RAMissionControlWindow alloc] initWithFrame:UIScreen.mainScreen._interfaceOrientedBounds];
+	window = [[RAMissionControlWindow alloc] initWithFrame:UIScreen.mainScreen.RA_interfaceOrientedBounds];
 	window.manager = self;
 	[window _rotateWindowToOrientation:UIApplication.sharedApplication.statusBarOrientation updateStatusBar:YES duration:1 skipCallbacks:NO];
 
@@ -222,7 +223,7 @@ CGRect swappedForOrientation2(CGRect in)
 	[[[%c(RADesktopManager) sharedInstance] currentDesktop] loadApps];
 	[[%c(RAGestureManager) sharedInstance] removeGestureWithIdentifier:@"com.efrederickson.reachapp.missioncontrol.dismissgesture"];
 	[[%c(RAGestureManager) sharedInstance] stopIgnoringSwipesForIdentifier:@"com.efrederickson.reachapp.windowedmultitasking.systemgesture"];
-	[[%c(SBUIController) sharedInstance] releaseSwitcherOrientationLock];
+	[%c(RAOrientationLocker) unlockOrientation];
     [%c(RAControlCenterInhibitor) setInhibited:NO];
 
 	//if (lastOpenedApp && lastOpenedApp.isRunning && UIApplication.sharedApplication._accessibilityFrontMostApplication != lastOpenedApp)
@@ -265,15 +266,15 @@ CGRect swappedForOrientation2(CGRect in)
 		}
 		else if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
 		{
-			dismiss = window.frame.origin.x + window.frame.size.width < UIScreen.mainScreen._interfaceOrientedBounds.size.width / 2.0;
+			dismiss = window.frame.origin.x + window.frame.size.width < UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width / 2.0;
 		}
 		else if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationPortrait)
-			dismiss = window.frame.origin.y + window.frame.size.height + velocity.y < UIScreen.mainScreen._interfaceOrientedBounds.size.height / 2;
+			dismiss = window.frame.origin.y + window.frame.size.height + velocity.y < UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height / 2;
 
 		if (dismiss)
 		{
 			// Close
-			CGFloat distance = UIScreen.mainScreen._interfaceOrientedBounds.size.height - (window.frame.origin.y + window.frame.size.height);
+			CGFloat distance = UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height - (window.frame.origin.y + window.frame.size.height);
 			CGFloat duration = MIN(distance / velocity.y, 0.3);
 
 			[UIView animateWithDuration:duration animations:^{
@@ -338,7 +339,7 @@ CGRect swappedForOrientation2(CGRect in)
 			window.center = CGPointMake(window.center.x, location.y - initialCenter.y);
 
 		if (originalAppView)
-			originalAppView.frame = swappedForOrientation2(CGRectMake(originalAppView.frame.origin.x, UIScreen.mainScreen._interfaceOrientedBounds.size.height - (UIScreen.mainScreen._interfaceOrientedBounds.size.height - location.y), originalAppFrame.size.width, originalAppFrame.size.height));
+			originalAppView.frame = swappedForOrientation2(CGRectMake(originalAppView.frame.origin.x, UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height - (UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height - location.y), originalAppFrame.size.width, originalAppFrame.size.height));
 	}
 	return RAGestureCallbackResultSuccess;
 }

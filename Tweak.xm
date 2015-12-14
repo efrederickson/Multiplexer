@@ -1,5 +1,6 @@
 #define MULTIPLEXER_CORE 1
 #import "headers.h"
+#include <execinfo.h>
 
 /*
 This project thanks: 

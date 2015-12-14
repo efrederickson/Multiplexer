@@ -30,7 +30,7 @@
 		view.frame = (CGRect){ { 0, 100 }, [RAFakePhoneMode fakeSizeForAppWithIdentifier:view.app.bundleIdentifier] };
 	}
 	else
-		view.frame = CGRectMake(0, 100, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height);
+		view.frame = CGRectMake(0, 100, UIScreen.mainScreen._referenceBounds.size.width, UIScreen.mainScreen._referenceBounds.size.height);
 	view.center = self.center;
 
 	RAWindowBar *windowBar = [[RAWindowBar alloc] init];
@@ -123,7 +123,7 @@
 			if (animated)
 				[UIView animateWithDuration:0.3 animations:^{
 					view.superview.layer.transform = CATransform3DMakeScale(0.1, 0.1, 1);
-					view.superview.layer.position = CGPointMake(UIScreen.mainScreen.bounds.size.width / 2, UIScreen.mainScreen.bounds.size.height);
+					view.superview.layer.position = CGPointMake(UIScreen.mainScreen._referenceBounds.size.width / 2, UIScreen.mainScreen._referenceBounds.size.height);
 					view.superview.layer.opacity = 0.0f;
 					[RADesktopManager.sharedInstance findNewForemostApp];
 				//view.superview.alpha = 0; 

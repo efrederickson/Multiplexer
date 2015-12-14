@@ -495,6 +495,7 @@ extern BOOL launchNextOpenIntoWindow;
 
 -(void) setKeyboardContextId:(unsigned int)id forIdentifier:(NSString*)identifier
 {
+	NSLog(@"[ReachApp] got c id %d", id);
 	contextIds[identifier] = @(id);
 }
 

@@ -7,11 +7,13 @@
 #import "RAMessagingServer.h"
 #import "RAResourceImageProvider.h"
 #import "RAAppSelectorView.h"
+#import "RAAppSwitcherModelWrapper.h"
+#import "RAOrientationLocker.h"
 
 extern int rotationDegsForOrientation(int o);
 
 //#define SCREEN_WIDTH (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation) ? UIScreen.mainScreen.bounds.size.height : UIScreen.mainScreen.bounds.size.width)
-#define SCREEN_WIDTH (UIScreen.mainScreen._interfaceOrientedBounds.size.width)
+#define SCREEN_WIDTH (UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width)
 
 @interface RASwipeOverManager () {
 	RASwipeOverOverlay *overlayWindow;
@@ -39,7 +41,8 @@ extern int rotationDegsForOrientation(int o);
 	currentAppIdentifier = [[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier;
 
 	[self createEdgeView];
-	[[%c(SBUIController) sharedInstance] _lockOrientationForSwitcher];
+
+	[%c(RAOrientationLocker) lockOrientation];
 }
 
 -(void) stopUsingSwipeOver
@@ -50,7 +53,8 @@ extern int rotationDegsForOrientation(int o);
 		[[%c(RAMessagingServer) sharedInstance] endResizingApp:currentAppIdentifier completion:nil];
 		[[%c(RAMessagingServer) sharedInstance] setShouldUseExternalKeyboard:YES forApp:currentAppIdentifier completion:nil];	
 	}
-	[[%c(SBUIController) sharedInstance] releaseSwitcherOrientationLock];
+
+	[%c(RAOrientationLocker) unlockOrientation];
 
 	isUsingSwipeOver = NO;
 	currentAppIdentifier = nil;
@@ -83,8 +87,9 @@ extern int rotationDegsForOrientation(int o);
 
 -(void) createEdgeView
 {
-	overlayWindow = [[RASwipeOverOverlay alloc] initWithFrame:UIScreen.mainScreen._interfaceOrientedBounds];
-	[overlayWindow _rotateWindowToOrientation:UIApplication.sharedApplication.statusBarOrientation updateStatusBar:YES duration:0.001 skipCallbacks:NO];
+	overlayWindow = [[RASwipeOverOverlay alloc] initWithFrame:UIScreen.mainScreen.RA_interfaceOrientedBounds];
+	if (SYSTEM_VERSION_LESS_THAN(@"9.0"))
+		[overlayWindow _rotateWindowToOrientation:UIApplication.sharedApplication.statusBarOrientation updateStatusBar:YES duration:0.001 skipCallbacks:NO];
 	[overlayWindow showEnoughToDarkenUnderlyingApp];
 	[overlayWindow makeKeyAndVisible];
 	[overlayWindow updateForOrientation:UIApplication.sharedApplication.statusBarOrientation];
@@ -103,7 +108,7 @@ extern int rotationDegsForOrientation(int o);
         app = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:identifier];
     else
     {
-	    NSMutableArray *bundleIdentifiers = [[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary];
+	    NSMutableArray *bundleIdentifiers = [[%c(RAAppSwitcherModelWrapper) appSwitcherAppIdentiferList] mutableCopy];
 	    while (scene == nil && bundleIdentifiers.count > 0)
 	    {
 	        identifier = bundleIdentifiers[0];
@@ -135,7 +140,7 @@ extern int rotationDegsForOrientation(int o);
 		view.autosizesApp = YES;
     view.shouldUseExternalKeyboard = YES;
     view.allowHidingStatusBar = NO;
-    view.frame = UIScreen.mainScreen.bounds;
+    view.frame = UIScreen.mainScreen._referenceBounds;
     view.showSplashscreenInsteadOfSpinner = YES;
 	view.renderWallpaper = YES;
     [view rotateToOrientation:UIInterfaceOrientationPortrait];
@@ -270,9 +275,9 @@ extern int rotationDegsForOrientation(int o);
 				lastX = translation.x; 
 
 				newScale = newScale + sqrt(targetView.transform.a * targetView.transform.a + targetView.transform.c * targetView.transform.c);
-				CGFloat scale = MIN(MAX(newScale, 0.1), UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation) ? (UIScreen.mainScreen._interfaceOrientedBounds.size.height / targetView.bounds.size.height) - 0.02 : 0.98);
+				CGFloat scale = MIN(MAX(newScale, 0.1), UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation) ? (UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height / targetView.bounds.size.height) - 0.02 : 0.98);
 
-				//CGFloat height = UIScreen.mainScreen._interfaceOrientedBounds.size.height;
+				//CGFloat height = UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height;
 				//if (targetView.bounds.size.height * scale >= height)
 				//	scale = scale - ((targetView.bounds.size.height * scale) - height);
 

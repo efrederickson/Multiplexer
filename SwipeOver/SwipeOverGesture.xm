@@ -7,6 +7,7 @@
 #import "RASettings.h"
 #import "RAHostManager.h"
 #import "RAResourceImageProvider.h"
+#import "Multiplexer.h"
 
 UIView *grabberView;
 BOOL isShowingGrabber = NO;
@@ -20,8 +21,8 @@ CGRect adjustFrameForRotation()
     CGFloat portraitWidth = 30;
     CGFloat portraitHeight = 50;
 
-    CGFloat width = UIScreen.mainScreen._interfaceOrientedBounds.size.width;
-    CGFloat height = UIScreen.mainScreen._interfaceOrientedBounds.size.height;
+    CGFloat width = UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width;
+    CGFloat height = UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height;
 
     switch ([[UIApplication.sharedApplication _accessibilityFrontMostApplication] statusBarOrientation])
     {
@@ -85,11 +86,11 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
         case RAGrabAreaSideAnywhere:
             return YES;
         case RAGrabAreaSideTopThird:
-            return y <= UIScreen.mainScreen._interfaceOrientedBounds.size.height / 3.0;
+            return y <= UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height / 3.0;
         case RAGrabAreaSideMiddleThird:
-            return y >= UIScreen.mainScreen._interfaceOrientedBounds.size.height / 3.0 && y <= (UIScreen.mainScreen._interfaceOrientedBounds.size.height / 3.0) * 2;
+            return y >= UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height / 3.0 && y <= (UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height / 3.0) * 2;
         case RAGrabAreaSideBottomThird:
-            return y >= (UIScreen.mainScreen._interfaceOrientedBounds.size.height / 3.0) * 2;
+            return y >= (UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height / 3.0) * 2;
         default:
             return NO;
     }
@@ -100,7 +101,7 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
     [[%c(RAGestureManager) sharedInstance] addGestureRecognizer:^RAGestureCallbackResult(UIGestureRecognizerState state, CGPoint location, CGPoint velocity) {
         lastTouch = [NSDate date];
 
-        if ([[%c(SBUIController) sharedInstance] shouldShowControlCenterTabControlOnFirstSwipe] || [[%c(RASettings) sharedInstance] alwaysShowSOGrabber])
+        if ([%c(Multiplexer) shouldShowControlCenterGrabberOnFirstSwipe] || [[%c(RASettings) sharedInstance] alwaysShowSOGrabber])
         {
             if (isShowingGrabber == NO && isPastGrabber == NO)
             {
@@ -191,7 +192,7 @@ BOOL swipeOverLocationIsInValidArea(CGFloat y)
     } withCondition:^BOOL(CGPoint location, CGPoint velocity) {
         if ([[%c(RAKeyboardStateListener) sharedInstance] visible] && ![RASwipeOverManager.sharedInstance isUsingSwipeOver])
         {
-            CGRect realKBFrame = CGRectMake(0, UIScreen.mainScreen._interfaceOrientedBounds.size.height, [[%c(RAKeyboardStateListener) sharedInstance] size].width, [[%c(RAKeyboardStateListener) sharedInstance] size].height);
+            CGRect realKBFrame = CGRectMake(0, UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height, [[%c(RAKeyboardStateListener) sharedInstance] size].width, [[%c(RAKeyboardStateListener) sharedInstance] size].height);
             realKBFrame = CGRectOffset(realKBFrame, 0, -realKBFrame.size.height);
 
             if (CGRectContainsPoint(realKBFrame, location) || realKBFrame.size.height > 50)

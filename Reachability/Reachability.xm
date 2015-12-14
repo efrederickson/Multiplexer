@@ -14,6 +14,7 @@
 #import "RADesktopManager.h"
 #import "RADesktopWindow.h"
 #import "RAMessagingServer.h"
+#import "RAAppSwitcherModelWrapper.h"
 
 #define SPRINGBOARD ([NSBundle.mainBundle.bundleIdentifier isEqual:@"com.apple.springboard"])
 
@@ -35,6 +36,8 @@ UIView *bottomDraggerView = nil;
 CGFloat old_grabberCenterY = -1;
 
 BOOL wasEnabled = NO;
+
+%group hooks
 
 %hook SBReachabilityManager
 +(BOOL)reachabilitySupported
@@ -105,7 +108,7 @@ BOOL wasEnabled = NO;
         }
         if (currentBundleIdentifier)
             [RAMessagingServer.sharedInstance endResizingApp:currentBundleIdentifier completion:nil];
-        [[%c(SBWorkspace) sharedInstance] RA_closeCurrentView];
+        [GET_SBWORKSPACE RA_closeCurrentView];
     }
 
 }
@@ -144,8 +147,7 @@ BOOL wasEnabled = NO;
 %end
 
 id SBWorkspace$sharedInstance;
-%hook SBWorkspace
-
+%hook SB_WORKSPACE_CLASS
 %new +(id) sharedInstance
 {
     return SBWorkspace$sharedInstance;
@@ -341,7 +343,7 @@ id SBWorkspace$sharedInstance;
         {
             SBApplication *app = nil;
             FBScene *scene = nil;
-            NSMutableArray *bundleIdentifiers = [[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary];
+            NSMutableArray *bundleIdentifiers = [[RAAppSwitcherModelWrapper appSwitcherAppIdentiferList] mutableCopy];
             while (scene == nil && bundleIdentifiers.count > 0)
             {
                 lastBundleIdentifier = bundleIdentifiers[0];
@@ -405,6 +407,9 @@ id SBWorkspace$sharedInstance;
 
 %new -(void)RA_showWidgetSelector
 {
+    if (view)
+        [self RA_closeCurrentView];
+        
     UIWindow *w = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
     //CGSize iconSize = [%c(SBIconView) defaultIconImageSize];
     static CGSize fullSize = [%c(SBIconView) defaultIconSize];
@@ -528,16 +533,16 @@ CGFloat startingY = -1;
 %new -(void) updateViewSizes:(CGPoint) center animate:(BOOL)animate
 {
     // Resizing
-    UIWindow *topWindow = MSHookIvar<UIWindow*>(self,"_reachabilityEffectWindow");
-    UIWindow *bottomWindow = MSHookIvar<UIWindow*>(self,"_reachabilityWindow");
+    UIWindow *topWindow = MSHookIvar<UIWindow*>(self, "_reachabilityEffectWindow");
+    UIWindow *bottomWindow = MSHookIvar<UIWindow*>(self, "_reachabilityWindow");
 
     CGRect topFrame = CGRectMake(topWindow.frame.origin.x, topWindow.frame.origin.y, topWindow.frame.size.width, center.y);
-    CGRect bottomFrame = CGRectMake(bottomWindow.frame.origin.x, center.y, bottomWindow.frame.size.width, UIScreen.mainScreen.bounds.size.height - center.y);
+    CGRect bottomFrame = CGRectMake(bottomWindow.frame.origin.x, center.y, bottomWindow.frame.size.width, UIScreen.mainScreen._referenceBounds.size.height - center.y);
 
     if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationLandscapeLeft)
     {
         topFrame = CGRectMake(topWindow.frame.origin.x, 0, topWindow.frame.size.width, center.y);
-        bottomFrame = CGRectMake(bottomWindow.frame.origin.x, center.y, bottomWindow.frame.size.width, UIScreen.mainScreen.bounds.size.height - center.y);
+        bottomFrame = CGRectMake(bottomWindow.frame.origin.x, center.y, bottomWindow.frame.size.width, UIScreen.mainScreen._referenceBounds.size.height - center.y);
     }
     else if (UIApplication.sharedApplication.statusBarOrientation == UIInterfaceOrientationPortraitUpsideDown)
     {
@@ -698,7 +703,7 @@ CGFloat startingY = -1;
         return;
     }
 
-    [[%c(SBAppSwitcherModel) sharedInstance] addToFront:[%c(SBDisplayLayout) fullScreenDisplayLayoutForApplication:[[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:bundleIdentifier]]];
+    [RAAppSwitcherModelWrapper addIdentifierToFront:bundleIdentifier];
 
     FBWindowContextHostManager *contextHostManager = [scene contextHostManager];
 
@@ -836,10 +841,13 @@ CGFloat startingY = -1;
 }
 %end
 
+%end
+
 %ctor
 {
     if (SPRINGBOARD)
     {
-        %init;            
+        Class c = objc_getClass("SBMainWorkspace") ?: objc_getClass("SBWorkspace");
+        %init(hooks, SB_WORKSPACE_CLASS=c);
     }
 }

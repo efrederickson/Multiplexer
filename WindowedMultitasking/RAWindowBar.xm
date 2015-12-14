@@ -321,7 +321,10 @@ extern BOOL allowOpenApp;
 -(void) maximize
 {
 	allowOpenApp = YES;
-	[[%c(SBUIController) sharedInstance] activateApplicationAnimated:attachedView.app];
+	if ([%c(SBUIController) respondsToSelector:@selector(activateApplicationAnimated:)])
+		[[%c(SBUIController) sharedInstance] activateApplicationAnimated:attachedView.app];
+	else
+		[[%c(SBUIController) sharedInstance] activateApplication:attachedView.app];
 	allowOpenApp = NO;
 }
 

@@ -88,7 +88,7 @@
 
 -(void) appViewItemTap:(UIGestureRecognizer*)gesture
 {
-	[[%c(SBWorkspace) sharedInstance] appViewItemTap:gesture];
+	[GET_SBWORKSPACE appViewItemTap:gesture];
 	//[[RAReachabilityManager sharedInstance] launchTopAppWithIdentifier:gesture.view.restorationIdentifier];
 }
 @end

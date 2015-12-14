@@ -1,3 +1,5 @@
+@class SBApplication;
+
 @interface MultiplexerExtension : NSObject
 @property (nonatomic, retain) NSString *name;
 @property (nonatomic, retain) NSString *multiplexerVersion;
@@ -12,4 +14,7 @@
 -(BOOL) isOnSupportedOS;
 
 -(void) registerExtension:(NSString*)name forMultiplexerVersion:(NSString*)version;
+
++(id) createSBAppToAppWorkspaceTransactionForExitingApp:(SBApplication*)app;
++(BOOL) shouldShowControlCenterGrabberOnFirstSwipe;
 @end

@@ -31,8 +31,16 @@
 		__block SBAppSwitcherSnapshotView *view = nil;
 
 		ON_MAIN_THREAD(^{
-			view = [[[%c(SBUIController) sharedInstance] switcherController] performSelector:@selector(_snapshotViewForDisplayItem:) withObject:item];
-			[view setOrientation:orientation orientationBehavior:0];
+			if ([%c(SBUIController) respondsToSelector:@selector(switcherController)])
+			{
+				view = [[[%c(SBUIController) sharedInstance] switcherController] performSelector:@selector(_snapshotViewForDisplayItem:) withObject:item];
+				[view setOrientation:orientation orientationBehavior:0];
+			}
+			else
+			{
+				//SBApplication *app = [[%c(SBApplicationController) sharedInstance] RA_applicationWithBundleIdentifier:identifier];
+				//view = [[%c(SBAppSwitcherSnapshotView) alloc] initWithDisplayItem:item application:app orientation:orientation preferringDownscaledSnapshot:NO async:NO withQueue:nil];
+			}
 		});
 		
 		if (view)
@@ -100,7 +108,7 @@
 -(void) storeSnapshotOfMissionControl:(UIWindow*)window
 {
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-		UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen]._interfaceOrientedBounds.size, YES, [UIScreen mainScreen].scale);
+		UIGraphicsBeginImageContextWithOptions([UIScreen mainScreen].RA_interfaceOrientedBounds.size, YES, [UIScreen mainScreen].scale);
 		//CGContextRef c = UIGraphicsGetCurrentContext();
 		//CGContextSetAllowsAntialiasing(c, YES);
 		//[window.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES];
@@ -201,7 +209,9 @@
 		//[[[[%c(SBUIController) sharedInstance] window] layer] performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Icons
 		//ON_MAIN_THREAD(^{
 			//[MSHookIvar<UIWindow*>([%c(SBWallpaperController) sharedInstance], "_wallpaperWindow") drawViewHierarchyInRect:UIScreen.mainScreen.bounds afterScreenUpdates:YES];
+			
 			[[[%c(SBUIController) sharedInstance] window] drawViewHierarchyInRect:UIScreen.mainScreen.bounds afterScreenUpdates:YES];
+			
 			[desktop drawViewHierarchyInRect:UIScreen.mainScreen.bounds afterScreenUpdates:YES];
 		});
 		//[desktop.layer performSelectorOnMainThread:@selector(renderInContext:) withObject:(__bridge id)c waitUntilDone:YES]; // Desktop windows

@@ -96,7 +96,24 @@ BOOL willShowMissionControl = NO;
 %end
 
 %hook SBAppSwitcherController
+// iOS 8
 - (void)switcherWillBeDismissed:(_Bool)arg1
+{
+	if (willShowMissionControl == NO)
+	{
+		[[%c(RADesktopManager) sharedInstance] reshowDesktop];
+		//[[[%c(RADesktopManager) sharedInstance] currentDesktop] loadApps];
+	}
+
+	[UIView animateWithDuration:0.3 animations:^{
+		[[[%c(SBUIController) sharedInstance] switcherWindow] viewWithTag:999].alpha = 0;
+	}];
+
+	%orig;
+}
+
+// iOS 9
+- (void)_switcherWasDismissed:(_Bool)arg1
 {
 	if (willShowMissionControl == NO)
 	{
@@ -168,6 +185,7 @@ BOOL willShowMissionControl = NO;
 		((UIView*)[view viewWithTag:999]).center = CGPointMake(view.frame.size.width / 2, 20/2);
 }
 
+// iOS 8
 -(void)viewDidAppear:(BOOL)a
 {
 	%orig;
@@ -209,7 +227,50 @@ BOOL willShowMissionControl = NO;
 	}
 	else
 		((UIView*)[view viewWithTag:999]).center = CGPointMake(view.frame.size.width / 2, 20/2);
+}
+
+// iOS 9
+- (void)_switcherWasPresented:(_Bool)arg1
+{
+	%orig;
+
+	UIView *view = MSHookIvar<UIView*>(self, "_pageView");
+
+	if ([view viewWithTag:999] == nil && ([[%c(RASettings) sharedInstance] missionControlEnabled] && ![[%c(RASettings) sharedInstance] replaceAppSwitcherWithMC]))
+	{
+		CGFloat width = 50, height = 30;
+		if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+		{
+			width = 60;
+		    height = 40;
+		}
+		SBControlCenterGrabberView *grabber = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:CGRectMake(0, 0, width, height)];
+		grabber.center = CGPointMake(view.frame.size.width / 2, 20/2);
 		
+		
+		grabber.backgroundColor = [UIColor clearColor];
+		//grabber.chevronView.vibrantSettings = [%c(_SBFVibrantSettings) vibrantSettingsWithReferenceColor:UIColor.whiteColor referenceContrast:0.5 legibilitySettings:nil];
+
+		_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:2060];
+		blurView.frame = grabber.frame;
+		[grabber insertSubview:blurView atIndex:0];
+
+		[grabber.chevronView setState:1 animated:NO];
+
+		grabber.layer.cornerRadius = 5;
+
+		//[grabber.chevronView setState:1 animated:YES];
+		grabber.tag = 999;
+		[view addSubview:grabber];
+
+		//[grabber.chevronView setState:1 animated:YES];
+		grabber.tag = 999;
+		[view addSubview:grabber];
+
+		[[%c(RAGestureManager) sharedInstance] addGestureRecognizerWithTarget:(NSObject<RAGestureCallbackProtocol> *)self forEdge:UIRectEdgeTop identifier:@"com.efrederickson.reachapp.appswitchergrabber"];
+	}
+	else
+		((UIView*)[view viewWithTag:999]).center = CGPointMake(view.frame.size.width / 2, 20/2);
 }
 
 %new -(BOOL) RAGestureCallback_canHandle:(CGPoint)point velocity:(CGPoint)velocity
@@ -240,8 +301,8 @@ BOOL willShowMissionControl = NO;
 		{
 			fakeView = [[UIView alloc] initWithFrame:view.frame];
 
-			CGFloat width = UIScreen.mainScreen._interfaceOrientedBounds.size.width / 4.5714;
-			CGFloat height = UIScreen.mainScreen._interfaceOrientedBounds.size.height / 4.36;
+			CGFloat width = UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width / 4.5714;
+			CGFloat height = UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height / 4.36;
 
 			_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:1];
 			blurView.frame = fakeView.frame;
@@ -320,16 +381,16 @@ BOOL willShowMissionControl = NO;
 	{
 		//NSLog(@"[ReachApp] %@ + %@ = %@ > %@", NSStringFromCGPoint(fakeView.frame.origin), NSStringFromCGPoint(velocity), @(fakeView.frame.origin.y + velocity.y), @(-(UIScreen.mainScreen.bounds.size.height / 2)));
 
-		if (fakeView.frame.origin.y + velocity.y > -(UIScreen.mainScreen._interfaceOrientedBounds.size.height / 2))
+		if (fakeView.frame.origin.y + velocity.y > -(UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height / 2))
 		{			
 			willShowMissionControl = YES;
-			CGFloat distance = UIScreen.mainScreen._interfaceOrientedBounds.size.height - (fakeView.frame.origin.y + fakeView.frame.size.height);
+			CGFloat distance = UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height - (fakeView.frame.origin.y + fakeView.frame.size.height);
 			CGFloat duration = MIN(distance / velocity.y, 0.3);
 
 			//NSLog(@"[ReachApp] dist %f, dur %f", distance, duration);
 
 			[UIView animateWithDuration:duration animations:^{
-				fakeView.frame = UIScreen.mainScreen._interfaceOrientedBounds;
+				fakeView.frame = UIScreen.mainScreen.RA_interfaceOrientedBounds;
 			} completion:^(BOOL _) {
 				//((UIWindow*)[[%c(SBUIController) sharedInstance] switcherWindow]).alpha = 0;
 				[[%c(SBUIController) sharedInstance] dismissSwitcherAnimated:NO];

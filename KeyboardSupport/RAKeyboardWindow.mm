@@ -7,6 +7,7 @@
 -(void) setupForKeyboardAndShow:(NSString*)identifier
 {
 	self.userInteractionEnabled = YES;
+	self.backgroundColor = UIColor.clearColor;
 	
 	if (kbView)
 		[self removeKeyboard];

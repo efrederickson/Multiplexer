@@ -6,6 +6,7 @@
 #import "RAAppSliderProvider.h"
 #import "RAAppSliderProviderView.h"
 #import "RAHostedAppView.h"
+#import "RAAppSwitcherModelWrapper.h"
 
 @interface RARecentAppsWidget () {
 	CGRect viewFrame;
@@ -38,7 +39,7 @@
 	NSInteger index = 0;
 	savedX = spacing / 2.0;
 
-	NSMutableArray *recents = [[[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary] mutableCopy];
+	NSMutableArray *recents = [[RAAppSwitcherModelWrapper appSwitcherAppIdentiferList] mutableCopy];
 	[recents removeObject:currentBundleIdentifier];
 	if (recents.count == 0)
 		return nil;
@@ -99,11 +100,11 @@
 		//[[%c(SBWorkspace) sharedInstance] appViewItemTap:gesture];
 		
 		RAAppSliderProvider *provider = [[RAAppSliderProvider alloc] init];
-		provider.availableIdentifiers = [[[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary] mutableCopy];
+		provider.availableIdentifiers = [[RAAppSwitcherModelWrapper appSwitcherAppIdentiferList] mutableCopy];
 		[((NSMutableArray*)provider.availableIdentifiers) removeObject:[[UIApplication sharedApplication] _accessibilityFrontMostApplication].bundleIdentifier];
 		provider.currentIndex = gesture.view.tag;
 
-		RAAppSliderProviderView *view = [[RAAppSliderProviderView alloc] initWithFrame:CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height / 2)];
+		RAAppSliderProviderView *view = [[RAAppSliderProviderView alloc] initWithFrame:CGRectMake(0, 0, UIScreen.mainScreen._referenceBounds.size.width, UIScreen.mainScreen._referenceBounds.size.height / 2)];
 		view.swipeProvider = provider;
 		view.isSwipeable = YES;
 

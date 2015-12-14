@@ -82,10 +82,30 @@ void externalKeyboardDidHide(CFNotificationCenterRef center, void *observer, CFS
 {
     %orig;
 
-    IF_NOT_SPRINGBOARD {
-        unsigned int contextID = UITextEffectsWindow.sharedTextEffectsWindow._contextId;
-        [RAMessagingClient.sharedInstance notifyServerWithKeyboardContextId:contextID];
-    }
+    void (^block)() = ^{
+        IF_NOT_SPRINGBOARD {
+            unsigned int contextID = 0;
+            if (objc_getClass("UIRemoteKeyboardWindow") != nil)
+                contextID = [[[UIKeyboard activeKeyboard] window] _contextId]; // ((UITextEffectsWindow*)[%c(UIRemoteKeyboardWindow) remoteKeyboardWindowForScreen:UIScreen.mainScreen create:NO])._contextId;
+            else
+                contextID = UITextEffectsWindow.sharedTextEffectsWindow._contextId;
+            [RAMessagingClient.sharedInstance notifyServerWithKeyboardContextId:contextID];
+
+    #if DEBUG
+            assert([[[UIKeyboard activeKeyboard] window] _contextId]);
+            assert(contextID != 0);
+            assert(contextID == [[[UIKeyboard activeKeyboard] window] _contextId]);
+    #endif
+
+            NSLog(@"[ReachApp] c id %d", contextID);
+        }
+    };
+
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"9.0"))
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), block);
+    else
+        block();
+
 }
 %end
 

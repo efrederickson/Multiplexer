@@ -10,6 +10,7 @@
 #import "RASettings.h"
 #import "RAResourceImageProvider.h"
 #import "RARunningAppsProvider.h"
+#import "RAAppSwitcherModelWrapper.h"
 
 @interface RAMissionControlWindow ()  {
 	UIScrollView *desktopScrollView, *windowedAppScrollView, *otherRunningAppsScrollView;
@@ -51,16 +52,16 @@
 
 -(void) reloadDesktopSection
 {
-	width = UIScreen.mainScreen._interfaceOrientedBounds.size.width / 4.5714;
-	height = UIScreen.mainScreen._interfaceOrientedBounds.size.height / 4.36;
+	width = UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width / 4.5714;
+	height = UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height / 4.36;
 	panePadding = width;
 	int count = 1;
-	while (panePadding + width < UIScreen.mainScreen._interfaceOrientedBounds.size.width)
+	while (panePadding + width < UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width)
 	{
 		count += 1;
 		panePadding += width;
 	}
-	panePadding = (UIScreen.mainScreen._interfaceOrientedBounds.size.width - panePadding) / 5; 
+	panePadding = (UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width - panePadding) / 5; 
 	/*if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 	{
 		width = (UIScreen.mainScreen.bounds.size.width / 3) * 0.9;
@@ -162,7 +163,7 @@
 {
 	runningApplications = [runningApplicationsArg mutableCopy];
 
-	NSArray *switcherOrder = [[[%c(SBAppSwitcherModel) sharedInstance] snapshotOfFlattenedArrayOfAppIdentifiersWhichIsOnlyTemporary] copy];
+	NSArray *switcherOrder = [[%c(RAAppSwitcherModelWrapper) appSwitcherAppIdentiferList] copy];
 	[runningApplications sortUsingComparator:^NSComparisonResult(SBApplication *obj1, SBApplication *obj2) {
     	return [@([switcherOrder indexOfObject:obj1.bundleIdentifier]) compare:@([switcherOrder indexOfObject:obj2.bundleIdentifier])];
 	}];
@@ -380,7 +381,7 @@
 			}];
 	}
 
-	if (parentView.contentSize.width - 1 <= UIScreen.mainScreen._interfaceOrientedBounds.size.width)
+	if (parentView.contentSize.width - 1 <= UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width)
 		; // don't make it too small to scroll
 	else if (targetView)
 		parentView.contentSize = CGSizeMake(parentView.contentSize.width - targetView.frame.size.width - panePadding + 1, parentView.contentSize.height);
@@ -398,11 +399,11 @@
 	{
 		if (!trashImageView || trashImageView.superview == nil /* new window perhaps */)
 		{
-			trashImageView = [[UIImageView alloc] initWithFrame:CGRectMake((UIScreen.mainScreen._interfaceOrientedBounds.size.width / 2) - (75/2), UIScreen.mainScreen._interfaceOrientedBounds.size.height + 75, 75, 75)];
+			trashImageView = [[UIImageView alloc] initWithFrame:CGRectMake((UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width / 2) - (75/2), UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height + 75, 75, 75)];
 			trashImageView.image = trashIcon;
 			[self addSubview:trashImageView];
 
-			shadowView = [[UIView alloc] initWithFrame:CGRectMake(0, UIScreen.mainScreen._interfaceOrientedBounds.size.height, UIScreen.mainScreen._interfaceOrientedBounds.size.width, 75)];
+			shadowView = [[UIView alloc] initWithFrame:CGRectMake(0, UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height, UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width, 75)];
 			shadowView.backgroundColor = [UIColor blackColor];
 			shadowView.layer.shadowColor = [UIColor blackColor].CGColor;
 			shadowView.layer.shadowRadius = 75/2;
@@ -414,7 +415,7 @@
 		[UIView animateWithDuration:0.4 animations:^{
 			shadowView.alpha = 1;
 			trashImageView.alpha = 1;
-			trashImageView.frame = CGRectMake((UIScreen.mainScreen._interfaceOrientedBounds.size.width / 2) - (75/2), UIScreen.mainScreen._interfaceOrientedBounds.size.height - (75+45), 75, 75);
+			trashImageView.frame = CGRectMake((UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width / 2) - (75/2), UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height - (75+45), 75, 75);
 		}];
 
 		if (draggedView == nil)
@@ -480,7 +481,7 @@
 		[UIView animateWithDuration:0.4 animations:^{
 			shadowView.alpha = 0;
 			trashImageView.alpha = 0;
-			trashImageView.frame = CGRectMake((UIScreen.mainScreen._interfaceOrientedBounds.size.width / 2) - (75/2), UIScreen.mainScreen._interfaceOrientedBounds.size.height + 75, 75, 75);
+			trashImageView.frame = CGRectMake((UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width / 2) - (75/2), UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height + 75, 75, 75);
 		} completion:^(BOOL _) {
 		}];
 

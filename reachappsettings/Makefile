@@ -2,6 +2,7 @@ ARCHS = armv7 armv7s arm64
 TARGET = iPhone:clang:latest:latest
 CFLAGS = -fobjc-arc -I../ -I../Backgrounding/ -I../Theming/ -I../NotificationCenterApp
 LDFLAGS = -F$(THEOS)/frameworks
+LDFLAGS += -Wl,-segalign,4000
 
 include $(THEOS)/makefiles/common.mk
 

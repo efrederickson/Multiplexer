@@ -7,6 +7,7 @@
 #import "RASwipeOverManager.h"
 #import "RAWindowStatePreservationSystemManager.h"
 #import "RAControlCenterInhibitor.h"
+#import "Multiplexer.h"
 
 BOOL locationIsInValidArea(CGFloat x)
 {
@@ -15,11 +16,12 @@ BOOL locationIsInValidArea(CGFloat x)
     switch ([RASettings.sharedInstance windowedMultitaskingGrabArea])
     {
         case RAGrabAreaBottomLeftThird:
-            return x <= UIScreen.mainScreen._interfaceOrientedBounds.size.width / 3.0;
+        NSLog(@"[ReachApp] StartMultitaskingGesture: %f %f", x, UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width);
+            return x <= UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width / 3.0;
         case RAGrabAreaBottomMiddleThird:
-            return x >= UIScreen.mainScreen._interfaceOrientedBounds.size.width / 3.0 && x <= (UIScreen.mainScreen._interfaceOrientedBounds.size.width / 3.0) * 2;
+            return x >= UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width / 3.0 && x <= (UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width / 3.0) * 2;
         case RAGrabAreaBottomRightThird:
-            return x >= (UIScreen.mainScreen._interfaceOrientedBounds.size.width / 3.0) * 2;
+            return x >= (UIScreen.mainScreen.RA_interfaceOrientedBounds.size.width / 3.0) * 2;
         default:
             return NO;
     }
@@ -49,12 +51,14 @@ BOOL locationIsInValidArea(CGFloat x)
 
             // Assign view
             appView = [RAHostManager systemHostViewForApplication:topApp].superview;
+            if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"9.0"))
+                appView = appView.superview;
             originalCenter = appView.center;
         }
         else if (state == UIGestureRecognizerStateChanged)
         {
             lastY = location.y;
-            CGFloat scale = location.y / UIScreen.mainScreen._interfaceOrientedBounds.size.height;
+            CGFloat scale = location.y / UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height;
 
             if ([RAWindowStatePreservationSystemManager.sharedInstance hasWindowInformationForIdentifier:topApp.bundleIdentifier])
             {
@@ -63,6 +67,7 @@ BOOL locationIsInValidArea(CGFloat x)
                 scale = 1 - scale;
                 RAPreservedWindowInformation info = [RAWindowStatePreservationSystemManager.sharedInstance windowInformationForAppIdentifier:topApp.bundleIdentifier];
 
+                // Interpolates between A and B with percentage T (T% between state A and state B)
                 CGFloat (^interpolate)(CGFloat, CGFloat, CGFloat) = ^CGFloat(CGFloat a, CGFloat b, CGFloat t){
                     return a + (b - a) * t;
                 };
@@ -90,7 +95,7 @@ BOOL locationIsInValidArea(CGFloat x)
         {
             [RAControlCenterInhibitor setInhibited:NO];
 
-            if (lastY <= (UIScreen.mainScreen._interfaceOrientedBounds.size.height / 4) * 3 && lastY != 0) // 75% down, 0 == gesture ended in most situations
+            if (lastY <= (UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height / 4) * 3 && lastY != 0) // 75% down, 0 == gesture ended in most situations
             {
                 [UIView animateWithDuration:.3 animations:^{
 
@@ -111,7 +116,7 @@ BOOL locationIsInValidArea(CGFloat x)
                     // Close app
                     [[%c(RABackgrounder) sharedInstance] temporarilyApplyBackgroundingMode:RABackgroundModeForcedForeground forApplication:topApp andCloseForegroundApp:NO];
                     FBWorkspaceEvent *event = [%c(FBWorkspaceEvent) eventWithName:@"ActivateSpringBoard" handler:^{
-                        SBAppToAppWorkspaceTransaction *transaction = [[%c(SBAppToAppWorkspaceTransaction) alloc] initWithAlertManager:nil exitedApp:topApp];
+                        SBAppToAppWorkspaceTransaction *transaction = [Multiplexer createSBAppToAppWorkspaceTransactionForExitingApp:topApp];
                         [transaction begin];
 
                         // Open in window

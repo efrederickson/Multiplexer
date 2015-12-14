@@ -16,7 +16,7 @@ BOOL overrideUIWindow = NO;
 
 -(void) addDesktop:(BOOL)switchTo
 {
-	RADesktopWindow *desktopWindow = [[RADesktopWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
+	RADesktopWindow *desktopWindow = [[RADesktopWindow alloc] initWithFrame:UIScreen.mainScreen._referenceBounds];
 
 	[windows addObject:desktopWindow];
 	if (switchTo)

@@ -11,6 +11,24 @@ Features:
 - NC app (Quick Access)
 - backgrounder-like features (Aura)
 
+-----------------------------------------
+
+iOS 9 update status:
+
+Windowed Multitasking: working
+fs daemon: working
+SwipeOver: fixed
+Reachability: fixed
+GestureSupport: fixed
+KeyboardSupport: hackily fixed but it works now
+MissionControl: initialization broken, otherwise fixed
+NCApp: broken
+Backgrounding: assumed broken
+assertiond hooks: unknown
+backboardd hooks: unknown
+fake phone mode: unknown
+
+-----------------------------------------
 
 There is a full public api (as opposed to the private/interval api and headers) that allows anyone to create addons, widgets, and tweaks (Tweakception!) for Multiplexer. 
 The public api can be found in public_api. This api is less likely to change or be removed as opposed to the other headers and stuff.

@@ -51,4 +51,22 @@ BOOL allowOpenApp = NO;
 	}
 	%orig;
 }
+
+- (void)activateApplication:(__unsafe_unretained SBApplication*)arg1
+{
+	// Broken
+	//if (launchNextOpenIntoWindow)
+
+	if ([RASettings.sharedInstance windowedMultitaskingEnabled] &&[RASettings.sharedInstance launchIntoWindows] && allowOpenApp != YES)
+	{
+		[RADesktopManager.sharedInstance.currentDesktop createAppWindowForSBApplication:arg1 animated:YES];
+		//launchNextOpenIntoWindow = NO;
+		return;
+	}
+	else
+	{
+		[RADesktopManager.sharedInstance removeAppWithIdentifier:arg1.bundleIdentifier animated:NO forceImmediateUnload:YES];
+	}
+	%orig;
+}
 %end

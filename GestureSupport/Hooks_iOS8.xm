@@ -149,6 +149,9 @@ struct VelocityData {
 {
     IF_SPRINGBOARD
     {
+        if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"9.0"))
+            return;
+
         class_addProtocol(objc_getClass("SBHandMotionExtractor"), @protocol(_UIScreenEdgePanRecognizerDelegate));
         
         UIRectEdge edgesToWatch[] = { UIRectEdgeBottom, UIRectEdgeLeft, UIRectEdgeRight, UIRectEdgeTop };
@@ -164,4 +167,5 @@ struct VelocityData {
 
         %init;
     }
+    
 }

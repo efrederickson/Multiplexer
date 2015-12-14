@@ -52,6 +52,12 @@
 -(NSString*) customTitle { return @"Empoleon"; }
 -(BOOL) showHeartImage { return NO; }
 
+-(void) viewDidAppear:(BOOL)arg1
+{
+    [super viewDidAppear:arg1];
+    [super performSelector:@selector(setupHeader)];
+}
+
 -(NSArray*) customSpecifiers
 {
     return @[

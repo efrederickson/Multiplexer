@@ -29,7 +29,7 @@ extern BOOL overrideDisableForStatusBar;
 		return YES;
 	}
 
-    if ([RASettings.sharedInstance homeButtonClosesReachability] && [[%c(SBWorkspace) sharedInstance] isUsingReachApp] && ((SBReachabilityManager*)[%c(SBReachabilityManager) sharedInstance]).reachabilityModeActive)
+    if ([RASettings.sharedInstance homeButtonClosesReachability] && [GET_SBWORKSPACE isUsingReachApp] && ((SBReachabilityManager*)[%c(SBReachabilityManager) sharedInstance]).reachabilityModeActive)
     {
         overrideDisableForStatusBar = NO;
         [[%c(SBReachabilityManager) sharedInstance] _handleReachabilityDeactivated];
@@ -97,7 +97,11 @@ extern BOOL overrideDisableForStatusBar;
 - (void)_willBegin
 {
     @autoreleasepool {
-        NSArray *apps = [MSHookIvar<NSArray*>(self, "_toApplications") copy];
+        NSArray *apps = nil;
+        if ([self respondsToSelector:@selector(toApplications)])
+            apps = [self toApplications];
+        else
+            apps = [MSHookIvar<NSArray*>(self, "_toApplications") copy];
         for (SBApplication *app in apps)
         {
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -163,6 +167,15 @@ extern BOOL overrideDisableForStatusBar;
         if ([[%c(RASwipeOverManager) sharedInstance] isUsingSwipeOver])
             [[%c(RASwipeOverManager) sharedInstance] stopUsingSwipeOver];
     }
+}
+%end
+
+%hook UIScreen
+%new -(CGRect) RA_interfaceOrientedBounds
+{
+    if ([self respondsToSelector:@selector(_interfaceOrientedBounds)])
+        return [self _interfaceOrientedBounds];
+    return [self bounds];
 }
 %end
 

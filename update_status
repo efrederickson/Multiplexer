@@ -1,0 +1,23 @@
+update status:
+
+Windowed: working
+fs daemon: working
+SwipeOver: working (replace with native slide over(?))
+Reachability: fixed
+GestureSupport: fixed
+KeyboardSupport: hackily fixed but it works now
+MissionControl: initialization broken, otherwise fixed
+NCApp: broken
+Backgrounding: assumed broken
+assertiond hooks: unknown
+backboardd hooks: unknown
+fake phone mode: unknown
+
+
+- adding items to SBAppSwitcherModel is broken
+- SwipeOver sliding off screen animation is broken (RASwipeOverManager.xm:L62)
+- icons and apps do not show up in RASnapshotProvider
+- GestureSupport: LandscapeLeft is, once again, broken
+
+notes:
+use _referenceBounds instead of bounds on UIScreen to get physical bounds. Makes landscape support easier?
