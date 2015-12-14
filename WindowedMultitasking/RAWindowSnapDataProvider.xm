@@ -11,8 +11,8 @@
 	CGRect location = windowBar.frame;
 
 	// Convienence values
-	CGFloat width = UIScreen.mainScreen.bounds.size.width;
-	CGFloat height = UIScreen.mainScreen.bounds.size.height;
+	CGFloat width = UIScreen.mainScreen._referenceBounds.size.width;
+	CGFloat height = UIScreen.mainScreen._referenceBounds.size.height;
 	//CGFloat oneThirdsHeight = height / 4;
 	CGFloat twoThirdsHeight = (height / 4) * 3;
 
@@ -104,8 +104,8 @@ try_bottom:
 +(CGPoint) snapCenterForWindow:(RAWindowBar*)window toLocation:(RAWindowSnapLocation)location
 {
 	// Convienence values
-	CGFloat width = UIScreen.mainScreen.bounds.size.width;
-	CGFloat height = UIScreen.mainScreen.bounds.size.height;
+	CGFloat width = UIScreen.mainScreen._referenceBounds.size.width;
+	CGFloat height = UIScreen.mainScreen._referenceBounds.size.height;
 
 	// Target frame values
 	CGRect frame = window.frame;
