@@ -7,8 +7,12 @@
 -(id)_newBulletinObserverViewControllerOfClass:(Class)aClass;
 @end
 
+@interface SBNotificationCenterLayoutViewController
+@end
+
 @interface SBModeViewController
 -(void) _addBulletinObserverViewController:(id)arg1;
+- (void)addViewController:(id)arg1;
 @end
 
 NSString *getAppName()
@@ -53,9 +57,8 @@ RANCViewController *ncAppViewController;
 %end
 
 %group iOS9
-/*
 %hook SBNotificationCenterLayoutViewController
-- (void)viewWillAppear:(BOOL)animated 
+- (void)_loadContentViewControllers
 {
    	%orig;
 
@@ -65,25 +68,37 @@ RANCViewController *ncAppViewController;
    	{
 		SBModeViewController* modeVC = MSHookIvar<id>(self, "_modeViewController");
 		if (ncAppViewController == nil) 
-			ncAppViewController = [self _newBulletinObserverViewControllerOfClass:[RANCViewController class]];
+			ncAppViewController = [[RANCViewController alloc] init];
 		[modeVC _addBulletinObserverViewController:ncAppViewController];
 	}
 }
+%end
 
-+ (NSString *)_localizableTitleForBulletinViewControllerOfClass:(__unsafe_unretained Class)aClass
+// This is more of a hack than anything else. Note that `_localizableTitleForColumnViewController` on iOS 9 does not seem to work (I may be doing something else wrong)
+// if more than one custom nc tab is added, this will not work correctly. 
+%hook SBModeViewController
+- (void)_layoutHeaderViewIfNecessary
 {
-	if (aClass == [RANCViewController class]) 
+	%orig;
+
+	NSString *text = @"";
+	BOOL useGenericLabel = THEMED(quickAccessUseGenericTabLabel) || [RASettings.sharedInstance quickAccessUseGenericTabLabel];
+	if (useGenericLabel)
+		text = LOCALIZE(@"APP");
+	else
+		text = ncAppViewController.hostedApp.displayName ?: getAppName() ?: LOCALIZE(@"APP");
+
+	for (UIView *view in MSHookIvar<UIView*>(self, "_headerView").subviews)
 	{
-		BOOL useGenericLabel = THEMED(quickAccessUseGenericTabLabel) || [RASettings.sharedInstance quickAccessUseGenericTabLabel];
-		if (useGenericLabel)
-			return LOCALIZE(@"APP");
-		return ncAppViewController.hostedApp.displayName ?: getAppName() ?: LOCALIZE(@"APP");
+		if ([view isKindOfClass:[UISegmentedControl class]])
+		{
+			UISegmentedControl *segment = (UISegmentedControl*)view;
+			if (segment.numberOfSegments > 2)
+				[segment setTitle:text forSegmentAtIndex:2];
+		}
 	}
-	else 
-		return %orig;
 }
 %end
-*/
 %end
 
 %ctor

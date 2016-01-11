@@ -2,6 +2,9 @@
 #import "RAHostedAppView.h"
 #import "RASettings.h"
 
+@implementation SBNCColumnViewController // dummy impl. for compiler
+@end
+
 @interface RANCViewController () {
 	RAHostedAppView *appView;
 	UILabel *isLockedLabel;
@@ -44,6 +47,21 @@ int rotationDegsForOrientation(int o)
 //-(void)hostDidPresent;
 //-(void)hostWillDismiss;
 //-(void)hostDidDismiss;
+
+- (void)insertAppropriateViewWithContent
+{
+	[self viewDidAppear:YES];
+}
+
+- (void)insertTableView
+{
+
+}
+
+- (void)viewWillLayoutSubviews
+{
+	[self viewDidAppear:YES];
+}
 
 -(void) viewDidAppear:(BOOL)animated
 {
@@ -101,8 +119,8 @@ int rotationDegsForOrientation(int o)
 		appView.transform = CGAffineTransformIdentity;
 		appView.frame = UIScreen.mainScreen.bounds;
 
-		appView.transform = CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(rotationDegsForOrientation(UIApplication.sharedApplication.statusBarOrientation)));
-		CGFloat scale = self.view.frame.size.height / UIScreen.mainScreen._interfaceOrientedBounds.size.height;
+		appView.transform = CGAffineTransformMakeRotation(DEGREES_TO_RADIANS(rotationDegsForOrientation(UIApplication.sharedApplication.statusBarOrientation))); // Explicitly, SpringBoard's status bar since the NC is shown in SpringBoard
+		CGFloat scale = self.view.frame.size.height / UIScreen.mainScreen.RA_interfaceOrientedBounds.size.height;
 		appView.transform = CGAffineTransformScale(appView.transform, scale, scale);
 		
 		// Align vertically
@@ -112,6 +130,13 @@ int rotationDegsForOrientation(int o)
 		appView.frame = f;
 	}
 	//[appView rotateToOrientation:UIApplication.sharedApplication.statusBarOrientation];
+
+	if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"9.0")) // Must manually place view controller :(
+	{
+		CGRect frame = self.view.frame;
+		frame.origin.x = UIScreen.mainScreen.bounds.size.width * 2.0;
+		self.view.frame = frame;
+	}
 }
 
 - (void)hostDidDismiss
@@ -139,6 +164,7 @@ int rotationDegsForOrientation(int o)
 - (void)forwardInvocation:(NSInvocation *)anInvocation
 {
 	// Override
+	NSLog(@"[ReachApp] RANCViewController: ignoring invocation: %@", anInvocation);
 }
 
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector
@@ -151,7 +177,7 @@ int rotationDegsForOrientation(int o)
 
 - (BOOL)isKindOfClass:(Class)aClass
 {
-	if (aClass == %c(SBBulletinObserverViewController))
+	if (aClass == %c(SBBulletinObserverViewController) || aClass == %c(SBNCColumnViewController))
 		return YES;
 	else
 		return [super isKindOfClass:aClass];
