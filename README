@@ -1,36 +1,35 @@
-Multitasking enhancer for iOS 8
+# Multiplexer
+Six multitasking additions to iOS
 
-Depiction (and some more info): http://elijahandandrew.com/repo/depictions/ReachApp/
-See the /wiki for some code tutorials.
+http://moreinfo.thebigboss.org/moreinfo/depiction.php?file=multiplexerDp
 
-Features:
-- Multitasking in Reachability (ReachApp)
-- iOS 9-like "slide over" (SwipeOver)
-- MissionControl with multiple desktops (Mission Control)
+### Features
+- Secondary app in Reachability (Reach App)
+- iOS 9-like "slide over" (Swipe Over)
+- Mission Control with multiple desktops (Mission Control)
 - Windowed multitasking (Empoleon)
-- NC app (Quick Access)
-- backgrounder-like features (Aura)
+- An app in a Notication Center tab (Quick Access)
+- Backgrounding features (Aura)
 
------------------------------------------
+### Wiki
+See /wiki for some code tutorials.
 
-iOS 9 update status:
+### iOS 9 Update Status
+- Empoleon: working
+- fs daemon: working
+- SwipeOver: fixed
+- Reachability: fixed
+- GestureSupport: fixed
+- KeyboardSupport: hackily fixed but it works now
+- MissionControl: initialization broken, otherwise fixed
+- NCApp: fixed
+- Backgrounding: assumed broken
+- assertiond hooks: unknown
+- backboardd hooks: unknown
+- fake phone mode: unknown
 
-Windowed Multitasking: working
-fs daemon: working
-SwipeOver: fixed
-Reachability: fixed
-GestureSupport: fixed
-KeyboardSupport: hackily fixed but it works now
-MissionControl: initialization broken, otherwise fixed
-NCApp: broken
-Backgrounding: assumed broken
-assertiond hooks: unknown
-backboardd hooks: unknown
-fake phone mode: unknown
-
------------------------------------------
-
-There is a full public api (as opposed to the private/interval api and headers) that allows anyone to create addons, widgets, and tweaks (Tweakception!) for Multiplexer. 
+### API
+There is a full public API (as opposed to the private/interval api and headers) that allows anyone to create addons, widgets, and tweaks (Tweakception!) for Multiplexer. 
 The public api can be found in public_api. This api is less likely to change or be removed as opposed to the other headers and stuff.
 For the end user's ease of use, please register your extensions with -[Multiplexer registerExtension:forMultiplexerVersion:]. I hope to also provide api requirements, etc at some point.
 
