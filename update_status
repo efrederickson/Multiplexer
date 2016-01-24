@@ -5,13 +5,13 @@ fs daemon: working
 SwipeOver: working (replace with native slide over(?))
 Reachability: fixed
 GestureSupport: fixed
+Backgrounding: fixed
 KeyboardSupport: hackily fixed but it works now
 MissionControl: initialization broken, otherwise fixed
-NCApp: broken
-Backgrounding: assumed broken
+NCApp: fixed on phone, not working right on ipad (misplaced view & no title)
 assertiond hooks: unknown
 backboardd hooks: unknown
-fake phone mode: unknown
+fake phone mode: working
 
 
 - adding items to SBAppSwitcherModel is broken

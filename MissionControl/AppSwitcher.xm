@@ -229,50 +229,6 @@ BOOL willShowMissionControl = NO;
 		((UIView*)[view viewWithTag:999]).center = CGPointMake(view.frame.size.width / 2, 20/2);
 }
 
-// iOS 9
-- (void)_switcherWasPresented:(_Bool)arg1
-{
-	%orig;
-
-	UIView *view = MSHookIvar<UIView*>(self, "_pageView");
-
-	if ([view viewWithTag:999] == nil && ([[%c(RASettings) sharedInstance] missionControlEnabled] && ![[%c(RASettings) sharedInstance] replaceAppSwitcherWithMC]))
-	{
-		CGFloat width = 50, height = 30;
-		if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-		{
-			width = 60;
-		    height = 40;
-		}
-		SBControlCenterGrabberView *grabber = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:CGRectMake(0, 0, width, height)];
-		grabber.center = CGPointMake(view.frame.size.width / 2, 20/2);
-		
-		
-		grabber.backgroundColor = [UIColor clearColor];
-		//grabber.chevronView.vibrantSettings = [%c(_SBFVibrantSettings) vibrantSettingsWithReferenceColor:UIColor.whiteColor referenceContrast:0.5 legibilitySettings:nil];
-
-		_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:2060];
-		blurView.frame = grabber.frame;
-		[grabber insertSubview:blurView atIndex:0];
-
-		[grabber.chevronView setState:1 animated:NO];
-
-		grabber.layer.cornerRadius = 5;
-
-		//[grabber.chevronView setState:1 animated:YES];
-		grabber.tag = 999;
-		[view addSubview:grabber];
-
-		//[grabber.chevronView setState:1 animated:YES];
-		grabber.tag = 999;
-		[view addSubview:grabber];
-
-		[[%c(RAGestureManager) sharedInstance] addGestureRecognizerWithTarget:(NSObject<RAGestureCallbackProtocol> *)self forEdge:UIRectEdgeTop identifier:@"com.efrederickson.reachapp.appswitchergrabber"];
-	}
-	else
-		((UIView*)[view viewWithTag:999]).center = CGPointMake(view.frame.size.width / 2, 20/2);
-}
-
 %new -(BOOL) RAGestureCallback_canHandle:(CGPoint)point velocity:(CGPoint)velocity
 {
 	return allowMissionControlActivationFromSwitcher && [[%c(RASettings) sharedInstance] missionControlEnabled] && self.view.window.isKeyWindow;
@@ -422,5 +378,52 @@ BOOL willShowMissionControl = NO;
 	}
 
 	return RAGestureCallbackResultSuccess;
+}
+%end
+
+@interface SBAppSwitcherPageViewController : UIViewController
+@end
+%hook SBAppSwitcherPageViewController
+- (void)_layout
+{
+	%orig;
+
+	UIView *view = [self view];
+
+	if ([view viewWithTag:999] == nil && ([[%c(RASettings) sharedInstance] missionControlEnabled] && ![[%c(RASettings) sharedInstance] replaceAppSwitcherWithMC]))
+	{
+		CGFloat width = 50, height = 30;
+		if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+		{
+			width = 60;
+		    height = 40;
+		}
+		SBControlCenterGrabberView *grabber = [[%c(SBControlCenterGrabberView) alloc] initWithFrame:CGRectMake(0, 0, width, height)];
+		grabber.center = CGPointMake(view.frame.size.width / 2, 20/2);
+		
+		
+		grabber.backgroundColor = [UIColor clearColor];
+		//grabber.chevronView.vibrantSettings = [%c(_SBFVibrantSettings) vibrantSettingsWithReferenceColor:UIColor.whiteColor referenceContrast:0.5 legibilitySettings:nil];
+
+		_UIBackdropView *blurView = [[%c(_UIBackdropView) alloc] initWithStyle:2060];
+		blurView.frame = grabber.frame;
+		[grabber insertSubview:blurView atIndex:0];
+
+		[grabber.chevronView setState:1 animated:NO];
+
+		grabber.layer.cornerRadius = 5;
+
+		//[grabber.chevronView setState:1 animated:YES];
+		grabber.tag = 999;
+		[view addSubview:grabber];
+
+		//[grabber.chevronView setState:1 animated:YES];
+		grabber.tag = 999;
+		[view addSubview:grabber];
+
+		[[%c(RAGestureManager) sharedInstance] addGestureRecognizerWithTarget:(NSObject<RAGestureCallbackProtocol> *)self forEdge:UIRectEdgeTop identifier:@"com.efrederickson.reachapp.appswitchergrabber"];
+	}
+	else
+		((UIView*)[view viewWithTag:999]).center = CGPointMake(view.frame.size.width / 2, 20/2);
 }
 %end

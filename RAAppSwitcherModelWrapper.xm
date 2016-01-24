@@ -41,4 +41,14 @@
 
 	return ret;
 }
+
++(void) removeItemWithIdentifier:(NSString*)ident
+{
+    SBDisplayItem *item = [%c(SBDisplayItem) displayItemWithType:@"App" displayIdentifier:ident];
+    id appSwitcherModel = [%c(SBAppSwitcherModel) sharedInstance];
+    if ([appSwitcherModel respondsToSelector:@selector(removeDisplayItem:)])
+        [[%c(SBAppSwitcherModel) sharedInstance] removeDisplayItem:item];
+    else
+        [[%c(SBAppSwitcherModel) sharedInstance] remove:item];
+}
 @end

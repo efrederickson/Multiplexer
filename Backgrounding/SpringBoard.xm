@@ -1,8 +1,6 @@
 #import "headers.h"
 #import "RABackgrounder.h"
-#include <execinfo.h>
-#include <stdio.h>
-#include <stdlib.h>
+#import "RAAppSwitcherModelWrapper.h"
 
 %hook SBApplication
 -(BOOL) shouldAutoRelaunchAfterExit
@@ -36,6 +34,16 @@
         //[bkProcess _handleExpirationWarning:nil];
         [arg2 processWillExpire:bkProcess];
     }
+}
+%end
+
+%hook FBUIApplicationSceneDeactivationManager // iOS 9
+- (BOOL)_isEligibleProcess:(__unsafe_unretained FBApplicationProcess*)arg1
+{
+    if ([RABackgrounder.sharedInstance shouldKeepInForeground:arg1.bundleIdentifier])
+        return NO;
+
+    return %orig;
 }
 %end
 
@@ -75,8 +83,7 @@
                     [RABackgrounder.sharedInstance updateIconIndicatorForIdentifier:arg1.identifier withInfo:RAIconIndicatorViewInfoForceDeath];
                     if ([RABackgrounder.sharedInstance shouldRemoveFromSwitcherWhenKilledOnExit:arg1.identifier])
                     {
-                        SBDisplayItem *item = [%c(SBDisplayItem) displayItemWithType:@"App" displayIdentifier:arg1.identifier];
-                        [[%c(SBAppSwitcherModel) sharedInstance] removeDisplayItem:item];
+                        [%c(RAAppSwitcherModelWrapper) removeItemWithIdentifier:arg1.identifier];
                     }
                 }
                 [RABackgrounder.sharedInstance queueRemoveTemporaryOverrideForIdentifier:arg1.identifier]; 

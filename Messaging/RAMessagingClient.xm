@@ -31,7 +31,7 @@ extern BOOL allowClosingReachabilityNatively;
 			[NSBundle.mainBundle.executablePath hasPrefix:@"/var/mobile/Containers/Bundle/Application"] ||
 			[NSBundle.mainBundle.executablePath hasPrefix:@"/private/var/mobile/Containers/Bundle/Application"])
 		{
-			NSLog(@"[ReachApp] valid process");
+			NSLog(@"[ReachApp] valid process for RAMessagingClient");
 			sharedInstance->allowedProcess = YES;
 		}
 	);
@@ -92,7 +92,7 @@ extern BOOL allowClosingReachabilityNatively;
 		// Anything that's not a UIApp (system app or user app) doesn't need this messaging client
 		// Attempting to reach out will either:
 		// 1. hang the process
-		// 2. crash after timeout due to no UIKit 
+		// 2. crash after timeout due to no UIKit (?)
 		// 3. something else bad
 		// so therefore all those are simply blacklisted. simple. 
 		return;
